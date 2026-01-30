@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
-    firstName: {
+  firstName: {
     type: String,
     required: true,
     maxlength: 50,
@@ -22,61 +22,67 @@ const userSchema = new mongoose.Schema({
     trim: true,
     match: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
   },
-  passwordHash: {
+  password: {
     type: String,
     required: true
+  },
+  gender: {
+    type: String,
+    required: true,
+    enum: ['MALE', 'FEMALE']
   },
   role: {
     type: String,
     required: true,
     enum: ['EMPLOYEE', 'EMPLOYER', 'ADMIN']
   },
-  status: {
+  telephone: {
+    type: [String],
+    default: [],
+    validate: {
+      validator: function(v) {
+        return v.length === 0 || v.every(function(t) {
+          return /^\d{10}$/.test(t);
+        });
+      },
+      message: 'Telephone number must be a valid 10-digit number'
+    } 
+  },
+  accountStatus: {
     type: String,
     required: true,
     enum: ['ACTIVE', 'INACTIVE', 'PENDING'],
     default: 'ACTIVE'
   },
-  phones: [String],
-  address: {
-    street: String,
-    city: String
-  },
-  employeeProfile: {
-    age: Number,
-    currentStatus: String
-  },
-  employerProfile: {
-    specialization: String,
-    accountStatus: {
-      type: String,
-      enum: ['PENDING', 'APPROVED', 'REJECTED'],
-      default: 'PENDING'
-    },
-    approvedBy: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    }
-  },
-  adminProfile: {
-    permissions: [String]
+  age: {
+    type: Number,
+    required: true,
+    min: 0,
+    max: 150
   }
 }, {
-  timestamps: true
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
-// hash the pasword before saving the user model
+// Virtual property to get full name
+userSchema.virtual('fullName').get(function() {
+  return `${this.firstName} ${this.lastName}`;
+});
+
+// hash the password before saving the user model
 userSchema.pre('save', async function(next) {
-  if (this.isModified('passwordHash')) {
+  if (this.isModified('password')) {
     const salt = await bcrypt.genSalt(10);
-    this.passwordHash = await bcrypt.hash(this.passwordHash, salt);
+    this.password = await bcrypt.hash(this.password, salt);
   }
   next();
 });
 
 // compare given password with the database hash
 userSchema.methods.comparePassword = async function(candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.passwordHash);
+  return await bcrypt.compare(candidatePassword, this.password);
 };
 
 const User = mongoose.model('User', userSchema);
