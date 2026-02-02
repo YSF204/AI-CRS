@@ -40,13 +40,13 @@ const userSchema = new mongoose.Schema({
     type: [String],
     default: [],
     validate: {
-      validator: function(v) {
-        return v.length === 0 || v.every(function(t) {
+      validator: function (v) {
+        return v.length === 0 || v.every(function (t) {
           return /^\d{10}$/.test(t);
         });
       },
       message: 'Telephone number must be a valid 10-digit number'
-    } 
+    }
   },
   accountStatus: {
     type: String,
@@ -67,12 +67,12 @@ const userSchema = new mongoose.Schema({
 });
 
 // Virtual property to get full name
-userSchema.virtual('fullName').get(function() {
+userSchema.virtual('fullName').get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
 
 // hash the password before saving the user model
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   if (this.isModified('password')) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -81,7 +81,7 @@ userSchema.pre('save', async function(next) {
 });
 
 // compare given password with the database hash
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 

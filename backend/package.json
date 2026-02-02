@@ -2,11 +2,11 @@
     "name": "ai-crs-backend",
     "version": "1.0.0",
     "description": "AI Career & Recruitment System - Backend API",
-    "main": "src/server.js",
+    "main": "Server.js",
     "type": "module",
     "scripts": {
-        "start": "node src/server.js",
-        "dev": "nodemon src/server.js",
+        "start": "node Server.js",
+        "dev": "nodemon Server.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [
@@ -19,15 +19,15 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "express": "^4.18.2",
-        "mongoose": "^8.0.3",
-        "dotenv": "^16.3.1",
-        "cors": "^2.8.5",
-        "jsonwebtoken": "^9.0.2",
+        "axios": "^1.6.5",
         "bcryptjs": "^2.4.3",
-        "axios": "^1.6.5"
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^8.0.3"
     },
     "devDependencies": {
-        "nodemon": "^3.0.2"
+        "nodemon": "^3.1.11"
     }
 }
