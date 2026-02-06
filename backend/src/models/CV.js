@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import validator from 'validator';
 
 const cvSchema = new mongoose.Schema({
     userId: {
@@ -20,13 +21,19 @@ const cvSchema = new mongoose.Schema({
         phone: {
             type: String,
             trim: true,
-            match: /^\d{10}$/
+            validate: {
+                validator: (v) => !v || /^\d{10}$/.test(v),
+                message: 'Phone must be a valid 10-digit number'
+            }
         },
         email: {
             type: String,
             lowercase: true,
             trim: true,
-            match: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+            validate: {
+                validator: (v) => !v || validator.isEmail(v),
+                message: 'Please enter a valid email'
+            }
         },
         github: {
             type: String,
