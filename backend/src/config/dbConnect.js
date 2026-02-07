@@ -1,18 +1,16 @@
-import mongoose  from "mongoose";   
+import mongoose from "mongoose";
 import dotenv from "dotenv";
 
-dotenv.config();
-
 const connectDB = async () => {
-    try {
-        await mongoose.connect(process.env.MONGODB_URI, {
-            dbName: process.env.MONGODB_DB_NAME || 'AI_CRS'
-        });
-        console.log('MongoDB server is connected');
-    } catch (error) {
-        console.error('MongoDB connection error:', error);
-        process.exit(1);
-    }
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, {
+      dbName: process.env.MONGODB_DB_NAME || "AI_CRS",
+    });
+    console.log("MongoDB server is connected");
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    process.exit(1);
+  }
 };
 
 export default connectDB;
