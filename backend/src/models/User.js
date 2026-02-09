@@ -1,84 +1,91 @@
-import mongoose from 'mongoose';
-import bcrypt from 'bcryptjs';
-import validator from 'validator';
+import mongoose from "mongoose";
+import bcrypt from "bcryptjs";
+import validator from "validator";
 
-const userSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: true,
-    maxlength: 50,
-    trim: true
-  },
-  lastName: {
-    type: String,
-    required: true,
-    maxlength: 50,
-    trim: true
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true,
-    validate: {
-      validator: (v) => validator.isEmail(v),
-      message: 'Please enter a valid email'
-    }
-  },
-  password: {
-    type: String,
-    required: true,
-    select: false,
-  },
-  gender: {
-    type: String,
-    required: true,
-    enum: ['MALE', 'FEMALE']
-  },
-  role: {
-    type: String,
-    required: true,
-    enum: ['EMPLOYEE', 'EMPLOYER', 'ADMIN']
-  },
-  telephone: {
-    type: [String],
-    default: [],
-    validate: {
-      validator: function (v) {
-        return v.length === 0 || v.every(function (t) {
-          return /^\d{10}$/.test(t);
-        });
+const userSchema = new mongoose.Schema(
+  {
+    firstName: {
+      type: String,
+      required: true,
+      maxlength: 50,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      maxlength: 50,
+      trim: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      validate: {
+        validator: (v) => validator.isEmail(v),
+        message: "Please enter a valid email",
       },
-      message: 'Telephone number must be a valid 10-digit number'
-    }
+    },
+    password: {
+      type: String,
+      required: true,
+      select: false,
+    },
+    passwordChangedAt: Date,
+    gender: {
+      type: String,
+      required: true,
+      enum: ["MALE", "FEMALE"],
+    },
+    role: {
+      type: String,
+      required: true,
+      enum: ["EMPLOYEE", "EMPLOYER", "ADMIN"],
+    },
+    telephone: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: function (v) {
+          return (
+            v.length === 0 ||
+            v.every(function (t) {
+              return /^\d{10}$/.test(t);
+            })
+          );
+        },
+        message: "Telephone number must be a valid 10-digit number",
+      },
+    },
+    accountStatus: {
+      type: String,
+      required: true,
+      enum: ["ACTIVE", "INACTIVE", "PENDING"],
+      default: "ACTIVE",
+    },
+    age: {
+      type: Number,
+      required: true,
+      min: 0,
+      max: 150,
+    },
   },
-  accountStatus: {
-    type: String,
-    required: true,
-    enum: ['ACTIVE', 'INACTIVE', 'PENDING'],
-    default: 'ACTIVE'
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
-  age: {
-    type: Number,
-    required: true,
-    min: 0,
-    max: 150
-  }
-}, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
+);
 
 // Virtual property to get full name
-userSchema.virtual('fullName').get(function () {
+userSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
 
 // hash the password before saving the user model
-userSchema.pre('save', async function (next) {
-  if (this.isModified('password')) {
+userSchema.pre("save", async function (next) {
+  if (this.isModified("password")) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
   }
@@ -90,10 +97,20 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10,
+    );
+    return JWTTimestamp < changedTimestamp;
+  }
+  return false;
+};
 
 // indexe for faster queries
 userSchema.index({ email: 1 });
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model("User", userSchema);
 
 export default User;

@@ -1,127 +1,134 @@
-import mongoose from 'mongoose';
-import validator from 'validator';
+import mongoose from "mongoose";
+import validator from "validator";
 
-const cvSchema = new mongoose.Schema({
+const cvSchema = new mongoose.Schema(
+  {
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     jobTitle: {
-        type: String,
-        required: true,
-        trim: true
+      type: String,
+      required: true,
+      trim: true,
     },
     summary: {
-        type: String,
-        required: true,
-        trim: true
+      type: String,
+      required: true,
+      trim: true,
     },
     contact: {
-        phone: {
-            type: String,
-            trim: true,
-            validate: {
-                validator: (v) => !v || /^\d{10}$/.test(v),
-                message: 'Phone must be a valid 10-digit number'
-            }
+      phone: {
+        type: String,
+        trim: true,
+        validate: {
+          validator: (v) => !v || /^\d{10}$/.test(v),
+          message: "Phone must be a valid 10-digit number",
         },
-        email: {
-            type: String,
-            lowercase: true,
-            trim: true,
-            validate: {
-                validator: (v) => !v || validator.isEmail(v),
-                message: 'Please enter a valid email'
-            }
+      },
+      email: {
+        type: String,
+        lowercase: true,
+        trim: true,
+        validate: {
+          validator: (v) => !v || validator.isEmail(v),
+          message: "Please enter a valid email",
         },
-        github: {
-            type: String,
-            trim: true
-        },
-        linkedin: {
-            type: String,
-            trim: true
-        }
+      },
+      github: {
+        type: String,
+        trim: true,
+      },
+      linkedin: {
+        type: String,
+        trim: true,
+      },
     },
     address: {
-        city: {
-            type: String,
-            required: true,
-            trim: true
-        },
-        street: {
-            type: String,
-            required: true,
-            trim: true
-        }
+      city: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      street: {
+        type: String,
+        required: true,
+        trim: true,
+      },
     },
-    experience: [{
+    experience: [
+      {
         institutionName: {
-            type: String,
-            required: true,
-            trim: true
+          type: String,
+          required: true,
+          trim: true,
         },
         duration: {
-            type: Number,
-            required: true,
-            min: 0
+          type: Number,
+          required: true,
+          min: 0,
         },
         position: {
-            type: String,
-            required: true,
-            trim: true
+          type: String,
+          required: true,
+          trim: true,
         },
         summary: {
-            type: String,
-            required: true,
-            trim: true
-        }
-    }],
-    education: [{
+          type: String,
+          required: true,
+          trim: true,
+        },
+      },
+    ],
+    education: [
+      {
         institutionName: {
-            type: String,
-            required: true,
-            trim: true
+          type: String,
+          required: true,
+          trim: true,
         },
         duration: {
-            type: Number,
-            required: true,
-            min: 0
+          type: Number,
+          required: true,
+          min: 0,
         },
         certification: {
-            type: String,
-            required: true,
-            trim: true
+          type: String,
+          required: true,
+          trim: true,
         },
         summary: {
-            type: String,
-            required: true,
-            trim: true
-        }
-    }],
+          type: String,
+          required: true,
+          trim: true,
+        },
+      },
+    ],
     language: {
-        type: [String],
-        default: []
+      type: [String],
+      default: [],
     },
     softSkills: {
-        type: [String],
-        default: []
+      type: [String],
+      default: [],
     },
     technicalSkills: {
-        type: [String],
-        default: []
-    }
-}, {
+      type: [String],
+      default: [],
+    },
+  },
+  {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-});
+    toObject: { virtuals: true },
+  },
+);
 
 // Indexes for faster queries
 cvSchema.index({ userId: 1 });
 cvSchema.index({ jobTitle: 1 });
 
-const CV = mongoose.model('CV', cvSchema);
+const CV = mongoose.model("CV", cvSchema);
 
 export default CV;
