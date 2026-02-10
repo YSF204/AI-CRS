@@ -2,6 +2,8 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "./../utils/appError.js";
+import sendEmail from "../utils/email.js";
+import crypto from "crypto";
 
 // ================================== //
 //            Gen JWT TOKEN           //
@@ -196,3 +198,159 @@ export const logout = async (req, res) => {
     });
   }
 };
+
+// ================================== //
+//       RESET PASSWORD VIA EMAIL                //
+// ================================== //
+
+export const forgotPassword = catchAsync(async (req, res, next) => {
+  const user = await User.findOne({ email: req.body.email });
+  if (!user) {
+    return next(new AppError("There is no user with that email address", 404));
+  }
+
+  const resetToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
+
+  const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetpassword/${resetToken}`;
+
+  // const message = `forget your password ? please submit a patch request to : ${resetURL}`;
+  const htmlMessage = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Password Reset</title>
+</head>
+<body style="
+  margin: 0;
+  padding: 0;
+  background-color: #f4f6f8;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+">
+  <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td align="center" style="padding: 40px 10px;">
+        <table width="100%" max-width="520px" style="
+          background-color: #ffffff;
+          border-radius: 12px;
+          padding: 32px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        ">
+          <tr>
+            <td align="center">
+              <h1 style="
+                margin: 0;
+                font-size: 24px;
+                color: #111827;
+              ">
+                Reset your password
+              </h1>
+
+              <p style="
+                margin: 16px 0 24px;
+                font-size: 15px;
+                color: #4b5563;
+                line-height: 1.6;
+              ">
+                You requested to reset your password for your
+                <strong>AI-CRS App</strong> account.
+                Click the button below to set a new password.
+              </p>
+
+              <a href="${resetURL}" style="
+                display: inline-block;
+                padding: 14px 28px;
+                background-color: #4f46e5;
+                color: #ffffff;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 15px;
+              ">
+                Reset Password
+              </a>
+
+              <p style="
+                margin: 24px 0 0;
+                font-size: 13px;
+                color: #6b7280;
+              ">
+                This link will expire in <strong>10 minutes</strong>.
+              </p>
+
+              <hr style="
+                margin: 32px 0;
+                border: none;
+                border-top: 1px solid #e5e7eb;
+              " />
+
+              <p style="
+                font-size: 13px;
+                color: #9ca3af;
+                line-height: 1.5;
+              ">
+                If you didn’t request a password reset, you can safely ignore this email.
+                Your password will remain unchanged.
+              </p>
+
+              <p style="
+                margin-top: 24px;
+                font-size: 12px;
+                color: #9ca3af;
+              ">
+                © ${new Date().getFullYear()} AI-CRS App
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`;
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: "Your password token valid for (10 min)",
+      html: htmlMessage,
+      text: `Reset your password using this link (valid for 10 minutes): ${resetURL}`,
+    });
+    res.status(200).json({
+      status: "success",
+      message: "Token has been sent to email",
+    });
+  } catch (err) {
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    return next(new AppError("An error occured when sending the email", 500));
+  }
+});
+export const resetPassword = catchAsync(async (req, res, next) => {
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+  if (!user) {
+    return next(new AppError("Token is invalid or has experied", 400));
+  }
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+
+  const token = signToken(user._id);
+  res.status(200).json({
+    status: "success",
+    token: token,
+  });
+});
