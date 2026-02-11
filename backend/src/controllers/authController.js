@@ -20,7 +20,7 @@ const generateToken = (userId) => {
 // ================================== //
 
 export const register = catchAsync(async (req, res, next) => {
-  const { firstName, lastName, email, password, gender, role, telephone, age } =
+  const { firstName, lastName, email, password, gender, role, telephone, age , passwordConfirm} =
     req.body;
 
   // make sure that all the fields are provided
@@ -31,7 +31,8 @@ export const register = catchAsync(async (req, res, next) => {
     !password ||
     !gender ||
     !role ||
-    !age
+    !age ||
+    !passwordConfirm
   ) {
     return next(new AppError("Please provide all the required fields", 400));
   }
@@ -66,6 +67,7 @@ export const register = catchAsync(async (req, res, next) => {
     lastName,
     email,
     password,
+    passwordConfirm,
     gender,
     role,
     telephone: telephone || [],
