@@ -117,6 +117,36 @@ const cvSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    customSections: [
+      {
+        title: {
+          type: String,
+          required: true,
+          trim: true,
+        },
+        items: [
+          {
+            name: {
+              type: String,
+              required: true,
+              trim: true,
+            },
+            description: {
+              type: String,
+              trim: true,
+            },
+            duration: {
+              type: Number,
+              min: 0,
+            },
+            link: {
+              type: String,
+              trim: true,
+            },
+          },
+        ],
+      },
+    ],
   },
   {
     timestamps: true,
