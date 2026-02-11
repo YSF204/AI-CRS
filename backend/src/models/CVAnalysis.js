@@ -1,10 +1,15 @@
 import mongoose from 'mongoose';
 
 const cvAnalysisSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     CVId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'CV',
-        required: true
+        default: null
     },
     atsScore: {
         type: Number,

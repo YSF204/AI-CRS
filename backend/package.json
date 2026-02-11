@@ -26,6 +26,8 @@
         "express": "^4.18.2",
         "jsonwebtoken": "^9.0.2",
         "mongoose": "^8.0.3",
+        "multer": "^2.0.2",
+        "pdf-parse": "^2.4.5",
         "validator": "^13.15.26"
     },
     "devDependencies": {
