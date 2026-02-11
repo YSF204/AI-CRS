@@ -22,10 +22,6 @@ const cvSchema = new mongoose.Schema(
       phone: {
         type: String,
         trim: true,
-        validate: {
-          validator: (v) => !v || /^\d{10}$/.test(v),
-          message: "Phone must be a valid 10-digit number",
-        },
       },
       email: {
         type: String,
@@ -76,7 +72,6 @@ const cvSchema = new mongoose.Schema(
         },
         summary: {
           type: String,
-          required: true,
           trim: true,
         },
       },
@@ -100,7 +95,6 @@ const cvSchema = new mongoose.Schema(
         },
         summary: {
           type: String,
-          required: true,
           trim: true,
         },
       },
