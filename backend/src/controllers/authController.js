@@ -115,7 +115,7 @@ export const login = catchAsync(async (req, res, next) => {
   }
 
   // find the user by the email
-  const user = await User.findOne({ email: email.toLowerCase() });
+  const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
 
   if (!user) {
     return next(new AppError("Invalid email or password", 401));

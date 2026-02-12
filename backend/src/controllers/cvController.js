@@ -3,7 +3,7 @@ import CV from "../models/CV.js";
 import CVAnalysis from "../models/CVAnalysis.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
-import { calculateATSScore, analyzeCVFromFile } from "../integrations/ai/openai.js";
+import { analyzeCVFromFile } from "../integrations/ai/openai.js";
 
 // ================================== //
 //          CREATE NEW CV             //
@@ -143,47 +143,58 @@ export const deleteCV = catchAsync(async (req, res, next) => {
 //  UPLOAD PDF CV + TRIGGER ANALYSIS  //
 // ================================== //
 
-// the user uploads a PDF file and the AI analyzes it directly
 export const analyzeCVFile = catchAsync(async (req, res, next) => {
-
-    if (!req.file) {
-        return next(new AppError("Please upload a PDF file", 400));
-    }
+    if (!req.file) return next(new AppError("Please upload a PDF file", 400));
 
     const { jobDescription } = req.body;
 
-    // send the PDF file directly to the AI for analysis
+    // one API call → extracts CV data + analyzes it
     const aiResult = await analyzeCVFromFile(req.file.path, jobDescription);
 
-    // parse the AI response
-    let parsedResult;
+    // parse the response
+    let parsed;
     try {
-        parsedResult = JSON.parse(aiResult);
+        const clean = aiResult.replace(/```json|```/g, "").trim();
+        parsed = JSON.parse(clean);
     } catch {
-        parsedResult = {
-            score: 0,
-            strengths: aiResult,
-            weaknesses: "Could not parse AI response",
-            suggestions: "Please try again",
-        };
+        fs.unlinkSync(req.file.path);
+        return next(new AppError("AI returned an invalid response, please try again", 500));
     }
 
-    const analysis = await CVAnalysis.create({
+    const str = (v) => (Array.isArray(v) ? v.join("\n• ") : v || "N/A");
+
+    // create a real CV from the extracted data
+    const cvData = parsed.cvData || {};
+    const cv = await CV.create({
         userId: req.user._id,
-        CVId: null,
-        atsScore: parsedResult.score || 0,
-        strength: parsedResult.strengths || "N/A",
-        weakness: parsedResult.weaknesses || "N/A",
-        suggestion: parsedResult.suggestions || "N/A",
+        jobTitle: cvData.jobTitle || "Uploaded CV",
+        summary: cvData.summary || "Extracted from uploaded PDF",
+        contact: cvData.contact || {},
+        address: cvData.address || { city: "N/A", street: "N/A" },
+        experience: cvData.experience || [],
+        education: cvData.education || [],
+        technicalSkills: cvData.technicalSkills || [],
+        softSkills: cvData.softSkills || [],
+        language: cvData.language || [],
     });
 
-    // clean up the uploaded file after analysis
+    // save the analysis linked to the CV
+    const analysisData = parsed.analysis || {};
+    const analysis = await CVAnalysis.create({
+        userId: req.user._id,
+        CVId: cv._id,
+        atsScore: analysisData.score || 0,
+        strength: str(analysisData.strengths),
+        weakness: str(analysisData.weaknesses),
+        suggestion: str(analysisData.suggestions),
+    });
+
     fs.unlinkSync(req.file.path);
 
     res.status(201).json({
         success: true,
-        message: "PDF CV analysis completed",
-        data: { analysis },
+        message: "CV extracted and analyzed successfully",
+        data: { cv, analysis },
     });
 });
 

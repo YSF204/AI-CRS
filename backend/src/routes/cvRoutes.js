@@ -5,7 +5,6 @@ import {
   getCVById,
   updateCV,
   deleteCV,
-  analyzeCV,
   analyzeCVFile,
   getCVAnalyses,
 } from "../controllers/cvController.js";
@@ -25,7 +24,6 @@ cvRouter.patch("/:id", updateCV);
 cvRouter.delete("/:id", deleteCV);
 
 // AI Analysis
-cvRouter.post("/:id/analyze", analyzeCV);
 cvRouter.get("/:id/analyses", getCVAnalyses);
 
 // PDF Upload + Analysis

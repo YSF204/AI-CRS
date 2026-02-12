@@ -1,68 +1,72 @@
 import OpenAI from "openai";
 import fs from "fs";
 
-// حدا يشتري ال
-//api
-// يا فقراء , لانه فش اشي ببلاش في هالدنيا ,
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let client;
+const getClient = () => {
+  if (!client) {
+    client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return client;
+};
 
+const buildPrompt = (jobDescription) => `You are a Senior Technical Recruiter and ATS expert.
 
-export const analyzeCVFromFile = async (filePath,jobDescription) => {
+Do TWO things with the attached CV:
 
-  const file = await client.files.create({
+1. EXTRACT the CV data into structured fields
+2. ANALYZE the CV and score it
+
+${jobDescription ? `Target job: "${jobDescription}"` : ""}
+
+Respond with ONLY a valid JSON object (no markdown, no code fences).
+
+{
+  "cvData": {
+    "jobTitle": "<extracted job title or target role>",
+    "summary": "<extracted profile summary>",
+    "contact": {
+      "email": "<email or null>",
+      "phone": "<phone or null>",
+      "linkedin": "<linkedin url or null>",
+      "github": "<github url or null>"
+    },
+    "address": {
+      "city": "<city or N/A>",
+      "street": "<street or N/A>"
+    },
+    "experience": [
+      { "institutionName": "<company>", "position": "<role>", "duration": <years as number>, "summary": "<brief description>" }
+    ],
+    "education": [
+      { "institutionName": "<school>", "certification": "<degree>", "duration": <years as number>, "summary": "<brief description>" }
+    ],
+    "technicalSkills": ["<skill1>", "<skill2>"],
+    "softSkills": ["<skill1>", "<skill2>"],
+    "language": ["<lang1>", "<lang2>"]
+  },
+  "analysis": {
+    "score": <number 0-100>,
+    "strengths": "<3-5 short bullet points>",
+    "weaknesses": "<3-5 short bullet points>",
+    "suggestions": "<3-5 short bullet points>"
+  }
+}`;
+
+// for uploaded PDF files — extracts CV data + analyzes in one call
+export const analyzeCVFromFile = async (filePath, jobDescription) => {
+  const file = await getClient().files.create({
     file: fs.createReadStream(filePath),
     purpose: "assistants",
   });
 
-  const prompt = `
-Role: Act as a Senior Technical Recruiter and Career Coach with 15+ years of experience. You also have deep technical expertise in Applicant Tracking Systems (ATS) algorithms.
-
-Task: Conduct a brutal, line-by-line analysis of the following CV. Your goal is to maximize the candidate's chances of getting past automated filters and impressing human hiring managers.
-
-Please provide the response in the following structured format:
-
-1. Executive Summary
-- Give a high-level assessment of the CV's first impression (e.g., is it modern, dated, cluttered, or professional?).
-
-2. ATS Compliance Audit
-- Parsing Risks: Identify any layout elements (columns, tables, graphics, headers/footers) that will break ATS parsing.
-- Keyword Gap Analysis: Based on the implied target role, list high-value keywords that are missing or underused.
-- Formatting: Critique the font, margins, and file structure for machine readability.
-
-3. Deep Dive: Strengths & Weaknesses
-- Strengths: List the top 3-5 elements that are working well (e.g., strong metrics, clear progression, good certifications).
-- Weaknesses: List the top 3-5 critical errors (e.g., generic clichés, listing duties instead of achievements, spelling errors, "fluff" content).
-
-4. Section-by-Section Improvement Plan
-- Summary/Profile: Critique the narrative. Is it unique or generic? Rewrite the opening sentence to be punchier.
-- Experience Section: Analyze the bullet points. Are they quantifiable?
-- Action Item: Select one weak bullet point from the CV and rewrite it using the "Action + Context + Result" (Google X-Y-Z) formula to show how it should look.
-- Skills & Education: Check for relevance and hierarchy.
-
-5. The Scorecard
-- ATS Score (0-100): Based on keyword optimization and formatting.
-- Recruiter Impact Score (0-100): Based on persuasiveness, clarity, and "wow" factor.
-- Final Weighted Score (0-100): The average of the two.
-
-${jobDescription ? `
-
-6. Job Match Analysis
-- Compare this CV against the following job description and evaluate how well the candidate fits.
-- Highlight matching skills, missing requirements, and suggestions to tailor the CV for this role.
-
-Job Description:
-${jobDescription}` : ""}`;
-
-  const response = await client.responses.create({
-    model: "gpt-4",
+  const response = await getClient().responses.create({
+    model: "gpt-4.1",
     input: [
       {
         role: "user",
         content: [
-          { type: "text", text: prompt },
-          { type: "file", file: { file_id: file.id } },
+          { type: "input_text", text: buildPrompt(jobDescription) },
+          { type: "input_file", file_id: file.id },
         ],
       },
     ],
@@ -70,6 +74,3 @@ ${jobDescription}` : ""}`;
 
   return response.output_text;
 };
-
-export default client;
-
