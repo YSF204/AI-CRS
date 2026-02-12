@@ -74,3 +74,43 @@ export const analyzeCVFromFile = async (filePath, jobDescription) => {
 
   return response.output_text;
 };
+
+
+
+const promptForCvInDatabase = (jobDescription) =>  `You are a Senior Technical Recruiter and ATS expert.
+
+Do ONE thing with the attached CV:
+
+1. ANALYZE the CV and score it
+
+${jobDescription ? `Target job: "${jobDescription}"` : ""}
+
+Respond with ONLY a valid JSON object (no markdown, no code fences).
+
+{
+  "analysis": {
+    "score": <number 0-100>,
+    "strengths": "<3-5 short bullet points>",
+    "weaknesses": "<3-5 short bullet points>",
+    "suggestions": "<3-5 short bullet points>"
+  }
+}`;
+
+
+// for CV in the database 
+export const analyzeCVFromDatabase = async (cvText, jobDescription) => {
+  const response = await getClient().responses.create({
+    model: "gpt-4.1",
+    input: [
+      {
+        role: "user",
+        content: [
+          { type: "input_text", text: promptForCvInDatabase(jobDescription) },
+          { type: "input_text", text: cvText },
+        ],
+      },
+    ],
+  });
+
+  return response.output_text;
+};

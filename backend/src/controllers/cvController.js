@@ -3,7 +3,7 @@ import CV from "../models/CV.js";
 import CVAnalysis from "../models/CVAnalysis.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
-import { analyzeCVFromFile } from "../integrations/ai/openai.js";
+import { analyzeCVFromFile, analyzeCVFromDatabase } from "../integrations/ai/openai.js";
 
 // ================================== //
 //          CREATE NEW CV             //
@@ -195,6 +195,69 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
         success: true,
         message: "CV extracted and analyzed successfully",
         data: { cv, analysis },
+    });
+});
+
+
+// ================================== //
+//  ANALYSIS FOR CVs IN APP           //
+// ================================== //
+export const analyzeCV = catchAsync(async (req, res, next) => {
+    const { jobDescription } = req.body;
+
+    const cv = await CV.findById(req.params.id);
+
+    if (!cv) {
+        return next(new AppError("CV not found", 404));
+    }
+
+    if (cv.userId.toString() !== req.user._id.toString()) {
+        return next(new AppError("Not authorized to analyze this CV", 403));
+    }
+
+    // convert the CV data into plain text for the AI
+    const cvText = [
+        `Job Title: ${cv.jobTitle}`,
+        `Summary: ${cv.summary}`,
+        `Email: ${cv.contact?.email || "N/A"}`,
+        `Phone: ${cv.contact?.phone || "N/A"}`,
+        `Location: ${cv.address?.city || ""}, ${cv.address?.street || ""}`,
+        `Experience: ${cv.experience?.map(e => `${e.position} at ${e.institutionName} (${e.duration}y) - ${e.summary || ""}`).join(" | ") || "None"}`,
+        `Education: ${cv.education?.map(e => `${e.certification} at ${e.institutionName} (${e.duration}y)`).join(" | ") || "None"}`,
+        `Technical Skills: ${cv.technicalSkills?.join(", ") || "None"}`,
+        `Soft Skills: ${cv.softSkills?.join(", ") || "None"}`,
+        `Languages: ${cv.language?.join(", ") || "None"}`,
+        ...cv.customSections?.map(s => `${s.title}: ${s.items?.map(i => `${i.name}${i.description ? " - " + i.description : ""}`).join(", ")}`) || [],
+    ].join("\n");
+
+    const aiResult = await analyzeCVFromDatabase(cvText, jobDescription);
+
+    // parse the response
+    let parsed;
+    try {
+        const clean = aiResult.replace(/```json|```/g, "").trim();
+        parsed = JSON.parse(clean);
+    } catch {
+        return next(new AppError("AI returned an invalid response, please try again", 500));
+    }
+
+    const str = (v) => (Array.isArray(v) ? v.join("\n• ") : v || "N/A");
+
+    // save the analysis linked to the CV
+    const analysisData = parsed.analysis || {};
+    const analysis = await CVAnalysis.create({
+        userId: req.user._id,
+        CVId: cv._id,
+        atsScore: analysisData.score || 0,
+        strength: str(analysisData.strengths),
+        weakness: str(analysisData.weaknesses),
+        suggestion: str(analysisData.suggestions),
+    });
+
+    res.status(201).json({
+        success: true,
+        message: "CV analyzed successfully",
+        data: { analysis },
     });
 });
 
