@@ -20,8 +20,17 @@ const generateToken = (userId) => {
 // ================================== //
 
 export const register = catchAsync(async (req, res, next) => {
-  const { firstName, lastName, email, password, gender, role, telephone, age , passwordConfirm} =
-    req.body;
+  const {
+    firstName,
+    lastName,
+    email,
+    password,
+    gender,
+    role,
+    telephone,
+    age,
+    passwordConfirm,
+  } = req.body;
 
   // make sure that all the fields are provided
   if (
@@ -115,7 +124,9 @@ export const login = catchAsync(async (req, res, next) => {
   }
 
   // find the user by the email
-  const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+  const user = await User.findOne({ email: email.toLowerCase() }).select(
+    "+password",
+  );
 
   if (!user) {
     return next(new AppError("Invalid email or password", 401));
@@ -132,7 +143,7 @@ export const login = catchAsync(async (req, res, next) => {
     );
   }
 
-  const isPasswordValid = await user.comparePassword(password);
+  const isPasswordValid = await user.comparePassword(String(password));
 
   if (!isPasswordValid) {
     return next(new AppError("Invalid email or password", 401));
@@ -206,7 +217,7 @@ export const logout = async (req, res) => {
 // ================================== //
 
 export const forgotPassword = catchAsync(async (req, res, next) => {
-  const user = await User.findOne({ email: req.body.email });
+  const user = await User.findOne({ email: req.body.email.toLowerCase() });
   if (!user) {
     return next(new AppError("There is no user with that email address", 404));
   }
@@ -214,7 +225,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   const resetToken = user.createPasswordResetToken();
   await user.save({ validateBeforeSave: false });
 
-  const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetpassword/${resetToken}`;
+  const resetURL = `${req.protocol}://${req.get("host")}/api/users/resetpassword/${resetToken}`;
 
   // const message = `forget your password ? please submit a patch request to : ${resetURL}`;
   const htmlMessage = `
@@ -357,12 +368,16 @@ export const resetPassword = catchAsync(async (req, res, next) => {
   });
 });
 
+// ================================== //
+//     UPDATE USER'S CURRENT PASSWORD       //
+// ================================== //
+
 export const updatePassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select("+password");
   if (!user) {
-    return next(new AppError("This is user isn't exist", 400));
+    return next(new AppError("This user does not exist", 400));
   }
-  if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+  if (!(await user.comparePassword(String(req.body.passwordCurrent)))) {
     return next(new AppError("You're current password is wrong ", 401));
   }
 
@@ -373,5 +388,54 @@ export const updatePassword = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     token: token,
+  });
+});
+
+// ================================== //
+//       UPDATE USER PROFILE                            //
+// ================================== //
+
+const fillterObj = (obj, ...allowFields) => {
+  const newObject = {};
+  Object.keys(obj).forEach((el) => {
+    if (allowFields.includes(el)) {
+      newObject[el] = obj[el];
+    }
+  });
+  return newObject;
+};
+export const updateMe = catchAsync(async (req, res, next) => {
+  if (req.body.role) {
+    return next(new AppError("You are not allowed to change your role", 403));
+  }
+
+  if (req.body.password || req.body.passwordConfirm) {
+    return next(
+      new AppError(
+        "This route isn't for password updates. Please use /updatepassword",
+        400,
+      ),
+    );
+  }
+
+  const filterBody = fillterObj(
+    req.body,
+    "firstName",
+    "lastName",
+    "email",
+    "gender",
+    "telephone",
+    "age",
+  );
+  const user = await User.findByIdAndUpdate(req.user.id, filterBody, {
+    new: true,
+    runValidators: true,
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
   });
 });
