@@ -83,6 +83,13 @@ const userSchema = new mongoose.Schema(
       min: 0,
       max: 150,
     },
+    active: {
+      type: Boolean,
+      default: true,
+      select: false,
+    },
+    deleteToken: String,
+    deleteTokenExpires: Date,
   },
   {
     timestamps: true,
@@ -137,6 +144,22 @@ userSchema.methods.createPasswordResetToken = function () {
     .digest("hex");
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
   return resetToken;
+};
+userSchema.pre(/^find/, function () {
+  this.find({ active: { $ne: false } });
+});
+
+userSchema.methods.createDeleteToken = function () {
+  const deleteToken = crypto.randomBytes(32).toString("hex");
+
+  this.deleteToken = crypto
+    .createHash("sha256")
+    .update(deleteToken)
+    .digest("hex");
+
+  this.deleteTokenExpires = Date.now() + 10 * 60 * 1000;
+
+  return deleteToken;
 };
 
 const User = mongoose.model("User", userSchema);
