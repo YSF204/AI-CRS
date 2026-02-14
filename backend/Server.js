@@ -1,6 +1,9 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import hpp from "hpp";
+import mongoSanitize from "express-mongo-sanitize";
 import connectDB from "./src/config/dbConnect.js";
 import authRoutes from "./src/routes/authRoutes.js";
 import errorHandler from "./src/controllers/errorController.js";
@@ -10,9 +13,11 @@ import cvRouter from "./src/routes/cvRoutes.js";
 import { regularLimiter, sensitiveLimiter } from "./src/middleware/limiter.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
-
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
+app.use(mongoSanitize());
+app.use(hpp());
 app.use("/api/auth", sensitiveLimiter);
 app.use("/api", regularLimiter);
 app.use("/api/auth", authRoutes);
