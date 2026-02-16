@@ -50,7 +50,9 @@ const employerSchema = new mongoose.Schema({
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    toObject: { virtuals: true },
+    strict: true,
+    strictQuery: true,
 });
 
 // indexes for faster queries

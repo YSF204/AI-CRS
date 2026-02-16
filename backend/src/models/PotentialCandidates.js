@@ -30,7 +30,9 @@ const potentialCandidatesSchema = new mongoose.Schema({
 }, {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
+    toObject: { virtuals: true },
+    strict: true,
+    strictQuery: true,
 });
 
 // Indexes for faster queries
