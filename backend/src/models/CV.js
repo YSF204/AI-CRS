@@ -141,6 +141,17 @@ const cvSchema = new mongoose.Schema(
         ],
       },
     ],
+    layout: {
+      sectionOrder: {
+        type: [String],
+        default: []
+      },
+      visibleSections: {
+        type: Map,
+        of: Boolean,
+        default: {}
+      }
+    },
   },
   {
     timestamps: true,

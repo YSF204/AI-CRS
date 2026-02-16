@@ -8,6 +8,7 @@ import {
   analyzeCV,
   analyzeCVFile,
   getCVAnalyses,
+  downloadPDF,
 } from "../controllers/cvController.js";
 import { authenticate } from "../middleware/Auth.js";
 import { isEmployee } from "../middleware/roleCheck.js";
@@ -27,6 +28,9 @@ cvRouter.delete("/:id", deleteCV);
 // AI Analysis
 cvRouter.post("/:id/analyze", analyzeCV);
 cvRouter.get("/:id/analyses", getCVAnalyses);
+
+// PDF Download (generates on-the-fly)
+cvRouter.post("/:id/download-pdf", downloadPDF);
 
 // PDF Upload + Analysis
 cvRouter.post("/upload/analyze", uploadCV, analyzeCVFile);

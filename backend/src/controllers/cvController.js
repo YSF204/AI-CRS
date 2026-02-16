@@ -4,6 +4,16 @@ import CVAnalysis from "../models/CVAnalysis.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import { analyzeCVFromFile, analyzeCVFromDatabase } from "../integrations/ai/openai.js";
+import htmlToPdf from "../utils/pdfGen.js";
+import User from "../models/User.js";
+
+// Helper function to verify CV ownership
+
+const verifyOwnership = (cv, userId) => {
+    if (cv.userId.toString() !== userId.toString()) {
+        throw new AppError("Not authorized to access this CV", 403);
+    }
+};
 
 // ================================== //
 //          CREATE NEW CV             //
@@ -22,11 +32,6 @@ export const createCV = catchAsync(async (req, res, next) => {
         technicalSkills,
         customSections,
     } = req.body;
-
-    // make sure that all required fields are provided
-    if (!jobTitle || !summary || !address) {
-        return next(new AppError("Please provide all required fields", 400));
-    }
 
     const cv = await CV.create({
         userId: req.user._id,
@@ -74,10 +79,7 @@ export const getCVById = catchAsync(async (req, res, next) => {
         return next(new AppError("CV not found", 404));
     }
 
-    // make sure the CV belongs to the logged-in user
-    if (cv.userId.toString() !== req.user._id.toString()) {
-        return next(new AppError("Not authorized to access this CV", 403));
-    }
+    verifyOwnership(cv, req.user._id);
 
     res.status(200).json({
         success: true,
@@ -96,10 +98,7 @@ export const updateCV = catchAsync(async (req, res, next) => {
         return next(new AppError("CV not found", 404));
     }
 
-    // verify ownership
-    if (cv.userId.toString() !== req.user._id.toString()) {
-        return next(new AppError("Not authorized to update this CV", 403));
-    }
+    verifyOwnership(cv, req.user._id);
 
     const updatedCV = await CV.findByIdAndUpdate(
         req.params.id,
@@ -125,9 +124,7 @@ export const deleteCV = catchAsync(async (req, res, next) => {
         return next(new AppError("CV not found", 404));
     }
 
-    if (cv.userId.toString() !== req.user._id.toString()) {
-        return next(new AppError("Not authorized to delete this CV", 403));
-    }
+    verifyOwnership(cv, req.user._id);
 
     await CVAnalysis.deleteMany({ CVId: cv._id });
     await CV.findByIdAndDelete(req.params.id);
@@ -211,9 +208,7 @@ export const analyzeCV = catchAsync(async (req, res, next) => {
         return next(new AppError("CV not found", 404));
     }
 
-    if (cv.userId.toString() !== req.user._id.toString()) {
-        return next(new AppError("Not authorized to analyze this CV", 403));
-    }
+    verifyOwnership(cv, req.user._id);
 
     // convert the CV data into plain text for the AI
     const cvText = [
@@ -272,10 +267,7 @@ export const getCVAnalyses = catchAsync(async (req, res, next) => {
         return next(new AppError("CV not found", 404));
     }
 
-    // verify ownership
-    if (cv.userId.toString() !== req.user._id.toString()) {
-        return next(new AppError("Not authorized to view analyses for this CV", 403));
-    }
+    verifyOwnership(cv, req.user._id);
 
     const analyses = await CVAnalysis.find({ CVId: cv._id }).sort({
         createdAt: -1,
@@ -287,3 +279,41 @@ export const getCVAnalyses = catchAsync(async (req, res, next) => {
         data: { analyses },
     });
 });
+
+// ================================== //
+//    GENERATE & DOWNLOAD PDF         //
+// ================================== //
+
+export const downloadPDF = catchAsync(async (req, res, next) => {
+    const { html } = req.body;
+
+    if (!html) {
+        return next(new AppError("Please provide HTML content", 400));
+    }
+
+    const cv = await CV.findById(req.params.id);
+
+    if (!cv) {
+        return next(new AppError("CV not found", 404));
+    }
+
+    verifyOwnership(cv, req.user._id);
+
+    await cv.populate('userId', 'firstName lastName');
+
+    const pdfResult = await htmlToPdf(html, cv._id);
+
+    const filename = `cv_${cv.userId.fullName.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
+    res.download(pdfResult.absolutePath, filename, (err) => {
+        
+        if (fs.existsSync(pdfResult.absolutePath)) {
+            fs.unlinkSync(pdfResult.absolutePath);
+        }
+        
+        if (err) {
+            return next(new AppError("Error downloading PDF", 500));
+        }
+    });
+});
+
+
