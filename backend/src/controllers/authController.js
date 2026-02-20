@@ -369,7 +369,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 });
 
 // ================================== //
-//     UPDATE USER'S CURRENT PASSWORD       //
+//     UPDATE USER'S CURRENT PASSWORD //
 // ================================== //
 
 export const updatePassword = catchAsync(async (req, res, next) => {

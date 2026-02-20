@@ -3,6 +3,28 @@ import Employer from "../models/Employer.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "./../utils/appError.js";
 
+
+const verifyOwnership = async (req , res , next) =>{
+  const {id} = req.params;
+  const job = await Job.findById(id);
+  const employer = await Employer.findOne({userId: req.user._id});
+
+  if(!job){
+    return next(new AppError("Job not found", 404));
+  }
+
+  if(!employer){
+    return next(new AppError("Employer not found", 404));
+  }
+
+  if(job.employerId.toString() !== employer._id.toString()){
+    return next(new AppError("Not authorized to update this job", 403));
+  }
+
+  next();
+}
+
+
 // ================================== //
 //         CREATE NEW JOB             //
 // ================================== //
@@ -84,17 +106,13 @@ export const getAllJobs = catchAsync(async (req, res) => {
 export const updateJob = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
-  // Find the job
   const job = await Job.findById(id);
   if (!job) {
     return next(new AppError("Job not found", 404));
   }
 
   // Verify ownership
-  const employer = await Employer.findOne({ userId: req.user._id });
-  if (!employer || job.employerId.toString() !== employer._id.toString()) {
-    return next(new AppError("Not authorized to update this job", 403));
-  }
+  verifyOwnership(req , res , next);
 
   const updatedJob = await Job.findByIdAndUpdate(
     id,
@@ -123,10 +141,7 @@ export const deleteJob = catchAsync(async (req, res, next) => {
   }
 
   // Verify ownership
-  const employer = await Employer.findOne({ userId: req.user._id });
-  if (!employer || job.employerId.toString() !== employer._id.toString()) {
-    return next(new AppError("Not authorized to delete this job", 403));
-  }
+  verifyOwnership(req , res , next);
 
   await Job.findByIdAndDelete(id);
 

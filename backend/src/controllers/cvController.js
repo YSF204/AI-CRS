@@ -145,10 +145,8 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
 
     const { jobDescription } = req.body;
 
-    // one API call → extracts CV data + analyzes it
     const aiResult = await analyzeCVFromFile(req.file.path, jobDescription);
 
-    // parse the response
     let parsed;
     try {
         const clean = aiResult.replace(/```json|```/g, "").trim();
@@ -160,7 +158,6 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
 
     const str = (v) => (Array.isArray(v) ? v.join("\n• ") : v || "N/A");
 
-    // create a real CV from the extracted data
     const cvData = parsed.cvData || {};
     const cv = await CV.create({
         userId: req.user._id,
@@ -175,7 +172,6 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
         language: cvData.language || [],
     });
 
-    // save the analysis linked to the CV
     const analysisData = parsed.analysis || {};
     const analysis = await CVAnalysis.create({
         userId: req.user._id,
