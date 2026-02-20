@@ -11,8 +11,9 @@ import userRouter from "./src/routes/userRoutes.js";
 import jobRouter from "./src/routes/jobRoutes.js";
 import cvRouter from "./src/routes/cvRoutes.js";
 import { regularLimiter, sensitiveLimiter } from "./src/middleware/limiter.js";
+import employerRouter from "./src/routes/employerRoutes.js";
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
@@ -24,6 +25,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRouter);
 app.use("/api/jobs", jobRouter);
 app.use("/api/cvs", cvRouter);
+app.use("/api/employers", employerRouter);
 app.use(errorHandler);
 
 const startServer = async () => {

@@ -114,3 +114,38 @@ export const analyzeCVFromDatabase = async (cvText, jobDescription) => {
 
   return response.output_text;
 };
+
+
+const matchPrompt = () =>{
+  return `You are a Senior Technical Recruiter and ATS expert.
+
+You will be given a CANDIDATE CV and a JOB POSTING.
+Your task is to match them and return a structured analysis.
+
+Respond with ONLY a valid JSON object (no markdown, no code fences).
+
+{
+  "matchScore": <number 0-100, overall match percentage>,
+  "skillsMatched": ["<skills the candidate has that the job requires>"],
+  "skillsMissing": ["<skills the job requires but the candidate lacks>"],
+  "experienceMatch": <true | false, does candidate meet years of experience?>,
+  "reasoning": "<2-3 sentence summary of why this score was given>"
+}`;
+}
+
+export const matchCVToJob = async (cvText , jobText) =>{
+  const response = await getClient().responses.create({
+    model: "gpt-4.1",
+    input: [{
+      role: "user",
+      content: [
+        { type: "input_text", text: matchPrompt() },
+        { type: "input_text", text: `--- CANDIDATE CV ---\n${cvText}` },
+        { type: "input_text", text: `--- JOB POSTING ---\n${jobText}` },
+      ],
+    }],
+  });
+
+  return response.output_text;
+
+}

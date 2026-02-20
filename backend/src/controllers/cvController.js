@@ -5,9 +5,7 @@ import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import { analyzeCVFromFile, analyzeCVFromDatabase } from "../integrations/ai/openai.js";
 import htmlToPdf from "../utils/pdfGen.js";
-import User from "../models/User.js";
 
-// Helper function to verify CV ownership
 
 const verifyOwnership = (cv, userId) => {
     if (cv.userId.toString() !== userId.toString()) {
@@ -31,20 +29,25 @@ export const createCV = catchAsync(async (req, res, next) => {
         softSkills,
         technicalSkills,
         customSections,
+        layout,
     } = req.body;
 
     const cv = await CV.create({
         userId: req.user._id,
         jobTitle,
-        summary,
+        summary: summary || "",
         contact: contact || {},
-        address,
+        address: address || {},
         experience: experience || [],
         education: education || [],
         language: language || [],
         softSkills: softSkills || [],
         technicalSkills: technicalSkills || [],
         customSections: customSections || [],
+        layout: {
+            sectionOrder: layout?.sectionOrder || [],
+            visibleSections: layout?.visibleSections || {},
+        },
     });
 
     res.status(201).json({
@@ -100,9 +103,22 @@ export const updateCV = catchAsync(async (req, res, next) => {
 
     verifyOwnership(cv, req.user._id);
 
+    const { layout, ...rest } = req.body;
+
+    // Build update object
+    const updateData = { ...rest, userId: req.user._id };
+
+    // Merge layout fields individually to avoid overwriting the whole layout object
+    if (layout?.sectionOrder !== undefined) {
+        updateData["layout.sectionOrder"] = layout.sectionOrder;
+    }
+    if (layout?.visibleSections !== undefined) {
+        updateData["layout.visibleSections"] = layout.visibleSections;
+    }
+
     const updatedCV = await CV.findByIdAndUpdate(
         req.params.id,
-        { ...req.body, userId: req.user._id }, // prevent changing userId
+        updateData,
         { new: true, runValidators: true },
     );
 
@@ -170,6 +186,10 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
         technicalSkills: cvData.technicalSkills || [],
         softSkills: cvData.softSkills || [],
         language: cvData.language || [],
+        layout: {
+            sectionOrder: cvData.layout?.sectionOrder || [],
+            visibleSections: cvData.layout?.visibleSections || {},
+        },
     });
 
     const analysisData = parsed.analysis || {};
@@ -219,11 +239,11 @@ export const analyzeCV = catchAsync(async (req, res, next) => {
         `Soft Skills: ${cv.softSkills?.join(", ") || "None"}`,
         `Languages: ${cv.language?.join(", ") || "None"}`,
         ...cv.customSections?.map(s => `${s.title}: ${s.items?.map(i => `${i.name}${i.description ? " - " + i.description : ""}`).join(", ")}`) || [],
+        `Layout: ${JSON.stringify(cv.layout)}`,
     ].join("\n");
 
     const aiResult = await analyzeCVFromDatabase(cvText, jobDescription);
 
-    // parse the response
     let parsed;
     try {
         const clean = aiResult.replace(/```json|```/g, "").trim();

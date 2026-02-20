@@ -13,6 +13,7 @@ import {
 import { authenticate } from "../middleware/Auth.js";
 import { isEmployee } from "../middleware/roleCheck.js";
 import { uploadCV } from "../middleware/upload.js";
+import { recommendJobs } from "../controllers/matchController.js";
 
 const cvRouter = express.Router();
 
@@ -34,5 +35,8 @@ cvRouter.post("/:id/download-pdf", downloadPDF);
 
 // PDF Upload + Analysis
 cvRouter.post("/upload/analyze", uploadCV, analyzeCVFile);
+
+// job Reccomendation 
+cvRouter.post("/:id/recommend-jobs", recommendJobs);
 
 export default cvRouter;

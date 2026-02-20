@@ -15,8 +15,8 @@ const cvSchema = new mongoose.Schema(
     },
     summary: {
       type: String,
-      required: true,
       trim: true,
+      default: "",
     },
     contact: {
       phone: {
@@ -44,13 +44,13 @@ const cvSchema = new mongoose.Schema(
     address: {
       city: {
         type: String,
-        required: true,
         trim: true,
+        default: "",
       },
       street: {
         type: String,
-        required: true,
         trim: true,
+        default: "",
       },
     },
     experience: [
