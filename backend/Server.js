@@ -10,6 +10,7 @@ import errorHandler from "./src/controllers/errorController.js";
 import userRouter from "./src/routes/userRoutes.js";
 import jobRouter from "./src/routes/jobRoutes.js";
 import cvRouter from "./src/routes/cvRoutes.js";
+import candidatesRouter from "./src/routes/PotentialCandedatesRoutes.js";
 import { regularLimiter, sensitiveLimiter } from "./src/middleware/limiter.js";
 import employerRouter from "./src/routes/employerRoutes.js";
 const app = express();
@@ -26,6 +27,7 @@ app.use("/api/users", userRouter);
 app.use("/api/jobs", jobRouter);
 app.use("/api/cvs", cvRouter);
 app.use("/api/employers", employerRouter);
+app.use("/api/candidates",candidatesRouter);
 app.use(errorHandler);
 
 const startServer = async () => {
