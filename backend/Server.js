@@ -13,6 +13,7 @@ import cvRouter from "./src/routes/cvRoutes.js";
 import candidatesRouter from "./src/routes/PotentialCandedatesRoutes.js";
 import { regularLimiter, sensitiveLimiter } from "./src/middleware/limiter.js";
 import employerRouter from "./src/routes/employerRoutes.js";
+import adminRouter from "./src/routes/adminRoutes.js";
 const app = express();
 const PORT = process.env.PORT || 3001;
 app.use(helmet());
@@ -28,6 +29,7 @@ app.use("/api/jobs", jobRouter);
 app.use("/api/cvs", cvRouter);
 app.use("/api/employers", employerRouter);
 app.use("/api/candidates",candidatesRouter);
+app.use("/api/admin", adminRouter);
 app.use(errorHandler);
 
 const startServer = async () => {
