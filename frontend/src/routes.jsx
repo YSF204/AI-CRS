@@ -1,11 +1,12 @@
 import { createBrowserRouter, Link } from 'react-router-dom';
 import { PageTransition } from './components/UI/PageTransition';
 import RootLayout from './components/UI/RootLayout';
-import LandingPage from './Pages/Public/Landing/LandingPage';
 import AuthPage from './Pages/Public/Auth/AuthPage';
+import DynamicRoot from './Pages/Public/DynamicRoot';
 import AdminDash from './Pages/Admin/AdminDash';
 import EmployeeDash from './Pages/Employee/EmployeeDash';
 import EmployerDash from './Pages/Employer/EmployerDash';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
 
 // Not Found page (inline since no dedicated file exists yet)
 function NotFound() {
@@ -25,7 +26,7 @@ export const router = createBrowserRouter([
         path: '/',
         element: (
           <PageTransition>
-            <LandingPage />
+            <DynamicRoot />
           </PageTransition>
         ),
       },
@@ -40,25 +41,31 @@ export const router = createBrowserRouter([
       {
         path: '/admin',
         element: (
-          <PageTransition>
-            <AdminDash />
-          </PageTransition>
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <PageTransition>
+              <AdminDash />
+            </PageTransition>
+          </ProtectedRoute>
         ),
       },
       {
         path: '/employee',
         element: (
-          <PageTransition>
-            <EmployeeDash />
-          </PageTransition>
+          <ProtectedRoute allowedRoles={['EMPLOYEE']}>
+            <PageTransition>
+              <EmployeeDash />
+            </PageTransition>
+          </ProtectedRoute>
         ),
       },
       {
         path: '/employer',
         element: (
-          <PageTransition>
-            <EmployerDash />
-          </PageTransition>
+          <ProtectedRoute allowedRoles={['EMPLOYER']}>
+            <PageTransition>
+              <EmployerDash />
+            </PageTransition>
+          </ProtectedRoute>
         ),
       },
       {
