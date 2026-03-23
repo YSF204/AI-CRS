@@ -12,6 +12,7 @@ export default function Stepper({
   initialStep = 1,
   onStepChange,
   onFinalStepCompleted,
+  onNextAttempt, // Callback when Next is clicked (even if disabled)
   backButtonText = 'Previous',
   nextButtonText = 'Next',
   canProceed,
@@ -32,8 +33,10 @@ export default function Stepper({
 
   const isNextDisabled = canProceed ? !canProceed(current) : false;
 
-  const goNext = () => {
+  const handleNextBtnClick = () => {
+    onNextAttempt?.(current);
     if (isNextDisabled) return;
+    
     if (current < total - 1) {
       setDirection(1);
       const next = current + 1;
@@ -178,7 +181,7 @@ export default function Stepper({
           {backButtonText}
         </button>
         <button
-          onClick={goNext}
+          onClick={handleNextBtnClick}
           className="brutal-btn"
           style={{
             padding: '0.5rem 1.25rem',
