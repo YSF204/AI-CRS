@@ -5,7 +5,7 @@ import AuthInput from '../../../components/UI/AuthInput';
 
 
 
-export default function LoginForm() {
+export default function LoginForm({ setMode }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -40,10 +40,30 @@ export default function LoginForm() {
       const res = await axios.post('http://localhost:3001/api/auth/google', {
         token: credentialResponse.credential,
       });
-      console.log('Google login successful:', res.data);
+
+      if (res.status === 206 || res.data.requireProfileCompletion) {
+        localStorage.setItem(
+          'pendingGoogleRegistration',
+          JSON.stringify({
+            token: credentialResponse.credential,
+            ...res.data.googleData,
+          })
+        );
+        if (setMode) setMode('signup');
+        return;
+      }
+
+      const { token, data } = res.data;
+      localStorage.setItem('token', token);
+      
+      const userRole = data.user.role;
+      if (userRole === 'ADMIN') window.location.href = '/admin';
+      else if (userRole === 'EMPLOYER') window.location.href = '/employer';
+      else window.location.href = '/employee';
+
     } catch (err) {
       console.error('Google login failed:', err);
-      setErrorMsg('Failed to login with Google.');
+      setErrorMsg(err.response?.data?.message || 'Google Login securely failed.');
     }
   };
 

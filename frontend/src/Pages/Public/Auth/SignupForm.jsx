@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Briefcase, User } from 'lucide-react';
 import Stepper, { Step } from '../../../components/UI/Stepper';
 import AuthInput from '../../../components/UI/AuthInput';
 
-export default function SignupForm() {
+export default function SignupForm({ setMode }) {
   const [errorMsg, setErrorMsg] = useState('');
+  const [googleAuthPayload, setGoogleAuthPayload] = useState(null);
   const [role, setRole] = useState('');
   const [form, setForm] = useState({
     firstName: '',
@@ -25,33 +26,72 @@ export default function SignupForm() {
     branchStreet: '',
   });
 
+  useEffect(() => {
+    const pendingJson = localStorage.getItem('pendingGoogleRegistration');
+    if (pendingJson) {
+      try {
+        const stored = JSON.parse(pendingJson);
+        setGoogleAuthPayload(stored);
+        setForm(prev => ({
+          ...prev,
+          firstName: stored.firstName || '',
+          lastName: stored.lastName || '',
+          email: stored.email || '',
+        }));
+      } catch (e) {
+        console.error('Failed to parse pending google data', e);
+      }
+    }
+  }, []);
+
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
   const handleComplete = async () => {
     setErrorMsg('');
-    const payload = {
-      firstName: form.firstName,
-      lastName: form.lastName,
-      email: form.email,
-      password: form.password,
-      passwordConfirm: form.passwordConfirm,
-      gender: form.gender,
-      role: role.toUpperCase(),
-      telephone: form.telephone ? [form.telephone] : [],
-      age: parseInt(form.age),
-    };
-
-    if (role === 'EMPLOYER') {
-      payload.company = {
-        name: form.companyName,
-        license: form.companyLicense,
-        contactEmail: form.contactEmail,
-        website: form.website || undefined,
-        branches: [{ name: form.branchName, city: form.branchCity, street: form.branchStreet }],
-      };
-    }
-
     try {
+      if (googleAuthPayload) {
+        const payload = {
+          token: googleAuthPayload.token,
+          role: role.toUpperCase(),
+          gender: form.gender,
+          age: parseInt(form.age),
+          telephone: form.telephone ? [form.telephone] : [],
+        };
+        const res = await axios.post('http://localhost:3001/api/auth/google/register', payload);
+        const { token, data } = res.data;
+        localStorage.setItem('token', token);
+        localStorage.removeItem('pendingGoogleRegistration');
+
+        const userRole = data.user.role;
+        if (userRole === 'ADMIN') window.location.href = '/admin';
+        else if (userRole === 'EMPLOYER') window.location.href = '/employer';
+        else window.location.href = '/employee';
+        return;
+      }
+
+      // Normal user creation
+      const payload = {
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        password: form.password,
+        passwordConfirm: form.passwordConfirm,
+        gender: form.gender,
+        role: role.toUpperCase(),
+        telephone: form.telephone ? [form.telephone] : [],
+        age: parseInt(form.age),
+      };
+
+      if (role === 'EMPLOYER') {
+        payload.company = {
+          name: form.companyName,
+          license: form.companyLicense,
+          contactEmail: form.contactEmail,
+          website: form.website || undefined,
+          branches: [{ name: form.branchName, city: form.branchCity, street: form.branchStreet }],
+        };
+      }
+
       const res = await axios.post('http://localhost:3001/api/auth/register', payload);
       
       const { token, data } = res.data;
@@ -84,7 +124,7 @@ export default function SignupForm() {
           parseInt(form.age) <= 150
         );
       case 2:
-        return form.password.length >= 6 && form.password === form.passwordConfirm;
+        return !!googleAuthPayload ? true : (form.password.length >= 6 && form.password === form.passwordConfirm);
       case 3:
         return (
           form.companyName.trim() !== '' &&
@@ -130,11 +170,12 @@ export default function SignupForm() {
     /* Step 2: Personal Info */
     <Step key="personal">
       <h2 style={heading}>Personal Information</h2>
+      {googleAuthPayload && <p style={subtext}>Name and email securely sourced from Google.</p>}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 14px' }}>
-        <AuthInput label="First Name" placeholder="Yousef" value={form.firstName} onChange={set('firstName')} required />
-        <AuthInput label="Last Name" placeholder="AL Bakri" value={form.lastName} onChange={set('lastName')} required />
+        <AuthInput label="First Name" placeholder="Yousef" value={form.firstName} onChange={set('firstName')} required readOnly={!!googleAuthPayload} />
+        <AuthInput label="Last Name" placeholder="AL Bakri" value={form.lastName} onChange={set('lastName')} required readOnly={!!googleAuthPayload} />
       </div>
-      <AuthInput label="Email" type="email" placeholder="you@example.com" value={form.email} onChange={set('email')} required />
+      <AuthInput label="Email" type="email" placeholder="you@example.com" value={form.email} onChange={set('email')} required readOnly={!!googleAuthPayload} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 14px' }}>
         <GenderSelect value={form.gender} onChange={(g) => setForm({ ...form, gender: g })} />
         <AuthInput label="Age" type="number" placeholder="22" min="16" max="150" value={form.age} onChange={set('age')} required />
@@ -143,17 +184,23 @@ export default function SignupForm() {
 
     /* Step 3: Security */
     <Step key="security">
-      <h2 style={heading}>Security</h2>
-      <AuthInput label="Password" type="password" placeholder="••••••••" value={form.password} onChange={set('password')} required />
-      <AuthInput
-        label="Confirm Password"
-        type="password"
-        placeholder="••••••••"
-        value={form.passwordConfirm}
-        onChange={set('passwordConfirm')}
-        error={form.passwordConfirm && form.password !== form.passwordConfirm ? "Passwords don't match" : ''}
-        required
-      />
+      <h2 style={heading}>Security & Contacts</h2>
+      {!googleAuthPayload ? (
+        <>
+          <AuthInput label="Password" type="password" placeholder="••••••••" value={form.password} onChange={set('password')} required />
+          <AuthInput
+            label="Confirm Password"
+            type="password"
+            placeholder="••••••••"
+            value={form.passwordConfirm}
+            onChange={set('passwordConfirm')}
+            error={form.passwordConfirm && form.password !== form.passwordConfirm ? "Passwords don't match" : ''}
+            required
+          />
+        </>
+      ) : (
+        <p style={subtext}>✓ Password setup securely bypassed via Google OAuth</p>
+      )}
       <AuthInput label="Phone Number" type="tel" placeholder="0598420206" value={form.telephone} onChange={set('telephone')} />
     </Step>,
   ];

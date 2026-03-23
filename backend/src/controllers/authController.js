@@ -4,16 +4,7 @@ import catchAsync from "../utils/catchAsync.js";
 import AppError from "./../utils/appError.js";
 import sendEmail from "../utils/email.js";
 import crypto from "crypto";
-
-// ================================== //
-//            Gen JWT TOKEN           //
-// ================================== //
-
-const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
-};
+import { generateToken } from "../utils/generateToken.js";
 
 // ================================== //
 //       REGISTER NEW USER            //
@@ -213,7 +204,7 @@ export const logout = async (req, res) => {
 };
 
 // ================================== //
-//       RESET PASSWORD VIA EMAIL                //
+//       RESET PASSWORD VIA EMAIL      //
 // ================================== //
 
 export const forgotPassword = catchAsync(async (req, res, next) => {

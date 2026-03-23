@@ -71,6 +71,15 @@ const userSchema = new mongoose.Schema(
         message: "Telephone number must be a valid 10-digit number",
       },
     },
+    authProvider : {
+      type : String,
+      enum : ["LOCAL", "GOOGLE"],
+      default : "LOCAL",
+    },
+    profilePic : {
+      type : String,
+      default : "",
+    },
     accountStatus: {
       type: String,
       required: true,

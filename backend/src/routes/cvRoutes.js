@@ -22,6 +22,9 @@ cvRouter.use(authenticate, isEmployee);
 
 cvRouter.post("/", createCV);
 cvRouter.get("/", getMyCVs);
+// PDF Upload + Analysis
+cvRouter.post("/upload/analyze", uploadCV, analyzeCVFile);
+
 cvRouter.get("/:id", getCVById);
 cvRouter.patch("/:id", updateCV);
 cvRouter.delete("/:id", deleteCV);
@@ -32,9 +35,6 @@ cvRouter.get("/:id/analyses", getCVAnalyses);
 
 // PDF Download (generates on-the-fly)
 cvRouter.post("/:id/download-pdf", downloadPDF);
-
-// PDF Upload + Analysis
-cvRouter.post("/upload/analyze", uploadCV, analyzeCVFile);
 
 // job Reccomendation 
 cvRouter.post("/:id/recommend-jobs", recommendJobs);

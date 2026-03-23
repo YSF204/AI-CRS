@@ -152,7 +152,7 @@ export default function AuthPage() {
         </p>
 
         {/* Form content */}
-        {mode === 'login' ? <LoginForm /> : <SignupForm />}
+        {mode === 'login' ? <LoginForm setMode={setMode} /> : <SignupForm setMode={setMode} />}
       </div>
 
       {/* Decorative elements */}
