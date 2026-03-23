@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { GoogleLogin } from '@react-oauth/google';
+import { useNavigate } from 'react-router-dom';
 import AuthInput from '../../../components/UI/AuthInput';
+import { useAuth } from '../../../context/AuthContext';
 
 
 
 export default function LoginForm({ setMode }) {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -22,12 +26,8 @@ export default function LoginForm({ setMode }) {
       
       // Save token & get role
       const { token, data } = res.data;
-      localStorage.setItem('token', token);
-      
-      const userRole = data.user.role;
-      if (userRole === 'ADMIN') window.location.href = '/admin';
-      else if (userRole === 'EMPLOYER') window.location.href = '/employer';
-      else window.location.href = '/employee';
+      login(token, data.user);
+      navigate('/');
       
     } catch (err) {
       console.error('Login error:', err);
@@ -54,12 +54,8 @@ export default function LoginForm({ setMode }) {
       }
 
       const { token, data } = res.data;
-      localStorage.setItem('token', token);
-      
-      const userRole = data.user.role;
-      if (userRole === 'ADMIN') window.location.href = '/admin';
-      else if (userRole === 'EMPLOYER') window.location.href = '/employer';
-      else window.location.href = '/employee';
+      login(token, data.user);
+      navigate('/');
 
     } catch (err) {
       console.error('Google login failed:', err);

@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Briefcase, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import Stepper, { Step } from '../../../components/UI/Stepper';
 import AuthInput from '../../../components/UI/AuthInput';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function SignupForm({ setMode }) {
+  const { login } = useAuth();
+  const navigate = useNavigate();
   const [errorMsg, setErrorMsg] = useState('');
   const [googleAuthPayload, setGoogleAuthPayload] = useState(null);
   const [role, setRole] = useState('');
@@ -59,13 +63,10 @@ export default function SignupForm({ setMode }) {
         };
         const res = await axios.post('http://localhost:3001/api/auth/google/register', payload);
         const { token, data } = res.data;
-        localStorage.setItem('token', token);
+        
+        login(token, data.user);
         localStorage.removeItem('pendingGoogleRegistration');
-
-        const userRole = data.user.role;
-        if (userRole === 'ADMIN') window.location.href = '/admin';
-        else if (userRole === 'EMPLOYER') window.location.href = '/employer';
-        else window.location.href = '/employee';
+        navigate('/');
         return;
       }
 
@@ -95,12 +96,8 @@ export default function SignupForm({ setMode }) {
       const res = await axios.post('http://localhost:3001/api/auth/register', payload);
       
       const { token, data } = res.data;
-      localStorage.setItem('token', token);
-
-      const userRole = data.user.role;
-      if (userRole === 'ADMIN') window.location.href = '/admin';
-      else if (userRole === 'EMPLOYER') window.location.href = '/employer';
-      else window.location.href = '/employee';
+      login(token, data.user);
+      navigate('/');
 
     } catch (err) {
       console.error('Signup error:', err);

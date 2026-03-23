@@ -4,6 +4,7 @@ import { RouterProvider } from 'react-router-dom'
 import './index.css'
 import { router } from './routes.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
+import { AuthProvider } from './context/AuthContext.jsx'
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -13,7 +14,9 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <GoogleOAuthProvider clientId={clientId}>
       <ThemeProvider>
-        <RouterProvider router={router} />
+        <AuthProvider>
+          <RouterProvider router={router} />
+        </AuthProvider>
       </ThemeProvider>
     </GoogleOAuthProvider>
   </StrictMode>,

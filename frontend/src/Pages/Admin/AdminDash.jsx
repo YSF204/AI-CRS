@@ -1,21 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { LayoutDashboard, Users, Settings, LogOut } from 'lucide-react';
+import { Users, Settings } from 'lucide-react';
+import DashboardNav from '../../components/UI/DashboardNav';
 
 export default function AdminDash() {
   return (
     <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
       <div className="max-w-6xl mx-auto">
-        <header className="flex justify-between items-center mb-12">
-          <h1 className="text-4xl font-bold flex items-center gap-3">
-            <LayoutDashboard size={40} className="text-(--yellow)" />
-            ADMIN DASHBOARD
-          </h1>
-          <Link to="/" className="brutal-btn-outline px-6 py-2 flex items-center gap-2">
-            <LogOut size={18} />
-            EXIT
-          </Link>
-        </header>
+        
+        <DashboardNav role="admin" />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="brutal-card p-6 bg-(--card-bg)">
