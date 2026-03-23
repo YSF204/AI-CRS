@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Briefcase, User } from 'lucide-react';
 import Stepper, { Step } from '../../../components/UI/Stepper';
 import AuthInput from '../../../components/UI/AuthInput';
+import { signupSchema } from '../../../schema/auth.schema';
 
 export default function SignupForm({ setMode }) {
   const [errorMsg, setErrorMsg] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [touched, setTouched] = useState({});
   const [googleAuthPayload, setGoogleAuthPayload] = useState(null);
   const [role, setRole] = useState('');
   const [form, setForm] = useState({
@@ -44,7 +47,43 @@ export default function SignupForm({ setMode }) {
     }
   }, []);
 
+  const errors = useMemo(() => {
+    const dataToValidate = {
+      ...form,
+      role: (role || '').toUpperCase(),
+      age: parseInt(form.age) || 0,
+    };
+    const result = signupSchema.safeParse(dataToValidate);
+    const errs = {};
+    if (!result.success) {
+      // Use flatten() which is more reliable across Zod versions for field errors
+      const flattened = result.error.flatten();
+      Object.entries(flattened.fieldErrors).forEach(([field, messages]) => {
+        errs[field] = messages[0];
+      });
+    }
+    return errs;
+  }, [form, role]);
+
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
+  const handleTouch = (field) => () => setTouched(prev => ({ ...prev, [field]: true }));
+
+  const handleNextAttempt = (stepIndex) => {
+    /* Fields belonging to each step index */
+    const fieldsByStep = [
+      ['role'],
+      ['firstName', 'lastName', 'email', 'gender', 'age'],
+      ['password', 'passwordConfirm', 'telephone'],
+      ['companyName', 'companyLicense', 'contactEmail', 'website', 'branchName', 'branchCity', 'branchStreet'],
+    ];
+
+    const currentFields = fieldsByStep[stepIndex] || [];
+    const newTouched = { ...touched };
+    currentFields.forEach(f => {
+      newTouched[f] = true;
+    });
+    setTouched(newTouched);
+  };
 
   const handleComplete = async () => {
     setErrorMsg('');
@@ -78,12 +117,31 @@ export default function SignupForm({ setMode }) {
         passwordConfirm: form.passwordConfirm,
         gender: form.gender,
         role: role.toUpperCase(),
-        telephone: form.telephone ? [form.telephone] : [],
+        telephone: form.telephone || undefined, // Pass string for schema validation
         age: parseInt(form.age),
+        companyName: form.companyName || undefined,
+        companyLicense: form.companyLicense || undefined,
+        contactEmail: form.contactEmail || undefined,
+        website: form.website || undefined,
+        branchName: form.branchName || undefined,
+        branchCity: form.branchCity || undefined,
+        branchStreet: form.branchStreet || undefined,
       };
 
+      const result = signupSchema.safeParse(payload);
+      if (!result.success) {
+        const firstError = result.error.issues?.[0]?.message || 'Validation failed';
+        setErrorMsg(firstError);
+        return;
+      }
+
+      // Prepare backend payload
+      const backendPayload = { 
+        ...result.data,
+        telephone: result.data.telephone ? [result.data.telephone] : [], // Transform for backend
+      };
       if (role === 'EMPLOYER') {
-        payload.company = {
+        backendPayload.company = {
           name: form.companyName,
           license: form.companyLicense,
           contactEmail: form.contactEmail,
@@ -92,7 +150,7 @@ export default function SignupForm({ setMode }) {
         };
       }
 
-      const res = await axios.post('http://localhost:3001/api/auth/register', payload);
+      const res = await axios.post('http://localhost:3001/api/auth/register', backendPayload);
       
       const { token, data } = res.data;
       localStorage.setItem('token', token);
@@ -110,21 +168,45 @@ export default function SignupForm({ setMode }) {
 
   /* ─── Per-step validation ─── */
   const canProceed = (stepIndex) => {
+    const dataToValidate = {
+      ...form,
+      role: (role || '').toUpperCase(),
+      age: parseInt(form.age) || 0,
+    };
+
+    const result = signupSchema.safeParse(dataToValidate);
+    const errors = {};
+    
+    if (!result.success) {
+      const flattened = result.error.flatten();
+      Object.entries(flattened.fieldErrors).forEach(([field, messages]) => {
+        errors[field] = messages[0];
+      });
+    }
+
     switch (stepIndex) {
       case 0:
         return role !== '';
       case 1:
-        return (
+        const step1Valid = (
           form.firstName.trim() !== '' &&
           form.lastName.trim() !== '' &&
           form.email.trim() !== '' &&
           form.gender !== '' &&
-          form.age !== '' &&
-          parseInt(form.age) >= 16 &&
-          parseInt(form.age) <= 150
+          !!form.age &&
+          !errors.firstName &&
+          !errors.lastName &&
+          !errors.email &&
+          !errors.age
         );
+        return step1Valid;
       case 2:
-        return !!googleAuthPayload ? true : (form.password.length >= 6 && form.password === form.passwordConfirm);
+        return !!googleAuthPayload ? true : (
+          form.password.length >= 6 && 
+          form.password === form.passwordConfirm &&
+          !errors.password &&
+          !errors.passwordConfirm
+        );
       case 3:
         return (
           form.companyName.trim() !== '' &&
@@ -132,7 +214,10 @@ export default function SignupForm({ setMode }) {
           form.contactEmail.trim() !== '' &&
           form.branchName.trim() !== '' &&
           form.branchCity.trim() !== '' &&
-          form.branchStreet.trim() !== ''
+          form.branchStreet.trim() !== '' &&
+          !errors.companyName &&
+          !errors.companyLicense &&
+          !errors.contactEmail
         );
       default:
         return true;
@@ -172,13 +257,13 @@ export default function SignupForm({ setMode }) {
       <h2 style={heading}>Personal Information</h2>
       {googleAuthPayload && <p style={subtext}>Name and email securely sourced from Google.</p>}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 14px' }}>
-        <AuthInput label="First Name" placeholder="Yousef" value={form.firstName} onChange={set('firstName')} required readOnly={!!googleAuthPayload} />
-        <AuthInput label="Last Name" placeholder="AL Bakri" value={form.lastName} onChange={set('lastName')} required readOnly={!!googleAuthPayload} />
+        <AuthInput label="First Name" placeholder="Yousef" value={form.firstName} onChange={set('firstName')} onFocus={handleTouch('firstName')} onBlur={handleTouch('firstName')} required readOnly={!!googleAuthPayload} error={touched.firstName ? errors.firstName : ''} />
+        <AuthInput label="Last Name" placeholder="AL Bakri" value={form.lastName} onChange={set('lastName')} onFocus={handleTouch('lastName')} onBlur={handleTouch('lastName')} required readOnly={!!googleAuthPayload} error={touched.lastName ? errors.lastName : ''} />
       </div>
-      <AuthInput label="Email" type="email" placeholder="you@example.com" value={form.email} onChange={set('email')} required readOnly={!!googleAuthPayload} />
+      <AuthInput label="Email" type="email" placeholder="you@example.com" value={form.email} onChange={set('email')} onFocus={handleTouch('email')} onBlur={handleTouch('email')} required readOnly={!!googleAuthPayload} error={touched.email ? errors.email : ''} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 14px' }}>
         <GenderSelect value={form.gender} onChange={(g) => setForm({ ...form, gender: g })} />
-        <AuthInput label="Age" type="number" placeholder="22" min="16" max="150" value={form.age} onChange={set('age')} required />
+        <AuthInput label="Age" type="number" placeholder="22" min="18" max="119" value={form.age} onChange={set('age')} onFocus={handleTouch('age')} onBlur={handleTouch('age')} required error={touched.age ? errors.age : ''} />
       </div>
     </Step>,
 
@@ -187,21 +272,23 @@ export default function SignupForm({ setMode }) {
       <h2 style={heading}>Security & Contacts</h2>
       {!googleAuthPayload ? (
         <>
-          <AuthInput label="Password" type="password" placeholder="••••••••" value={form.password} onChange={set('password')} required />
+          <AuthInput label="Password" type="password" placeholder="••••••••" value={form.password} onChange={set('password')} onFocus={handleTouch('password')} onBlur={handleTouch('password')} required error={touched.password ? errors.password : ''} />
           <AuthInput
             label="Confirm Password"
             type="password"
             placeholder="••••••••"
             value={form.passwordConfirm}
             onChange={set('passwordConfirm')}
-            error={form.passwordConfirm && form.password !== form.passwordConfirm ? "Passwords don't match" : ''}
+            onFocus={handleTouch('passwordConfirm')}
+            onBlur={handleTouch('passwordConfirm')}
+            error={touched.passwordConfirm ? errors.passwordConfirm : ''}
             required
           />
         </>
       ) : (
         <p style={subtext}>✓ Password setup securely bypassed via Google OAuth</p>
       )}
-      <AuthInput label="Phone Number" type="tel" placeholder="0598420206" value={form.telephone} onChange={set('telephone')} />
+      <AuthInput label="Phone Number" type="tel" placeholder="0598420206" value={form.telephone} onChange={set('telephone')} onFocus={handleTouch('telephone')} onBlur={handleTouch('telephone')} error={touched.telephone ? errors.telephone : ''} />
     </Step>,
   ];
 
@@ -211,12 +298,12 @@ export default function SignupForm({ setMode }) {
       <Step key="company">
         <h2 style={heading}>Company Details</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 14px' }}>
-          <AuthInput label="Company Name" placeholder="Acme Corp" value={form.companyName} onChange={set('companyName')} required />
-          <AuthInput label="License Number" placeholder="BR-12345" value={form.companyLicense} onChange={set('companyLicense')} required />
+          <AuthInput label="Company Name" placeholder="Acme Corp" value={form.companyName} onChange={set('companyName')} onFocus={handleTouch('companyName')} onBlur={handleTouch('companyName')} required error={touched.companyName ? errors.companyName : ''} />
+          <AuthInput label="License Number" placeholder="BR-12345" value={form.companyLicense} onChange={set('companyLicense')} onFocus={handleTouch('companyLicense')} onBlur={handleTouch('companyLicense')} required error={touched.companyLicense ? errors.companyLicense : ''} />
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 14px' }}>
-          <AuthInput label="Contact Email" type="email" placeholder="hr@company.com" value={form.contactEmail} onChange={set('contactEmail')} required />
-          <AuthInput label="Website" type="url" placeholder="https://company.com" value={form.website} onChange={set('website')} />
+          <AuthInput label="Contact Email" type="email" placeholder="hr@company.com" value={form.contactEmail} onChange={set('contactEmail')} onFocus={handleTouch('contactEmail')} onBlur={handleTouch('contactEmail')} required error={touched.contactEmail ? errors.contactEmail : ''} />
+          <AuthInput label="Website" type="url" placeholder="https://company.com" value={form.website} onChange={set('website')} onFocus={handleTouch('website')} onBlur={handleTouch('website')} error={touched.website ? errors.website : ''} />
         </div>
         <div
           style={{
@@ -235,16 +322,16 @@ export default function SignupForm({ setMode }) {
           Branch Office
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0 12px' }}>
-          <AuthInput label="Branch Name" placeholder="HQ" value={form.branchName} onChange={set('branchName')} required />
-          <AuthInput label="City" placeholder="Hebron" value={form.branchCity} onChange={set('branchCity')} required />
-          <AuthInput label="Street" placeholder="Main St" value={form.branchStreet} onChange={set('branchStreet')} required />
+          <AuthInput label="Branch Name" placeholder="HQ" value={form.branchName} onChange={set('branchName')} onFocus={handleTouch('branchName')} onBlur={handleTouch('branchName')} required error={touched.branchName ? errors.branchName : ''} />
+          <AuthInput label="City" placeholder="Hebron" value={form.branchCity} onChange={set('branchCity')} onFocus={handleTouch('branchCity')} onBlur={handleTouch('branchCity')} required error={touched.branchCity ? errors.branchCity : ''} />
+          <AuthInput label="Street" placeholder="Main St" value={form.branchStreet} onChange={set('branchStreet')} onFocus={handleTouch('branchStreet')} onBlur={handleTouch('branchStreet')} required error={touched.branchStreet ? errors.branchStreet : ''} />
         </div>
       </Step>
     );
   }
 
   return (
-    <>
+    <div noValidate>
       {errorMsg && (
         <div style={{ padding: 10, marginBottom: 14, background: '#FF6B6B', color: '#fff', fontSize: 13, fontFamily: "'DM Mono', monospace" }}>
           {errorMsg}
@@ -254,6 +341,7 @@ export default function SignupForm({ setMode }) {
       initialStep={1}
       onStepChange={(step) => console.log('Step:', step)}
       onFinalStepCompleted={handleComplete}
+      onNextAttempt={handleNextAttempt}
       backButtonText="← Back"
       nextButtonText="Continue →"
       canProceed={canProceed}
@@ -261,7 +349,7 @@ export default function SignupForm({ setMode }) {
     >
       {steps}
     </Stepper>
-    </>
+    </div>
   );
 }
 

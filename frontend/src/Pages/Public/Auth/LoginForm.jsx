@@ -1,19 +1,41 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import axios from 'axios';
 import { GoogleLogin } from '@react-oauth/google';
 import AuthInput from '../../../components/UI/AuthInput';
-
-
+import { loginSchema } from '../../../schema/auth.schema';
 
 export default function LoginForm({ setMode }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [touched, setTouched] = useState({});
+
+  const errors = useMemo(() => {
+    const result = loginSchema.safeParse({ email, password });
+    if (result.success) return {};
+    const errs = {};
+    const flattened = result.error.flatten();
+    Object.entries(flattened.fieldErrors).forEach(([field, messages]) => {
+      errs[field] = messages[0];
+    });
+    return errs;
+  }, [email, password]);
+
+  const handleTouch = (field) => () => setTouched(prev => ({ ...prev, [field]: true }));
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setTouched({ email: true, password: true });
     setErrorMsg('');
+
+    const result = loginSchema.safeParse({ email, password });
+    if (!result.success) {
+      const firstError = result.error.issues?.[0]?.message || 'Validation failed';
+      setErrorMsg(firstError);
+      return;
+    }
+
     try {
       const res = await axios.post('http://localhost:3001/api/auth/login', {
         email,
@@ -68,7 +90,7 @@ export default function LoginForm({ setMode }) {
   };
 
   return (
-    <form onSubmit={handleLogin}>
+    <form onSubmit={handleLogin} noValidate>
       {errorMsg && (
         <div style={{ padding: 10, marginBottom: 14, background: '#FF6B6B', color: '#fff', fontSize: 13, fontFamily: "'DM Mono', monospace" }}>
           {errorMsg}
@@ -80,17 +102,24 @@ export default function LoginForm({ setMode }) {
         placeholder="you@example.com"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        onFocus={handleTouch('email')}
+        onBlur={handleTouch('email')}
         required
+        error={touched.email ? errors.email : ''}
       />
       <AuthInput
         label="Password"
+        type="password"
         showToggle
         showPw={showPw}
         onToggle={() => setShowPw(!showPw)}
         placeholder="••••••••"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        onFocus={handleTouch('password')}
+        onBlur={handleTouch('password')}
         required
+        error={touched.password ? errors.password : ''}
       />
       <button
         type="submit"

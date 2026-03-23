@@ -42,10 +42,12 @@ export default function AuthInput({ label, error, type, showToggle, showPw, onTo
         onFocus={(e) => {
           e.target.style.boxShadow = '5px 5px 0 #FFE630';
           e.target.style.borderColor = '#FFE630';
+          if (props.onFocus) props.onFocus(e);
         }}
         onBlur={(e) => {
           e.target.style.boxShadow = '3px 3px 0 var(--shadow-color)';
           e.target.style.borderColor = error ? '#FF6B6B' : 'var(--border-color)';
+          if (props.onBlur) props.onBlur(e);
         }}
       />
       {showToggle && (
