@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Sun, Moon } from 'lucide-react';
-import { ThemeProvider, useTheme } from '../../../context/ThemeContext';
+import { useTheme } from '../../../context/ThemeContext';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 
-function AuthPageContent() {
+export default function AuthPage() {
   const [mode, setMode] = useState('login');
   const { theme, toggleTheme } = useTheme();
 
@@ -188,10 +188,3 @@ function AuthPageContent() {
   );
 }
 
-export default function AuthPage() {
-  return (
-    <ThemeProvider>
-      <AuthPageContent />
-    </ThemeProvider>
-  );
-}
