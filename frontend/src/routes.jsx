@@ -3,6 +3,7 @@ import { PageTransition } from './components/UI/PageTransition';
 import RootLayout from './components/UI/RootLayout';
 import AuthPage from './Pages/Public/Auth/AuthPage';
 import DynamicRoot from './Pages/Public/DynamicRoot';
+import PendingActivation from './Pages/Public/PendingActivation';
 import AdminDash from './Pages/Admin/AdminDash';
 import EmployeeDash from './Pages/Employee/EmployeeDash';
 import EmployerDash from './Pages/Employer/EmployerDash';
@@ -66,6 +67,14 @@ export const router = createBrowserRouter([
               <EmployerDash />
             </PageTransition>
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/pending',
+        element: (
+          <PageTransition>
+            <PendingActivation />
+          </PageTransition>
         ),
       },
       {

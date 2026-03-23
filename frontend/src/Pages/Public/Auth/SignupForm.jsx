@@ -103,8 +103,14 @@ export default function SignupForm({ setMode }) {
         const res = await axios.post('http://localhost:3001/api/auth/google/register', payload);
         const { token, data } = res.data;
         
-        login(token, data.user);
         localStorage.removeItem('pendingGoogleRegistration');
+
+        if (data.user.accountStatus === 'PENDING') {
+          navigate('/pending');
+          return;
+        }
+
+        login(token, data.user);
         navigate('/');
         return;
       }
@@ -154,6 +160,12 @@ export default function SignupForm({ setMode }) {
       const res = await axios.post('http://localhost:3001/api/auth/register', backendPayload);
       
       const { token, data } = res.data;
+
+      if (data.user.accountStatus === 'PENDING') {
+        navigate('/pending');
+        return;
+      }
+
       login(token, data.user);
       navigate('/');
 
