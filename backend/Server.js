@@ -17,7 +17,10 @@ import adminRouter from "./src/routes/adminRoutes.js";
 const app = express();
 const PORT = process.env.PORT || 3001;
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: true, // Allow all origins/ports dynamically
+  credentials: true,
+}));
 app.use(express.json());
 app.use(mongoSanitize());
 app.use(hpp());

@@ -1,10 +1,10 @@
 import { BrowserRouter } from 'react-router-dom';
-import AnimatedRoutes from './components/UI/PageTransition';
+import AppRoutes from './routes/AppRoutes';
 
 function App() {
   return (
     <BrowserRouter>
-      <AnimatedRoutes />
+      <AppRoutes />
     </BrowserRouter>
   );
 }

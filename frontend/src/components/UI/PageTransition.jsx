@@ -1,7 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import LandingPage from '../../Pages/Public/Landing/LandingPage';
-import AuthPage from '../../Pages/Public/Auth/AuthPage';
+import { motion } from 'motion/react';
 
 // A reusable wrapper that defines the intro/outro animation for any page
 export const PageTransition = ({ children }) => {
@@ -16,32 +13,3 @@ export const PageTransition = ({ children }) => {
     </motion.div>
   );
 };
-
-// Sub-component to use the useLocation hook and handle AnimatePresence routing
-export default function AnimatedRoutes() {
-  const location = useLocation();
-
-  return (
-    /* mode="wait" ensures the old page fully exits before the new one enters */
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route
-          path="/"
-          element={
-            <PageTransition>
-              <LandingPage />
-            </PageTransition>
-          }
-        />
-        <Route
-          path="/auth"
-          element={
-            <PageTransition>
-              <AuthPage />
-            </PageTransition>
-          }
-        />
-      </Routes>
-    </AnimatePresence>
-  );
-}

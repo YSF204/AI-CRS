@@ -5,10 +5,16 @@ import './index.css'
 import { router } from './routes.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ThemeProvider>
-      <RouterProvider router={router} />
-    </ThemeProvider>
+    <GoogleOAuthProvider clientId={clientId}>
+      <ThemeProvider>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </GoogleOAuthProvider>
   </StrictMode>,
 )

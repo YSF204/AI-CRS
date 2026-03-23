@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import axios from 'axios';
 import { Briefcase, User } from 'lucide-react';
 import Stepper, { Step } from '../../../components/UI/Stepper';
 import AuthInput from '../../../components/UI/AuthInput';
 
 export default function SignupForm() {
+  const [errorMsg, setErrorMsg] = useState('');
   const [role, setRole] = useState('');
   const [form, setForm] = useState({
     firstName: '',
@@ -25,7 +27,8 @@ export default function SignupForm() {
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    setErrorMsg('');
     const payload = {
       firstName: form.firstName,
       lastName: form.lastName,
@@ -48,7 +51,21 @@ export default function SignupForm() {
       };
     }
 
-    console.log('Signup payload:', payload);
+    try {
+      const res = await axios.post('http://localhost:3001/api/auth/register', payload);
+      
+      const { token, data } = res.data;
+      localStorage.setItem('token', token);
+
+      const userRole = data.user.role;
+      if (userRole === 'ADMIN') window.location.href = '/admin';
+      else if (userRole === 'EMPLOYER') window.location.href = '/employer';
+      else window.location.href = '/employee';
+
+    } catch (err) {
+      console.error('Signup error:', err);
+      setErrorMsg(err.response?.data?.message || 'Registration failed. Please try again.');
+    }
   };
 
   /* ─── Per-step validation ─── */
@@ -180,7 +197,13 @@ export default function SignupForm() {
   }
 
   return (
-    <Stepper
+    <>
+      {errorMsg && (
+        <div style={{ padding: 10, marginBottom: 14, background: '#FF6B6B', color: '#fff', fontSize: 13, fontFamily: "'DM Mono', monospace" }}>
+          {errorMsg}
+        </div>
+      )}
+      <Stepper
       initialStep={1}
       onStepChange={(step) => console.log('Step:', step)}
       onFinalStepCompleted={handleComplete}
@@ -191,6 +214,7 @@ export default function SignupForm() {
     >
       {steps}
     </Stepper>
+    </>
   );
 }
 
