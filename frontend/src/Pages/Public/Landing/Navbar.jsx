@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../../context/ThemeContext';
-import PillNav from '../../../components/UI/PillNav';
+import PillNav from '../../../components/shared/PillNav';
 
 export default function Navbar() {
   const [visible, setVisible] = useState(true);

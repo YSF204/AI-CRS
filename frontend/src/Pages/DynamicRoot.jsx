@@ -1,9 +1,9 @@
 import React from 'react';
-import { useAuth } from '../../context/AuthContext';
-import LandingPage from './Landing/LandingPage';
-import AdminDash from '../Admin/AdminDash';
-import EmployerDash from '../Employer/EmployerDash';
-import EmployeeDash from '../Employee/EmployeeDash';
+import { useAuth } from '../context/AuthContext';
+import LandingPage from './Public/Landing/LandingPage';
+import AdminDash from './Admin/AdminDash';
+import EmployerDash from './Employer/EmployerDash';
+import EmployeeDash from './Employee/EmployeeDash';
 
 export default function DynamicRoot() {
   const { user, loading } = useAuth();

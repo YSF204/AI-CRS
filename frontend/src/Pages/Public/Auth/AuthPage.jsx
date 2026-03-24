@@ -151,8 +151,13 @@ export default function AuthPage() {
             : "Let's get you set up in a few steps"}
         </p>
 
-        {/* Form content */}
-        {mode === 'login' ? <LoginForm setMode={setMode} /> : <SignupForm setMode={setMode} />}
+        {/* Form content — both always mounted, shown/hidden via CSS to prevent Google SDK re-init */}
+        <div style={{ display: mode === 'login' ? 'block' : 'none' }}>
+          <LoginForm setMode={setMode} />
+        </div>
+        <div style={{ display: mode === 'signup' ? 'block' : 'none' }}>
+          <SignupForm setMode={setMode} />
+        </div>
       </div>
 
       {/* Decorative elements */}

@@ -1,9 +1,9 @@
 import { createBrowserRouter, Link } from 'react-router-dom';
-import { PageTransition } from './components/UI/PageTransition';
-import RootLayout from './components/UI/RootLayout';
+import { PageTransition } from './components/layout/PageTransition';
+import RootLayout from './components/layout/RootLayout';
 import AuthPage from './Pages/Public/Auth/AuthPage';
-import DynamicRoot from './Pages/Public/DynamicRoot';
-import PendingActivation from './Pages/Public/PendingActivation';
+import DynamicRoot from './Pages/DynamicRoot';
+import PendingActivation from './Pages/Employer/PendingActivation';
 import AdminDash from './Pages/Admin/AdminDash';
 import EmployeeDash from './Pages/Employee/EmployeeDash';
 import EmployerDash from './Pages/Employer/EmployerDash';
