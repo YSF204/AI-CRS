@@ -1,5 +1,5 @@
 import React from 'react';
-import CardSwap, { Card } from '../../../components/UI/CardSwap';
+import CardSwap, { Card } from './components/CardSwap';
 
 /* ───── CV Data ───── */
 const cvData = [

@@ -1,6 +1,6 @@
 import React from 'react';
 import { User, Briefcase, FileText } from 'lucide-react';
-import DashboardNav from '../../components/UI/DashboardNav';
+import DashboardNav from '../../components/shared/DashboardNav';
 
 export default function EmployeeDash() {
   return (

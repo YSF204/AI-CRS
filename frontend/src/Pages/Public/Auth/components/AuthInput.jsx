@@ -32,12 +32,13 @@ export default function AuthInput({ label, error, type, showToggle, showPw, onTo
           fontSize: 13,
           background: 'var(--bg)',
           color: 'var(--fg)',
-          border: '3px solid var(--border-color)',
+          borderWidth: '3px',
+          borderStyle: 'solid',
+          borderColor: error ? '#FF6B6B' : 'var(--border-color)',
           boxShadow: '3px 3px 0 var(--shadow-color)',
           outline: 'none',
           transition: 'box-shadow 0.15s ease',
           boxSizing: 'border-box',
-          ...(error ? { borderColor: '#FF6B6B' } : {}),
         }}
         onFocus={(e) => {
           e.target.style.boxShadow = '5px 5px 0 #FFE630';

@@ -14,7 +14,7 @@ export const signupSchema = z.object({
   gender: z.enum(['MALE', 'FEMALE'], { errorMap: () => ({ message: 'Please select a gender' }) }),
   role: z.enum(['EMPLOYEE', 'EMPLOYER', 'ADMIN'], { errorMap: () => ({ message: 'Please select a role' }) }),
   age: z.coerce.number().min(18, 'Min age 18').max(119, 'Max age 119'),
-  telephone: z.string().optional(),
+  telephone: z.string().regex(/^\+?[0-9\s\-().]{7,20}$/, 'Invalid phone number').optional().or(z.literal('')),
   companyName: z.string().optional(),
   companyLicense: z.string().optional(),
   contactEmail: z.string().email('Invalid email address').optional().or(z.literal('')),

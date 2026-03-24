@@ -1,5 +1,5 @@
 import CVShowcase from './CVShowcase';
-import Shuffle from '../../../components/UI/Shuffle';
+import Shuffle from './components/Shuffle';
 
 export default function HeroSection() {
   return (

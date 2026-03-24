@@ -1,6 +1,6 @@
 import React from 'react';
 import { Building2, Search, PlusCircle } from 'lucide-react';
-import DashboardNav from '../../components/UI/DashboardNav';
+import DashboardNav from '../../components/shared/DashboardNav';
 
 export default function EmployerDash() {
   return (
