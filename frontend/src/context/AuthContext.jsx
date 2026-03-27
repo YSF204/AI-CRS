@@ -11,9 +11,14 @@ export function AuthProvider({ children }) {
     try {
       const res = await api.get('/auth/me');
       setUser(res.data.data.user);
-    } catch {
-      localStorage.removeItem('token');
-      setUser(null);
+    } catch (err) {
+      // Only log out if the token is actually invalid (401).
+      // Do NOT log out on 429 (rate-limited), 5xx, or network errors —
+      // those are transient and should not destroy the session.
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }
