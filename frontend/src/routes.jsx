@@ -6,7 +6,16 @@ import DynamicRoot from './Pages/DynamicRoot';
 import PendingActivation from './Pages/Employer/PendingActivation';
 import AdminDash from './Pages/Admin/AdminDash';
 import EmployeeDash from './Pages/Employee/EmployeeDash';
+import Jobs from './Pages/Employee/jobs';
+import Applications from './Pages/Employee/applications';
+import CVs from './Pages/Employee/cvs';
+import Profile from './Pages/Employee/Profile';
 import EmployerDash from './Pages/Employer/EmployerDash';
+import PostJob from './Pages/Employer/PostJob';
+import EditJob from './Pages/Employer/EditJob';
+import ManageJobs from './Pages/Employer/ManageJobs';
+import CompanyProfile from './Pages/Employer/CompanyProfile';
+import FindTalent from './Pages/Employer/FindTalent';
 import ProtectedRoute from './components/Auth/ProtectedRoute';
 
 // Not Found page (inline since no dedicated file exists yet)
@@ -60,11 +69,101 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: '/employee/jobs',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYEE']}>
+            <PageTransition>
+              <Jobs />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employee/applications',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYEE']}>
+            <PageTransition>
+              <Applications />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employee/cvs',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYEE']}>
+            <PageTransition>
+              <CVs />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employee/profile',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYEE']}>
+            <PageTransition>
+              <Profile />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: '/employer',
         element: (
           <ProtectedRoute allowedRoles={['EMPLOYER']}>
             <PageTransition>
               <EmployerDash />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employer/post-job',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYER']}>
+            <PageTransition>
+              <PostJob />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employer/edit-job/:id',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYER']}>
+            <PageTransition>
+              <EditJob />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employer/jobs',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYER']}>
+            <PageTransition>
+              <ManageJobs />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employer/search',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYER']}>
+            <PageTransition>
+              <FindTalent />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employer/profile',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYER']}>
+            <PageTransition>
+              <CompanyProfile />
             </PageTransition>
           </ProtectedRoute>
         ),

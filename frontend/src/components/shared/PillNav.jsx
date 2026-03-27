@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 
 export default function PillNav({
@@ -78,7 +79,7 @@ export default function PillNav({
         backgroundColor: baseColor,
         border: `3px solid ${navBorderColor}`,
         boxShadow: `4px 4px 0 ${shadowColor}`,
-        maxWidth: 950,
+        maxWidth: '100%',
         margin: '0 auto',
         width: '100%',
         position: 'relative',
@@ -120,9 +121,9 @@ export default function PillNav({
           const isHighlight = isHovered || isActive;
 
           return (
-            <a
+            <Link
               key={item.href}
-              href={item.href}
+              to={item.href}
               ref={(el) => (itemRefs.current[i] = el)}
               onMouseEnter={() => setHoveredIndex(i)}
               style={{
@@ -140,7 +141,7 @@ export default function PillNav({
               }}
             >
               {item.label}
-            </a>
+            </Link>
           );
         })}
       </div>

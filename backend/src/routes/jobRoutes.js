@@ -1,6 +1,8 @@
 import express from "express";
 import {
   getAllJobs,
+  getJobById,
+  getEmployerJobs,
   createJob,
   updateJob,
   deleteJob,
@@ -12,8 +14,10 @@ const jobRouter = express.Router();
 
 // any one can access
 jobRouter.get("/", getAllJobs);
+jobRouter.get("/:id", getJobById);
 
 // Employer only !!!
+jobRouter.get("/employer/me", authenticate, isEmployer, getEmployerJobs);
 jobRouter.post("/create", authenticate, isEmployer, createJob);
 jobRouter.patch("/:id", authenticate, isEmployer, updateJob);
 jobRouter.delete("/:id", authenticate, isEmployer, deleteJob);
