@@ -1,18 +1,21 @@
-import { createBrowserRouter, Link } from 'react-router-dom';
-import { PageTransition } from './components/layout/PageTransition';
-import RootLayout from './components/layout/RootLayout';
-import AuthPage from './Pages/Public/Auth/AuthPage';
-import DynamicRoot from './Pages/DynamicRoot';
-import PendingActivation from './Pages/Employer/PendingActivation';
-import AdminDash from './Pages/Admin/AdminDash';
-import EmployeeDash from './Pages/Employee/EmployeeDash';
-import EmployerDash from './Pages/Employer/EmployerDash';
-import ProtectedRoute from './components/Auth/ProtectedRoute';
+import { createBrowserRouter, Link } from "react-router-dom";
+import { PageTransition } from "./components/layout/PageTransition";
+import RootLayout from "./components/layout/RootLayout";
+import AuthPage from "./Pages/Public/Auth/AuthPage";
+import DynamicRoot from "./Pages/DynamicRoot";
+import PendingActivation from "./Pages/Employer/PendingActivation";
+import AdminDash from "./Pages/Admin/AdminDash";
+import UserManagement from "./Pages/Admin/UserManagement";
+import UserProfile from "./Pages/Admin/UserProfile";
+import UserDelete from "./Pages/Admin/UserDelete";
+import EmployeeDash from "./Pages/Employee/EmployeeDash";
+import EmployerDash from "./Pages/Employer/EmployerDash";
+import ProtectedRoute from "./components/Auth/ProtectedRoute";
 
 // Not Found page (inline since no dedicated file exists yet)
 function NotFound() {
   return (
-    <div style={{ textAlign: 'center', marginTop: '4rem' }}>
+    <div style={{ textAlign: "center", marginTop: "4rem" }}>
       <h1>404 – Page Not Found</h1>
       <Link to="/">Go to Home</Link>
     </div>
@@ -24,7 +27,7 @@ export const router = createBrowserRouter([
     element: <RootLayout />, // provides AnimatePresence wrapper for all routes
     children: [
       {
-        path: '/',
+        path: "/",
         element: (
           <PageTransition>
             <DynamicRoot />
@@ -32,7 +35,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '/auth',
+        path: "/auth",
         element: (
           <PageTransition>
             <AuthPage />
@@ -40,9 +43,9 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '/admin',
+        path: "/admin",
         element: (
-          <ProtectedRoute allowedRoles={['ADMIN']}>
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
             <PageTransition>
               <AdminDash />
             </PageTransition>
@@ -50,9 +53,59 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '/employee',
+        path: "/admin/users",
         element: (
-          <ProtectedRoute allowedRoles={['EMPLOYEE']}>
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <PageTransition>
+              <UserManagement />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/users/new",
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <PageTransition>
+              <UserProfile />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/users/:id",
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <PageTransition>
+              <UserProfile />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/users/:id/edit",
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <PageTransition>
+              <UserProfile />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/admin/users/:id/delete",
+        element: (
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <PageTransition>
+              <UserDelete />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/employee",
+        element: (
+          <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
             <PageTransition>
               <EmployeeDash />
             </PageTransition>
@@ -60,9 +113,9 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '/employer',
+        path: "/employer",
         element: (
-          <ProtectedRoute allowedRoles={['EMPLOYER']}>
+          <ProtectedRoute allowedRoles={["EMPLOYER"]}>
             <PageTransition>
               <EmployerDash />
             </PageTransition>
@@ -70,7 +123,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '/pending',
+        path: "/pending",
         element: (
           <PageTransition>
             <PendingActivation />
@@ -78,7 +131,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '*',
+        path: "*",
         element: (
           <PageTransition>
             <NotFound />
@@ -88,4 +141,3 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
-

@@ -1,10 +1,19 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+import path from "path";
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import hpp from "hpp";
 import mongoSanitize from "express-mongo-sanitize";
 import connectDB from "./src/config/dbConnect.js";
+
+const envPath = path.resolve(process.cwd(), ".env");
+dotenv.config({ path: envPath });
+
+if (!process.env.MONGODB_URI) {
+  const rootEnvPath = path.resolve(process.cwd(), "..", ".env");
+  dotenv.config({ path: rootEnvPath });
+}
 import authRoutes from "./src/routes/authRoutes.js";
 import errorHandler from "./src/controllers/errorController.js";
 import userRouter from "./src/routes/userRoutes.js";
@@ -31,7 +40,7 @@ app.use("/api/users", userRouter);
 app.use("/api/jobs", jobRouter);
 app.use("/api/cvs", cvRouter);
 app.use("/api/employers", employerRouter);
-app.use("/api/candidates",candidatesRouter);
+app.use("/api/candidates", candidatesRouter);
 app.use("/api/admin", adminRouter);
 app.use(errorHandler);
 
