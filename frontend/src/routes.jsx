@@ -6,6 +6,10 @@ import DynamicRoot from './Pages/DynamicRoot';
 import PendingActivation from './Pages/Employer/PendingActivation';
 import AdminDash from './Pages/Admin/AdminDash';
 import EmployeeDash from './Pages/Employee/EmployeeDash';
+import Jobs from './Pages/Employee/jobs';
+import Applications from './Pages/Employee/applications';
+import CVs from './Pages/Employee/cvs';
+import Profile from './Pages/Employee/Profile';
 import EmployerDash from './Pages/Employer/EmployerDash';
 import PostJob from './Pages/Employer/PostJob';
 import EditJob from './Pages/Employer/EditJob';
@@ -60,6 +64,46 @@ export const router = createBrowserRouter([
           <ProtectedRoute allowedRoles={['EMPLOYEE']}>
             <PageTransition>
               <EmployeeDash />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employee/jobs',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYEE']}>
+            <PageTransition>
+              <Jobs />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employee/applications',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYEE']}>
+            <PageTransition>
+              <Applications />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employee/cvs',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYEE']}>
+            <PageTransition>
+              <CVs />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employee/profile',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYEE']}>
+            <PageTransition>
+              <Profile />
             </PageTransition>
           </ProtectedRoute>
         ),

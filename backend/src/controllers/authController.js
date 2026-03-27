@@ -5,12 +5,20 @@ import AppError from "./../utils/appError.js";
 import sendEmail from "../utils/email.js";
 import crypto from "crypto";
 import { generateToken } from "../utils/generateToken.js";
+import { signupSchema, loginSchema } from "../schema/auth.schema.js";
 
 // ================================== //
 //       REGISTER NEW USER            //
 // ================================== //
 
 export const register = catchAsync(async (req, res, next) => {
+  const result = signupSchema.safeParse(req.body);
+
+  if (!result.success) {
+    const message = result.error.errors.map((err) => err.message).join(", ");
+    return next(new AppError(message, 400));
+  }
+
   const {
     firstName,
     lastName,
@@ -21,32 +29,8 @@ export const register = catchAsync(async (req, res, next) => {
     telephone,
     age,
     passwordConfirm,
-  } = req.body;
-
-  // make sure that all the fields are provided
-  if (
-    !firstName ||
-    !lastName ||
-    !email ||
-    !password ||
-    !gender ||
-    !role ||
-    !age ||
-    !passwordConfirm
-  ) {
-    return next(new AppError("Please provide all the required fields", 400));
-  }
-
-  // validate the role :
-  const validRoles = ["EMPLOYEE", "EMPLOYER", "ADMIN"];
-  if (!validRoles.includes(role)) {
-    return next(
-      new AppError(
-        "Invalid role. Role must be one of EMPLOYEE, EMPLOYER, ADMIN",
-        400,
-      ),
-    );
-  }
+    company,
+  } = result.data;
 
   // check if the user already exists
   const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -73,6 +57,7 @@ export const register = catchAsync(async (req, res, next) => {
     telephone: telephone || [],
     age,
     accountStatus, // it will be based on the role
+    company: company || undefined,
   });
 
   // Gen token for the user
@@ -106,13 +91,14 @@ export const register = catchAsync(async (req, res, next) => {
 //            LOGIN USER              //
 // ======================.============ //
 export const login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
+  const result = loginSchema.safeParse(req.body);
 
-  // make sure that all the fields are provided
-
-  if (!email || !password) {
-    return next(new AppError("Please provide all required fields", 400));
+  if (!result.success) {
+    const message = result.error.errors.map((err) => err.message).join(", ");
+    return next(new AppError(message, 400));
   }
+
+  const { email, password } = result.data;
 
   // find the user by the email
   const user = await User.findOne({ email: email.toLowerCase() }).select(
