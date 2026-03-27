@@ -1,17 +1,10 @@
-import { Outlet, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'motion/react';
+import { Outlet } from 'react-router-dom';
 
 /**
- * RootLayout — wraps the entire app with AnimatePresence so that
- * PageTransition exit animations play correctly when navigating.
- * Used as the root layout element in createBrowserRouter.
+ * RootLayout keeps the router outlet mounted consistently.
+ * Each page already owns its own transition wrapper, so animating the
+ * outlet itself can cause blank states during client-side navigation.
  */
 export default function RootLayout() {
-  const location = useLocation();
-
-  return (
-    <AnimatePresence mode="wait">
-      <Outlet key={location.key} />
-    </AnimatePresence>
-  );
+  return <Outlet />;
 }

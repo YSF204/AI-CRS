@@ -28,25 +28,6 @@ const statusClass = (status) => {
   }
 };
 
-const EMPTY_FORM = {
-  firstName: "",
-  lastName: "",
-  email: "",
-  password: "",
-  passwordConfirm: "",
-  role: "EMPLOYEE",
-  gender: "MALE",
-  age: "",
-  telephone: "",
-  companyName: "",
-  companyLicense: "",
-  contactEmail: "",
-  website: "",
-  branchName: "",
-  branchCity: "",
-  branchStreet: "",
-};
-
 export default function UserManagement() {
   const navigate = useNavigate();
   const location = useLocation();

@@ -1,5 +1,5 @@
 import { useState, Children, useRef, useLayoutEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /* ─── Step wrapper (just renders children) ─── */
 export function Step({ children }) {
@@ -55,8 +55,6 @@ export default function Stepper({
       onStepChange?.(prev + 1);
     }
   };
-
-  const progress = ((current + 1) / total) * 100;
 
   return (
     <div style={{ width: '100%' }}>

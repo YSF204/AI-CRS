@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import LoginForm from './LoginForm';
@@ -8,6 +8,19 @@ import SignupForm from './SignupForm';
 export default function AuthPage() {
   const [mode, setMode] = useState('login');
   const { theme, toggleTheme } = useTheme();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const requestedMode = searchParams.get('mode');
+    if (requestedMode === 'login' || requestedMode === 'signup') {
+      setMode(requestedMode);
+    }
+  }, [searchParams]);
+
+  const handleModeChange = (nextMode) => {
+    setMode(nextMode);
+    setSearchParams({ mode: nextMode }, { replace: true });
+  };
 
   return (
     <div
@@ -104,7 +117,7 @@ export default function AuthPage() {
           {['login', 'signup'].map((m) => (
             <button
               key={m}
-              onClick={() => setMode(m)}
+              onClick={() => handleModeChange(m)}
               style={{
                 flex: 1,
                 padding: '10px',
@@ -192,4 +205,3 @@ export default function AuthPage() {
     </div>
   );
 }
-

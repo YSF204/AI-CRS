@@ -28,8 +28,8 @@ export default function DashboardNav({ role = 'employee' }) {
       <UserMenu
         profileHref={
           role === 'employer' ? '/employer/profile'
-          : role === 'admin'  ? '/admin/profile'
-          : '/employee/profile'
+            : role === 'admin' ? '/admin/profile'
+              : '/employee/profile'
         }
       />
     </>
@@ -46,8 +46,6 @@ export default function DashboardNav({ role = 'employee' }) {
         { label: 'Dashboard', href: '/employer' },
         { label: 'Post Job', href: '/employer/post-job' },
         { label: 'Manage Jobs', href: '/employer/jobs' },
-        { label: 'Dashboard',   href: '/employer' },
-        { label: 'Post Job',    href: '/employer/post-job' },
         { label: 'Find Talent', href: '/employer/search' },
       ],
     };
@@ -57,9 +55,9 @@ export default function DashboardNav({ role = 'employee' }) {
       color: 'var(--yellow)',
       label: 'Admin',
       items: [
-        { label: 'Dashboard',    href: '/admin' },
+        { label: 'Dashboard', href: '/admin' },
         { label: 'Manage Users', href: '/admin/users' },
-        { label: 'Settings',     href: '/admin/settings' },
+        { label: 'Settings', href: '/admin/settings' },
       ],
     };
   } else {
@@ -69,10 +67,10 @@ export default function DashboardNav({ role = 'employee' }) {
       color: 'var(--teal)',
       label: 'Employee',
       items: [
-        { label: 'Dashboard',    href: '/employee' },
-        { label: 'Find Jobs',    href: '/employee/jobs' },
+        { label: 'Dashboard', href: '/employee' },
+        { label: 'Find Jobs', href: '/employee/jobs' },
         { label: 'Applications', href: '/employee/applications' },
-        { label: 'My CVs',       href: '/employee/cvs' },
+        { label: 'My CVs', href: '/employee/cvs' },
       ],
     };
   }

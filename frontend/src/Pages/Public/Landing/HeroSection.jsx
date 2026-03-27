@@ -1,5 +1,6 @@
 import CVShowcase from './CVShowcase';
 import Shuffle from './components/Shuffle';
+import { Link } from 'react-router-dom';
 
 export default function HeroSection() {
   return (
@@ -88,8 +89,8 @@ export default function HeroSection() {
         </p>
 
         <div className="flex flex-wrap brutal-reveal brutal-reveal-delay-4" style={{ gap: 'clamp(0.75rem, 1.5%, 1.25rem)' }}>
-          <a
-            href="#get-started"
+          <Link
+            to="/auth?mode=signup"
             className="brutal-btn bg-brutal-yellow text-black"
             style={{
               padding: 'clamp(0.6rem, 1.2%, 0.9rem) clamp(1.25rem, 2.5%, 2rem)',
@@ -97,7 +98,7 @@ export default function HeroSection() {
             }}
           >
             Build My CV →
-          </a>
+          </Link>
           <a
             href="#features"
             className="brutal-btn-outline"

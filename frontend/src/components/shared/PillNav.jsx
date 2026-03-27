@@ -120,25 +120,42 @@ export default function PillNav({
           const isActive = i === activeIndex && hoveredIndex === null;
           const isHighlight = isHovered || isActive;
 
+          const commonStyle = {
+            position: 'relative',
+            zIndex: 1,
+            textDecoration: 'none',
+            padding: '0.45rem 1.25rem',
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontWeight: 700,
+            fontSize: '0.85rem',
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: isHighlight ? hoveredPillTextColor : pillTextColor,
+            transition: 'color 0.2s ease',
+          };
+
+          // Use native anchor for hash links to enable browser scroll-to-section
+          if (typeof item.href === 'string' && item.href.startsWith('#')) {
+            return (
+              <a
+                key={item.href}
+                href={item.href}
+                ref={(el) => (itemRefs.current[i] = el)}
+                onMouseEnter={() => setHoveredIndex(i)}
+                style={commonStyle}
+              >
+                {item.label}
+              </a>
+            );
+          }
+
           return (
             <Link
               key={item.href}
               to={item.href}
               ref={(el) => (itemRefs.current[i] = el)}
               onMouseEnter={() => setHoveredIndex(i)}
-              style={{
-                position: 'relative',
-                zIndex: 1,
-                textDecoration: 'none',
-                padding: '0.45rem 1.25rem',
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontWeight: 700,
-                fontSize: '0.85rem',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color: isHighlight ? hoveredPillTextColor : pillTextColor,
-                transition: 'color 0.2s ease',
-              }}
+              style={commonStyle}
             >
               {item.label}
             </Link>

@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 // A reusable wrapper that defines the intro/outro animation for any page.
 // Exit is intentionally instant to prevent blank-screen gaps during navigation.

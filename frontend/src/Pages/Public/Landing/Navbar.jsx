@@ -61,7 +61,7 @@ export default function Navbar() {
       </button>
 
       <Link
-        to="/auth"
+        to="/auth?mode=login"
         style={{
           textDecoration: 'none',
           padding: '0.4rem 1rem',
@@ -76,7 +76,7 @@ export default function Navbar() {
           letterSpacing: '0.05em'
         }}
       >
-        Get Started
+        Login
       </Link>
     </>
   );
@@ -95,7 +95,7 @@ export default function Navbar() {
         pointerEvents: 'none',
       }}
     >
-      <div style={{ pointerEvents: 'auto' }}>
+      <div style={{ pointerEvents: 'auto', maxWidth: 920, margin: '0 auto' }}>
         <PillNav
           logo={logoNode}
           items={[

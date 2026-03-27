@@ -96,7 +96,7 @@ export default function PendingActivation() {
             ← Back to Home
           </Link>
           <Link
-            to="/auth"
+            to="/auth?mode=login"
             style={{
               display: 'flex', justifyContent: 'center', alignItems: 'center',
               padding: '12px 20px',

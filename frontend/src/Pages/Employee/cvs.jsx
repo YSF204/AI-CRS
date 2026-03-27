@@ -1,29 +1,33 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FileText, Plus } from 'lucide-react';
-import { motion } from 'motion/react';
 import DashboardNav from '../../components/shared/DashboardNav';
 import StatsBar from '../../components/shared/StatsBar';
 import CVCard from '../../components/Employee/CVCard';
 
 const INITIAL_CVS = [
-  { id: 1, name: 'Software Engineer CV', updated: 'Mar 26, 2026', skills: ['React', 'Node.js', 'SQL'],            color: 'var(--teal)'   },
-  { id: 2, name: 'UX Designer CV',       updated: 'Mar 15, 2026', skills: ['Figma', 'CSS', 'User Research'],      color: 'var(--coral)'  },
-  { id: 3, name: 'Full-Stack CV',        updated: 'Mar 10, 2026', skills: ['TypeScript', 'PostgreSQL', 'Docker'],  color: 'var(--yellow)' },
+  { id: 1, name: 'Software Engineer CV', updated: 'Mar 26, 2026', skills: ['React', 'Node.js', 'SQL'], color: 'var(--teal)' },
+  { id: 2, name: 'UX Designer CV', updated: 'Mar 15, 2026', skills: ['Figma', 'CSS', 'User Research'], color: 'var(--coral)' },
+  { id: 3, name: 'Full-Stack CV', updated: 'Mar 10, 2026', skills: ['TypeScript', 'PostgreSQL', 'Docker'], color: 'var(--yellow)' },
 ];
 
 export default function CVs() {
-  const [cvs, setCvs] = useState(INITIAL_CVS);
+  const [cvs, setCvs] = useState(() => INITIAL_CVS.map((cv) => ({ ...cv, skills: cv.skills || [] })));
 
   const handleDelete = (id) => setCvs((prev) => prev.filter((c) => c.id !== id));
 
-  const stats = [
-    { label: 'Total',  value: cvs.length,                           color: 'var(--coral)'  },
-    { label: 'Active', value: 2,                                     color: 'var(--teal)'   },
-    { label: 'Skills', value: cvs.flatMap((c) => c.skills).length,   color: 'var(--yellow)' },
-  ];
+  const stats = useMemo(() => {
+    const safeCvs = Array.isArray(cvs) ? cvs : [];
+    const skillsCount = safeCvs.reduce((total, cv) => total + (Array.isArray(cv.skills) ? cv.skills.length : 0), 0);
+
+    return [
+      { label: 'Total', value: safeCvs.length, color: 'var(--coral)' },
+      { label: 'Active', value: Math.min(2, safeCvs.length), color: 'var(--teal)' },
+      { label: 'Skills', value: skillsCount, color: 'var(--yellow)' },
+    ];
+  }, [cvs]);
 
   return (
-    <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
+    <div className="min-h-screen p-8 bg-[var(--bg)] text-[var(--fg)]">
       <div className="max-w-6xl mx-auto">
         <DashboardNav role="employee" />
 
@@ -31,10 +35,10 @@ export default function CVs() {
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold font-['Space_Grotesk'] uppercase tracking-tight flex items-center gap-3">
-              <FileText size={28} className="text-(--coral)" />
+              <FileText size={28} className="text-[var(--coral)]" />
               My CVs
             </h1>
-            <p className="font-mono text-sm text-(--fg-muted) mt-1">
+            <p className="font-mono text-sm text-[var(--fg-muted)] mt-1">
               {cvs.length} resume{cvs.length !== 1 ? 's' : ''} on file
             </p>
           </div>
@@ -49,23 +53,20 @@ export default function CVs() {
 
         {/* Cards grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cvs.map((cv, i) => (
-            <CVCard key={cv.id} cv={cv} index={i} onDelete={handleDelete} />
+          {cvs.map((cv) => (
+            <CVCard key={cv.id} cv={cv} onDelete={handleDelete} />
           ))}
 
           {/* Ghost "add new" card */}
-          <motion.div
+          <div
             key="add-new-cv"
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: cvs.length * 0.07, ease: [0.22, 1, 0.36, 1] }}
-            className="brutal-card bg-(--card-bg) flex flex-col items-center justify-center gap-3 min-h-[200px] border-dashed opacity-50 hover:opacity-80 cursor-pointer transition-opacity"
+            className="brutal-card bg-[var(--card-bg)] flex flex-col items-center justify-center gap-3 min-h-[200px] border-dashed opacity-50 hover:opacity-80 cursor-pointer transition-opacity"
           >
             <div className="p-3 border-2 border-dashed border-black">
-              <Plus size={24} className="text-(--fg-muted)" />
+              <Plus size={24} className="text-[var(--fg-muted)]" />
             </div>
-            <p className="font-mono text-sm text-(--fg-muted) text-center">Add a new CV</p>
-          </motion.div>
+            <p className="font-mono text-sm text-[var(--fg-muted)] text-center">Add a new CV</p>
+          </div>
         </div>
       </div>
     </div>

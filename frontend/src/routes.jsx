@@ -1,28 +1,32 @@
 import { createBrowserRouter, Link } from 'react-router-dom';
-import { PageTransition } from './components/layout/PageTransition';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
 import RootLayout from './components/layout/RootLayout';
-import AuthPage from './Pages/Public/Auth/AuthPage';
-import DynamicRoot from './Pages/DynamicRoot';
-import PendingActivation from './Pages/Employer/PendingActivation';
+import RouteError from './components/layout/RouteError';
+import { PageTransition } from './components/layout/PageTransition';
 import AdminDash from './Pages/Admin/AdminDash';
-import EmployeeDash from './Pages/Employee/EmployeeDash';
-import Jobs from './Pages/Employee/jobs';
+import AdminProfile from './Pages/Admin/AdminProfile';
+import UserDelete from './Pages/Admin/UserDelete';
+import UserManagement from './Pages/Admin/UserManagement';
+import UserProfile from './Pages/Admin/UserProfile';
+import DynamicRoot from './Pages/DynamicRoot';
 import Applications from './Pages/Employee/applications';
 import CVs from './Pages/Employee/cvs';
+import EmployeeDash from './Pages/Employee/EmployeeDash';
+import Jobs from './Pages/Employee/jobs';
 import Profile from './Pages/Employee/Profile';
-import EmployerDash from './Pages/Employer/EmployerDash';
-import PostJob from './Pages/Employer/PostJob';
-import EditJob from './Pages/Employer/EditJob';
-import ManageJobs from './Pages/Employer/ManageJobs';
 import CompanyProfile from './Pages/Employer/CompanyProfile';
+import EditJob from './Pages/Employer/EditJob';
+import EmployerDash from './Pages/Employer/EmployerDash';
 import FindTalent from './Pages/Employer/FindTalent';
-import ProtectedRoute from './components/Auth/ProtectedRoute';
+import ManageJobs from './Pages/Employer/ManageJobs';
+import PendingActivation from './Pages/Employer/PendingActivation';
+import PostJob from './Pages/Employer/PostJob';
+import AuthPage from './Pages/Public/Auth/AuthPage';
 
-// Not Found page (inline since no dedicated file exists yet)
 function NotFound() {
   return (
-    <div style={{ textAlign: "center", marginTop: "4rem" }}>
-      <h1>404 – Page Not Found</h1>
+    <div style={{ textAlign: 'center', marginTop: '4rem' }}>
+      <h1>404 - Page Not Found</h1>
       <Link to="/">Go to Home</Link>
     </div>
   );
@@ -30,10 +34,11 @@ function NotFound() {
 
 export const router = createBrowserRouter([
   {
-    element: <RootLayout />, // provides AnimatePresence wrapper for all routes
+    element: <RootLayout />,
+    errorElement: <RouteError />,
     children: [
       {
-        path: "/",
+        path: '/',
         element: (
           <PageTransition>
             <DynamicRoot />
@@ -41,7 +46,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/auth",
+        path: '/auth',
         element: (
           <PageTransition>
             <AuthPage />
@@ -49,9 +54,9 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/admin",
+        path: '/admin',
         element: (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
+          <ProtectedRoute allowedRoles={['ADMIN']}>
             <PageTransition>
               <AdminDash />
             </PageTransition>
@@ -59,9 +64,19 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/admin/users",
+        path: '/admin/profile',
         element: (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <PageTransition>
+              <AdminProfile />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/admin/users',
+        element: (
+          <ProtectedRoute allowedRoles={['ADMIN']}>
             <PageTransition>
               <UserManagement />
             </PageTransition>
@@ -69,9 +84,9 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/admin/users/new",
+        path: '/admin/users/new',
         element: (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
+          <ProtectedRoute allowedRoles={['ADMIN']}>
             <PageTransition>
               <UserProfile />
             </PageTransition>
@@ -79,9 +94,9 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/admin/users/:id",
+        path: '/admin/users/:id',
         element: (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
+          <ProtectedRoute allowedRoles={['ADMIN']}>
             <PageTransition>
               <UserProfile />
             </PageTransition>
@@ -89,9 +104,9 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/admin/users/:id/edit",
+        path: '/admin/users/:id/edit',
         element: (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
+          <ProtectedRoute allowedRoles={['ADMIN']}>
             <PageTransition>
               <UserProfile />
             </PageTransition>
@@ -99,9 +114,9 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/admin/users/:id/delete",
+        path: '/admin/users/:id/delete',
         element: (
-          <ProtectedRoute allowedRoles={["ADMIN"]}>
+          <ProtectedRoute allowedRoles={['ADMIN']}>
             <PageTransition>
               <UserDelete />
             </PageTransition>
@@ -109,9 +124,9 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/employee",
+        path: '/employee',
         element: (
-          <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+          <ProtectedRoute allowedRoles={['EMPLOYEE']}>
             <PageTransition>
               <EmployeeDash />
             </PageTransition>
@@ -119,7 +134,6 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/employer",
         path: '/employee/jobs',
         element: (
           <ProtectedRoute allowedRoles={['EMPLOYEE']}>
@@ -143,9 +157,7 @@ export const router = createBrowserRouter([
         path: '/employee/cvs',
         element: (
           <ProtectedRoute allowedRoles={['EMPLOYEE']}>
-            <PageTransition>
-              <CVs />
-            </PageTransition>
+            <CVs />
           </ProtectedRoute>
         ),
       },
@@ -162,7 +174,7 @@ export const router = createBrowserRouter([
       {
         path: '/employer',
         element: (
-          <ProtectedRoute allowedRoles={["EMPLOYER"]}>
+          <ProtectedRoute allowedRoles={['EMPLOYER']}>
             <PageTransition>
               <EmployerDash />
             </PageTransition>
@@ -170,7 +182,6 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "/pending",
         path: '/employer/post-job',
         element: (
           <ProtectedRoute allowedRoles={['EMPLOYER']}>
@@ -229,7 +240,7 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: "*",
+        path: '*',
         element: (
           <PageTransition>
             <NotFound />

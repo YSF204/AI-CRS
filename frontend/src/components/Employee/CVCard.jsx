@@ -1,20 +1,12 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import { FileText, Edit2, Trash2 } from 'lucide-react';
 
 /**
  * CVCard — renders a single CV card with edit / delete actions.
  */
-export default function CVCard({ cv, index, onDelete, onEdit }) {
+export default function CVCard({ cv, onDelete, onEdit }) {
   return (
-    <motion.div
-      key={cv.id}
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.92 }}
-      transition={{ duration: 0.35, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
-      className="brutal-card bg-(--card-bg) flex flex-col overflow-hidden"
-    >
+    <div className="brutal-card bg-[var(--card-bg)] flex flex-col overflow-hidden">
       {/* Coloured accent strip */}
       <div className="h-2 w-full" style={{ background: cv.color }} />
 
@@ -29,7 +21,7 @@ export default function CVCard({ cv, index, onDelete, onEdit }) {
             <h2 className="font-bold font-['Space_Grotesk'] text-base uppercase tracking-tight leading-tight">
               {cv.name}
             </h2>
-            <p className="font-mono text-xs text-(--fg-muted) mt-1">Updated {cv.updated}</p>
+            <p className="font-mono text-xs text-[var(--fg-muted)] mt-1">Updated {cv.updated}</p>
           </div>
         </div>
 
@@ -65,6 +57,6 @@ export default function CVCard({ cv, index, onDelete, onEdit }) {
           </button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

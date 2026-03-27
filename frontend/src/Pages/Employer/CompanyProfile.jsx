@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, MapPin, Building2, Upload } from 'lucide-react';
+import { Building2, PlusCircle, Trash2 } from 'lucide-react';
 import DashboardNav from '../../components/shared/DashboardNav';
 import api from '../../services/api';
 
