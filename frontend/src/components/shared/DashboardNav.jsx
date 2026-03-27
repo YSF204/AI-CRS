@@ -43,6 +43,9 @@ export default function DashboardNav({ role = 'employee' }) {
       color: 'var(--coral)',
       label: 'Employer',
       items: [
+        { label: 'Dashboard', href: '/employer' },
+        { label: 'Post Job', href: '/employer/post-job' },
+        { label: 'Manage Jobs', href: '/employer/jobs' },
         { label: 'Dashboard',   href: '/employer' },
         { label: 'Post Job',    href: '/employer/post-job' },
         { label: 'Find Talent', href: '/employer/search' },
