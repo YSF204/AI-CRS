@@ -3,11 +3,11 @@
 @layer base {
   /* ===== LIGHT MODE (default) ===== */
   :root {
-    --bg: #f0efeb;
-    --fg: #0a0a0a;
-    --fg-muted: rgba(10, 10, 10, 0.5);
+    --bg: #F0EFEB;
+    --fg: #0d0d0d;
+    --fg-muted: rgba(10, 10, 10, 0.68);
     --border-color: #0a0a0a;
-    --card-bg: #f0efeb;
+    --card-bg: #ffffff;
     --shadow-color: #0a0a0a;
     --nav-bg: #f0efeb;
     --yellow: #ffe630;
@@ -23,15 +23,15 @@
   /* ===== DARK MODE ===== */
   [data-theme="dark"] {
     --bg: #1a1a1f;
-    --fg: #e8e8ec;
-    --fg-muted: rgba(232, 232, 236, 0.55);
-    --border-color: #9090a0;
-    --card-bg: #222228;
-    --shadow-color: #9090a0;
+    --fg: #f2f2f6;
+    --fg-muted: rgba(242, 242, 246, 0.75);
+    --border-color: #c0c0d0;
+    --card-bg: #28282f;
+    --shadow-color: #b8b8c8;
     --nav-bg: #1e1e24;
-    --brutal-shadow: 6px 6px 0px #9090a0;
-    --brutal-shadow-sm: 4px 4px 0px #9090a0;
-    --stripe-color: rgba(232, 232, 236, 0.04);
+    --brutal-shadow: 6px 6px 0px #b8b8c8;
+    --brutal-shadow-sm: 4px 4px 0px #b8b8c8;
+    --stripe-color: rgba(242, 242, 246, 0.04);
   }
 
   html {

@@ -156,3 +156,18 @@ export const findPotintialCandidates = catchAsync(async (req, res, next) => {
     });
 
 })
+
+export const getEmployerSearchHistory = catchAsync(async (req, res, next) => {
+    const employer = await Employer.findOne({ userId: req.user._id });
+    if (!employer) return next(new AppError("Employer not found", 404));
+
+    const history = await potentialCandidates.find({ employerId: employer._id })
+        .populate('candidate.userId', 'firstName lastName email')
+        .populate('candidate.CVId', 'jobTitle summary technicalSkills experience education')
+        .sort('-createdAt');
+
+    res.status(200).json({
+        status: "success",
+        data: history
+    });
+});
