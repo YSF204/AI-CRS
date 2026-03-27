@@ -11,7 +11,7 @@ export default function RootLayout() {
 
   return (
     <AnimatePresence mode="wait">
-      <Outlet key={location.pathname} />
+      <Outlet key={location.key} />
     </AnimatePresence>
   );
 }
