@@ -100,6 +100,46 @@ export const getAllJobs = catchAsync(async (req, res) => {
 });
 
 // ================================== //
+//         GET JOB BY ID              //
+// ================================== //
+
+export const getJobById = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const job = await Job.findById(id).populate("employerId", "company");
+
+  if (!job) {
+    return next(new AppError("Job not found", 404));
+  }
+
+  res.status(200).json({
+    success: true,
+    data: { job },
+  });
+});
+
+// ================================== //
+//      GET ALL EMPLOYER JOBS         //
+// ================================== //
+
+export const getEmployerJobs = catchAsync(async (req, res, next) => {
+  const employer = await Employer.findOne({ userId: req.user._id });
+  
+  if (!employer) {
+    return next(new AppError("Employer profile not found", 404));
+  }
+
+  // Returns ALL jobs for this employer (both OPEN and CLOSED)
+  const jobs = await Job.find({ employerId: employer._id })
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    count: jobs.length,
+    data: { jobs },
+  });
+});
+
+// ================================== //
 //          UPDATE JOB                //
 // ================================== //
 

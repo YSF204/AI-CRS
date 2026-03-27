@@ -49,6 +49,7 @@ export default function DashboardNav({ role = 'employee' }) {
       items: [
         { label: 'Dashboard', href: '/employer' },
         { label: 'Post Job', href: '/employer/post-job' },
+        { label: 'Manage Jobs', href: '/employer/jobs' },
         { label: 'Find Talent', href: '/employer/search' },
         { label: 'Profile', href: '/employer/profile' },
       ]
