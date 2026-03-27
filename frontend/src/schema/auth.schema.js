@@ -2,14 +2,22 @@ import { z } from 'zod';
 
 export const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase character')
+    .regex(/[a-z]/, 'Password must contain at least one lowercase character')
+    .regex(/[0-9]/, 'Password must contain at least one number'),
 });
 
 export const signupSchema = z.object({
   firstName: z.string().trim().min(1, 'First name is required').regex(/^[^0-9]*$/, 'First name should not contain numbers'),
   lastName: z.string().trim().min(1, 'Last name is required').regex(/^[^0-9]*$/, 'Last name should not contain numbers'),
   email: z.string().trim().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase character')
+    .regex(/[a-z]/, 'Password must contain at least one lowercase character')
+    .regex(/[0-9]/, 'Password must contain at least one number'),
   passwordConfirm: z.string().min(1, 'Please confirm your password'),
   gender: z.enum(['MALE', 'FEMALE'], { errorMap: () => ({ message: 'Please select a gender' }) }),
   role: z.enum(['EMPLOYEE', 'EMPLOYER', 'ADMIN'], { errorMap: () => ({ message: 'Please select a role' }) }),
