@@ -80,9 +80,9 @@ export const register = catchAsync(async (req, res, next) => {
   res.status(201).json({
     success: true,
     message: "User registered successfully",
+    token: token,
     data: {
       user: userResponse,
-      token: token,
     },
   });
 });

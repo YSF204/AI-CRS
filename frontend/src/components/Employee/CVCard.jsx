@@ -6,7 +6,7 @@ import { FileText, Edit2, Trash2 } from 'lucide-react';
  */
 export default function CVCard({ cv, onDelete, onEdit }) {
   return (
-    <div className="brutal-card bg-[var(--card-bg)] flex flex-col overflow-hidden">
+    <div className="brutal-card bg-(--card-bg) flex flex-col overflow-hidden">
       {/* Coloured accent strip */}
       <div className="h-2 w-full" style={{ background: cv.color }} />
 
@@ -21,7 +21,7 @@ export default function CVCard({ cv, onDelete, onEdit }) {
             <h2 className="font-bold font-['Space_Grotesk'] text-base uppercase tracking-tight leading-tight">
               {cv.name}
             </h2>
-            <p className="font-mono text-xs text-[var(--fg-muted)] mt-1">Updated {cv.updated}</p>
+            <p className="font-mono text-xs text-(--fg-muted) mt-1">Updated {cv.updated}</p>
           </div>
         </div>
 

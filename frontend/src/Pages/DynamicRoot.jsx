@@ -10,9 +10,9 @@ export default function DynamicRoot() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--bg)] text-[var(--fg)]">
+      <div className="min-h-screen flex items-center justify-center bg-(--bg) text-(--fg)">
         <div className="font-['Space_Grotesk'] font-bold text-2xl animate-pulse flex items-center gap-2">
-          <div className="w-4 h-4 bg-[var(--coral)] border-2 border-black"></div>
+          <div className="w-4 h-4 bg-(--coral) border-2 border-black"></div>
           LOADING SYSTEM...
         </div>
       </div>

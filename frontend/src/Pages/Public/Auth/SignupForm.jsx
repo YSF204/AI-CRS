@@ -163,10 +163,29 @@ export default function SignupForm({ setMode }) {
 
     <Step key="personal">
       <h2 style={heading}>Personal Information</h2>
-      {googlePayload && <p style={subtext}>Name and email securely sourced from Google.</p>}
+      {googlePayload ? (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--fg-muted)' }}>
+            Email securely sourced from Google.
+          </span>
+          <button 
+            type="button"
+            onClick={() => {
+              localStorage.removeItem('pendingGoogleRegistration');
+              setGooglePayload(null);
+              setForm(prev => ({ ...prev, firstName: '', lastName: '', email: '' }));
+            }}
+            style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--coral)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+          >
+            Use standard signup
+          </button>
+        </div>
+      ) : (
+        <p style={subtext}>Enter your details below to create an account.</p>
+      )}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 14px' }}>
-        <AuthInput label="First Name" placeholder="Yousef" required readOnly={!!googlePayload} {...field('firstName')} />
-        <AuthInput label="Last Name"  placeholder="AL Bakri" required readOnly={!!googlePayload} {...field('lastName')} />
+        <AuthInput label="First Name" placeholder="Yousef" required {...field('firstName')} />
+        <AuthInput label="Last Name"  placeholder="AL Bakri" required {...field('lastName')} />
       </div>
       <AuthInput label="Email" type="email" placeholder="you@example.com" required readOnly={!!googlePayload} {...field('email')} />
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 14px' }}>
