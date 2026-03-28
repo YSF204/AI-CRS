@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Briefcase, ArrowLeft } from 'lucide-react';
 import DashboardNav from '../../components/shared/DashboardNav';
 import api from '../../services/api';
+import useFetch from '../../hooks/useFetch';
 
 const INPUT = {
   width: '100%', padding: '14px 18px', boxSizing: 'border-box',
@@ -38,26 +39,35 @@ export default function EditJob() {
     status: 'OPEN'
   });
 
+  const { data: jobData, error: jobError, loading: jobLoading } = useFetch(async () => {
+    const res = await api.get(`/jobs/${id}`);
+    return res.data?.data?.job || null;
+  }, { initialData: null, deps: [id] });
+
   useEffect(() => {
-    // Fetch the job
-    api.get(`/jobs/${id}`)
-      .then((res) => {
-        const j = res.data.data.job;
-        setForm({
-          position: j.position || '',
-          description: j.description || '',
-          yearsOfExperience: j.yearsOfExperience || '',
-          workSite: j.workSite || 'ON_SITE',
-          workDuration: j.workDuration || 'FULL_TIME',
-          salary: j.salary || '',
-          technicalSkills: j.technicalSkills?.join(', ') || '',
-          softSkills: j.softSkills?.join(', ') || '',
-          status: j.status || 'OPEN'
-        });
-      })
-      .catch((err) => setError('Could not load job details.'))
-      .finally(() => setLoading(false));
-  }, [id]);
+    if (jobLoading) return;
+    if (jobError) {
+      setError('Could not load job details.');
+      setLoading(false);
+      return;
+    }
+    if (!jobData) {
+      setLoading(false);
+      return;
+    }
+    setForm({
+      position: jobData.position || '',
+      description: jobData.description || '',
+      yearsOfExperience: jobData.yearsOfExperience || '',
+      workSite: jobData.workSite || 'ON_SITE',
+      workDuration: jobData.workDuration || 'FULL_TIME',
+      salary: jobData.salary || '',
+      technicalSkills: jobData.technicalSkills?.join(', ') || '',
+      softSkills: jobData.softSkills?.join(', ') || '',
+      status: jobData.status || 'OPEN',
+    });
+    setLoading(false);
+  }, [jobData, jobError, jobLoading]);
 
   const setField = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
 
@@ -97,10 +107,10 @@ export default function EditJob() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', padding: 'clamp(1.5rem, 4%, 2.5rem)', overflowX: 'hidden' }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto', marginBottom: '1rem' }}>
+      <div className="dashboard-shell" style={{ marginBottom: '1rem' }}>
         <DashboardNav role="employer" />
       </div>
-      <div style={{ maxWidth: 900, margin: '0 auto' }}>
+      <div className="dashboard-shell">
 
         <button 
           onClick={() => navigate(-1)}

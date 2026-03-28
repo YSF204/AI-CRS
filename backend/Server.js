@@ -34,7 +34,7 @@ app.use("/api", regularLimiter);
 app.use("/api/auth/login", regularLimiter);
 app.use("/api/auth/register", regularLimiter);
 app.use("/api/auth/forgotPassword", regularLimiter);
-app.use("/api/auth/google", regularLimiter);
+app.use("/api/auth/google", sensitiveLimiter);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRouter);
 app.use("/api/jobs", jobRouter);

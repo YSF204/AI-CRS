@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Shield, Eye, EyeOff, Key } from 'lucide-react';
+import api from '../../services/api';
 
 /**
  * SecuritySettings — password change form.
@@ -14,7 +15,7 @@ export default function SecuritySettings() {
   const set = (field) => (e) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
   const toggle = (field) => () => setShow((prev) => ({ ...prev, [field]: !prev[field] }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
@@ -28,10 +29,18 @@ export default function SecuritySettings() {
       return;
     }
 
-    // TODO: call PATCH /auth/change-password
-    setSuccess(true);
-    setForm({ current: '', next: '', confirm: '' });
-    setTimeout(() => setSuccess(false), 3000);
+    try {
+      await api.patch('/auth/updatePassword', {
+        passwordCurrent: form.current,
+        password: form.next,
+        passwordConfirm: form.confirm,
+      });
+      setSuccess(true);
+      setForm({ current: '', next: '', confirm: '' });
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to update password.');
+    }
   };
 
   const PasswordField = ({ id, label, field }) => (

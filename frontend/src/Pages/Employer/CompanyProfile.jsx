@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Building2, PlusCircle, Trash2 } from 'lucide-react';
 import DashboardNav from '../../components/shared/DashboardNav';
 import api from '../../services/api';
+import useFetch from '../../hooks/useFetch';
 
 const INPUT = {
   width: '100%', padding: '14px 18px', boxSizing: 'border-box',
@@ -34,35 +35,47 @@ export default function CompanyProfile() {
     branches: [{ name: '', city: '', street: '' }]
   });
 
-  // Fetch existing profile on mount
+  const {
+    data: employerData,
+    error: employerError,
+    loading: profileLoading,
+  } = useFetch(async () => {
+    const res = await api.get('/employers');
+    return res.data?.data?.employer || null;
+  }, { initialData: null });
+
   useEffect(() => {
-    api.get('/employers')
-      .then((res) => {
-        const comp = res.data.data.employer.company;
-        setForm({
-          name: comp.name || '',
-          license: comp.license || '',
-          website: comp.website || '',
-          contactEmail: comp.contactEmail || '',
-          branches: comp.branches?.length ? comp.branches : [{ name: '', city: '', street: '' }]
-        });
-        setIsEditing(true);
+    if (profileLoading) return;
+    if (employerError) {
+      setIsEditing(false);
+      setLoading(false);
+      return;
+    }
+    if (!employerData) {
+      setIsEditing(false);
+      setLoading(false);
+      return;
+    }
 
-        // Check cooldown matching backend logic
-        const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
-        const employerData = res.data.data.employer;
-        const timeSinceLastUpdate = Date.now() - new Date(employerData.updatedAt).getTime();
+    const comp = employerData.company || {};
+    setForm({
+      name: comp.name || '',
+      license: comp.license || '',
+      website: comp.website || '',
+      contactEmail: comp.contactEmail || '',
+      branches: comp.branches?.length ? comp.branches : [{ name: '', city: '', street: '' }],
+    });
+    setIsEditing(true);
 
-        if (timeSinceLastUpdate < SEVEN_DAYS) {
-          setCooldownDaysLeft(Math.ceil((SEVEN_DAYS - timeSinceLastUpdate) / (1000 * 60 * 60 * 24)));
-        }
-      })
-      .catch(() => {
-        // 404 means no profile yet, which is fine
-        setIsEditing(false);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+    const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+    const timeSinceLastUpdate = Date.now() - new Date(employerData.updatedAt).getTime();
+    if (timeSinceLastUpdate < SEVEN_DAYS) {
+      setCooldownDaysLeft(Math.ceil((SEVEN_DAYS - timeSinceLastUpdate) / (1000 * 60 * 60 * 24)));
+    } else {
+      setCooldownDaysLeft(0);
+    }
+    setLoading(false);
+  }, [employerData, employerError, profileLoading]);
 
   const setField = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
 
@@ -107,10 +120,10 @@ export default function CompanyProfile() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', padding: 'clamp(1.5rem, 4%, 2.5rem)', overflowX: 'hidden' }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto', marginBottom: '1rem' }}>
+      <div className="dashboard-shell" style={{ marginBottom: '1rem' }}>
         <DashboardNav role="employer" />
       </div>
-      <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+      <div className="dashboard-shell">
 
         <div style={{
           background: 'var(--card-bg)', border: '4px solid var(--border-color)',

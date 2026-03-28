@@ -82,13 +82,25 @@ export default function SignupForm({ setMode }) {
       let res;
 
       if (googlePayload) {
-        res = await api.post('/auth/google/register', {
+        const googleRegisterBody = {
           token: googlePayload.token,
           role: role.toUpperCase(),
           gender: form.gender,
           age: parseInt(form.age),
           telephone: form.telephone ? [form.telephone] : [],
-        });
+        };
+
+        if (role.toUpperCase() === 'EMPLOYER') {
+          googleRegisterBody.company = {
+            name: form.companyName,
+            license: form.companyLicense,
+            contactEmail: form.contactEmail,
+            website: form.website || undefined,
+            branches: [{ name: form.branchName, city: form.branchCity, street: form.branchStreet }],
+          };
+        }
+
+        res = await api.post('/auth/google/register', googleRegisterBody);
         localStorage.removeItem('pendingGoogleRegistration');
       } else {
         // Validate before sending

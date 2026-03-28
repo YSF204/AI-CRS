@@ -6,7 +6,8 @@ import { User, Mail, Briefcase, MapPin, Camera } from 'lucide-react';
  * and key stats. Purely presentational.
  */
 export default function ProfileHeader({ user }) {
-  const initials = (user?.fullName ?? user?.email ?? 'U')
+  const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+  const initials = (fullName || user?.email || 'U')
     .split(' ')
     .map((w) => w[0])
     .slice(0, 2)
@@ -39,7 +40,7 @@ export default function ProfileHeader({ user }) {
         {/* Info */}
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold font-['Space_Grotesk'] uppercase tracking-tight truncate">
-            {user?.fullName ?? 'Your Name'}
+            {fullName || 'Your Name'}
           </h2>
 
           <div className="flex flex-wrap gap-x-5 gap-y-1 mt-2">
@@ -51,12 +52,10 @@ export default function ProfileHeader({ user }) {
               <Briefcase size={13} />
               {user?.role ?? 'EMPLOYEE'}
             </span>
-            {user?.location && (
-              <span className="flex items-center gap-1.5 font-mono text-sm text-(--fg-muted)">
-                <MapPin size={13} />
-                {user.location}
-              </span>
-            )}
+            <span className="flex items-center gap-1.5 font-mono text-sm text-(--fg-muted)">
+              <MapPin size={13} />
+              {user?.telephone?.[0] || 'No phone set'}
+            </span>
           </div>
         </div>
 

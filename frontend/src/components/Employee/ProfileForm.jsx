@@ -40,12 +40,12 @@ function FormField({ label, id, icon: Icon, type = 'text', value, onChange, plac
  */
 export default function ProfileForm({ user, onSave }) {
   const [form, setForm] = useState({
-    fullName:  user?.fullName         ?? '',
-    // telephone is stored as an array on the backend — read first entry
-    phone:     user?.telephone?.[0]   ?? '',
-    location:  user?.location         ?? '',
-    website:   user?.website          ?? '',
-    bio:       user?.bio              ?? '',
+    firstName: user?.firstName ?? '',
+    lastName: user?.lastName ?? '',
+    email: user?.email ?? '',
+    phone: user?.telephone?.[0] ?? '',
+    age: user?.age?.toString() ?? '',
+    gender: user?.gender || 'MALE',
   });
   const [saved, setSaved] = useState(false);
 
@@ -53,8 +53,14 @@ export default function ProfileForm({ user, onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Wrap phone back into an array to match the backend schema
-    onSave?.({ ...form, telephone: form.phone ? [form.phone] : [] });
+    onSave?.({
+      firstName: form.firstName,
+      lastName: form.lastName,
+      email: form.email,
+      age: form.age ? Number(form.age) : undefined,
+      gender: form.gender,
+      telephone: form.phone ? [form.phone] : [],
+    });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -69,12 +75,29 @@ export default function ProfileForm({ user, onSave }) {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField
-            label="Full Name"
-            id="fullName"
+            label="First Name"
+            id="firstName"
             icon={User}
-            value={form.fullName}
-            onChange={set('fullName')}
-            placeholder="John Doe"
+            value={form.firstName}
+            onChange={set('firstName')}
+            placeholder="John"
+          />
+          <FormField
+            label="Last Name"
+            id="lastName"
+            icon={User}
+            value={form.lastName}
+            onChange={set('lastName')}
+            placeholder="Doe"
+          />
+          <FormField
+            label="Email"
+            id="email"
+            icon={Globe}
+            type="email"
+            value={form.email}
+            onChange={set('email')}
+            placeholder="you@example.com"
           />
           <FormField
             label="Phone"
@@ -86,42 +109,29 @@ export default function ProfileForm({ user, onSave }) {
             placeholder="+20 100 000 0000"
           />
           <FormField
-            label="Location"
-            id="location"
+            label="Age"
+            id="age"
             icon={MapPin}
-            value={form.location}
-            onChange={set('location')}
-            placeholder="Cairo, Egypt"
-          />
-          <FormField
-            label="Website / LinkedIn"
-            id="website"
-            icon={Globe}
-            type="url"
-            value={form.website}
-            onChange={set('website')}
-            placeholder="https://linkedin.com/in/..."
+            type="number"
+            value={form.age}
+            onChange={set('age')}
+            placeholder="30"
           />
         </div>
 
-        {/* Bio – full width */}
         <div className="flex flex-col gap-1.5">
           <label
-            htmlFor="bio"
+            htmlFor="gender"
             className="flex items-center gap-1.5 text-xs font-bold font-mono uppercase tracking-wider text-(--fg-muted)"
           >
             <FileText size={11} />
-            Short Bio
+            Gender
           </label>
           <div className="brutal-card px-3 py-2.5 bg-(--card-bg) focus-within:shadow-[4px_4px_0_var(--teal)] transition-shadow">
-            <textarea
-              id="bio"
-              rows={3}
-              value={form.bio}
-              onChange={set('bio')}
-              placeholder="A short summary about yourself..."
-              style={{ ...FIELD_STYLE, resize: 'vertical' }}
-            />
+            <select id="gender" value={form.gender} onChange={set('gender')} style={FIELD_STYLE}>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+            </select>
           </div>
         </div>
 

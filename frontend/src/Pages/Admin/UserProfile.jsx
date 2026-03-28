@@ -3,10 +3,23 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { ArrowLeft, Save, UserPlus, Edit3 } from "lucide-react";
 import DashboardNav from "../../components/shared/DashboardNav";
 import api from "../../services/api";
+import useFetch from "../../hooks/useFetch";
 
 const roles = ["EMPLOYEE", "EMPLOYER", "ADMIN"];
 const genders = ["MALE", "FEMALE"];
 const statuses = ["ACTIVE", "INACTIVE", "PENDING"];
+const statusClass = (status) => {
+  switch (status) {
+    case "ACTIVE":
+      return "status-pill status-pill-active";
+    case "PENDING":
+      return "status-pill status-pill-pending";
+    case "INACTIVE":
+      return "status-pill status-pill-inactive";
+    default:
+      return "status-pill";
+  }
+};
 
 const EMPTY_FORM = {
   firstName: "",
@@ -49,36 +62,19 @@ export default function UserProfile() {
   const [error, setError] = useState("");
 
   const fetchUser = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await api.get(`/admin/users/${userId}`);
-      const { user, employer } = res.data.data;
-      setFormData({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        email: user.email || "",
-        password: "",
-        passwordConfirm: "",
-        role: user.role || "EMPLOYEE",
-        gender: user.gender || "MALE",
-        age: user.age?.toString() || "",
-        telephone: user.telephone?.[0] || "",
-        companyName: employer?.company?.name || "",
-        companyLicense: employer?.company?.license || "",
-        contactEmail: employer?.company?.contactEmail || "",
-        website: employer?.company?.website || "",
-        branchName: employer?.company?.branches?.[0]?.name || "",
-        branchCity: employer?.company?.branches?.[0]?.city || "",
-        branchStreet: employer?.company?.branches?.[0]?.street || "",
-      });
-      setAccountStatus(user.accountStatus || "ACTIVE");
-    } catch (err) {
-      setError(err.response?.data?.message || "Unable to load user details.");
-    } finally {
-      setLoading(false);
-    }
+    const res = await api.get(`/admin/users/${userId}`);
+    return res.data?.data || null;
   }, [userId]);
+
+  const {
+    data: fetchedUserData,
+    loading: fetchLoading,
+    error: fetchError,
+  } = useFetch(fetchUser, {
+    enabled: Boolean(userId) && !isCreate,
+    deps: [userId, isCreate],
+    initialData: null,
+  });
 
   useEffect(() => {
     if (isCreate) {
@@ -89,10 +85,39 @@ export default function UserProfile() {
       return;
     }
 
-    if (userId) {
-      fetchUser();
-    }
-  }, [userId, isCreate, fetchUser]);
+    setLoading(fetchLoading);
+  }, [userId, isCreate, fetchLoading]);
+
+  useEffect(() => {
+    if (!fetchedUserData?.user) return;
+    const { user, employer } = fetchedUserData;
+    setFormData({
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      email: user.email || "",
+      password: "",
+      passwordConfirm: "",
+      role: user.role || "EMPLOYEE",
+      gender: user.gender || "MALE",
+      age: user.age?.toString() || "",
+      telephone: user.telephone?.[0] || "",
+      companyName: employer?.company?.name || "",
+      companyLicense: employer?.company?.license || "",
+      contactEmail: employer?.company?.contactEmail || "",
+      website: employer?.company?.website || "",
+      branchName: employer?.company?.branches?.[0]?.name || "",
+      branchCity: employer?.company?.branches?.[0]?.city || "",
+      branchStreet: employer?.company?.branches?.[0]?.street || "",
+    });
+    setAccountStatus(user.accountStatus || "ACTIVE");
+    setLoading(false);
+  }, [fetchedUserData]);
+
+  useEffect(() => {
+    if (!fetchError) return;
+    setError(fetchError.response?.data?.message || "Unable to load user details.");
+    setLoading(false);
+  }, [fetchError]);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -121,7 +146,7 @@ export default function UserProfile() {
       }
 
       if (formData.role === "EMPLOYER") {
-        payload.company = {
+        const companyPayload = {
           name: formData.companyName,
           license: formData.companyLicense,
           contactEmail: formData.contactEmail,
@@ -134,6 +159,19 @@ export default function UserProfile() {
             },
           ],
         };
+
+        const hasCompanyData =
+          formData.companyName?.trim() ||
+          formData.companyLicense?.trim() ||
+          formData.contactEmail?.trim() ||
+          formData.website?.trim() ||
+          formData.branchName?.trim() ||
+          formData.branchCity?.trim() ||
+          formData.branchStreet?.trim();
+
+        if (hasCompanyData) {
+          payload.company = companyPayload;
+        }
       }
 
       if (formData.password || formData.passwordConfirm) {
@@ -162,45 +200,73 @@ export default function UserProfile() {
   };
 
   const renderViewRow = (label, value) => (
-    <div className="rounded-xl border border-(--border) bg-(--bg) p-4">
-      <div className="text-xs text-(--fg-muted) uppercase tracking-[0.18em] mb-2">
-        {label}
+    <div className="rounded-xl border-2 border-(--border) bg-(--bg) p-5 min-h-[88px] flex items-center">
+      <div className="w-full flex flex-col gap-2">
+        <div className="text-xs text-(--fg-muted) uppercase tracking-[0.18em]">
+          {label}
+        </div>
+        <div className="font-semibold text-base break-words">{value || "—"}</div>
       </div>
-      <div className="font-medium">{value || "—"}</div>
     </div>
   );
 
   return (
     <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-      <div className="max-w-7xl mx-auto">
+      <div className="dashboard-shell">
         <DashboardNav role="admin" />
 
         <div className="brutal-card p-6 bg-(--card-bg) mt-8">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">
-                {isCreate
-                  ? "Create New User"
-                  : isEdit
-                    ? "Edit User"
-                    : "View User Profile"}
-              </h1>
-              <p className="text-(--fg-muted) mt-2">
-                {isCreate
-                  ? "Fill in the details for the new account."
-                  : isEdit
-                    ? "Update the existing profile and save changes."
-                    : "Review the current user record and navigate to edit if needed."}
-              </p>
+          <div className="brutal-card p-5 bg-(--bg) mb-6">
+            <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+              <div className="min-w-0">
+                <div className="text-xs uppercase tracking-[0.18em] text-(--fg-muted)">
+                  Admin Workspace
+                </div>
+                <h1 className="text-3xl font-bold mt-1">
+                  {isCreate
+                    ? "Create New User"
+                    : isEdit
+                      ? "Edit User"
+                      : "View User Profile"}
+                </h1>
+                <p className="text-(--fg-muted) mt-2">
+                  {isCreate
+                    ? "Fill in the details for the new account."
+                    : isEdit
+                      ? "Update the existing profile and save changes."
+                      : "Review the user details and use actions to navigate quickly."}
+                </p>
+                {isView && (
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                    <span className="stat-pill">{formData.role || "USER"}</span>
+                    <span className={statusClass(accountStatus)}>
+                      {accountStatus || "UNKNOWN"}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                <button
+                  type="button"
+                  onClick={() => navigate("/admin/users")}
+                  className="brutal-btn inline-flex items-center gap-2 px-4 py-2.5 bg-(--card-bg) text-(--fg)"
+                >
+                  <ArrowLeft size={16} />
+                  Back to list
+                </button>
+                {isView && (
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/admin/users/${userId}/edit`)}
+                    className="brutal-btn inline-flex items-center gap-2 px-4 py-2.5 bg-(--yellow) text-black"
+                  >
+                    <Edit3 size={16} />
+                    Edit Profile
+                  </button>
+                )}
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => navigate("/admin/users")}
-              className="brutal-btn inline-flex items-center gap-2 px-4 py-3 bg-(--yellow) text-black"
-            >
-              <ArrowLeft size={18} />
-              Back to list
-            </button>
           </div>
 
           {message && (
@@ -219,43 +285,36 @@ export default function UserProfile() {
               Loading user...
             </div>
           ) : isView ? (
-            <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-              <div className="grid gap-4">
-                {renderViewRow(
-                  "Full Name",
-                  `${formData.firstName} ${formData.lastName}`,
-                )}
-                {renderViewRow("Email", formData.email)}
-                {renderViewRow("Role", formData.role)}
-                {renderViewRow("Gender", formData.gender)}
-                {renderViewRow("Age", formData.age)}
-                {renderViewRow("Telephone", formData.telephone)}
-                {renderViewRow("Account Status", accountStatus)}
+            <div className="grid gap-6">
+              <div className="form-section w-full">
+                <h2 className="text-xl font-bold mb-4">Personal Details</h2>
+                <div className="grid gap-4 md:grid-cols-2">
+                  {renderViewRow(
+                    "Full Name",
+                    `${formData.firstName} ${formData.lastName}`,
+                  )}
+                  {renderViewRow("Email", formData.email)}
+                  {renderViewRow("Telephone", formData.telephone)}
+                  {renderViewRow("Gender", formData.gender)}
+                  {renderViewRow("Age", formData.age)}
+                  {renderViewRow("User ID", userId)}
+                </div>
               </div>
-              <div className="grid gap-4">
-                {formData.role === "EMPLOYER" && (
-                  <div className="form-section">
-                    <h2>Company Profile</h2>
-                    <div className="grid gap-3">
-                      {renderViewRow("Company Name", formData.companyName)}
-                      {renderViewRow("License", formData.companyLicense)}
-                      {renderViewRow("Contact Email", formData.contactEmail)}
-                      {renderViewRow("Website", formData.website)}
-                      {renderViewRow("Branch Name", formData.branchName)}
-                      {renderViewRow("Branch City", formData.branchCity)}
-                      {renderViewRow("Branch Street", formData.branchStreet)}
-                    </div>
+
+              {formData.role === "EMPLOYER" && (
+                <div className="form-section w-full">
+                  <h2 className="text-xl font-bold mb-4">Company Details</h2>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {renderViewRow("Company Name", formData.companyName)}
+                    {renderViewRow("License", formData.companyLicense)}
+                    {renderViewRow("Contact Email", formData.contactEmail)}
+                    {renderViewRow("Website", formData.website)}
+                    {renderViewRow("Branch Name", formData.branchName)}
+                    {renderViewRow("Branch City", formData.branchCity)}
+                    {renderViewRow("Branch Street", formData.branchStreet)}
                   </div>
-                )}
-                <button
-                  type="button"
-                  onClick={() => navigate(`/admin/users/${userId}/edit`)}
-                  className="brutal-btn inline-flex items-center gap-2 px-3 py-2 bg-(--yellow) text-black w-auto"
-                >
-                  <Edit3 size={18} />
-                  Edit Profile
-                </button>
-              </div>
+                </div>
+              )}
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="grid gap-6">
@@ -362,7 +421,7 @@ export default function UserProfile() {
                       className="form-field"
                       required
                     >
-                      {statuses.slice(1).map((status) => (
+                      {statuses.map((status) => (
                         <option key={status} value={status}>
                           {status}
                         </option>

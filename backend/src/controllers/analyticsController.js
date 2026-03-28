@@ -2,9 +2,54 @@ import User from "../models/User.js";
 import CV from "../models/CV.js";
 import Job from "../models/Job.js";
 import Employer from "../models/Employer.js";
+import mongoose from "mongoose";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import sendEmail from "../utils/email.js";
+
+const findEmployerProfileByUserId = async (userId) => {
+  const normalizedId =
+    typeof userId === "string" && mongoose.Types.ObjectId.isValid(userId)
+      ? new mongoose.Types.ObjectId(userId)
+      : userId;
+
+  const employer = await Employer.findOne({ userId: normalizedId });
+  if (employer) return employer;
+
+  // Legacy fallback: some old records used `user` instead of `userId`
+  const legacyRecord = await Employer.collection.findOne({ user: normalizedId });
+  if (!legacyRecord) return null;
+
+  return Employer.hydrate(legacyRecord);
+};
+
+const recoverEmployerProfileFromLegacyUserData = async (userId) => {
+  const normalizedId =
+    typeof userId === "string" && mongoose.Types.ObjectId.isValid(userId)
+      ? new mongoose.Types.ObjectId(userId)
+      : userId;
+
+  const rawUser = await User.collection.findOne(
+    { _id: normalizedId },
+    { projection: { company: 1 } },
+  );
+
+  const legacyCompany = rawUser?.company;
+  const hasCompanyData =
+    legacyCompany &&
+    typeof legacyCompany === "object" &&
+    (legacyCompany.name ||
+      legacyCompany.license ||
+      legacyCompany.contactEmail ||
+      (Array.isArray(legacyCompany.branches) && legacyCompany.branches.length > 0));
+
+  if (!hasCompanyData) return null;
+
+  return Employer.create({
+    userId: normalizedId,
+    company: legacyCompany,
+  });
+};
 
 const buildChangeHtml = (changes) => {
   if (!changes.length) {
@@ -389,8 +434,12 @@ export const getUserById = catchAsync(async (req, res, next) => {
     return next(new AppError("User not found", 404));
   }
 
-  const employer =
-    user.role === "EMPLOYER" ? await Employer.findOne({ userId: id }) : null;
+  let employer =
+    user.role === "EMPLOYER" ? await findEmployerProfileByUserId(id) : null;
+
+  if (user.role === "EMPLOYER" && !employer) {
+    employer = await recoverEmployerProfileFromLegacyUserData(id);
+  }
 
   res.status(200).json({
     success: true,
@@ -419,9 +468,17 @@ export const updateUser = catchAsync(async (req, res, next) => {
 
   const validRoles = ["EMPLOYEE", "EMPLOYER", "ADMIN"];
   const validGenders = ["MALE", "FEMALE"];
+  const hasMeaningfulValue = (value) => {
+    if (Array.isArray(value)) return value.length > 0;
+    if (value === null || value === undefined) return false;
+    return String(value).trim().length > 0;
+  };
 
   const user = await User.findById(id);
-  const existingEmployer = await Employer.findOne({ userId: id });
+  let existingEmployer = await findEmployerProfileByUserId(id);
+  if (user?.role === "EMPLOYER" && !existingEmployer) {
+    existingEmployer = await recoverEmployerProfileFromLegacyUserData(id);
+  }
   if (!user) {
     return next(new AppError("User not found", 404));
   }
@@ -484,20 +541,48 @@ export const updateUser = catchAsync(async (req, res, next) => {
   }
 
   let updatedEmployer = null;
-  const shouldHandleEmployer =
-    (updates.role === "EMPLOYER" || user.role === "EMPLOYER") && company;
+  const isEmployerTarget =
+    updates.role === "EMPLOYER" || user.role === "EMPLOYER";
+  const companyPayloadProvided =
+    company &&
+    (hasMeaningfulValue(company.name) ||
+      hasMeaningfulValue(company.license) ||
+      hasMeaningfulValue(company.contactEmail) ||
+      hasMeaningfulValue(company.website) ||
+      (Array.isArray(company.branches) &&
+        company.branches.some(
+          (branch) =>
+            hasMeaningfulValue(branch?.name) ||
+            hasMeaningfulValue(branch?.city) ||
+            hasMeaningfulValue(branch?.street),
+        )));
+  const shouldHandleEmployer = isEmployerTarget && companyPayloadProvided;
 
   if (shouldHandleEmployer) {
+    const mergedCompany = {
+      name: company.name ?? existingEmployer?.company?.name,
+      license: company.license ?? existingEmployer?.company?.license,
+      contactEmail: company.contactEmail ?? existingEmployer?.company?.contactEmail,
+      website:
+        company.website !== undefined
+          ? company.website
+          : existingEmployer?.company?.website,
+      branches:
+        company.branches !== undefined
+          ? company.branches
+          : existingEmployer?.company?.branches,
+    };
+
     if (existingEmployer) {
       updatedEmployer = await Employer.findByIdAndUpdate(
         existingEmployer._id,
-        { company },
+        { company: mergedCompany },
         { new: true, runValidators: true },
       );
     } else {
       updatedEmployer = await Employer.create({
         userId: id,
-        company,
+        company: mergedCompany,
       });
     }
   }

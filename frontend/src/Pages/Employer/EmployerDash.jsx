@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { PlusCircle, Briefcase, CheckCircle2, MapPin, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
+import useFetch from '../../hooks/useFetch';
 
 import DashboardNav from '../../components/shared/DashboardNav';
 import StatWidget from './components/StatWidget';
@@ -15,29 +16,24 @@ export default function EmployerDash() {
   const navigate = useNavigate();
 
   // ── Data state ──────────────────────────────────────────────── //
-  const [profile, setProfile] = useState(null);
-  const [profileLoading, setProfileLoading] = useState(true);
-  const [profileError, setProfileError] = useState(false);
+  const {
+    data: profile = null,
+    loading: profileLoading,
+    error: profileFetchError,
+  } = useFetch(async () => {
+    const res = await api.get('/employers');
+    return res.data?.data?.employer || null;
+  }, { initialData: null });
 
-  const [jobs, setJobs] = useState([]);
-  const [jobsLoading, setJobsLoading] = useState(true);
+  const {
+    data: jobs = [],
+    loading: jobsLoading,
+  } = useFetch(async () => {
+    const res = await api.get('/jobs/employer/me');
+    return res.data?.data?.jobs || [];
+  }, { initialData: [], deps: [user?.id || user?._id] });
 
-  // ── Fetching ─────────────────────────────────────────────────── //
-  useEffect(() => {
-    api.get('/employers')
-      .then((res) => setProfile(res.data.data.employer))
-      .catch(() => setProfileError(true))
-      .finally(() => setProfileLoading(false));
-  }, []);
-
-  useEffect(() => {
-    api.get('/jobs/employer/me')
-      .then((res) => {
-        setJobs(res.data.data.jobs); 
-      })
-      .catch(() => {})
-      .finally(() => setJobsLoading(false));
-  }, [user]);
+  const profileError = Boolean(profileFetchError);
 
   // ── Derived values ───────────────────────────────────────────── //
   const company = profile?.company;
@@ -48,7 +44,7 @@ export default function EmployerDash() {
   // ── Layout ───────────────────────────────────────────────────── //
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', padding: 'clamp(1.5rem, 4%, 2.5rem)', overflowX: 'hidden' }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+      <div className="dashboard-shell">
         <DashboardNav role="employer" />
 
         {/* Greeting + Post button */}

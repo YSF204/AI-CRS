@@ -182,7 +182,7 @@ export default function FindTalent() {
       overflowY: 'auto', padding: 'clamp(2rem, 5vw, 4rem)',
     }}>
       <div style={{
-        background: 'var(--bg)', width: '100%', maxWidth: 1000,
+        background: 'var(--bg)', width: 'min(96vw, 1500px)',
         border: '3px solid var(--border-color)', boxShadow: '8px 8px 0 rgba(0,0,0,0.5)',
         padding: 'clamp(1.5rem, 4%, 3rem)', position: 'relative', marginTop: '2rem', marginBottom: '4rem',
         borderRadius: 8,
@@ -345,10 +345,10 @@ export default function FindTalent() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', padding: 'clamp(1.5rem, 4%, 2.5rem)', overflowX: 'hidden' }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto', marginBottom: '1rem' }}>
+      <div className="dashboard-shell" style={{ marginBottom: '1rem' }}>
         <DashboardNav role="employer" />
       </div>
-      <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+      <div className="dashboard-shell">
         
         {/* Toggle Tabs */}
         <div style={{ display: 'flex', gap: 12, marginBottom: '2rem', borderBottom: '3px solid var(--border-color)', paddingBottom: 16 }}>
