@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, LogOut, ChevronDown } from 'lucide-react';
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { useAuth } from '../../context/AuthContext';
 
 /**
@@ -11,181 +12,72 @@ import { useAuth } from '../../context/AuthContext';
 export default function UserMenu({ profileHref = '/employee/profile' }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const menuRef = useRef(null);
-
-  // Close on outside click
-  useEffect(() => {
-    if (!open) return;
-    const handle = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
-  }, [open]);
-
-  const initials = (user?.fullName ?? user?.email ?? 'U')
-    .split(' ')
-    .map((w) => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
+  const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
 
   const handleLogout = () => {
-    setOpen(false);
     logout();
     navigate('/');
   };
 
   return (
-    <div ref={menuRef} style={{ position: 'relative' }}>
-      {/* Trigger button */}
-      <button
-        onClick={() => setOpen((v) => !v)}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          padding: '6px 12px 6px 8px',
-          border: '3px solid #0a0a0a',
-          boxShadow: '3px 3px 0 #0a0a0a',
-          background: 'var(--yellow)',
-          cursor: 'pointer',
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontWeight: 700,
-        }}
-      >
-        {/* Initials circle */}
-        <span
-          style={{
-            width: 26,
-            height: 26,
-            background: '#0a0a0a',
-            color: 'var(--yellow)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '0.7rem',
-            fontWeight: 800,
-            borderRadius: '50%',
-            flexShrink: 0,
-          }}
-        >
-          {initials}
-        </span>
-        <ChevronDown
-          size={14}
-          color="#0a0a0a"
-          style={{
-            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
-            transition: 'transform 0.2s ease',
-          }}
-        />
-      </button>
-
-      {/* Dropdown */}
-      {open && (
-        <div
-          style={{
-            position: 'absolute',
-            top: 'calc(100% + 8px)',
-            right: 0,
-            minWidth: 220,
-            background: 'var(--card-bg)',
-            border: '3px solid #0a0a0a',
-            boxShadow: '5px 5px 0 #0a0a0a',
-            zIndex: 200,
-          }}
-        >
-          {/* Profile info header */}
-          <div
-            style={{
-              padding: '14px 16px',
-              borderBottom: '2px solid #0a0a0a',
-              background: 'var(--yellow)',
-            }}
+    <Menu as="div" className="relative">
+      {({ open }) => (
+        <>
+          <MenuButton
+            className="inline-flex items-center gap-2 px-4 py-2.5 border-[3px] border-black shadow-[4px_4px_0_black] bg-(--yellow) font-['Space_Grotesk'] font-bold text-sm uppercase tracking-[0.05em]"
           >
-            <p
+            <span className="max-w-[180px] truncate text-black">
+              {fullName || 'My Account'}
+            </span>
+            <ChevronDown
+              size={16}
+              color="#0a0a0a"
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontWeight: 800,
-                fontSize: '0.9rem',
-                color: '#0a0a0a',
-                textTransform: 'uppercase',
-                letterSpacing: '0.04em',
-                margin: 0,
+                transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease',
               }}
-            >
-              {user?.fullName ?? 'My Account'}
-            </p>
-            <p
-              style={{
-                fontFamily: 'monospace',
-                fontSize: '0.75rem',
-                color: '#0a0a0a99',
-                margin: '2px 0 0',
-                wordBreak: 'break-all',
-              }}
-            >
-              {user?.email ?? ''}
-            </p>
-          </div>
+            />
+          </MenuButton>
 
-          {/* My Profile link */}
-          <Link
-            to={profileHref}
-            onClick={() => setOpen(false)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '12px 16px',
-              textDecoration: 'none',
-              color: 'var(--fg)',
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              borderBottom: '2px solid var(--border-color)',
-              transition: 'background 0.15s ease',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          <MenuItems
+            anchor="bottom end"
+            transition
+            className="z-[200] mt-2 min-w-[280px] border-[3px] border-black shadow-[6px_6px_0_black] bg-(--card-bg) p-0 focus:outline-none origin-top-right transition duration-200 ease-out data-[closed]:opacity-0 data-[closed]:scale-95 data-[closed]:-translate-y-1"
           >
-            <User size={15} />
-            My Profile
-          </Link>
+            <div className="px-4 py-4 border-b-2 border-black bg-(--yellow)">
+              <p className="font-['Space_Grotesk'] font-extrabold text-sm uppercase tracking-[0.04em] text-black m-0">
+                {fullName || 'My Account'}
+              </p>
+              <p className="font-mono text-xs text-black/70 mt-1 break-all m-0">
+                {user?.email || ''}
+              </p>
+            </div>
 
-          {/* Log Out */}
-          <button
-            onClick={handleLogout}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '12px 16px',
-              width: '100%',
-              border: 'none',
-              background: 'transparent',
-              color: 'var(--coral)',
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontWeight: 700,
-              fontSize: '0.85rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              cursor: 'pointer',
-              textAlign: 'left',
-              transition: 'background 0.15s ease',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg)')}
-            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-          >
-            <LogOut size={15} />
-            Log Out
-          </button>
-        </div>
+            <div className="p-2">
+              <MenuItem>
+                <Link
+                  to={profileHref}
+                  className="flex items-center gap-3 px-4 py-3 rounded-md font-['Space_Grotesk'] font-bold text-sm uppercase tracking-[0.06em] text-(--fg) data-[focus]:bg-(--bg)"
+                >
+                  <User size={16} />
+                  My Profile
+                </Link>
+              </MenuItem>
+
+              <MenuItem>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-md font-['Space_Grotesk'] font-bold text-sm uppercase tracking-[0.06em] text-(--coral) data-[focus]:bg-(--bg)"
+                >
+                  <LogOut size={16} />
+                  Log Out
+                </button>
+              </MenuItem>
+            </div>
+          </MenuItems>
+        </>
       )}
-    </div>
+    </Menu>
   );
 }

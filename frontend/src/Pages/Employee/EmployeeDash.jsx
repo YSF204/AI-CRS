@@ -33,7 +33,7 @@ const QUICK_ACTIONS = [
 export default function EmployeeDash() {
   return (
     <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-      <div className="max-w-6xl mx-auto">
+      <div className="dashboard-shell">
         <DashboardNav role="employee" />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

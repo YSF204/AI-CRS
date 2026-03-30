@@ -8,9 +8,10 @@ import {
   Eye,
   Trash2,
 } from "lucide-react";
+import { useDebounce } from "@uidotdev/usehooks";
 import DashboardNav from "../../components/shared/DashboardNav";
-import AnimatedList from "../../components/AnimatedList";
 import api from "../../services/api";
+import useFetch from "../../hooks/useFetch";
 
 const roles = ["", "EMPLOYEE", "EMPLOYER", "ADMIN"];
 const statuses = ["", "ACTIVE", "INACTIVE", "PENDING"];
@@ -37,35 +38,45 @@ export default function UserManagement() {
   const [roleFilter, setRoleFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [pendingDeleteUser, setPendingDeleteUser] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const debouncedSearch = useDebounce(search, 400);
+  const debouncedRoleFilter = useDebounce(roleFilter, 250);
+  const debouncedStatusFilter = useDebounce(statusFilter, 250);
 
-  const fetchUsers = useCallback(async () => {
-    setLoading(true);
-    setError("");
+  const fetchUsersApi = useCallback(async () => {
+    const params = new URLSearchParams();
+    if (debouncedSearch) params.set("search", debouncedSearch);
+    if (debouncedRoleFilter) params.set("role", debouncedRoleFilter);
+    if (debouncedStatusFilter) params.set("accountStatus", debouncedStatusFilter);
+    params.set("page", String(page));
+    params.set("limit", "20");
+    const res = await api.get(`/admin/users?${params.toString()}`);
+    return res.data?.data || { users: [], pagination: {} };
+  }, [debouncedSearch, debouncedRoleFilter, debouncedStatusFilter, page]);
 
-    try {
-      const params = new URLSearchParams();
-      if (search) params.set("search", search);
-      if (roleFilter) params.set("role", roleFilter);
-      if (statusFilter) params.set("accountStatus", statusFilter);
-      params.set("page", String(page));
-      params.set("limit", "20");
-
-      const res = await api.get(`/admin/users?${params.toString()}`);
-      setUsers(res.data.data.users);
-      setPagination(res.data.data.pagination || {});
-    } catch (err) {
-      setError(err.response?.data?.message || "Unable to load users.");
-    } finally {
-      setLoading(false);
-    }
-  }, [search, roleFilter, statusFilter, page]);
+  const {
+    data: usersPayload,
+    loading,
+    error: fetchError,
+    refetch: refetchUsers,
+  } = useFetch(fetchUsersApi, {
+    initialData: { users: [], pagination: {} },
+    deps: [debouncedSearch, debouncedRoleFilter, debouncedStatusFilter, page],
+  });
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    setUsers(usersPayload?.users || []);
+    setPagination(usersPayload?.pagination || {});
+  }, [usersPayload]);
+
+  useEffect(() => {
+    if (fetchError) {
+      setError(fetchError.response?.data?.message || "Unable to load users.");
+    }
+  }, [fetchError]);
 
   useEffect(() => {
     if (location.state?.message) {
@@ -74,13 +85,38 @@ export default function UserManagement() {
     }
   }, [location.state, location.pathname]);
 
-  const handleDeleteNavigation = (userId) => {
-    navigate(`/admin/users/${userId}/delete`);
+  const openDeleteDialog = (user) => {
+    setPendingDeleteUser(user);
+  };
+
+  const closeDeleteDialog = () => {
+    if (deleting) return;
+    setPendingDeleteUser(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteUser) return;
+    setDeleting(true);
+    setError("");
+    setMessage("");
+    try {
+      const userId = pendingDeleteUser._id || pendingDeleteUser.id;
+      await api.delete(`/admin/users/${userId}`);
+      setUsers((prev) =>
+        prev.filter((item) => (item._id || item.id) !== userId),
+      );
+      setMessage("User deleted successfully.");
+      setPendingDeleteUser(null);
+    } catch (err) {
+      setError(err.response?.data?.message || "Unable to delete user.");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
     <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-      <div className="max-w-7xl mx-auto">
+      <div className="dashboard-shell">
         <DashboardNav role="admin" />
 
         <div className="grid gap-6">
@@ -109,7 +145,10 @@ export default function UserManagement() {
                 <div className="flex items-center gap-2">
                   <input
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage(1);
+                    }}
                     placeholder="Search name or email"
                     className="flex-1 rounded-sm border border-black bg-(--bg) px-4 py-3 text-(--fg)"
                   />
@@ -180,78 +219,70 @@ export default function UserManagement() {
                 No users found.
               </div>
             ) : (
-              <AnimatedList
-                items={users}
-                showGradients
-                enableArrowNavigation={false}
-                displayScrollbar
-                renderItem={(user) => (
-                  <div className="grid gap-4">
-                    <div className="flex flex-col gap-2 sm:flex-row sm:justify-between sm:items-start">
-                      <div>
-                        <div className="text-xl font-semibold">
-                          {user.firstName} {user.lastName}
-                        </div>
-                        <div className="text-base text-(--fg-muted)">
-                          {user.email}
-                        </div>
-                        <div className="text-sm text-(--fg-muted) mt-1">
-                          ID: {user._id || user.id}
-                        </div>
+              <div className="brutal-card bg-(--card-bg) divide-y-2 divide-black">
+                {users.map((user) => (
+                  <div
+                    key={user._id || user.id}
+                    className="p-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-base font-bold truncate">
+                        {user.firstName} {user.lastName}
                       </div>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="stat-pill">{user.role}</span>
-                        <span className={statusClass(user.accountStatus)}>
-                          {user.accountStatus}
+                      <div className="text-sm font-medium text-(--fg-muted) truncate">
+                        {user.email}
+                      </div>
+                      <div className="text-xs font-medium text-(--fg-muted) mt-1 truncate">
+                        {user._id || user.id}
+                      </div>
+                      <div className="mt-2 grid gap-2">
+                        <span className="text-sm font-semibold text-(--fg-muted)">
+                          {user.gender || "—"} | {user.telephone?.[0] || "—"}
                         </span>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="stat-pill user-list-pill">{user.role}</span>
+                          <span className={`${statusClass(user.accountStatus)} user-list-pill`}>
+                            {user.accountStatus}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-                      <div className="grid gap-2 text-base text-(--fg-muted)">
-                        <div>Gender: {user.gender}</div>
-                        <div>Telephone: {user.telephone?.[0] || "—"}</div>
-                      </div>
-                      <div className="flex flex-wrap gap-2 justify-end">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/admin/users/${user._id || user.id}`);
-                          }}
-                          className="brutal-btn px-3 py-2 bg-(--mint) text-black"
-                        >
-                          <Eye size={16} />
-                          View
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(
-                              `/admin/users/${user._id || user.id}/edit`,
-                            );
-                          }}
-                          className="brutal-btn px-3 py-2 bg-(--yellow) text-black"
-                        >
-                          <Edit3 size={16} />
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteNavigation(user._id || user.id);
-                          }}
-                          className="brutal-btn px-3 py-2 bg-[#FF6B6B] text-black"
-                        >
-                          <Trash2 size={16} />
-                          Delete
-                        </button>
-                      </div>
+
+                    <div className="grid grid-cols-3 gap-2 lg:w-[180px]">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigate(`/admin/users/${user._id || user.id}`);
+                        }}
+                        className="brutal-btn px-2 py-2 bg-(--mint) text-black text-[10px]"
+                        title="View"
+                      >
+                        <Eye size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigate(`/admin/users/${user._id || user.id}/edit`);
+                        }}
+                        className="brutal-btn px-2 py-2 bg-(--yellow) text-black text-[10px]"
+                        title="Edit"
+                      >
+                        <Edit3 size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          openDeleteDialog(user);
+                        }}
+                        className="brutal-btn px-2 py-2 bg-[#FF6B6B] text-black text-[10px]"
+                        title="Delete"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   </div>
-                )}
-              />
+                ))}
+              </div>
             )}
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
@@ -277,7 +308,7 @@ export default function UserManagement() {
                 </button>
                 <button
                   type="button"
-                  onClick={fetchUsers}
+                  onClick={() => refetchUsers().catch(() => {})}
                   className="brutal-btn px-4 py-2 bg-(--mint)"
                 >
                   <RefreshCcw size={16} />
@@ -287,6 +318,40 @@ export default function UserManagement() {
           </div>
         </div>
       </div>
+
+      {pendingDeleteUser && (
+        <div className="fixed inset-0 z-[100] bg-black/55 flex items-center justify-center p-4">
+          <div className="brutal-card bg-(--card-bg) p-6 w-full max-w-md">
+            <h2 className="text-2xl font-bold mb-2">Confirm Delete</h2>
+            <p className="text-(--fg-muted) mb-5">
+              Delete user{" "}
+              <span className="font-semibold text-(--fg)">
+                {pendingDeleteUser.firstName} {pendingDeleteUser.lastName}
+              </span>
+              ? This action will deactivate the account.
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={closeDeleteDialog}
+                className="brutal-btn px-4 py-2 bg-(--card-bg)"
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="brutal-btn px-4 py-2 bg-[#FF6B6B] text-black"
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

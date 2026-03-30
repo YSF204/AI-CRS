@@ -1,25 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import DashboardNav from '../../components/shared/DashboardNav';
 import JobsGrid from './components/JobsGrid';
 import api from '../../services/api';
+import useFetch from '../../hooks/useFetch';
 
 export default function ManageJobs() {
   const { user } = useAuth();
   const navigate = useNavigate();
   
+  const { data: fetchedJobs = [], loading } = useFetch(async () => {
+    const res = await api.get('/jobs/employer/me');
+    return res.data?.data?.jobs || [];
+  }, { initialData: [], deps: [user?.id || user?._id] });
+
   const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/jobs/employer/me')
-      .then((res) => {
-        setJobs(res.data.data.jobs); 
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [user]);
+    setJobs(fetchedJobs);
+  }, [fetchedJobs]);
 
   const handleJobDeleted = (id) => {
     setJobs((prev) => prev.filter((j) => j._id !== id));
@@ -33,7 +33,7 @@ export default function ManageJobs() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', padding: 'clamp(1.5rem, 4%, 2.5rem)', overflowX: 'hidden' }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+      <div className="dashboard-shell">
         <DashboardNav role="employer" />
 
         <div style={{ marginBottom: 'clamp(1.5rem, 3%, 2.5rem)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>

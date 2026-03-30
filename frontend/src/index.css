@@ -11,13 +11,13 @@
 @layer base {
   /* ===== LIGHT MODE (default) ===== */
   :root {
-    --bg: #F0EFEB;
+    --bg: #E4E1DA;
     --fg: #0a0a0a;
     --fg-muted: rgba(10,10,10,0.5);
     --border-color: #0a0a0a;
-    --card-bg: #F0EFEB;
+    --card-bg: #DFDBD3;
     --shadow-color: #0a0a0a;
-    --nav-bg: #f0efeb;
+    --nav-bg: #DCD8D0;
     --yellow: #ffe630;
     --coral: #ff6b6b;
     --teal: #4ecdc4;
@@ -388,6 +388,33 @@
     color: #0f172a;
   }
 
+  .user-list-pill {
+    padding: 0.32rem 0.55rem;
+    border-radius: 0.55rem;
+    font-size: 0.7rem;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    font-weight: 800;
+  }
+
+  [data-theme="dark"] .status-pill-active {
+    border-color: #86efac;
+    background: rgba(22, 101, 52, 0.6);
+    color: #dcfce7;
+  }
+
+  [data-theme="dark"] .status-pill-pending {
+    border-color: #fcd34d;
+    background: rgba(180, 83, 9, 0.62);
+    color: #fef3c7;
+  }
+
+  [data-theme="dark"] .status-pill-inactive {
+    border-color: #94a3b8;
+    background: rgba(51, 65, 85, 0.68);
+    color: #e2e8f0;
+  }
+
   .status-pill,
   .stat-pill {
     font-size: 0.85rem;
@@ -530,6 +557,11 @@
       0 8px 0 #222,
       0 2px 16px rgba(0, 0, 0, 0.06);
     border-color: #222;
+  }
+
+  .dashboard-shell {
+    width: min(96vw, 1500px);
+    margin: 0 auto;
   }
 }
 

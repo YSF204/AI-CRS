@@ -3,32 +3,61 @@ import { FileText, Plus } from 'lucide-react';
 import DashboardNav from '../../components/shared/DashboardNav';
 import StatsBar from '../../components/shared/StatsBar';
 import CVCard from '../../components/Employee/CVCard';
+import api from '../../services/api';
+import useFetch from '../../hooks/useFetch';
 
-const INITIAL_CVS = [
-  { id: 1, name: 'Software Engineer CV', updated: 'Mar 26, 2026', skills: ['React', 'Node.js', 'SQL'], color: 'var(--teal)' },
-  { id: 2, name: 'UX Designer CV', updated: 'Mar 15, 2026', skills: ['Figma', 'CSS', 'User Research'], color: 'var(--coral)' },
-  { id: 3, name: 'Full-Stack CV', updated: 'Mar 10, 2026', skills: ['TypeScript', 'PostgreSQL', 'Docker'], color: 'var(--yellow)' },
-];
+const COLORS = ['var(--teal)', 'var(--coral)', 'var(--yellow)', 'var(--mint)', 'var(--blue)'];
 
 export default function CVs() {
-  const [cvs, setCvs] = useState(() => INITIAL_CVS.map((cv) => ({ ...cv, skills: cv.skills || [] })));
+  const [error, setError] = useState('');
+  const {
+    data: cvs = [],
+    loading,
+    error: fetchError,
+    refetch,
+  } = useFetch(async () => {
+    const res = await api.get('/cvs');
+    return res.data?.data?.cvs || [];
+  }, { initialData: [] });
 
-  const handleDelete = (id) => setCvs((prev) => prev.filter((c) => c.id !== id));
+  const setCvsError = (err, fallback) =>
+    setError(err?.response?.data?.message || fallback);
+
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/cvs/${id}`);
+      await refetch();
+    } catch (err) {
+      setCvsError(err, 'Unable to delete CV.');
+    }
+  };
+
+  const handleCreate = async () => {
+    const title = window.prompt('Enter CV title');
+    if (!title?.trim()) return;
+
+    try {
+      await api.post('/cvs', { jobTitle: title.trim() });
+      await refetch();
+    } catch (err) {
+      setCvsError(err, 'Unable to create CV.');
+    }
+  };
 
   const stats = useMemo(() => {
     const safeCvs = Array.isArray(cvs) ? cvs : [];
-    const skillsCount = safeCvs.reduce((total, cv) => total + (Array.isArray(cv.skills) ? cv.skills.length : 0), 0);
+    const skillsCount = safeCvs.reduce((total, cv) => total + (Array.isArray(cv.technicalSkills) ? cv.technicalSkills.length : 0), 0);
 
     return [
       { label: 'Total', value: safeCvs.length, color: 'var(--coral)' },
-      { label: 'Active', value: Math.min(2, safeCvs.length), color: 'var(--teal)' },
+      { label: 'With Summary', value: safeCvs.filter((cv) => cv.summary).length, color: 'var(--teal)' },
       { label: 'Skills', value: skillsCount, color: 'var(--yellow)' },
     ];
   }, [cvs]);
 
   return (
     <div className="min-h-screen p-8 bg-[var(--bg)] text-[var(--fg)]">
-      <div className="max-w-6xl mx-auto">
+      <div className="dashboard-shell">
         <DashboardNav role="employee" />
 
         {/* Header */}
@@ -43,7 +72,11 @@ export default function CVs() {
             </p>
           </div>
 
-          <button className="brutal-btn px-5 py-3 font-bold flex items-center gap-2 self-start" style={{ background: 'var(--yellow)', color: '#0a0a0a' }}>
+          <button
+            className="brutal-btn px-5 py-3 font-bold flex items-center gap-2 self-start"
+            style={{ background: 'var(--yellow)', color: '#0a0a0a' }}
+            onClick={handleCreate}
+          >
             <Plus size={16} />
             NEW CV
           </button>
@@ -51,10 +84,32 @@ export default function CVs() {
 
         <StatsBar stats={stats} />
 
+        {(error || fetchError) && (
+          <div className="mb-6 brutal-card p-4 bg-(--coral) text-black font-mono text-sm">
+            {error || fetchError?.response?.data?.message || 'Unable to load CVs.'}
+          </div>
+        )}
+
+        {loading ? (
+          <div className="brutal-card p-8 bg-(--card-bg) text-center font-mono text-(--fg-muted)">
+            Loading CVs...
+          </div>
+        ) : null}
+
         {/* Cards grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cvs.map((cv) => (
-            <CVCard key={cv.id} cv={cv} onDelete={handleDelete} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {cvs.map((cv, index) => (
+            <CVCard
+              key={cv._id}
+              cv={{
+                id: cv._id,
+                name: cv.jobTitle,
+                updated: new Date(cv.updatedAt || cv.createdAt).toLocaleDateString(),
+                skills: cv.technicalSkills || [],
+                color: COLORS[index % COLORS.length],
+              }}
+              onDelete={handleDelete}
+            />
           ))}
 
           {/* Ghost "add new" card */}

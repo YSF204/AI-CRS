@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Trash2 } from "lucide-react";
 import DashboardNav from "../../components/shared/DashboardNav";
 import api from "../../services/api";
+import useFetch from "../../hooks/useFetch";
 
 export default function UserDelete() {
   const { id } = useParams();
@@ -13,23 +14,27 @@ export default function UserDelete() {
   const [error, setError] = useState("");
 
   const fetchUser = useCallback(async () => {
-    if (!id) return;
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await api.get(`/admin/users/${id}`);
-      setUser(res.data.data.user);
-    } catch (err) {
-      setError(err.response?.data?.message || "Unable to load user details.");
-    } finally {
-      setLoading(false);
-    }
+    if (!id) return null;
+    const res = await api.get(`/admin/users/${id}`);
+    return res.data?.data?.user || null;
   }, [id]);
 
+  const {
+    data: fetchedUser,
+    loading: fetchLoading,
+    error: fetchError,
+  } = useFetch(fetchUser, { enabled: Boolean(id), deps: [id], initialData: null });
+
   useEffect(() => {
-    fetchUser();
-  }, [fetchUser]);
+    setLoading(fetchLoading);
+    if (fetchError) {
+      setError(fetchError.response?.data?.message || "Unable to load user details.");
+      return;
+    }
+    if (fetchedUser) {
+      setUser(fetchedUser);
+    }
+  }, [fetchLoading, fetchError, fetchedUser]);
 
   const handleDelete = async () => {
     if (!id) return;
@@ -51,7 +56,7 @@ export default function UserDelete() {
 
   return (
     <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-      <div className="max-w-7xl mx-auto">
+      <div className="dashboard-shell">
         <DashboardNav role="admin" />
 
         <div className="brutal-card p-6 bg-(--card-bg)">

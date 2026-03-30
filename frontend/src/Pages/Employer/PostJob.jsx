@@ -57,10 +57,10 @@ export default function PostJob() {
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', padding: 'clamp(1.5rem, 4%, 2.5rem)' }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto', marginBottom: '1rem' }}>
+      <div className="dashboard-shell" style={{ marginBottom: '1rem' }}>
         <DashboardNav role="employer" />
       </div>
-      <div style={{ maxWidth: 900, margin: '0 auto' }}>
+      <div className="dashboard-shell">
 
         <div style={{
           background: 'var(--card-bg)', border: '4px solid var(--border-color)',

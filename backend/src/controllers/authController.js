@@ -1,5 +1,5 @@
-import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Employer from "../models/Employer.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "./../utils/appError.js";
 import sendEmail from "../utils/email.js";
@@ -57,8 +57,14 @@ export const register = catchAsync(async (req, res, next) => {
     telephone: telephone || [],
     age,
     accountStatus, // it will be based on the role
-    company: company || undefined,
   });
+
+  if (role === "EMPLOYER" && company) {
+    await Employer.create({
+      userId: user._id,
+      company,
+    });
+  }
 
   // Gen token for the user
   const token = generateToken(user._id);

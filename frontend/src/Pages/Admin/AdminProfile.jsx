@@ -125,7 +125,7 @@ export default function AdminProfile() {
 
   return (
     <div className="min-h-screen bg-(--bg) p-8 text-(--fg)">
-      <div className="mx-auto max-w-4xl">
+      <div className="dashboard-shell">
         <DashboardNav role="admin" />
 
         <div className="mt-8">

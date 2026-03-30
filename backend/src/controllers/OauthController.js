@@ -1,6 +1,6 @@
 import { OAuth2Client } from "google-auth-library";
-import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Employer from "../models/Employer.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import { generateToken } from "../utils/generateToken.js";
@@ -86,10 +86,14 @@ export const googleAuth = catchAsync(async (req, res, next) => {
 // =========================================== //
 
 export const googleRegister = catchAsync(async (req, res, next) => {
-  const { token, role, gender, age, telephone } = req.body;
+  const { token, role, gender, age, telephone, company } = req.body;
 
   if (!token || !role || !gender || !age) {
     return next(new AppError("Please provide token, role, gender, and age", 400));
+  }
+
+  if (role === "EMPLOYER" && !company) {
+    return next(new AppError("Company details are required for employer accounts", 400));
   }
 
   // 1. Verify the Google token again
@@ -133,6 +137,13 @@ export const googleRegister = catchAsync(async (req, res, next) => {
     authProvider: "GOOGLE", // Tag them as a Google user!
     profilePic: picture,
   });
+
+  if (role === "EMPLOYER" && company) {
+    await Employer.create({
+      userId: user._id,
+      company,
+    });
+  }
 
   // 6. Generate backend auth token
   const jwtToken = generateToken(user._id);

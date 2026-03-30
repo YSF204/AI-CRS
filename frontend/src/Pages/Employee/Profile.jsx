@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { User, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -7,24 +7,42 @@ import StatsBar from '../../components/shared/StatsBar';
 import ProfileHeader from '../../components/Employee/ProfileHeader';
 import ProfileForm from '../../components/Employee/ProfileForm';
 import SecuritySettings from '../../components/Employee/SecuritySettings';
-
-const STATS = [
-  { label: 'Applications', value: 4, color: 'var(--blue)'  },
-  { label: 'CVs',          value: 3, color: 'var(--coral)' },
-  { label: 'Interviews',   value: 1, color: 'var(--mint)'  },
-];
+import api from '../../services/api';
+import useFetch from '../../hooks/useFetch';
 
 /**
  * Profile — composes ProfileHeader + ProfileForm + SecuritySettings.
  * Responsible only for layout/composition and data passing.
  */
 export default function Profile() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUserState } = useAuth();
   const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const { data: statsState = { cvs: 0, jobs: 0 } } = useFetch(async () => {
+    const [cvsRes, jobsRes] = await Promise.all([api.get('/cvs'), api.get('/jobs')]);
+    return {
+      cvs: cvsRes.data?.data?.cvs?.length || 0,
+      jobs: jobsRes.data?.data?.jobs?.length || 0,
+    };
+  }, { initialData: { cvs: 0, jobs: 0 } });
 
-  const handleSaveProfile = (updatedData) => {
-    // TODO: call PATCH /auth/me with updatedData
-    console.log('Saving profile:', updatedData);
+  const stats = useMemo(
+    () => ([
+      { label: 'Open Jobs', value: statsState.jobs, color: 'var(--blue)' },
+      { label: 'CVs', value: statsState.cvs, color: 'var(--coral)' },
+      { label: 'Role', value: user?.role || 'EMPLOYEE', color: 'var(--mint)' },
+    ]),
+    [statsState, user?.role],
+  );
+
+  const handleSaveProfile = async (updatedData) => {
+    setError('');
+    try {
+      const res = await api.patch('/users/updateMe', updatedData);
+      updateUserState(res.data?.data?.user);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Unable to update profile.');
+    }
   };
 
   const handleSignOut = () => {
@@ -34,7 +52,7 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-      <div className="max-w-4xl mx-auto">
+      <div className="dashboard-shell">
         <DashboardNav role="employee" />
 
         {/* Page heading */}
@@ -61,7 +79,13 @@ export default function Profile() {
         </div>
 
         {/* Quick stats */}
-        <StatsBar stats={STATS} className="mb-6" />
+        <StatsBar stats={stats} className="mb-6" />
+
+        {error && (
+          <div className="mb-6 brutal-card p-4 bg-(--coral) text-black font-mono text-sm">
+            {error}
+          </div>
+        )}
 
         {/* Header card */}
         <ProfileHeader user={user} />

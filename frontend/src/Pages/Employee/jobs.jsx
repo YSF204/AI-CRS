@@ -1,37 +1,58 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Briefcase, Search } from 'lucide-react';
+import { useDebounce } from '@uidotdev/usehooks';
 import DashboardNav from '../../components/shared/DashboardNav';
 import StatsBar from '../../components/shared/StatsBar';
-import AnimatedList from '../../components/UI/AnimatedList';
 import JobItem from '../../components/Employee/JobItem';
+import api from '../../services/api';
+import useFetch from '../../hooks/useFetch';
 
-const JOBS = [
-  { id: 1, title: 'Frontend Developer', company: 'TechCorp',  location: 'Remote',     type: 'Full-time', posted: '2d ago' },
-  { id: 2, title: 'UX Designer',        company: 'Creativa',  location: 'Cairo, EG',  type: 'Part-time', posted: '5d ago' },
-  { id: 3, title: 'Backend Engineer',   company: 'DataSoft',  location: 'Hybrid',     type: 'Full-time', posted: '1w ago' },
-  { id: 4, title: 'Product Manager',    company: 'LaunchPad', location: 'Alexandria', type: 'Full-time', posted: '2w ago' },
-  { id: 5, title: 'DevOps Engineer',    company: 'CloudBase', location: 'Remote',     type: 'Contract',  posted: '3d ago' },
-];
-
-const STATS = [
-  { label: 'Open',    value: JOBS.length, color: 'var(--teal)'   },
-  { label: 'New',     value: 3,           color: 'var(--yellow)' },
-  { label: 'Applied', value: 2,           color: 'var(--coral)'  },
-];
+const toRoleType = (value) => {
+  if (value === 'FULL_TIME') return 'Full-time';
+  if (value === 'PART_TIME') return 'Part-time';
+  if (value === 'CONTRACT') return 'Contract';
+  if (value === 'INTERNSHIP') return 'Internship';
+  return value || 'Open';
+};
 
 export default function Jobs() {
   const [query,    setQuery]    = useState('');
-  const [selected, setSelected] = useState(null);
+  const debouncedQuery = useDebounce(query, 250);
+  const { data: jobs = [], loading, error } = useFetch(async () => {
+    const res = await api.get('/jobs');
+    return (res.data?.data?.jobs || []).map((job) => ({
+      id: job._id,
+      title: job.position,
+      company: job.employerId?.company?.name || 'Company',
+      location: job.workSite?.replace('_', ' ') || 'N/A',
+      type: toRoleType(job.workDuration),
+      posted: new Date(job.createdAt).toLocaleDateString(),
+      raw: job,
+    }));
+  }, { initialData: [] });
 
-  const filtered = JOBS.filter(
+  const filtered = jobs.filter(
     (j) =>
-      j.title.toLowerCase().includes(query.toLowerCase()) ||
-      j.company.toLowerCase().includes(query.toLowerCase()),
+      j.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
+      j.company.toLowerCase().includes(debouncedQuery.toLowerCase()),
   );
+
+  const stats = useMemo(() => {
+    const recentCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const recent = jobs.filter((job) => {
+      const timestamp = new Date(job.raw?.createdAt || 0).getTime();
+      return Number.isFinite(timestamp) && timestamp >= recentCutoff;
+    }).length;
+    return [
+      { label: 'Open', value: jobs.length, color: 'var(--teal)' },
+      { label: 'New (7d)', value: recent, color: 'var(--yellow)' },
+      { label: 'Visible', value: filtered.length, color: 'var(--coral)' },
+    ];
+  }, [jobs, filtered.length]);
 
   return (
     <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-      <div className="max-w-5xl mx-auto">
+      <div className="dashboard-shell">
         <DashboardNav role="employee" />
 
         {/* Header */}
@@ -56,23 +77,36 @@ export default function Jobs() {
           </div>
         </div>
 
-        <StatsBar stats={STATS} />
+        <StatsBar stats={stats} />
 
-        <AnimatedList
-          items={filtered}
-          renderItem={(job, i, isSelected) => (
-            <JobItem job={job} isSelected={isSelected} />
-          )}
-          onItemSelect={setSelected}
-          showGradients
-          enableArrowNavigation
-          displayScrollbar
-        />
+        {error && (
+          <div className="mb-6 brutal-card p-4 bg-(--coral) text-black font-mono text-sm">
+            {error.response?.data?.message || 'Unable to load jobs.'}
+          </div>
+        )}
 
-        {selected && (
-          <p className="mt-4 font-mono text-xs text-(--fg-muted) text-center">
-            Selected: <span className="font-bold text-(--fg)">{selected.title}</span> @ {selected.company}
-          </p>
+        {loading ? (
+          <div className="brutal-card p-8 bg-(--card-bg) text-center font-mono text-(--fg-muted)">
+            Loading jobs...
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="brutal-card p-8 bg-(--card-bg) text-center font-mono text-(--fg-muted)">
+            No jobs matched your search.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {filtered.map((job) => (
+              <div
+                key={job.id}
+                className="brutal-card bg-(--card-bg)"
+              >
+                <JobItem
+                  job={job}
+                  isSelected={false}
+                />
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

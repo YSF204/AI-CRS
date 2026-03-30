@@ -12,10 +12,10 @@ export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJob
     <div style={{ gridColumn: 'span 12' }}>
       {/* Section heading */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 16, color: 'var(--fg)', textTransform: 'uppercase', letterSpacing: '-0.01em' }}>
+        <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 20, color: 'var(--fg)', textTransform: 'uppercase', letterSpacing: '-0.01em' }}>
           Your Job Listings
         </h2>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--fg-muted)' }}>
+        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: 'var(--fg-muted)' }}>
           {loading ? '...' : `${jobs.length} total`}
         </span>
       </div>
@@ -43,7 +43,7 @@ export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJob
         </div>
       ) : (
         <div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 'clamp(0.75rem, 2%, 1.25rem)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 'clamp(1rem, 2.4%, 1.6rem)' }}>
             {jobs.map((job) => (
               <JobCard key={job._id} job={job} onDelete={onJobDeleted} onUpdate={onJobUpdated} />
             ))}
