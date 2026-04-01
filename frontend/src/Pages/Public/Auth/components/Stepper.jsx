@@ -1,4 +1,4 @@
-import { useState, Children, useRef, useLayoutEffect } from 'react';
+import { useState, Children, useRef, useLayoutEffect, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /* ─── Step wrapper (just renders children) ─── */
@@ -12,10 +12,11 @@ export default function Stepper({
   initialStep = 1,
   onStepChange,
   onFinalStepCompleted,
-  onNextAttempt, // Callback when Next is clicked (even if disabled)
+  onNextAttempt,
   backButtonText = 'Previous',
   nextButtonText = 'Next',
   canProceed,
+  advanceRef,      // optional ref — caller can call advanceRef.current() to go next
 }) {
   const steps = Children.toArray(children);
   const total = steps.length;
@@ -23,6 +24,20 @@ export default function Stepper({
   const [direction, setDirection] = useState(1);
   const contentRef = useRef(null);
   const [contentHeight, setContentHeight] = useState('auto');
+
+  // Expose advance() to parent via advanceRef
+  useEffect(() => {
+    if (!advanceRef) return;
+    advanceRef.current = () => {
+      setCurrent((prev) => {
+        if (prev < total - 1) {
+          setDirection(1);
+          return prev + 1;
+        }
+        return prev;
+      });
+    };
+  }, [advanceRef, total]);
 
   useLayoutEffect(() => {
     if (contentRef.current) {
