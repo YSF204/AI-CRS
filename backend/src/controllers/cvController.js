@@ -30,6 +30,7 @@ export const createCV = catchAsync(async (req, res, next) => {
         technicalSkills,
         customSections,
         layout,
+        templateId,
     } = req.body;
 
     const cv = await CV.create({
@@ -44,6 +45,7 @@ export const createCV = catchAsync(async (req, res, next) => {
         softSkills: softSkills || [],
         technicalSkills: technicalSkills || [],
         customSections: customSections || [],
+        templateId: templateId || 1,
         layout: {
             sectionOrder: layout?.sectionOrder || [],
             visibleSections: layout?.visibleSections || {},

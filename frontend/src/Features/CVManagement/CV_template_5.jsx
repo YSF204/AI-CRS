@@ -1,18 +1,18 @@
 import React from 'react';
-
-const TwoColumnResumeTemplate = ({ 
-  userName = "SHERLOCK HOLMES", 
-  profileImage, // Pass an image URL here
-  cvData 
+import ysf from "../../assets/Yousef.png"
+const TwoColumnResumeTemplate = ({
+  userName = "SHERLOCK HOLMES",
+  profileImage = ysf, // Pass an image URL here
+  cvData
 }) => {
   if (!cvData) return null;
 
   // Separate custom sections for Sidebar vs Main Column based on title
   const sidebarSectionTitles = ['hobbies', 'reference', 'references'];
-  const sidebarCustomSections = cvData.customSections?.filter(sec => 
+  const sidebarCustomSections = cvData.customSections?.filter(sec =>
     sidebarSectionTitles.includes(sec.title.toLowerCase())
   ) || [];
-  const mainCustomSections = cvData.customSections?.filter(sec => 
+  const mainCustomSections = cvData.customSections?.filter(sec =>
     !sidebarSectionTitles.includes(sec.title.toLowerCase())
   ) || [];
 
@@ -25,7 +25,7 @@ const TwoColumnResumeTemplate = ({
         <div className="text-gray-500 text-[13px]">{leftText2}</div>
         <div className="text-gray-400 text-[12px] mt-1">{leftText3}</div>
       </div>
-      
+
       {/* Center Timeline Divider */}
       <div className="relative flex flex-col items-center w-4 flex-shrink-0">
         <div className="w-2.5 h-2.5 bg-gray-600 rounded-full mt-1.5 z-10"></div>
@@ -56,15 +56,15 @@ const TwoColumnResumeTemplate = ({
 
   return (
     <div className="max-w-[950px] mx-auto bg-white flex shadow-lg font-sans min-h-[1100px]">
-      
+
       {/* LEFT COLUMN (SIDEBAR) */}
       <div className="w-[32%] bg-[#4b4b4b] text-gray-200 p-8 flex flex-col">
         {/* Profile Image */}
         <div className="mb-8 flex justify-center">
           {profileImage ? (
-            <img 
-              src={profileImage} 
-              alt={userName} 
+            <img
+              src={ysf}
+              alt={userName}
               className="w-40 h-40 rounded-full object-cover border-2 border-gray-400"
             />
           ) : (
@@ -139,7 +139,7 @@ const TwoColumnResumeTemplate = ({
 
       {/* RIGHT COLUMN (MAIN CONTENT) */}
       <div className="w-[68%] p-10 flex flex-col">
-        
+
         {/* HEADER AREA */}
         <div className="flex justify-between items-start mb-10">
           <div className="flex-1">
@@ -152,7 +152,7 @@ const TwoColumnResumeTemplate = ({
               {cvData.jobTitle}
             </h2>
           </div>
-          
+
           <div className="flex flex-col gap-2 text-[12px] text-gray-500 text-right">
             {(cvData.address?.street || cvData.address?.city) && (
               <div className="flex items-center justify-end gap-2">
@@ -183,7 +183,7 @@ const TwoColumnResumeTemplate = ({
             </h3>
             <div className="flex flex-col">
               {cvData.experience.map((exp, index) => (
-                <TimelineItem 
+                <TimelineItem
                   key={index}
                   leftText1={exp.institutionName}
                   leftText2={""} // Location isn't native to schema experience block, left blank or mapping
@@ -205,10 +205,10 @@ const TwoColumnResumeTemplate = ({
             </h3>
             <div className="flex flex-col">
               {cvData.education.map((edu, index) => (
-                <TimelineItem 
+                <TimelineItem
                   key={index}
                   leftText1={edu.institutionName}
-                  leftText2={""} 
+                  leftText2={""}
                   leftText3={edu.duration}
                   title={edu.certification}
                   description={edu.summary}
@@ -227,10 +227,10 @@ const TwoColumnResumeTemplate = ({
             </h3>
             <div className="flex flex-col">
               {section.items.map((item, itemIdx) => (
-                <TimelineItem 
+                <TimelineItem
                   key={itemIdx}
                   leftText1={item.name}
-                  leftText2={item.link ? "Link Available" : ""} 
+                  leftText2={item.link ? "Link Available" : ""}
                   leftText3={item.duration}
                   title={item.name}
                   description={item.description}

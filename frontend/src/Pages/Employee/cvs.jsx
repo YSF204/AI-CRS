@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, Plus } from 'lucide-react';
 import DashboardNav from '../../components/shared/DashboardNav';
 import StatsBar from '../../components/shared/StatsBar';
@@ -9,6 +10,7 @@ import useFetch from '../../hooks/useFetch';
 const COLORS = ['var(--teal)', 'var(--coral)', 'var(--yellow)', 'var(--mint)', 'var(--blue)'];
 
 export default function CVs() {
+  const navigate = useNavigate();
   const [error, setError] = useState('');
   const {
     data: cvs = [],
@@ -32,17 +34,7 @@ export default function CVs() {
     }
   };
 
-  const handleCreate = async () => {
-    const title = window.prompt('Enter CV title');
-    if (!title?.trim()) return;
-
-    try {
-      await api.post('/cvs', { jobTitle: title.trim() });
-      await refetch();
-    } catch (err) {
-      setCvsError(err, 'Unable to create CV.');
-    }
-  };
+  const goToTemplates = () => navigate('/employee/cv-templates');
 
   const stats = useMemo(() => {
     const safeCvs = Array.isArray(cvs) ? cvs : [];
@@ -75,7 +67,8 @@ export default function CVs() {
           <button
             className="brutal-btn px-5 py-3 font-bold flex items-center gap-2 self-start"
             style={{ background: 'var(--yellow)', color: '#0a0a0a' }}
-            onClick={handleCreate}
+            onClick={goToTemplates}
+            id="new-cv-btn"
           >
             <Plus size={16} />
             NEW CV
@@ -107,6 +100,7 @@ export default function CVs() {
                 updated: new Date(cv.updatedAt || cv.createdAt).toLocaleDateString(),
                 skills: cv.technicalSkills || [],
                 color: COLORS[index % COLORS.length],
+                templateId: cv.templateId || 1,
               }}
               onDelete={handleDelete}
             />
@@ -116,11 +110,16 @@ export default function CVs() {
           <div
             key="add-new-cv"
             className="brutal-card bg-[var(--card-bg)] flex flex-col items-center justify-center gap-3 min-h-[200px] border-dashed opacity-50 hover:opacity-80 cursor-pointer transition-opacity"
+            onClick={goToTemplates}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && goToTemplates()}
+            aria-label="Browse templates and add a new CV"
           >
             <div className="p-3 border-2 border-dashed border-black">
               <Plus size={24} className="text-[var(--fg-muted)]" />
             </div>
-            <p className="font-mono text-sm text-[var(--fg-muted)] text-center">Add a new CV</p>
+            <p className="font-mono text-sm text-[var(--fg-muted)] text-center">Browse Templates</p>
           </div>
         </div>
       </div>

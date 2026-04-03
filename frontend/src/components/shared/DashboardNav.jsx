@@ -71,6 +71,7 @@ export default function DashboardNav({ role = 'employee' }) {
         { label: 'Find Jobs', href: '/employee/jobs' },
         { label: 'Applications', href: '/employee/applications' },
         { label: 'My CVs', href: '/employee/cvs' },
+        { label: 'CV Templates', href: '/employee/cv-templates' },
       ],
     };
   }

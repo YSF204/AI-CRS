@@ -141,6 +141,12 @@ const cvSchema = new mongoose.Schema(
         ],
       },
     ],
+    templateId: {
+      type: Number,
+      min: 1,
+      max: 7,
+      default: 1,
+    },
     layout: {
       sectionOrder: {
         type: [String],
