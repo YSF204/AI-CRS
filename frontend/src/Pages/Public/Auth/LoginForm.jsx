@@ -51,6 +51,8 @@ export default function LoginForm({ setMode }) {
           'pendingGoogleRegistration',
           JSON.stringify({ token: credentialResponse.credential, ...res.data.googleData })
         );
+        // Notify SignupForm (which may already be mounted) to re-read the payload
+        window.dispatchEvent(new Event('googlePayloadReady'));
         setMode?.('signup');
         return;
       }

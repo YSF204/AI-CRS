@@ -11,6 +11,7 @@ import UserProfile from './Pages/Admin/UserProfile';
 import DynamicRoot from './Pages/DynamicRoot';
 import Applications from './Pages/Employee/applications';
 import CVs from './Pages/Employee/cvs';
+import CVTemplates from './Pages/Employee/CVTemplates';
 import EmployeeDash from './Pages/Employee/EmployeeDash';
 import Jobs from './Pages/Employee/jobs';
 import Profile from './Pages/Employee/Profile';
@@ -158,6 +159,26 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={['EMPLOYEE']}>
             <CVs />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employee/cv-templates',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYEE']}>
+            <PageTransition>
+              <CVTemplates />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '/employee/cv-templates',
+        element: (
+          <ProtectedRoute allowedRoles={['EMPLOYEE']}>
+            <PageTransition>
+              <CVTemplates />
+            </PageTransition>
           </ProtectedRoute>
         ),
       },
