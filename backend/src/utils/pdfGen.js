@@ -22,7 +22,7 @@ const htmlToPdf = async (html,cvid) =>{
 
         const page = await browser.newPage();
 
-        await page.setContent(html);
+        await page.setContent(html, { waitUntil: ['load', 'networkidle0'] });
 
         const pdfDir = path.join(__dirname , '../uploads/cv/pdfs');
         if(!fs.existsSync(pdfDir)){

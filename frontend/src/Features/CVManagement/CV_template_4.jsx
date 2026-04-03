@@ -1,7 +1,7 @@
 import React from 'react';
 
 const BlueAccentResumeTemplate = ({ 
-  userName = "HERMAN WALTON", 
+  userName = "", 
   profileImage, // Optional prop for the image URL
   cvData 
 }) => {
@@ -62,115 +62,98 @@ const BlueAccentResumeTemplate = ({
         )}
       </header>
 
-      {/* SUMMARY */}
-      {cvData.summary && (
-        <section>
-          <SectionHeader title="Summary" />
-          <p className="text-sm text-gray-800 leading-relaxed text-justify">
-            {cvData.summary}
-          </p>
-        </section>
-      )}
-
-      {/* PROFESSIONAL EXPERIENCE */}
-      {cvData.experience && cvData.experience.length > 0 && (
-        <section>
-          <SectionHeader title="Professional Experience" />
-          <div className="flex flex-col gap-4">
-            {cvData.experience.map((exp, index) => (
-              <div key={index}>
-                <div className="flex flex-col sm:flex-row justify-between items-baseline mb-1">
-                  <h3 className="text-[15px] font-bold text-gray-900">
-                    {exp.position}{exp.institutionName ? `, ${exp.institutionName}` : ''}
-                  </h3>
-                  {exp.duration && (
-                    <div className="text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">
-                      {exp.duration}
+      {(() => {
+        const sectionBlocks = {
+          summary: cvData.summary ? (
+            <section key="summary">
+              <SectionHeader title="Summary" />
+              <p className="text-sm text-gray-800 leading-relaxed text-justify">{cvData.summary}</p>
+            </section>
+          ) : null,
+          experience: cvData.experience && cvData.experience.length > 0 ? (
+            <section key="experience">
+              <SectionHeader title="Professional Experience" />
+              <div className="flex flex-col gap-4">
+                {cvData.experience.map((exp, index) => (
+                  <div key={index}>
+                    <div className="flex flex-col sm:flex-row justify-between items-baseline mb-1">
+                      <h3 className="text-[15px] font-bold text-gray-900">
+                        {exp.position}{exp.institutionName ? `, ${exp.institutionName}` : ''}
+                      </h3>
+                      {exp.duration && <div className="text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">{exp.duration}</div>}
                     </div>
-                  )}
-                </div>
-                {exp.summary && (
-                  <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line ml-4 mt-1 list-disc-wrapper">
-                    {/* Assuming summary contains bullet points mapped to • or - */}
-                    {exp.summary}
+                    {exp.summary && <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line ml-4 mt-1 list-disc-wrapper">{exp.summary}</div>}
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* EDUCATION */}
-      {cvData.education && cvData.education.length > 0 && (
-        <section>
-          <SectionHeader title="Education" />
-          <div className="flex flex-col gap-4">
-            {cvData.education.map((edu, index) => (
-              <div key={index}>
-                <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
-                  <h3 className="text-[15px] font-bold text-gray-900">
-                    {edu.certification}
-                  </h3>
-                  {edu.duration && (
-                    <div className="text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">
-                      {edu.duration}
+            </section>
+          ) : null,
+          education: cvData.education && cvData.education.length > 0 ? (
+            <section key="education">
+              <SectionHeader title="Education" />
+              <div className="flex flex-col gap-4">
+                {cvData.education.map((edu, index) => (
+                  <div key={index}>
+                    <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
+                      <h3 className="text-[15px] font-bold text-gray-900">{edu.certification}</h3>
+                      {edu.duration && <div className="text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">{edu.duration}</div>}
                     </div>
-                  )}
-                </div>
-                {edu.institutionName && (
-                  <p className="text-sm text-gray-800 mb-1">
-                    {edu.institutionName}
-                  </p>
-                )}
-                {edu.summary && (
-                  <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line ml-4">
-                    {edu.summary}
+                    {edu.institutionName && <p className="text-sm text-gray-800 mb-1">{edu.institutionName}</p>}
+                    {edu.summary && <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-line ml-4">{edu.summary}</div>}
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+            </section>
+          ) : null,
+          technicalSkills: cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
+            <section key="technicalSkills">
+              <SectionHeader title="Technical Skills" />
+              <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-4 text-sm text-gray-700">
+                {cvData.technicalSkills.map((skill, index) => <li key={index}>{skill}</li>)}
+              </ul>
+            </section>
+          ) : null,
+          softSkills: cvData.softSkills && cvData.softSkills.length > 0 ? (
+            <section key="softSkills">
+              <SectionHeader title="Soft Skills" />
+              <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-4 text-sm text-gray-700">
+                {cvData.softSkills.map((skill, index) => <li key={index}>{skill}</li>)}
+              </ul>
+            </section>
+          ) : null,
+          language: cvData.language && cvData.language.length > 0 ? (
+            <section key="language">
+              <SectionHeader title="Languages" />
+              <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-4 text-sm text-gray-700">
+                {cvData.language.map((skill, index) => <li key={index}>{skill}</li>)}
+              </ul>
+            </section>
+          ) : null,
+        };
 
-      {/* TECHNICAL SKILLS (4-Column Grid) */}
-      {cvData.technicalSkills && cvData.technicalSkills.length > 0 && (
-        <section>
-          <SectionHeader title="Technical Skills" />
-          <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-4 text-sm text-gray-700">
-            {cvData.technicalSkills.map((skill, index) => (
-              <li key={index}>
-                {skill}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+        const sectionOrder = cvData.layout?.sectionOrder || ['summary', 'experience', 'education', 'customSections', 'technicalSkills', 'softSkills', 'language'];
 
-      {/* CUSTOM SECTIONS (Dynamically handled, useful for 'Additional Information') */}
-      {cvData.customSections && cvData.customSections.length > 0 && (
-        cvData.customSections.map((section, sectionIndex) => (
-          <section key={sectionIndex}>
-            <SectionHeader title={section.title} />
-            <div className="flex flex-col gap-2">
-              {section.items.map((item, itemIndex) => (
-                <div key={itemIndex} className="text-sm text-gray-800">
-                  <span className="font-bold text-gray-900 mr-2">
-                    • {item.name}:
-                  </span>
-                  <span>{item.description}</span>
-                  {item.link && (
-                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-2">
-                      [Link]
-                    </a>
-                  )}
+        return sectionOrder.map(key => {
+          if (key === 'customSections' && cvData.customSections?.length > 0) {
+            return cvData.customSections.map((section, sectionIndex) => (
+              <section key={`custom-${sectionIndex}`}>
+                <SectionHeader title={section.title} />
+                <div className="flex flex-col gap-2">
+                  {section.items.map((item, itemIndex) => (
+                    <div key={itemIndex} className="text-sm text-gray-800">
+                      <span className="font-bold text-gray-900 mr-2">• {item.name}:</span>
+                      <span>{item.description}</span>
+                      {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-2">[Link]</a>}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </section>
-        ))
-      )}
+              </section>
+            ));
+          }
+          if (key === 'skills') return null; // this template separates them
+          return sectionBlocks[key];
+        });
+      })()}
 
     </div>
   );

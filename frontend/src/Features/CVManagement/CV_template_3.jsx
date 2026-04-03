@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ExecutiveResumeTemplate = ({ userName = "Charles Bloomberg", cvData }) => {
+const ExecutiveResumeTemplate = ({ userName = "", cvData }) => {
   if (!cvData) return null;
 
   // Helper to format contact info with the bullet separator " • "
@@ -43,127 +43,108 @@ const ExecutiveResumeTemplate = ({ userName = "Charles Bloomberg", cvData }) => 
         </div>
       </header>
 
-      {/* PROFESSIONAL SUMMARY */}
-      {cvData.summary && (
-        <section>
-          <SectionHeader title="Professional Summary" />
-          <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line text-justify">
-            {cvData.summary}
-          </p>
-        </section>
-      )}
-
-      {/* PROFESSIONAL EXPERIENCE */}
-      {cvData.experience && cvData.experience.length > 0 && (
-        <section>
-          <SectionHeader title="Professional Experience" />
-          <div className="flex flex-col gap-5">
-            {cvData.experience.map((exp, index) => (
-              <div key={index}>
-                <div className="flex flex-col sm:flex-row justify-between items-baseline mb-1">
-                  <div>
-                    <h3 className="text-[15px] font-bold text-gray-800">{exp.position}</h3>
-                    <p className="text-sm text-gray-800 font-medium">{exp.institutionName}</p>
-                  </div>
-                  {exp.duration && (
-                    <div className="text-sm text-gray-800 font-bold sm:text-right mt-1 sm:mt-0">
-                      {exp.duration}
-                    </div>
-                  )}
-                </div>
-                {exp.summary && (
-                  <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-line mt-2">
-                    {exp.summary}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* EDUCATION */}
-      {cvData.education && cvData.education.length > 0 && (
-        <section>
-          <SectionHeader title="Education" />
-          <div className="flex flex-col gap-4">
-            {cvData.education.map((edu, index) => (
-              <div key={index}>
-                <h3 className="text-[15px] font-bold text-gray-800 mb-0.5">
-                  {edu.certification}
-                </h3>
-                <p className="text-sm text-gray-800">
-                  {edu.institutionName}
-                  {edu.summary && ` • ${edu.summary}`}
-                  {edu.duration && ` • ${edu.duration}`}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* CUSTOM SECTIONS (Dynamically mapped for Consultancy, Projects, specific Skill formats, etc.) */}
-      {cvData.customSections && cvData.customSections.length > 0 && (
-        cvData.customSections.map((section, sectionIndex) => (
-          <section key={sectionIndex}>
-            <SectionHeader title={section.title} />
-            <div className="flex flex-col gap-4">
-              {section.items.map((item, itemIndex) => (
-                <div key={itemIndex}>
-                  <div className="flex flex-col sm:flex-row justify-between items-baseline mb-1">
-                    <h3 className="text-[15px] font-bold text-gray-800">
-                      {item.name}
-                    </h3>
-                    {item.duration && (
-                      <div className="text-sm text-gray-800 font-medium sm:text-right">
-                        {item.duration}
+      {(() => {
+        const sectionBlocks = {
+          summary: cvData.summary ? (
+            <section key="summary">
+              <SectionHeader title="Professional Summary" />
+              <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-line text-justify">{cvData.summary}</p>
+            </section>
+          ) : null,
+          experience: cvData.experience && cvData.experience.length > 0 ? (
+            <section key="experience">
+              <SectionHeader title="Professional Experience" />
+              <div className="flex flex-col gap-5">
+                {cvData.experience.map((exp, index) => (
+                  <div key={index}>
+                    <div className="flex flex-col sm:flex-row justify-between items-baseline mb-1">
+                      <div>
+                        <h3 className="text-[15px] font-bold text-gray-800">{exp.position}</h3>
+                        <p className="text-sm text-gray-800 font-medium">{exp.institutionName}</p>
                       </div>
-                    )}
-                  </div>
-                  {item.description && (
-                    <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">
-                      {item.description}
+                      {exp.duration && <div className="text-sm text-gray-800 font-bold sm:text-right mt-1 sm:mt-0">{exp.duration}</div>}
                     </div>
-                  )}
-                  {item.link && (
-                    <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm block mt-1">
-                      View Project/Link
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        ))
-      )}
+                    {exp.summary && <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-line mt-2">{exp.summary}</div>}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null,
+          education: cvData.education && cvData.education.length > 0 ? (
+            <section key="education">
+              <SectionHeader title="Education" />
+              <div className="flex flex-col gap-4">
+                {cvData.education.map((edu, index) => (
+                  <div key={index}>
+                    <h3 className="text-[15px] font-bold text-gray-800 mb-0.5">{edu.certification}</h3>
+                    <p className="text-sm text-gray-800">
+                      {edu.institutionName}
+                      {edu.summary && ` • ${edu.summary}`}
+                      {edu.duration && ` • ${edu.duration}`}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null,
+          skills: (cvData.technicalSkills?.length > 0 || cvData.softSkills?.length > 0 || cvData.language?.length > 0) ? (
+            <section key="skills">
+              <SectionHeader title="Expert-Level Skills" />
+              <ul className="text-sm text-gray-800 space-y-2">
+                {cvData.softSkills && cvData.softSkills.length > 0 && <li><span className="font-bold">Leadership: </span>{cvData.softSkills.join(', ')}</li>}
+                {cvData.technicalSkills && cvData.technicalSkills.length > 0 && <li><span className="font-bold">Technical: </span>{cvData.technicalSkills.join(', ')}</li>}
+                {cvData.language && cvData.language.length > 0 && <li><span className="font-bold">Languages: </span>{cvData.language.join(', ')}</li>}
+              </ul>
+            </section>
+          ) : null,
+          technicalSkills: cvData.technicalSkills?.length > 0 ? (
+            <section key="technicalSkills">
+              <SectionHeader title="Technical Skills" />
+              <p className="text-sm text-gray-800">{cvData.technicalSkills.join(', ')}</p>
+            </section>
+          ) : null,
+          softSkills: cvData.softSkills?.length > 0 ? (
+            <section key="softSkills">
+              <SectionHeader title="Soft Skills" />
+              <p className="text-sm text-gray-800">{cvData.softSkills.join(', ')}</p>
+            </section>
+          ) : null,
+          language: cvData.language?.length > 0 ? (
+            <section key="language">
+              <SectionHeader title="Languages" />
+              <p className="text-sm text-gray-800">{cvData.language.join(', ')}</p>
+            </section>
+          ) : null,
+        };
 
-      {/* STANDARD SKILLS FALLBACK (If you prefer to use standard schema arrays instead of customSections) */}
-      {(cvData.technicalSkills?.length > 0 || cvData.softSkills?.length > 0 || cvData.language?.length > 0) && (
-        <section>
-          <SectionHeader title="Expert-Level Skills" />
-          <ul className="text-sm text-gray-800 space-y-2">
-            {cvData.softSkills && cvData.softSkills.length > 0 && (
-              <li>
-                <span className="font-bold">Leadership: </span>
-                {cvData.softSkills.join(', ')}
-              </li>
-            )}
-            {cvData.technicalSkills && cvData.technicalSkills.length > 0 && (
-              <li>
-                <span className="font-bold">Technical: </span>
-                {cvData.technicalSkills.join(', ')}
-              </li>
-            )}
-            {cvData.language && cvData.language.length > 0 && (
-              <li>
-                <span className="font-bold">Languages: </span>
-                {cvData.language.join(', ')}
-              </li>
-            )}
-          </ul>
-        </section>
-      )}
+        const sectionOrder = cvData.layout?.sectionOrder || ['summary', 'experience', 'education', 'customSections', 'technicalSkills', 'softSkills', 'language'];
+
+        return sectionOrder.map(key => {
+          if (key === 'customSections' && cvData.customSections?.length > 0) {
+            return cvData.customSections.map((section, sectionIndex) => (
+              <section key={`custom-${sectionIndex}`}>
+                <SectionHeader title={section.title} />
+                <div className="flex flex-col gap-4">
+                  {section.items.map((item, itemIndex) => (
+                    <div key={itemIndex}>
+                      <div className="flex flex-col sm:flex-row justify-between items-baseline mb-1">
+                        <h3 className="text-[15px] font-bold text-gray-800">{item.name}</h3>
+                        {item.duration && <div className="text-sm text-gray-800 font-medium sm:text-right">{item.duration}</div>}
+                      </div>
+                      {item.description && <div className="text-sm text-gray-800 leading-relaxed whitespace-pre-line">{item.description}</div>}
+                      {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm block mt-1">View Project/Link</a>}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ));
+          }
+          if (key.includes('Skills') || key === 'language') {
+             return sectionBlocks[key];
+          }
+          return sectionBlocks[key];
+        });
+      })()}
 
     </div>
   );

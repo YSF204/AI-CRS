@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, Save, Plus, Trash2, ChevronUp, ChevronDown,
   Phone, MapPin, Briefcase, GraduationCap,
   Code, Heart, Globe, FileText, Layers,
   CheckCircle, AlertCircle, X, Check, PanelLeftClose,
+  Download, Eye, GripVertical, ImagePlus, User
 } from 'lucide-react';
 import DashboardNav from '../../components/shared/DashboardNav';
 import { getTemplateById } from '../../Features/CVManagement/index.js';
@@ -321,6 +322,7 @@ function SectionCard({ sectionKey, form, handlers, onRemove, collapsed, onToggle
       {/* Card header */}
       <div className="flex items-center gap-2.5 px-4 py-3 border-b-[3px] border-[var(--border-color)]"
         style={{ background: meta.accent }}>
+        <GripVertical size={14} style={{ color: meta.textColor, opacity: 0.5, cursor: 'grab', flexShrink: 0 }} />
         <Icon size={15} style={{ color: meta.textColor }} />
         <span className="font-['Space_Grotesk'] font-black text-xs uppercase tracking-[0.1em] flex-1"
           style={{ color: meta.textColor }}>
@@ -378,18 +380,30 @@ function LivePreview({ formData, userName, templateId }) {
         <span className="font-mono text-[9px] text-[var(--fg-muted)]">A4 · {Math.round(ZOOM * 100)}%</span>
       </div>
       {/* Preview viewport */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden flex justify-center p-4 border-[3px] border-[var(--border-color)] border-t-0"
+      <div className="flex-1 overflow-auto flex justify-center p-4 border-[3px] border-[var(--border-color)] border-t-0"
         style={{ background: '#b0ada6', scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,0,0,0.2) transparent' }}>
+        
+        {/* Container that acts as the scaled A4 wrapper */}
         <div style={{
-          zoom: ZOOM,
-          flexShrink: 0,
-          background: '#fff',
-          boxShadow: '0 6px 32px rgba(0,0,0,0.28)',
-          pointerEvents: 'none',
-          userSelect: 'none',
-          alignSelf: 'flex-start',
+           display: 'flex',
+           justifyContent: 'center',
+           transformOrigin: 'top center',
+           transform: `scale(${ZOOM})`,
+           marginBottom: `${(ZOOM - 1) * 1123}px`, // Adjust container height for scaled child
+           height: 'max-content'
         }}>
-          <TemplateComponent userName={userName} cvData={formData} />
+           <div data-cv-content style={{
+             width: '794px',         // A4 width at 96 dpi
+             minHeight: '1123px',    // A4 height
+             height: '1123px',       // Strict A4 height to prevent infinite growth
+             overflow: 'hidden',     // Clip text that overflows the A4 page
+             background: '#fff',
+             boxShadow: '0 6px 32px rgba(0,0,0,0.28)',
+             pointerEvents: 'none',
+             userSelect: 'none',
+           }}>
+             <TemplateComponent userName={userName} cvData={formData} />
+           </div>
         </div>
       </div>
     </div>
@@ -408,18 +422,24 @@ export default function CVEditor() {
   const [sidebarOpen, setSidebarOpen]             = useState(true);
   const [activeSections, setActiveSections]       = useState(['summary']);
   const [collapsedSections, setCollapsedSections] = useState({});
+  const [showPreview, setShowPreview]             = useState(false);
+  const [downloadingPdf, setDownloadingPdf]       = useState(false);
+  const [dragOverKey, setDragOverKey]             = useState(null);
+  const dragItemRef = useRef(null);
+  const previewRef  = useRef(null);
 
   const [form, setForm] = useState({
-    jobTitle: '', summary: '',
+    fullName: '', jobTitle: '', summary: '',
     contact:  { phone: '', email: '', github: '', linkedin: '' },
     address:  { city: '', street: '' },
     experience: [], education: [],
     technicalSkills: [], softSkills: [], language: [],
     customSections: [],
+    profileImage: '',
     layout: { sectionOrder: [...DEFAULT_SECTION_ORDER], visibleSections: {} },
   });
 
-  const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Your Name';
+  const userName = form.fullName?.trim() || (user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Your Name');
 
   // ── Load CV ──────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -429,6 +449,7 @@ export default function CVEditor() {
         const d   = res.data.data.cv;
         setCv(d);
         setForm({
+          fullName: d.fullName || '',
           jobTitle: d.jobTitle || '',
           summary:  d.summary  || '',
           contact:  { phone: '', email: '', github: '', linkedin: '', ...d.contact },
@@ -442,6 +463,7 @@ export default function CVEditor() {
             title: s.title,
             items: s.items?.map((it) => ({ name: it.name, description: it.description || '', duration: String(it.duration ?? ''), link: it.link || '' })) || [],
           })) || [],
+          profileImage: d.profileImage || '',
           layout: {
             sectionOrder:    d.layout?.sectionOrder?.length ? d.layout.sectionOrder : [...DEFAULT_SECTION_ORDER],
             visibleSections: d.layout?.visibleSections ? Object.fromEntries(Object.entries(d.layout.visibleSections)) : {},
@@ -473,15 +495,40 @@ export default function CVEditor() {
     setTimeout(() => setToast(null), 3500);
   };
 
+  const getFilteredFormData = useCallback(() => {
+    const f = { ...form };
+    f.fullName = form.fullName || '';
+    if (!activeSections.includes('summary'))        { f.jobTitle = ''; f.summary = ''; }
+    if (!activeSections.includes('contact'))         { f.contact = { phone: '', email: '', github: '', linkedin: '' }; }
+    if (!activeSections.includes('address'))          { f.address = { city: '', street: '' }; }
+    if (!activeSections.includes('experience'))       { f.experience = []; }
+    if (!activeSections.includes('education'))        { f.education = []; }
+    if (!activeSections.includes('technicalSkills'))  { f.technicalSkills = []; }
+    if (!activeSections.includes('softSkills'))       { f.softSkills = []; }
+    if (!activeSections.includes('language'))         { f.language = []; }
+    if (!activeSections.includes('customSections'))   { f.customSections = []; }
+    
+    // Inject active section array layout for dynamic templates to sort
+    f.layout = {
+      ...(f.layout || {}),
+      sectionOrder: activeSections
+    };
+
+    return f;
+  }, [form, activeSections]);
+
   // ── Save ─────────────────────────────────────────────────────────────────────
   const handleSave = async () => {
     setSaving(true);
     try {
+      const filtered = getFilteredFormData();
+      const visibleSections = {};
+      activeSections.forEach((k) => { visibleSections[k] = true; });
       await api.patch(`/cvs/${id}`, {
-        ...form,
-        experience:     form.experience.map((e) => ({ ...e, duration: Number(e.duration) || 0 })),
-        education:      form.education.map((e) => ({ ...e, duration: Number(e.duration) || 0 })),
-        customSections: form.customSections.map((s) => ({
+        ...filtered,
+        experience:     filtered.experience.map((e) => ({ ...e, duration: Number(e.duration) || 0 })),
+        education:      filtered.education.map((e) => ({ ...e, duration: Number(e.duration) || 0 })),
+        customSections: filtered.customSections.map((s) => ({
           title: s.title,
           items: s.items.map((it) => ({
             name: it.name, description: it.description,
@@ -489,6 +536,8 @@ export default function CVEditor() {
             link: it.link,
           })),
         })),
+        profileImage: form.profileImage,
+        layout: { sectionOrder: [...activeSections], visibleSections },
       });
       showToast('success', 'CV saved!');
     } catch (err) {
@@ -524,6 +573,65 @@ export default function CVEditor() {
 
   const handlers = { setForm, exp, edu, set, setContact, setAddress, addCustomSection, removeCustomSection, updateCustomSectionTitle, addCustomItem, removeCustomItem, updateCustomItem };
 
+  // ── Drag-and-drop section reorder ─────────────────────────────────────────────
+  const onDragStart = (key) => { dragItemRef.current = key; };
+  const onDragOver = (e, key) => { e.preventDefault(); if (dragItemRef.current !== key) setDragOverKey(key); };
+  const onDragLeave = () => setDragOverKey(null);
+  const onDrop = (targetKey) => {
+    const srcKey = dragItemRef.current;
+    if (!srcKey || srcKey === targetKey) { setDragOverKey(null); return; }
+    setActiveSections((prev) => {
+      const arr = [...prev];
+      const fromIdx = arr.indexOf(srcKey);
+      const toIdx   = arr.indexOf(targetKey);
+      if (fromIdx < 0 || toIdx < 0) return prev;
+      arr.splice(fromIdx, 1);
+      arr.splice(toIdx, 0, srcKey);
+      return arr;
+    });
+    dragItemRef.current = null;
+    setDragOverKey(null);
+  };
+  const onDragEnd = () => { dragItemRef.current = null; setDragOverKey(null); };
+
+  // ── Download PDF ──────────────────────────────────────────────────────────────
+  const handleDownloadPdf = async () => {
+    setDownloadingPdf(true);
+    try {
+      const el = previewRef.current?.querySelector('[data-cv-content]');
+      if (!el) { showToast('error', 'Preview not ready.'); return; }
+      
+      const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+        .map(s => s.outerHTML)
+        .join('\n');
+
+      const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8">${styles}<style>body{margin:0;padding:0;} * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }</style></head><body>${el.innerHTML}</body></html>`;
+            const res = await api.post(`/cvs/${id}/download-pdf`, { html: htmlContent }, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${form.jobTitle || 'CV'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      showToast('success', 'PDF downloaded!');
+    } catch (err) {
+      showToast('error', 'Failed to generate PDF.');
+    } finally { setDownloadingPdf(false); }
+  };
+
+  // ── Profile image upload ──────────────────────────────────────────────────────
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 512000) { showToast('error', 'Image must be under 500KB.'); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => setForm((f) => ({ ...f, profileImage: ev.target.result }));
+    reader.readAsDataURL(file);
+  };
+  const removeProfileImage = () => setForm((f) => ({ ...f, profileImage: '' }));
+
   // ── Loading ───────────────────────────────────────────────────────────────────
   if (loading) {
     return (
@@ -554,11 +662,26 @@ export default function CVEditor() {
             {form.jobTitle || 'Untitled CV'}
           </div>
         </div>
-        <button onClick={handleSave} disabled={saving}
-          className="flex items-center gap-2 font-['Space_Grotesk'] font-black text-xs uppercase tracking-wider px-5 py-2.5 bg-[var(--yellow)] text-[#0a0a0a] border-[3px] border-[#0a0a0a] transition-all hover:translate-x-0.5 hover:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ boxShadow: saving ? 'none' : '4px 4px 0 #0a0a0a' }}>
-          <Save size={13} /> {saving ? 'Saving…' : 'Save CV'}
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Preview button */}
+          <button onClick={() => setShowPreview(true)}
+            className="flex items-center gap-2 font-['Space_Grotesk'] font-black text-xs uppercase tracking-wider px-4 py-2.5 bg-[var(--card-bg)] text-[var(--fg)] border-[3px] border-[var(--border-color)] transition-all hover:border-[var(--fg)] hover:translate-x-0.5 hover:translate-y-0.5"
+            style={{ boxShadow: '3px 3px 0 var(--border-color)' }}>
+            <Eye size={13} /> Preview
+          </button>
+          {/* Download PDF button */}
+          <button onClick={handleDownloadPdf} disabled={downloadingPdf}
+            className="flex items-center gap-2 font-['Space_Grotesk'] font-black text-xs uppercase tracking-wider px-4 py-2.5 bg-[var(--card-bg)] text-[var(--fg)] border-[3px] border-[var(--border-color)] transition-all hover:border-[var(--fg)] hover:translate-x-0.5 hover:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ boxShadow: downloadingPdf ? 'none' : '3px 3px 0 var(--border-color)' }}>
+            <Download size={13} /> {downloadingPdf ? 'Generating…' : 'Download PDF'}
+          </button>
+          {/* Save CV button */}
+          <button onClick={handleSave} disabled={saving}
+            className="flex items-center gap-2 font-['Space_Grotesk'] font-black text-xs uppercase tracking-wider px-5 py-2.5 bg-[var(--yellow)] text-[#0a0a0a] border-[3px] border-[#0a0a0a] transition-all hover:translate-x-0.5 hover:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ boxShadow: saving ? 'none' : '4px 4px 0 #0a0a0a' }}>
+            <Save size={13} /> {saving ? 'Saving…' : 'Save CV'}
+          </button>
+        </div>
       </div>
 
       {/* ── Toast ── */}
@@ -678,16 +801,80 @@ export default function CVEditor() {
             </div>
           ) : (
             <div className="p-5 flex flex-col gap-4">
+              {/* Static Section: Name Override */}
+              <div className="border-[3px] border-[var(--border-color)] bg-[var(--card-bg)] overflow-hidden">
+                <div className="flex items-center gap-2.5 px-4 py-3 border-b-[3px] border-[var(--border-color)] bg-[var(--yellow)]">
+                  <User size={15} color="#000" />
+                  <span className="font-['Space_Grotesk'] font-black text-xs uppercase tracking-[0.1em] text-[#0a0a0a] flex-1">CV Name Holder</span>
+                </div>
+                <div className="p-4 flex flex-col gap-2">
+                  <label className="font-mono text-[9px] uppercase font-bold tracking-widest text-[#0a0a0a]">Who is this CV for?</label>
+                  <input 
+                    className="w-full p-2.5 border-2 border-[var(--border-color)] bg-[var(--bg)] text-sm font-mono focus:outline-none focus:bg-[var(--yellow)]/10"
+                    placeholder={user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : "Default Name"}
+                    value={form.fullName}
+                    onChange={(e) => setForm(f => ({ ...f, fullName: e.target.value }))}
+                  />
+                  <p className="font-mono text-[8px] text-[var(--fg-muted)]">Type any name here to override your account name on the CV preview and PDF.</p>
+                </div>
+              </div>
+
+              {/* Profile image upload — shown for Two-Column template (id:5) */}
+              {(cv?.templateId === 5) && (
+                <div className="border-[3px] border-[var(--border-color)] bg-[var(--card-bg)] overflow-hidden">
+                  <div className="flex items-center gap-2.5 px-4 py-3 border-b-[3px] border-[var(--border-color)] bg-[#6c63ff]">
+                    <ImagePlus size={15} style={{ color: '#fff' }} />
+                    <span className="font-['Space_Grotesk'] font-black text-xs uppercase tracking-[0.1em] text-white flex-1">Profile Photo</span>
+                  </div>
+                  <div className="p-4 flex items-center gap-4">
+                    {form.profileImage ? (
+                      <>
+                        <img src={form.profileImage} alt="Profile" className="w-20 h-20 rounded-full object-cover border-2 border-[var(--border-color)]" />
+                        <div className="flex flex-col gap-2">
+                          <label className="flex items-center gap-1.5 cursor-pointer font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--fg)] px-3 py-1.5 border-2 border-[var(--border-color)] bg-[var(--bg)] hover:border-[var(--fg)] transition-colors">
+                            <ImagePlus size={11} /> Change
+                            <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                          </label>
+                          <button onClick={removeProfileImage}
+                            className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors">
+                            <Trash2 size={10} /> Remove
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <label className="flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-[var(--border-color)] text-[var(--fg-muted)] font-mono text-[11px] font-bold uppercase tracking-wider hover:border-[var(--fg)] hover:text-[var(--fg)] transition-colors cursor-pointer">
+                        <ImagePlus size={14} /> Upload Profile Photo (max 500KB)
+                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                      </label>
+                    )}
+                  </div>
+                </div>
+              )}
               {activeSections.map((key) => (
-                <SectionCard
+                <div
                   key={key}
-                  sectionKey={key}
-                  form={form}
-                  handlers={handlers}
-                  onRemove={() => toggleSection(key)}
-                  collapsed={!!collapsedSections[key]}
-                  onToggleCollapse={() => toggleCollapse(key)}
-                />
+                  draggable
+                  onDragStart={() => onDragStart(key)}
+                  onDragOver={(e) => onDragOver(e, key)}
+                  onDragLeave={onDragLeave}
+                  onDrop={() => onDrop(key)}
+                  onDragEnd={onDragEnd}
+                  style={{
+                    transition: 'transform 0.15s ease, opacity 0.15s ease',
+                    transform: dragOverKey === key ? 'scale(1.01)' : 'none',
+                    borderTop: dragOverKey === key ? '3px solid var(--yellow)' : '3px solid transparent',
+                    cursor: 'grab',
+                  }}
+                >
+                  <SectionCard
+                    sectionKey={key}
+                    form={form}
+                    handlers={handlers}
+                    onRemove={() => toggleSection(key)}
+                    collapsed={!!collapsedSections[key]}
+                    onToggleCollapse={() => toggleCollapse(key)}
+                  />
+                </div>
               ))}
               <div className="h-12" />
             </div>
@@ -695,14 +882,50 @@ export default function CVEditor() {
         </div>
 
         {/* ══ RIGHT: live preview ══ */}
-        <div className="w-[420px] flex-shrink-0 overflow-hidden flex flex-col p-3 pl-0 border-l-[3px] border-[var(--border-color)]">
+        <div ref={previewRef} className="w-[420px] flex-shrink-0 overflow-hidden flex flex-col p-3 pl-0 border-l-[3px] border-[var(--border-color)]">
           <LivePreview
-            formData={form}
+            formData={getFilteredFormData()}
             userName={userName}
             templateId={cv?.templateId || 1}
           />
         </div>
       </div>
+
+      {/* ── Full-screen Preview Modal ── */}
+      {showPreview && (
+        <div
+          style={{ position: 'fixed', inset: 0, background: 'rgba(10,10,10,0.82)', backdropFilter: 'blur(8px)', zIndex: 9000, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowPreview(false); }}
+        >
+          {/* Modal top bar */}
+          <div className="flex items-center gap-3 px-6 py-3 border-b-[3px] border-[var(--border-color)] bg-[var(--bg)] flex-shrink-0">
+            <span className="font-['Space_Grotesk'] font-black text-sm uppercase tracking-wider flex-1">Full Preview</span>
+            <button onClick={handleDownloadPdf} disabled={downloadingPdf}
+              className="flex items-center gap-2 font-['Space_Grotesk'] font-bold text-xs uppercase tracking-wider px-4 py-2 bg-[var(--card-bg)] text-[var(--fg)] border-2 border-[var(--border-color)] hover:border-[var(--fg)] transition-colors">
+              <Download size={12} /> {downloadingPdf ? 'Generating…' : 'Download PDF'}
+            </button>
+            <button onClick={() => setShowPreview(false)}
+              className="flex items-center gap-1 font-['Space_Grotesk'] font-bold text-xs uppercase tracking-wider px-4 py-2 bg-[var(--yellow)] text-[#0a0a0a] border-2 border-[#0a0a0a]">
+              <X size={12} /> Close
+            </button>
+          </div>
+          {/* Full preview body */}
+          <div className="flex-1 overflow-y-auto flex justify-center p-8" style={{ background: '#b0ada6' }}>
+            <div style={{
+              width: '850px', // A4 width at full scale
+              transformOrigin: 'top center',
+              transform: 'scale(1)', // Let it take up the available width or scale if on small screens
+              flexShrink: 0,
+              background: '#fff',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.35)',
+              alignSelf: 'flex-start',
+              minHeight: '1100px' // A4 height at full scale
+            }}>
+              {(() => { const t = getTemplateById(cv?.templateId || 1); const C = t?.component; return C ? <C userName={userName} cvData={getFilteredFormData()} /> : null; })()}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

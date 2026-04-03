@@ -1,11 +1,13 @@
 import React from 'react';
-import ysf from "../../assets/Yousef.png"
+
 const TwoColumnResumeTemplate = ({
-  userName = "SHERLOCK HOLMES",
-  profileImage = ysf, // Pass an image URL here
+  userName = "",
+  profileImage, // Pass an image URL here
   cvData
 }) => {
   if (!cvData) return null;
+
+  const displayImage = cvData.profileImage || profileImage || null;
 
   // Separate custom sections for Sidebar vs Main Column based on title
   const sidebarSectionTitles = ['hobbies', 'reference', 'references'];
@@ -61,9 +63,9 @@ const TwoColumnResumeTemplate = ({
       <div className="w-[32%] bg-[#4b4b4b] text-gray-200 p-8 flex flex-col">
         {/* Profile Image */}
         <div className="mb-8 flex justify-center">
-          {profileImage ? (
+          {displayImage ? (
             <img
-              src={ysf}
+              src={displayImage}
               alt={userName}
               className="w-40 h-40 rounded-full object-cover border-2 border-gray-400"
             />
@@ -174,100 +176,98 @@ const TwoColumnResumeTemplate = ({
             )}
           </div>
         </div>
+        {(() => {
+          const mainBlocks = {
+            experience: cvData.experience && cvData.experience.length > 0 ? (
+              <div key="experience" className="mb-6">
+                <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-6 border-b border-gray-400 pb-1">Work Experience</h3>
+                <div className="flex flex-col">
+                  {cvData.experience.map((exp, index) => (
+                    <TimelineItem
+                      key={index}
+                      leftText1={exp.institutionName}
+                      leftText2={""} 
+                      leftText3={exp.duration}
+                      title={exp.position}
+                      description={exp.summary}
+                      isLast={index === cvData.experience.length - 1}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null,
+            education: cvData.education && cvData.education.length > 0 ? (
+              <div key="education" className="mb-6">
+                <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-6 border-b border-gray-400 pb-1">Education</h3>
+                <div className="flex flex-col">
+                  {cvData.education.map((edu, index) => (
+                    <TimelineItem
+                      key={index}
+                      leftText1={edu.institutionName}
+                      leftText2={""}
+                      leftText3={edu.duration}
+                      title={edu.certification}
+                      description={edu.summary}
+                      isLast={index === cvData.education.length - 1}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null,
+            technicalSkills: cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
+              <div key="technicalSkills" className="mb-6">
+                <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-4 border-b border-gray-400 pb-1">Technical Skills</h3>
+                <div className="grid grid-cols-2 gap-x-12 gap-y-1">
+                  {cvData.technicalSkills.map((skill, index) => <SkillBar key={index} name={skill} />)}
+                </div>
+              </div>
+            ) : null,
+            softSkills: cvData.softSkills && cvData.softSkills.length > 0 ? (
+              <div key="softSkills" className="mb-6">
+                <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-4 border-b border-gray-400 pb-1">Soft Skills</h3>
+                <div className="grid grid-cols-2 gap-x-12 gap-y-1">
+                  {cvData.softSkills.map((skill, index) => <SkillBar key={index} name={skill} />)}
+                </div>
+              </div>
+            ) : null,
+            language: cvData.language && cvData.language.length > 0 ? (
+              <div key="language" className="mb-6">
+                <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-4 border-b border-gray-400 pb-1">Languages</h3>
+                <div className="grid grid-cols-2 gap-x-12 gap-y-1">
+                  {cvData.language.map((lang, index) => <SkillBar key={index} name={lang} />)}
+                </div>
+              </div>
+            ) : null,
+          };
 
-        {/* WORK EXPERIENCE */}
-        {cvData.experience && cvData.experience.length > 0 && (
-          <div className="mb-6">
-            <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-6 border-b border-gray-400 pb-1">
-              Work Experience
-            </h3>
-            <div className="flex flex-col">
-              {cvData.experience.map((exp, index) => (
-                <TimelineItem
-                  key={index}
-                  leftText1={exp.institutionName}
-                  leftText2={""} // Location isn't native to schema experience block, left blank or mapping
-                  leftText3={exp.duration}
-                  title={exp.position}
-                  description={exp.summary}
-                  isLast={index === cvData.experience.length - 1}
-                />
-              ))}
-            </div>
-          </div>
-        )}
+          const sectionOrder = cvData.layout?.sectionOrder || ['experience', 'education', 'customSections', 'technicalSkills', 'softSkills', 'language'];
 
-        {/* EDUCATION */}
-        {cvData.education && cvData.education.length > 0 && (
-          <div className="mb-6">
-            <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-6 border-b border-gray-400 pb-1">
-              Education
-            </h3>
-            <div className="flex flex-col">
-              {cvData.education.map((edu, index) => (
-                <TimelineItem
-                  key={index}
-                  leftText1={edu.institutionName}
-                  leftText2={""}
-                  leftText3={edu.duration}
-                  title={edu.certification}
-                  description={edu.summary}
-                  isLast={index === cvData.education.length - 1}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* MAIN CUSTOM SECTIONS */}
-        {mainCustomSections.map((section, idx) => (
-          <div key={idx} className="mb-6">
-            <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-6 border-b border-gray-400 pb-1">
-              {section.title}
-            </h3>
-            <div className="flex flex-col">
-              {section.items.map((item, itemIdx) => (
-                <TimelineItem
-                  key={itemIdx}
-                  leftText1={item.name}
-                  leftText2={item.link ? "Link Available" : ""}
-                  leftText3={item.duration}
-                  title={item.name}
-                  description={item.description}
-                  isLast={itemIdx === section.items.length - 1}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-
-        {/* SKILLS */}
-        {cvData.technicalSkills && cvData.technicalSkills.length > 0 && (
-          <div className="mb-6">
-            <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-4 border-b border-gray-400 pb-1">
-              Skills
-            </h3>
-            <div className="grid grid-cols-2 gap-x-12 gap-y-1">
-              {cvData.technicalSkills.map((skill, index) => (
-                <SkillBar key={index} name={skill} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* LANGUAGES */}
-        {cvData.language && cvData.language.length > 0 && (
-          <div className="mb-6">
-            <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-4 border-b border-gray-400 pb-1">
-              Languages
-            </h3>
-            <div className="grid grid-cols-2 gap-x-12 gap-y-1">
-              {cvData.language.map((lang, index) => (
-                <SkillBar key={index} name={lang} />
-              ))}
-            </div>
-          </div>
-        )}
+          return sectionOrder.map(key => {
+            if (key === 'customSections' && mainCustomSections.length > 0) {
+              return mainCustomSections.map((section, idx) => (
+                <div key={`custom-${idx}`} className="mb-6">
+                  <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-6 border-b border-gray-400 pb-1">{section.title}</h3>
+                  <div className="flex flex-col">
+                    {section.items.map((item, itemIdx) => (
+                      <TimelineItem
+                        key={itemIdx}
+                        leftText1={item.name}
+                        leftText2={item.link ? "Link Available" : ""}
+                        leftText3={item.duration}
+                        title={item.name}
+                        description={item.description}
+                        isLast={itemIdx === section.items.length - 1}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ));
+            }
+            if (key === 'summary') return null; // Summary is rendered in the sidebar for template 5
+            if (key === 'skills') return null; // Mapped individually
+            return mainBlocks[key];
+          });
+        })()}
 
       </div>
     </div>

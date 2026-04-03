@@ -19,6 +19,7 @@ const verifyOwnership = (cv, userId) => {
 
 export const createCV = catchAsync(async (req, res, next) => {
     const {
+        fullName,
         jobTitle,
         summary,
         contact,
@@ -31,10 +32,12 @@ export const createCV = catchAsync(async (req, res, next) => {
         customSections,
         layout,
         templateId,
+        profileImage,
     } = req.body;
 
     const cv = await CV.create({
         userId: req.user._id,
+        fullName: fullName || "",
         jobTitle,
         summary: summary || "",
         contact: contact || {},
@@ -46,6 +49,7 @@ export const createCV = catchAsync(async (req, res, next) => {
         technicalSkills: technicalSkills || [],
         customSections: customSections || [],
         templateId: templateId || 1,
+        profileImage: profileImage || "",
         layout: {
             sectionOrder: layout?.sectionOrder || [],
             visibleSections: layout?.visibleSections || {},

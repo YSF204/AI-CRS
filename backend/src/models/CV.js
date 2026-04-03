@@ -8,6 +8,11 @@ const cvSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    fullName: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     jobTitle: {
       type: String,
       required: true,
@@ -146,6 +151,10 @@ const cvSchema = new mongoose.Schema(
       min: 1,
       max: 7,
       default: 1,
+    },
+    profileImage: {
+      type: String,
+      default: "",
     },
     layout: {
       sectionOrder: {

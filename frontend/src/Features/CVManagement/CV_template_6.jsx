@@ -1,6 +1,6 @@
 import React from 'react';
 
-const FederalResumeTemplate = ({ userName = "CAROL COOPER", cvData }) => {
+const FederalResumeTemplate = ({ userName = "", cvData }) => {
   if (!cvData) return null;
 
   // Helper to format contact info with the pipe separator " | "
@@ -62,113 +62,101 @@ const FederalResumeTemplate = ({ userName = "CAROL COOPER", cvData }) => {
         </div>
       )}
 
-      {/* PROFESSIONAL STATEMENT (SUMMARY) */}
-      {cvData.summary && (
-        <section className="mb-6">
-          <SectionHeader title="Professional Statement" />
-          <div className="text-[13px] text-gray-800 leading-relaxed text-justify whitespace-pre-line">
-            {cvData.summary}
-          </div>
-        </section>
-      )}
-
-      {/* WORK EXPERIENCES */}
-      {cvData.experience && cvData.experience.length > 0 && (
-        <section className="mb-6">
-          <SectionHeader title="Work Experiences" />
-          <div className="flex flex-col gap-6">
-            {cvData.experience.map((exp, index) => (
-              <div key={index}>
-                <div className="flex justify-between items-baseline text-[13px] text-gray-900 mb-1">
-                  <div>
-                    <span className="font-bold">{exp.position}</span>
-                    {exp.institutionName && <span> | <strong>Employer:</strong> {exp.institutionName}</span>}
-                  </div>
-                  {exp.duration && (
-                    <div className="font-medium">{exp.duration}</div>
-                  )}
-                </div>
-                {exp.summary && (
-                  <div className="text-[13px] text-gray-700 leading-relaxed whitespace-pre-line mt-2 text-justify">
-                    {exp.summary}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* EDUCATION (2-Column Grid) */}
-      {cvData.education && cvData.education.length > 0 && (
-        <section className="mb-6">
-          <SectionHeader title="Education" />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-            {cvData.education.map((edu, index) => (
-              <div key={index} className="text-[13px]">
-                <div className="font-bold text-gray-900">
-                  {edu.certification} {edu.duration && `| ${edu.duration}`}
-                </div>
-                <div className="text-gray-700 mt-0.5">
-                  {edu.institutionName}
-                </div>
-                {edu.summary && (
-                  <div className="text-gray-600 mt-1 whitespace-pre-line">
-                    {edu.summary}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* CUSTOM SECTIONS (Dynamically Mapped - Uses 2-Column Grid for 'Professional Development' or 'Skills') */}
-      {cvData.customSections && cvData.customSections.length > 0 && (
-        cvData.customSections
-          .filter(sec => sec.title.toLowerCase() !== 'federal details') // Filter out the special federal block if used
-          .map((section, sectionIndex) => {
-            // Determine if this section should use a grid layout based on common short-item sections
-            const useGrid = ['professional development', 'skills', 'certifications'].includes(section.title.toLowerCase());
-            
-            return (
-              <section key={sectionIndex} className="mb-6">
-                <SectionHeader title={section.title} />
-                <div className={useGrid ? "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4" : "flex flex-col gap-4"}>
-                  {section.items.map((item, itemIndex) => (
-                    <div key={itemIndex} className="text-[13px]">
-                      <div className="font-bold text-gray-900">
-                        {item.name} {item.duration && `| ${item.duration}`}
+      {(() => {
+        const sectionBlocks = {
+          summary: cvData.summary ? (
+            <section key="summary" className="mb-6">
+              <SectionHeader title="Professional Statement" />
+              <div className="text-[13px] text-gray-800 leading-relaxed text-justify whitespace-pre-line">{cvData.summary}</div>
+            </section>
+          ) : null,
+          experience: cvData.experience && cvData.experience.length > 0 ? (
+            <section key="experience" className="mb-6">
+              <SectionHeader title="Work Experiences" />
+              <div className="flex flex-col gap-6">
+                {cvData.experience.map((exp, index) => (
+                  <div key={index}>
+                    <div className="flex justify-between items-baseline text-[13px] text-gray-900 mb-1">
+                      <div>
+                        <span className="font-bold">{exp.position}</span>
+                        {exp.institutionName && <span> | <strong>Employer:</strong> {exp.institutionName}</span>}
                       </div>
-                      {item.description && (
-                        <div className="text-gray-700 mt-0.5 whitespace-pre-line">
-                          {item.description}
-                        </div>
-                      )}
-                      {item.link && (
-                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline mt-1 block">
-                          View Details
-                        </a>
-                      )}
+                      {exp.duration && <div className="font-medium">{exp.duration}</div>}
                     </div>
-                  ))}
-                </div>
-              </section>
-            );
-          })
-      )}
+                    {exp.summary && <div className="text-[13px] text-gray-700 leading-relaxed whitespace-pre-line mt-2 text-justify">{exp.summary}</div>}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null,
+          education: cvData.education && cvData.education.length > 0 ? (
+            <section key="education" className="mb-6">
+              <SectionHeader title="Education" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                {cvData.education.map((edu, index) => (
+                  <div key={index} className="text-[13px]">
+                    <div className="font-bold text-gray-900">{edu.certification} {edu.duration && `| ${edu.duration}`}</div>
+                    <div className="text-gray-700 mt-0.5">{edu.institutionName}</div>
+                    {edu.summary && <div className="text-gray-600 mt-1 whitespace-pre-line">{edu.summary}</div>}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null,
+          technicalSkills: cvData.technicalSkills?.length > 0 ? (
+            <section key="technicalSkills" className="mb-6">
+              <SectionHeader title="Technical Skills" />
+              <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-2 gap-x-4 text-[13px] text-gray-800 list-disc list-inside">
+                {cvData.technicalSkills.map((skill, index) => <li key={index}>{skill}</li>)}
+              </ul>
+            </section>
+          ) : null,
+          softSkills: cvData.softSkills?.length > 0 ? (
+            <section key="softSkills" className="mb-6">
+              <SectionHeader title="Soft Skills" />
+              <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-2 gap-x-4 text-[13px] text-gray-800 list-disc list-inside">
+                {cvData.softSkills.map((skill, index) => <li key={index}>{skill}</li>)}
+              </ul>
+            </section>
+          ) : null,
+          language: cvData.language?.length > 0 ? (
+            <section key="language" className="mb-6">
+              <SectionHeader title="Languages" />
+              <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-2 gap-x-4 text-[13px] text-gray-800 list-disc list-inside">
+                {cvData.language.map((skill, index) => <li key={index}>{skill}</li>)}
+              </ul>
+            </section>
+          ) : null,
+        };
 
-      {/* STANDARD SKILLS FALLBACK (Rendered as a simple grid) */}
-      {(cvData.technicalSkills?.length > 0 || cvData.softSkills?.length > 0 || cvData.language?.length > 0) && (
-        <section className="mb-6">
-          <SectionHeader title="Skills & Languages" />
-          <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-2 gap-x-4 text-[13px] text-gray-800 list-disc list-inside">
-            {[...(cvData.technicalSkills || []), ...(cvData.softSkills || []), ...(cvData.language || [])].map((skill, index) => (
-              <li key={index}>{skill}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+        const sectionOrder = cvData.layout?.sectionOrder || ['summary', 'experience', 'education', 'customSections', 'technicalSkills', 'softSkills', 'language'];
+
+        return sectionOrder.map(key => {
+          if (key === 'customSections' && cvData.customSections?.length > 0) {
+            return cvData.customSections
+              .filter(sec => sec.title.toLowerCase() !== 'federal details') // Filter special block
+              .map((section, sectionIndex) => {
+                const useGrid = ['professional development', 'skills', 'certifications'].includes(section.title.toLowerCase());
+                return (
+                  <section key={`custom-${sectionIndex}`} className="mb-6">
+                    <SectionHeader title={section.title} />
+                    <div className={useGrid ? "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4" : "flex flex-col gap-4"}>
+                      {section.items.map((item, itemIndex) => (
+                        <div key={itemIndex} className="text-[13px]">
+                          <div className="font-bold text-gray-900">{item.name} {item.duration && `| ${item.duration}`}</div>
+                          {item.description && <div className="text-gray-700 mt-0.5 whitespace-pre-line">{item.description}</div>}
+                          {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline mt-1 block">View Details</a>}
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                );
+              });
+          }
+          if (key === 'skills') return null; // separated out in our mapping
+          return sectionBlocks[key];
+        });
+      })()}
 
     </div>
   );
