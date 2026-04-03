@@ -12,6 +12,7 @@ import DynamicRoot from './Pages/DynamicRoot';
 import Applications from './Pages/Employee/applications';
 import CVs from './Pages/Employee/cvs';
 import CVTemplates from './Pages/Employee/CVTemplates';
+import CVEditor from './Pages/Employee/CVEditor';
 import EmployeeDash from './Pages/Employee/EmployeeDash';
 import Jobs from './Pages/Employee/jobs';
 import Profile from './Pages/Employee/Profile';
@@ -173,11 +174,11 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '/employee/cv-templates',
+        path: '/employee/cv-editor/:id',
         element: (
           <ProtectedRoute allowedRoles={['EMPLOYEE']}>
             <PageTransition>
-              <CVTemplates />
+              <CVEditor />
             </PageTransition>
           </ProtectedRoute>
         ),

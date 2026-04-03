@@ -34,6 +34,8 @@ export default function CVs() {
     }
   };
 
+  const handleEdit = (id) => navigate(`/employee/cv-editor/${id}`);
+
   const goToTemplates = () => navigate('/employee/cv-templates');
 
   const stats = useMemo(() => {
@@ -103,8 +105,10 @@ export default function CVs() {
                 templateId: cv.templateId || 1,
               }}
               onDelete={handleDelete}
+              onEdit={handleEdit}
             />
           ))}
+
 
           {/* Ghost "add new" card */}
           <div

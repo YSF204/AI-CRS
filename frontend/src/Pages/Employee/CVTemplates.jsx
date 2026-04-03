@@ -386,8 +386,9 @@ export default function CVTemplates() {
     setLoading(true);
     setApiError('');
     try {
-      await api.post('/cvs', { jobTitle, templateId: selected.id });
-      navigate('/employee/cvs');
+      const res = await api.post('/cvs', { jobTitle, templateId: selected.id });
+      const newId = res.data.data.cv._id;
+      navigate(`/employee/cv-editor/${newId}`);
     } catch (err) {
       setApiError(err?.response?.data?.message || 'Unable to create CV. Please try again.');
       setLoading(false);
