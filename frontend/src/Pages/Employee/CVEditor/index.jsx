@@ -246,7 +246,7 @@ export default function CVEditor() {
         </div>
 
         {/* ══ RIGHT: live preview ══ */}
-        <div ref={previewRef} className="w-[420px] flex-shrink-0 overflow-hidden flex flex-col p-3 pl-0 border-l-[3px] border-[var(--border-color)]">
+        <div ref={previewRef} className="w-[520px] flex-shrink-0 overflow-hidden flex flex-col p-3 pl-0 border-l-[3px] border-[var(--border-color)]">
           <LivePreview
             formData={filteredFormData()}
             userName={userName}
