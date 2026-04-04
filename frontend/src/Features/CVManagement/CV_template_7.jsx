@@ -48,13 +48,13 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary">
+            <section key="summary" className="break-inside-avoid">
               <SectionHeader title="Career Summary" />
               <p className="text-[14.5px] text-gray-800 leading-[1.7] text-justify whitespace-pre-wrap break-words">{cvData.summary}</p>
             </section>
           ) : null,
           technicalSkills: cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
-            <section key="technicalSkills">
+            <section key="technicalSkills" className="break-inside-avoid">
               <SectionHeader title="Technical Strengths" />
               <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-1.5 gap-x-4 pl-4 text-[14px] text-gray-800 list-disc">
                 {cvData.technicalSkills.map((skill, index) => <li key={index} className="pl-1">{skill}</li>)}
@@ -62,7 +62,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
             </section>
           ) : null,
           softSkills: cvData.softSkills && cvData.softSkills.length > 0 ? (
-            <section key="softSkills">
+            <section key="softSkills" className="break-inside-avoid">
               <SectionHeader title="Core Competencies" />
               <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-1.5 gap-x-4 pl-4 text-[14px] text-gray-800 list-disc">
                 {cvData.softSkills.map((skill, index) => <li key={index} className="pl-1">{skill}</li>)}
@@ -70,7 +70,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
             </section>
           ) : null,
           language: cvData.language && cvData.language.length > 0 ? (
-            <section key="language">
+            <section key="language" className="break-inside-avoid">
               <SectionHeader title="Languages" />
               <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-1.5 gap-x-4 pl-4 text-[14px] text-gray-800 list-disc">
                 {cvData.language.map((skill, index) => <li key={index} className="pl-1">{skill}</li>)}
@@ -78,13 +78,13 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
             </section>
           ) : null,
           experience: cvData.experience && cvData.experience.length > 0 ? (
-            <section key="experience">
+            <section key="experience" className="break-inside-avoid">
               <SectionHeader title="Professional Experience" />
-              <div className="flex flex-col gap-6">
+              <div className="space-y-6 block">
                 {cvData.experience.map((exp, index) => {
                   const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                   return (
-                    <div key={index}>
+                    <div key={index} className="break-inside-avoid">
                       <div className="text-[14.5px] text-gray-800 mb-2">
                         <span className="font-bold">{exp.position}</span>
                         {exp.institutionName && <span> | {exp.institutionName}</span>}
@@ -98,13 +98,13 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
             </section>
           ) : null,
           education: cvData.education && cvData.education.length > 0 ? (
-            <section key="education">
+            <section key="education" className="break-inside-avoid">
               <SectionHeader title="Education" />
-              <div className="flex flex-col gap-6">
+              <div className="space-y-6 block">
                 {cvData.education.map((edu, index) => {
                   const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                   return (
-                    <div key={index}>
+                    <div key={index} className="break-inside-avoid">
                       <div className="text-[14.5px] text-gray-800 mb-2">
                         <span className="font-bold">{edu.certification}</span>
                         {edu.institutionName && <span> | {edu.institutionName}</span>}
@@ -124,13 +124,13 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
         return sectionOrder.map(key => {
           if (key === 'customSections' && cvData.customSections?.length > 0) {
             return cvData.customSections.map((section, sectionIndex) => (
-              <section key={`custom-${sectionIndex}`}>
+              <section key={`custom-${sectionIndex}`} className="break-inside-avoid">
                 <SectionHeader title={section.title} />
-                <div className="flex flex-col gap-5">
+                <div className="space-y-5 block">
                   {section.items.map((item, itemIndex) => {
                     const dur = fmtDuration(item.durationFrom, item.durationTo);
                     return (
-                      <div key={itemIndex}>
+                      <div key={itemIndex} className="break-inside-avoid">
                         <div className="text-[14.5px] text-gray-800 mb-1">
                           <span className="font-bold">
                             {item.link ? (

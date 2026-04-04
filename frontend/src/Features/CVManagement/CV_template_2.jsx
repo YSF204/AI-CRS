@@ -51,21 +51,21 @@ const MinimalResumeTemplate = ({ userName = "", cvData }) => {
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary" className="mb-6">
+            <section key="summary" className="break-inside-avoid mb-6">
               <h3 className="text-base font-bold uppercase text-gray-900 mb-1">Objective</h3>
               <hr className="border-t-[1.5px] border-gray-400 mb-3" />
               <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words">{cvData.summary}</p>
             </section>
           ) : null,
           education: cvData.education && cvData.education.length > 0 ? (
-            <section key="education" className="mb-6">
+            <section key="education" className="break-inside-avoid mb-6">
               <h3 className="text-base font-bold uppercase text-gray-900 mb-1">Education</h3>
               <hr className="border-t-[1.5px] border-gray-400 mb-3" />
-              <div className="flex flex-col gap-4">
+              <div className="space-y-4 block">
                 {cvData.education.map((edu, index) => {
                   const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                   return (
-                    <div key={index}>
+                    <div key={index} className="break-inside-avoid">
                       <p className="text-sm text-gray-800">
                         <span className="font-medium">{edu.certification}</span>
                         {edu.institutionName && ` | ${edu.institutionName}`}
@@ -79,14 +79,14 @@ const MinimalResumeTemplate = ({ userName = "", cvData }) => {
             </section>
           ) : null,
           experience: cvData.experience && cvData.experience.length > 0 ? (
-            <section key="experience" className="mb-6">
+            <section key="experience" className="break-inside-avoid mb-6">
               <h3 className="text-base font-bold uppercase text-gray-900 mb-1">Experience</h3>
               <hr className="border-t-[1.5px] border-gray-400 mb-3" />
-              <div className="flex flex-col gap-4">
+              <div className="space-y-4 block">
                 {cvData.experience.map((exp, index) => {
                   const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                   return (
-                    <div key={index}>
+                    <div key={index} className="break-inside-avoid">
                       <p className="text-sm text-gray-800">
                         <span className="font-medium">{exp.institutionName}</span>
                         {exp.position && ` | ${exp.position}`}
@@ -100,21 +100,21 @@ const MinimalResumeTemplate = ({ userName = "", cvData }) => {
             </section>
           ) : null,
           technicalSkills: cvData.technicalSkills?.length > 0 ? (
-            <section key="technicalSkills" className="mb-6">
+            <section key="technicalSkills" className="break-inside-avoid mb-6">
               <h3 className="text-base font-bold uppercase text-gray-900 mb-1">Technical Skills</h3>
               <hr className="border-t-[1.5px] border-gray-400 mb-3" />
               <p className="text-sm text-gray-800">{cvData.technicalSkills.join(', ')}</p>
             </section>
           ) : null,
           softSkills: cvData.softSkills?.length > 0 ? (
-            <section key="softSkills" className="mb-6">
+            <section key="softSkills" className="break-inside-avoid mb-6">
               <h3 className="text-base font-bold uppercase text-gray-900 mb-1">Soft Skills</h3>
               <hr className="border-t-[1.5px] border-gray-400 mb-3" />
               <p className="text-sm text-gray-800">{cvData.softSkills.join(', ')}</p>
             </section>
           ) : null,
           language: cvData.language?.length > 0 ? (
-            <section key="language" className="mb-6">
+            <section key="language" className="break-inside-avoid mb-6">
               <h3 className="text-base font-bold uppercase text-gray-900 mb-1">Languages</h3>
               <hr className="border-t-[1.5px] border-gray-400 mb-3" />
               <p className="text-sm text-gray-800">{cvData.language.join(', ')}</p>
@@ -127,14 +127,14 @@ const MinimalResumeTemplate = ({ userName = "", cvData }) => {
         return sectionOrder.map((key) => {
           if (key === 'customSections' && cvData.customSections?.length > 0) {
             return cvData.customSections.map((section, sectionIndex) => (
-              <section key={`custom-${sectionIndex}`} className="mb-6">
+              <section key={`custom-${sectionIndex}`} className="break-inside-avoid mb-6">
                 <h3 className="text-base font-bold uppercase text-gray-900 mb-1">{section.title}</h3>
                 <hr className="border-t-[1.5px] border-gray-400 mb-3" />
-                <div className="flex flex-col gap-4">
+                <div className="space-y-4 block">
                   {section.items.map((item, itemIndex) => {
                     const dur = fmtDuration(item.durationFrom, item.durationTo);
                     return (
-                      <div key={itemIndex}>
+                      <div key={itemIndex} className="break-inside-avoid">
                         <p className="text-sm text-gray-800">
                           {item.link ? (
                             <a href={item.link} target="_blank" rel="noopener noreferrer" className="font-medium text-blue-600 hover:underline">{item.name}</a>

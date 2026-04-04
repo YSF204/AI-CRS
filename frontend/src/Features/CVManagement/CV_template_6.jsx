@@ -61,19 +61,19 @@ const FederalResumeTemplate = ({ userName = "", cvData }) => {
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary" className="mb-6">
+            <section key="summary" className="break-inside-avoid mb-6">
               <SectionHeader title="Professional Statement" />
               <div className="text-[13px] text-gray-800 leading-relaxed text-justify whitespace-pre-wrap break-words">{cvData.summary}</div>
             </section>
           ) : null,
           experience: cvData.experience && cvData.experience.length > 0 ? (
-            <section key="experience" className="mb-6">
+            <section key="experience" className="break-inside-avoid mb-6">
               <SectionHeader title="Work Experiences" />
-              <div className="flex flex-col gap-6">
+              <div className="space-y-6 block">
                 {cvData.experience.map((exp, index) => {
                   const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                   return (
-                    <div key={index}>
+                    <div key={index} className="break-inside-avoid">
                       <div className="flex justify-between items-baseline text-[13px] text-gray-900 mb-1">
                         <div>
                           <span className="font-bold">{exp.position}</span>
@@ -89,13 +89,13 @@ const FederalResumeTemplate = ({ userName = "", cvData }) => {
             </section>
           ) : null,
           education: cvData.education && cvData.education.length > 0 ? (
-            <section key="education" className="mb-6">
+            <section key="education" className="break-inside-avoid mb-6">
               <SectionHeader title="Education" />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                 {cvData.education.map((edu, index) => {
                   const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                   return (
-                    <div key={index} className="text-[13px]">
+                    <div key={index} className="text-[13px] break-inside-avoid">
                       <div className="font-bold text-gray-900">{edu.certification}{dur ? ` | ${dur}` : ''}</div>
                       <div className="text-gray-700 mt-0.5">{edu.institutionName}</div>
                       {edu.summary && <div className="text-gray-600 mt-1 whitespace-pre-wrap break-words">{edu.summary}</div>}
@@ -106,7 +106,7 @@ const FederalResumeTemplate = ({ userName = "", cvData }) => {
             </section>
           ) : null,
           technicalSkills: cvData.technicalSkills?.length > 0 ? (
-            <section key="technicalSkills" className="mb-6">
+            <section key="technicalSkills" className="break-inside-avoid mb-6">
               <SectionHeader title="Technical Skills" />
               <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-2 gap-x-4 text-[13px] text-gray-800 list-disc list-inside">
                 {cvData.technicalSkills.map((skill, index) => <li key={index}>{skill}</li>)}
@@ -114,7 +114,7 @@ const FederalResumeTemplate = ({ userName = "", cvData }) => {
             </section>
           ) : null,
           softSkills: cvData.softSkills?.length > 0 ? (
-            <section key="softSkills" className="mb-6">
+            <section key="softSkills" className="break-inside-avoid mb-6">
               <SectionHeader title="Soft Skills" />
               <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-2 gap-x-4 text-[13px] text-gray-800 list-disc list-inside">
                 {cvData.softSkills.map((skill, index) => <li key={index}>{skill}</li>)}
@@ -122,7 +122,7 @@ const FederalResumeTemplate = ({ userName = "", cvData }) => {
             </section>
           ) : null,
           language: cvData.language?.length > 0 ? (
-            <section key="language" className="mb-6">
+            <section key="language" className="break-inside-avoid mb-6">
               <SectionHeader title="Languages" />
               <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-2 gap-x-4 text-[13px] text-gray-800 list-disc list-inside">
                 {cvData.language.map((skill, index) => <li key={index}>{skill}</li>)}
@@ -140,13 +140,13 @@ const FederalResumeTemplate = ({ userName = "", cvData }) => {
               .map((section, sectionIndex) => {
                 const useGrid = ['professional development', 'skills', 'certifications'].includes(section.title.toLowerCase());
                 return (
-                  <section key={`custom-${sectionIndex}`} className="mb-6">
+                  <section key={`custom-${sectionIndex}`} className="break-inside-avoid mb-6">
                     <SectionHeader title={section.title} />
                     <div className={useGrid ? "grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4" : "flex flex-col gap-4"}>
                       {section.items.map((item, itemIndex) => {
                         const dur = fmtDuration(item.durationFrom, item.durationTo);
                         return (
-                          <div key={itemIndex} className="text-[13px]">
+                          <div key={itemIndex} className="text-[13px] break-inside-avoid">
                             <div className="font-bold text-gray-900">
                               {item.link ? (
                                 <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{item.name}</a>
