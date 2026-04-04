@@ -1,26 +1,37 @@
-import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FileText, Plus } from 'lucide-react';
-import DashboardNav from '../../components/shared/DashboardNav';
-import StatsBar from '../../components/shared/StatsBar';
-import CVCard from '../../components/Employee/CVCard';
-import api from '../../services/api';
-import useFetch from '../../hooks/useFetch';
+import React, { useMemo, useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { FileText, Plus, Upload } from "lucide-react";
+import DashboardNav from "../../components/shared/DashboardNav";
+import StatsBar from "../../components/shared/StatsBar";
+import CVCard from "../../components/Employee/CVCard";
+import api from "../../services/api";
+import useFetch from "../../hooks/useFetch";
 
-const COLORS = ['var(--teal)', 'var(--coral)', 'var(--yellow)', 'var(--mint)', 'var(--blue)'];
+const COLORS = [
+  "var(--teal)",
+  "var(--coral)",
+  "var(--yellow)",
+  "var(--mint)",
+  "var(--blue)",
+];
 
 export default function CVs() {
   const navigate = useNavigate();
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const [uploadingPdf, setUploadingPdf] = useState(false);
+  const fileInputRef = useRef(null);
   const {
     data: cvs = [],
     loading,
     error: fetchError,
     refetch,
-  } = useFetch(async () => {
-    const res = await api.get('/cvs');
-    return res.data?.data?.cvs || [];
-  }, { initialData: [] });
+  } = useFetch(
+    async () => {
+      const res = await api.get("/cvs");
+      return res.data?.data?.cvs || [];
+    },
+    { initialData: [] },
+  );
 
   const setCvsError = (err, fallback) =>
     setError(err?.response?.data?.message || fallback);
@@ -30,22 +41,70 @@ export default function CVs() {
       await api.delete(`/cvs/${id}`);
       await refetch();
     } catch (err) {
-      setCvsError(err, 'Unable to delete CV.');
+      setCvsError(err, "Unable to delete CV.");
     }
   };
 
   const handleEdit = (id) => navigate(`/employee/cv-editor/${id}`);
 
-  const goToTemplates = () => navigate('/employee/cv-templates');
+  const goToTemplates = () => navigate("/employee/cv-templates");
+
+  const handlePdfUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith(".pdf")) {
+      setError("Please upload a PDF file");
+      return;
+    }
+
+    setUploadingPdf(true);
+    setError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("cvFile", file);
+
+      const res = await api.post("/cvs/upload/analyze", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      // Refresh CVs list
+      await refetch();
+      setError("");
+
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (err) {
+      setCvsError(err, "Failed to upload PDF. Please try again.");
+    } finally {
+      setUploadingPdf(false);
+    }
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
+  };
 
   const stats = useMemo(() => {
     const safeCvs = Array.isArray(cvs) ? cvs : [];
-    const skillsCount = safeCvs.reduce((total, cv) => total + (Array.isArray(cv.technicalSkills) ? cv.technicalSkills.length : 0), 0);
+    const skillsCount = safeCvs.reduce(
+      (total, cv) =>
+        total +
+        (Array.isArray(cv.technicalSkills) ? cv.technicalSkills.length : 0),
+      0,
+    );
 
     return [
-      { label: 'Total', value: safeCvs.length, color: 'var(--coral)' },
-      { label: 'With Summary', value: safeCvs.filter((cv) => cv.summary).length, color: 'var(--teal)' },
-      { label: 'Skills', value: skillsCount, color: 'var(--yellow)' },
+      { label: "Total", value: safeCvs.length, color: "var(--coral)" },
+      {
+        label: "With Summary",
+        value: safeCvs.filter((cv) => cv.summary).length,
+        color: "var(--teal)",
+      },
+      { label: "Skills", value: skillsCount, color: "var(--yellow)" },
     ];
   }, [cvs]);
 
@@ -62,26 +121,49 @@ export default function CVs() {
               My CVs
             </h1>
             <p className="font-mono text-sm text-[var(--fg-muted)] mt-1">
-              {cvs.length} resume{cvs.length !== 1 ? 's' : ''} on file
+              {cvs.length} resume{cvs.length !== 1 ? "s" : ""} on file
             </p>
           </div>
 
-          <button
-            className="brutal-btn px-5 py-3 font-bold flex items-center gap-2 self-start"
-            style={{ background: 'var(--yellow)', color: '#0a0a0a' }}
-            onClick={goToTemplates}
-            id="new-cv-btn"
-          >
-            <Plus size={16} />
-            NEW CV
-          </button>
+          {/* Action Buttons */}
+          <div className="flex gap-3 self-start">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf"
+              onChange={handlePdfUpload}
+              className="hidden"
+              disabled={uploadingPdf}
+            />
+            <button
+              className="brutal-btn px-5 py-3 font-bold flex items-center gap-2"
+              style={{ background: "var(--teal)", color: "#0a0a0a" }}
+              onClick={triggerFileUpload}
+              disabled={uploadingPdf}
+              title="Upload a PDF resume to auto-extract and create a CV"
+            >
+              <Upload size={16} />
+              {uploadingPdf ? "UPLOADING..." : "UPLOAD PDF"}
+            </button>
+            <button
+              className="brutal-btn px-5 py-3 font-bold flex items-center gap-2"
+              style={{ background: "var(--yellow)", color: "#0a0a0a" }}
+              onClick={goToTemplates}
+              id="new-cv-btn"
+            >
+              <Plus size={16} />
+              NEW CV
+            </button>
+          </div>
         </div>
 
         <StatsBar stats={stats} />
 
         {(error || fetchError) && (
           <div className="mb-6 brutal-card p-4 bg-(--coral) text-black font-mono text-sm">
-            {error || fetchError?.response?.data?.message || 'Unable to load CVs.'}
+            {error ||
+              fetchError?.response?.data?.message ||
+              "Unable to load CVs."}
           </div>
         )}
 
@@ -99,7 +181,9 @@ export default function CVs() {
               cv={{
                 id: cv._id,
                 name: cv.jobTitle,
-                updated: new Date(cv.updatedAt || cv.createdAt).toLocaleDateString(),
+                updated: new Date(
+                  cv.updatedAt || cv.createdAt,
+                ).toLocaleDateString(),
                 skills: cv.technicalSkills || [],
                 color: COLORS[index % COLORS.length],
                 templateId: cv.templateId || 1,
@@ -109,7 +193,6 @@ export default function CVs() {
             />
           ))}
 
-
           {/* Ghost "add new" card */}
           <div
             key="add-new-cv"
@@ -117,13 +200,15 @@ export default function CVs() {
             onClick={goToTemplates}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && goToTemplates()}
+            onKeyDown={(e) => e.key === "Enter" && goToTemplates()}
             aria-label="Browse templates and add a new CV"
           >
             <div className="p-3 border-2 border-dashed border-black">
               <Plus size={24} className="text-[var(--fg-muted)]" />
             </div>
-            <p className="font-mono text-sm text-[var(--fg-muted)] text-center">Browse Templates</p>
+            <p className="font-mono text-sm text-[var(--fg-muted)] text-center">
+              Browse Templates
+            </p>
           </div>
         </div>
       </div>

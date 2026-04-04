@@ -1,23 +1,33 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brutal-yellow: #FFE630;
-  --color-brutal-coral: #FF6B6B;
-  --color-brutal-teal: #4ECDC4;
-  --color-brutal-mint: #A8E6CF;
-  --color-brutal-blue: #6C63FF;
+  --color-brutal-yellow: #ffe630;
+  --color-brutal-coral: #ff6b6b;
+  --color-brutal-teal: #4ecdc4;
+  --color-brutal-mint: #a8e6cf;
+  --color-brutal-blue: #6c63ff;
+
+  /* Slower transition durations for smoother animations */
+  --duration-75: 100ms;
+  --duration-100: 150ms;
+  --duration-150: 250ms;
+  --duration-200: 300ms;
+  --duration-300: 500ms;
+  --duration-500: 800ms;
+  --duration-700: 1200ms;
+  --duration-1000: 1500ms;
 }
 
 @layer base {
   /* ===== LIGHT MODE (default) ===== */
   :root {
-    --bg: #E4E1DA;
+    --bg: #e4e1da;
     --fg: #0a0a0a;
-    --fg-muted: rgba(10,10,10,0.5);
+    --fg-muted: rgba(10, 10, 10, 0.5);
     --border-color: #0a0a0a;
-    --card-bg: #DFDBD3;
+    --card-bg: #dfdbd3;
     --shadow-color: #0a0a0a;
-    --nav-bg: #DCD8D0;
+    --nav-bg: #dcd8d0;
     --yellow: #ffe630;
     --coral: #ff6b6b;
     --teal: #4ecdc4;
@@ -32,7 +42,7 @@
   [data-theme="dark"] {
     --bg: #1a1a1f;
     --fg: #e8e8ec;
-    --fg-muted: rgba(232,232,236,0.55);
+    --fg-muted: rgba(232, 232, 236, 0.55);
     --border-color: #9090a0;
     --card-bg: #222228;
     --shadow-color: #9090a0;
