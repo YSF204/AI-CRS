@@ -246,6 +246,8 @@ function CreateModal({ template, onClose, onCreate, loading }) {
             <div
               style={{
                 zoom: ZOOM,
+                width: 794,
+                minHeight: 1123,
                 flexShrink: 0,
                 background: '#fff',
                 boxShadow: '0 6px 32px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.10)',

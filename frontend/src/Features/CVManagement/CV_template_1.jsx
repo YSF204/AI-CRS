@@ -12,20 +12,20 @@ const ResumeTemplate = ({ userName, cvData }) => {
 
   const sectionBlocks = {
     summary: cvData.summary ? (
-      <section key="summary" className="mb-8 border-b-[1.5px] border-gray-400 pb-8">
+      <section key="summary" className="break-inside-avoid mb-8 border-b-[1.5px] border-gray-400 pb-8">
         <h3 className="text-lg font-bold uppercase tracking-wider text-gray-900 mb-3">About Me</h3>
         <p className="text-gray-700 text-sm leading-relaxed text-justify whitespace-pre-wrap break-words">{cvData.summary}</p>
       </section>
     ) : null,
 
     education: cvData.education && cvData.education.length > 0 ? (
-      <section key="education" className="mb-8 border-b-[1.5px] border-gray-400 pb-8">
+      <section key="education" className="break-inside-avoid mb-8 border-b-[1.5px] border-gray-400 pb-8">
         <h3 className="text-lg font-bold uppercase tracking-wider text-gray-900 mb-4">Education</h3>
-        <div className="flex flex-col gap-5">
+        <div className="space-y-5 block">
           {cvData.education.map((edu, index) => {
             const dur = fmtDuration(edu.durationFrom, edu.durationTo);
             return (
-              <div key={index}>
+              <div key={index} className="break-inside-avoid">
                 <p className="text-sm text-gray-500 mb-1">{edu.institutionName}{dur ? ` | ${dur}` : ''}</p>
                 <h4 className="text-base font-bold text-gray-900 mb-1">{edu.certification}</h4>
                 {edu.summary && <p className="text-gray-700 text-sm leading-relaxed text-justify whitespace-pre-wrap break-words">{edu.summary}</p>}
@@ -37,13 +37,13 @@ const ResumeTemplate = ({ userName, cvData }) => {
     ) : null,
 
     experience: cvData.experience && cvData.experience.length > 0 ? (
-      <section key="experience" className="mb-8 border-b-[1.5px] border-gray-400 pb-8">
+      <section key="experience" className="break-inside-avoid mb-8 border-b-[1.5px] border-gray-400 pb-8">
         <h3 className="text-lg font-bold uppercase tracking-wider text-gray-900 mb-4">Work Experience</h3>
-        <div className="flex flex-col gap-5">
+        <div className="space-y-5 block">
           {cvData.experience.map((exp, index) => {
             const dur = fmtDuration(exp.durationFrom, exp.durationTo);
             return (
-              <div key={index}>
+              <div key={index} className="break-inside-avoid">
                 <p className="text-sm text-gray-500 mb-1">{exp.institutionName}{dur ? ` | ${dur}` : ''}</p>
                 <h4 className="text-base font-bold text-gray-900 mb-1">{exp.position}</h4>
                 {exp.summary && <p className="text-gray-700 text-sm leading-relaxed text-justify whitespace-pre-wrap break-words">{exp.summary}</p>}
@@ -55,7 +55,7 @@ const ResumeTemplate = ({ userName, cvData }) => {
     ) : null,
 
     technicalSkills: cvData.technicalSkills?.length > 0 ? (
-      <section key="technicalSkills" className="mb-4">
+      <section key="technicalSkills" className="break-inside-avoid mb-4">
         <h3 className="text-lg font-bold uppercase tracking-wider text-gray-900 mb-4">Technical Skills</h3>
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-y-2 gap-x-4 text-sm text-gray-700 list-disc list-inside">
           {cvData.technicalSkills.map((skill, index) => <li key={index} className="marker:text-gray-400">{skill}</li>)}
@@ -64,7 +64,7 @@ const ResumeTemplate = ({ userName, cvData }) => {
     ) : null,
     
     softSkills: cvData.softSkills?.length > 0 ? (
-      <section key="softSkills" className="mb-4">
+      <section key="softSkills" className="break-inside-avoid mb-4">
         <h3 className="text-lg font-bold uppercase tracking-wider text-gray-900 mb-4">Soft Skills</h3>
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-y-2 gap-x-4 text-sm text-gray-700 list-disc list-inside">
           {cvData.softSkills.map((skill, index) => <li key={index} className="marker:text-gray-400">{skill}</li>)}
@@ -73,7 +73,7 @@ const ResumeTemplate = ({ userName, cvData }) => {
     ) : null,
     
     language: cvData.language?.length > 0 ? (
-      <section key="language" className="mb-4">
+      <section key="language" className="break-inside-avoid mb-4">
         <h3 className="text-lg font-bold uppercase tracking-wider text-gray-900 mb-4">Languages</h3>
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-y-2 gap-x-4 text-sm text-gray-700 list-disc list-inside">
           {cvData.language.map((skill, index) => <li key={index} className="marker:text-gray-400">{skill}</li>)}
@@ -137,13 +137,13 @@ const ResumeTemplate = ({ userName, cvData }) => {
       {sectionOrder.map((key) => {
         if (key === 'customSections' && cvData.customSections?.length > 0) {
           return cvData.customSections.map((section, sectionIndex) => (
-            <section key={`custom-${sectionIndex}`} className="mb-8 border-b-[1.5px] border-gray-400 pb-8">
+            <section key={`custom-${sectionIndex}`} className="break-inside-avoid mb-8 border-b-[1.5px] border-gray-400 pb-8">
               <h3 className="text-lg font-bold uppercase tracking-wider text-gray-900 mb-4">{section.title}</h3>
-              <div className="flex flex-col gap-5">
+              <div className="space-y-5 block">
                 {section.items.map((item, itemIndex) => {
                   const dur = fmtDuration(item.durationFrom, item.durationTo);
                   return (
-                    <div key={itemIndex}>
+                    <div key={itemIndex} className="break-inside-avoid">
                       {dur && <p className="text-sm text-gray-500 mb-1">{dur}</p>}
                       <h4 className="text-base font-bold text-gray-900 mb-1">
                         {item.link ? (

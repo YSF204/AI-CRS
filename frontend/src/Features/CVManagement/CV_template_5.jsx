@@ -27,7 +27,7 @@ const TwoColumnResumeTemplate = ({
 
   // Reusable Component for the Timeline Items (Experience & Education)
   const TimelineItem = ({ leftText1, leftText2, leftText3, title, description, isLast }) => (
-    <div className="flex relative">
+    <div className="flex relative break-inside-avoid">
       <div className="w-[30%] pr-6 text-left pt-0.5">
         <div className="text-gray-800 font-medium text-[13px] uppercase tracking-wide">{leftText1}</div>
         {leftText2 && <div className="text-gray-500 text-[13px]">{leftText2}</div>}
@@ -66,7 +66,7 @@ const TwoColumnResumeTemplate = ({
         {cvData.summary && (
           <div className="mb-8">
             <h3 className="uppercase text-sm font-bold tracking-widest text-white mb-3 border-b border-gray-500 pb-2">About Me</h3>
-            <p className="text-[13px] leading-relaxed text-gray-300 text-justify whitespace-pre-wrap break-words">{cvData.summary}</p>
+            <p className="text-[13px] leading-relaxed text-gray-300 whitespace-pre-wrap break-words">{cvData.summary}</p>
           </div>
         )}
 
@@ -186,9 +186,9 @@ const TwoColumnResumeTemplate = ({
         {(() => {
           const mainBlocks = {
             experience: cvData.experience && cvData.experience.length > 0 ? (
-              <div key="experience" className="mb-6">
+              <div key="experience" className="break-inside-avoid mb-6">
                 <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-6 border-b border-gray-400 pb-1">Work Experience</h3>
-                <div className="flex flex-col">
+                <div className="block">
                   {cvData.experience.map((exp, index) => {
                     const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                     return (
@@ -207,9 +207,9 @@ const TwoColumnResumeTemplate = ({
               </div>
             ) : null,
             education: cvData.education && cvData.education.length > 0 ? (
-              <div key="education" className="mb-6">
+              <div key="education" className="break-inside-avoid mb-6">
                 <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-6 border-b border-gray-400 pb-1">Education</h3>
-                <div className="flex flex-col">
+                <div className="block">
                   {cvData.education.map((edu, index) => {
                     const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                     return (
@@ -234,9 +234,9 @@ const TwoColumnResumeTemplate = ({
           return sectionOrder.map(key => {
             if (key === 'customSections' && mainCustomSections.length > 0) {
               return mainCustomSections.map((section, idx) => (
-                <div key={`custom-${idx}`} className="mb-6">
+                <div key={`custom-${idx}`} className="break-inside-avoid mb-6">
                   <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-6 border-b border-gray-400 pb-1">{section.title}</h3>
-                  <div className="flex flex-col">
+                  <div className="block">
                     {section.items.map((item, itemIdx) => {
                       const dur = fmtDuration(item.durationFrom, item.durationTo);
                       return (

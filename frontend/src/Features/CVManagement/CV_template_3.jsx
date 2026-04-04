@@ -43,19 +43,19 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData }) => {
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary">
+            <section key="summary" className="break-inside-avoid">
               <SectionHeader title="Professional Summary" />
               <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words text-justify">{cvData.summary}</p>
             </section>
           ) : null,
           experience: cvData.experience && cvData.experience.length > 0 ? (
-            <section key="experience">
+            <section key="experience" className="break-inside-avoid">
               <SectionHeader title="Professional Experience" />
-              <div className="flex flex-col gap-5">
+              <div className="space-y-5 block">
                 {cvData.experience.map((exp, index) => {
                   const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                   return (
-                    <div key={index}>
+                    <div key={index} className="break-inside-avoid">
                       <div className="flex flex-col sm:flex-row justify-between items-baseline mb-1">
                         <div>
                           <h3 className="text-[15px] font-bold text-gray-800">{exp.position}</h3>
@@ -71,13 +71,13 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData }) => {
             </section>
           ) : null,
           education: cvData.education && cvData.education.length > 0 ? (
-            <section key="education">
+            <section key="education" className="break-inside-avoid">
               <SectionHeader title="Education" />
-              <div className="flex flex-col gap-4">
+              <div className="space-y-4 block">
                 {cvData.education.map((edu, index) => {
                   const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                   return (
-                    <div key={index}>
+                    <div key={index} className="break-inside-avoid">
                       <h3 className="text-[15px] font-bold text-gray-800 mb-0.5">{edu.certification}</h3>
                       <p className="text-sm text-gray-800">
                         {edu.institutionName}
@@ -91,19 +91,19 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData }) => {
             </section>
           ) : null,
           technicalSkills: cvData.technicalSkills?.length > 0 ? (
-            <section key="technicalSkills">
+            <section key="technicalSkills" className="break-inside-avoid">
               <SectionHeader title="Technical Skills" />
               <p className="text-sm text-gray-800">{cvData.technicalSkills.join(', ')}</p>
             </section>
           ) : null,
           softSkills: cvData.softSkills?.length > 0 ? (
-            <section key="softSkills">
+            <section key="softSkills" className="break-inside-avoid">
               <SectionHeader title="Soft Skills" />
               <p className="text-sm text-gray-800">{cvData.softSkills.join(', ')}</p>
             </section>
           ) : null,
           language: cvData.language?.length > 0 ? (
-            <section key="language">
+            <section key="language" className="break-inside-avoid">
               <SectionHeader title="Languages" />
               <p className="text-sm text-gray-800">{cvData.language.join(', ')}</p>
             </section>
@@ -115,13 +115,13 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData }) => {
         return sectionOrder.map(key => {
           if (key === 'customSections' && cvData.customSections?.length > 0) {
             return cvData.customSections.map((section, sectionIndex) => (
-              <section key={`custom-${sectionIndex}`}>
+              <section key={`custom-${sectionIndex}`} className="break-inside-avoid">
                 <SectionHeader title={section.title} />
-                <div className="flex flex-col gap-4">
+                <div className="space-y-4 block">
                   {section.items.map((item, itemIndex) => {
                     const dur = fmtDuration(item.durationFrom, item.durationTo);
                     return (
-                      <div key={itemIndex}>
+                      <div key={itemIndex} className="break-inside-avoid">
                         <div className="flex flex-col sm:flex-row justify-between items-baseline mb-1">
                           <h3 className="text-[15px] font-bold text-gray-800">
                             {item.link ? (

@@ -55,19 +55,19 @@ const BlueAccentResumeTemplate = ({
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary">
+            <section key="summary" className="break-inside-avoid">
               <SectionHeader title="Summary" />
               <p className="text-sm text-gray-800 leading-relaxed text-justify whitespace-pre-wrap break-words">{cvData.summary}</p>
             </section>
           ) : null,
           experience: cvData.experience && cvData.experience.length > 0 ? (
-            <section key="experience">
+            <section key="experience" className="break-inside-avoid">
               <SectionHeader title="Professional Experience" />
-              <div className="flex flex-col gap-4">
+              <div className="space-y-4 block">
                 {cvData.experience.map((exp, index) => {
                   const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                   return (
-                    <div key={index}>
+                    <div key={index} className="break-inside-avoid">
                       <div className="flex flex-col sm:flex-row justify-between items-baseline mb-1">
                         <h3 className="text-[15px] font-bold text-gray-900">
                           {exp.position}{exp.institutionName ? `, ${exp.institutionName}` : ''}
@@ -82,13 +82,13 @@ const BlueAccentResumeTemplate = ({
             </section>
           ) : null,
           education: cvData.education && cvData.education.length > 0 ? (
-            <section key="education">
+            <section key="education" className="break-inside-avoid">
               <SectionHeader title="Education" />
-              <div className="flex flex-col gap-4">
+              <div className="space-y-4 block">
                 {cvData.education.map((edu, index) => {
                   const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                   return (
-                    <div key={index}>
+                    <div key={index} className="break-inside-avoid">
                       <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
                         <h3 className="text-[15px] font-bold text-gray-900">{edu.certification}</h3>
                         {dur && <div className="text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">{dur}</div>}
@@ -102,7 +102,7 @@ const BlueAccentResumeTemplate = ({
             </section>
           ) : null,
           technicalSkills: cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
-            <section key="technicalSkills">
+            <section key="technicalSkills" className="break-inside-avoid">
               <SectionHeader title="Technical Skills" />
               <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-4 text-sm text-gray-700">
                 {cvData.technicalSkills.map((skill, index) => <li key={index}>{skill}</li>)}
@@ -110,7 +110,7 @@ const BlueAccentResumeTemplate = ({
             </section>
           ) : null,
           softSkills: cvData.softSkills && cvData.softSkills.length > 0 ? (
-            <section key="softSkills">
+            <section key="softSkills" className="break-inside-avoid">
               <SectionHeader title="Soft Skills" />
               <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-4 text-sm text-gray-700">
                 {cvData.softSkills.map((skill, index) => <li key={index}>{skill}</li>)}
@@ -118,7 +118,7 @@ const BlueAccentResumeTemplate = ({
             </section>
           ) : null,
           language: cvData.language && cvData.language.length > 0 ? (
-            <section key="language">
+            <section key="language" className="break-inside-avoid">
               <SectionHeader title="Languages" />
               <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-4 text-sm text-gray-700">
                 {cvData.language.map((skill, index) => <li key={index}>{skill}</li>)}
@@ -132,13 +132,13 @@ const BlueAccentResumeTemplate = ({
         return sectionOrder.map(key => {
           if (key === 'customSections' && cvData.customSections?.length > 0) {
             return cvData.customSections.map((section, sectionIndex) => (
-              <section key={`custom-${sectionIndex}`}>
+              <section key={`custom-${sectionIndex}`} className="break-inside-avoid">
                 <SectionHeader title={section.title} />
-                <div className="flex flex-col gap-2">
+                <div className="space-y-2 block">
                   {section.items.map((item, itemIndex) => {
                     const dur = fmtDuration(item.durationFrom, item.durationTo);
                     return (
-                      <div key={itemIndex} className="text-sm text-gray-800">
+                      <div key={itemIndex} className="text-sm text-gray-800 break-inside-avoid">
                         <span className="font-bold text-gray-900 mr-2">• {item.link ? (
                           <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{item.name}</a>
                         ) : item.name}{dur ? ` | ${dur}` : ''}:</span>
