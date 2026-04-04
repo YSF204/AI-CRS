@@ -38,12 +38,7 @@ const htmlToPdf = async (html,cvid) =>{
             path : pdfPath,
             format : 'A4',
             printBackground : true,
-            margin : {
-                top : '10mm',
-                bottom : '10mm',
-                left : '10mm',
-                right : '10mm'
-            }
+            margin : { top: 0, bottom: 0, left: 0, right: 0 }
         })
 
         await browser.close();

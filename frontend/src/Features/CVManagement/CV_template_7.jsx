@@ -3,7 +3,13 @@ import React from 'react';
 const CenteredFormalTemplate = ({ userName = "", cvData }) => {
   if (!cvData) return null;
 
-  // Combine contact info into a single line separated by pipes
+  const fmtDuration = (from, to) => {
+    if (from && to) return `${from} – ${to}`;
+    if (from) return from;
+    if (to) return to;
+    return '';
+  };
+
   const contactItems = [];
   if (cvData.contact?.phone) contactItems.push(cvData.contact.phone);
   if (cvData.contact?.email) contactItems.push(cvData.contact.email);
@@ -14,59 +20,37 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
   if (cvData.contact?.linkedin) contactItems.push(cvData.contact.linkedin);
   if (cvData.contact?.github) contactItems.push(cvData.contact.github);
 
-  // Combine all skills for the Core Strengths section
-  const allSkills = [
-    ...(cvData.technicalSkills || []),
-    ...(cvData.softSkills || []),
-    ...(cvData.language || [])
-  ];
-
-  // Reusable Section Header Component
   const SectionHeader = ({ title }) => (
     <div className="my-6">
       <hr className="border-t-[1px] border-gray-300 mb-4" />
-      <h2 className="text-center text-[15px] font-bold uppercase tracking-widest text-gray-800">
-        {title}
-      </h2>
+      <h2 className="text-center text-[15px] font-bold uppercase tracking-widest text-gray-800">{title}</h2>
       <hr className="border-t-[1px] border-gray-300 mt-4" />
     </div>
   );
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-12 md:p-16 text-gray-800 font-sans shadow-md">
-      
-      {/* HEADER SECTION */}
+    <div className="bg-white p-12 md:p-16 text-gray-800 font-sans" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
       <header className="text-center mb-6">
-        <h1 className="text-4xl md:text-[42px] font-bold uppercase tracking-wide text-gray-900 mb-2">
-          {userName}
-        </h1>
-        <h2 className="text-lg text-gray-600 mb-4">
-          {cvData.jobTitle}
-        </h2>
-        
-        {/* Contact info wrapping line */}
+        <h1 className="text-4xl md:text-[42px] font-bold uppercase tracking-wide text-gray-900 mb-2">{userName}</h1>
+        <h2 className="text-lg text-gray-600 mb-4">{cvData.jobTitle}</h2>
         <div className="border-y-[1px] border-gray-300 py-3 mb-2">
           <div className="flex flex-wrap justify-center items-center gap-2 text-[14px] text-gray-700">
             {contactItems.map((item, index) => (
               <React.Fragment key={index}>
                 <span>{item}</span>
-                {index < contactItems.length - 1 && (
-                  <span className="text-gray-400 font-light px-1">|</span>
-                )}
+                {index < contactItems.length - 1 && <span className="text-gray-400 font-light px-1">|</span>}
               </React.Fragment>
             ))}
           </div>
         </div>
       </header>
 
-      {/* CAREER SUMMARY is replaced by dynamic mapping */}
-
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
             <section key="summary">
               <SectionHeader title="Career Summary" />
-              <p className="text-[14.5px] text-gray-800 leading-[1.7] text-justify whitespace-pre-line">{cvData.summary}</p>
+              <p className="text-[14.5px] text-gray-800 leading-[1.7] text-justify whitespace-pre-wrap break-words">{cvData.summary}</p>
             </section>
           ) : null,
           technicalSkills: cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
@@ -97,16 +81,19 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
             <section key="experience">
               <SectionHeader title="Professional Experience" />
               <div className="flex flex-col gap-6">
-                {cvData.experience.map((exp, index) => (
-                  <div key={index}>
-                    <div className="text-[14.5px] text-gray-800 mb-2">
-                      <span className="font-bold">{exp.position}</span>
-                      {exp.institutionName && <span> | {exp.institutionName}</span>}
-                      {exp.duration && <span> | {exp.duration}</span>}
+                {cvData.experience.map((exp, index) => {
+                  const dur = fmtDuration(exp.durationFrom, exp.durationTo);
+                  return (
+                    <div key={index}>
+                      <div className="text-[14.5px] text-gray-800 mb-2">
+                        <span className="font-bold">{exp.position}</span>
+                        {exp.institutionName && <span> | {exp.institutionName}</span>}
+                        {dur && <span> | {dur}</span>}
+                      </div>
+                      {exp.summary && <div className="text-[14.5px] text-gray-800 leading-[1.7] whitespace-pre-wrap break-words ml-5">{exp.summary}</div>}
                     </div>
-                    {exp.summary && <div className="text-[14.5px] text-gray-800 leading-[1.7] whitespace-pre-line ml-5">{exp.summary}</div>}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           ) : null,
@@ -114,16 +101,19 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
             <section key="education">
               <SectionHeader title="Education" />
               <div className="flex flex-col gap-6">
-                {cvData.education.map((edu, index) => (
-                  <div key={index}>
-                    <div className="text-[14.5px] text-gray-800 mb-2">
-                      <span className="font-bold">{edu.certification}</span>
-                      {edu.institutionName && <span> | {edu.institutionName}</span>}
-                      {edu.duration && <span> | {edu.duration}</span>}
+                {cvData.education.map((edu, index) => {
+                  const dur = fmtDuration(edu.durationFrom, edu.durationTo);
+                  return (
+                    <div key={index}>
+                      <div className="text-[14.5px] text-gray-800 mb-2">
+                        <span className="font-bold">{edu.certification}</span>
+                        {edu.institutionName && <span> | {edu.institutionName}</span>}
+                        {dur && <span> | {dur}</span>}
+                      </div>
+                      {edu.summary && <div className="text-[14.5px] text-gray-800 leading-[1.7] whitespace-pre-wrap break-words ml-5">{edu.summary}</div>}
                     </div>
-                    {edu.summary && <div className="text-[14.5px] text-gray-800 leading-[1.7] whitespace-pre-line ml-5">{edu.summary}</div>}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           ) : null,
@@ -137,25 +127,30 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
               <section key={`custom-${sectionIndex}`}>
                 <SectionHeader title={section.title} />
                 <div className="flex flex-col gap-5">
-                  {section.items.map((item, itemIndex) => (
-                    <div key={itemIndex}>
-                      <div className="text-[14.5px] text-gray-800 mb-1">
-                        <span className="font-bold">{item.name}</span>
-                        {item.duration && <span> | {item.duration}</span>}
-                        {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-2">[Link]</a>}
+                  {section.items.map((item, itemIndex) => {
+                    const dur = fmtDuration(item.durationFrom, item.durationTo);
+                    return (
+                      <div key={itemIndex}>
+                        <div className="text-[14.5px] text-gray-800 mb-1">
+                          <span className="font-bold">
+                            {item.link ? (
+                              <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{item.name}</a>
+                            ) : item.name}
+                          </span>
+                          {dur && <span> | {dur}</span>}
+                        </div>
+                        {item.description && <div className="text-[14.5px] text-gray-800 leading-[1.7] whitespace-pre-wrap break-words ml-5">{item.description}</div>}
                       </div>
-                      {item.description && <div className="text-[14.5px] text-gray-800 leading-[1.7] whitespace-pre-line ml-5">{item.description}</div>}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             ));
           }
-          if (key === 'skills') return null; // Separated in this template now
+          if (key === 'skills') return null;
           return sectionBlocks[key];
         });
       })()}
-
     </div>
   );
 };

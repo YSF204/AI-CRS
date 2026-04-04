@@ -2,10 +2,17 @@ import React from 'react';
 
 const TwoColumnResumeTemplate = ({
   userName = "",
-  profileImage, // Pass an image URL here
+  profileImage,
   cvData
 }) => {
   if (!cvData) return null;
+
+  const fmtDuration = (from, to) => {
+    if (from && to) return `${from} – ${to}`;
+    if (from) return from;
+    if (to) return to;
+    return '';
+  };
 
   const displayImage = cvData.profileImage || profileImage || null;
 
@@ -21,54 +28,33 @@ const TwoColumnResumeTemplate = ({
   // Reusable Component for the Timeline Items (Experience & Education)
   const TimelineItem = ({ leftText1, leftText2, leftText3, title, description, isLast }) => (
     <div className="flex relative">
-      {/* Left side (Dates, Company, Location) */}
       <div className="w-[30%] pr-6 text-left pt-0.5">
         <div className="text-gray-800 font-medium text-[13px] uppercase tracking-wide">{leftText1}</div>
-        <div className="text-gray-500 text-[13px]">{leftText2}</div>
-        <div className="text-gray-400 text-[12px] mt-1">{leftText3}</div>
+        {leftText2 && <div className="text-gray-500 text-[13px]">{leftText2}</div>}
+        {leftText3 && <div className="text-gray-400 text-[12px] mt-1">{leftText3}</div>}
       </div>
-
-      {/* Center Timeline Divider */}
       <div className="relative flex flex-col items-center w-4 flex-shrink-0">
         <div className="w-2.5 h-2.5 bg-gray-600 rounded-full mt-1.5 z-10"></div>
         {!isLast && <div className="absolute top-3 bottom-[-1.5rem] left-1/2 -translate-x-1/2 w-[1.5px] bg-gray-300"></div>}
       </div>
-
-      {/* Right side (Title & Summary) */}
       <div className="w-[70%] pl-6 pb-6">
         <h4 className="font-bold text-gray-800 text-[15px] mb-1.5">{title}</h4>
         {description && (
-          <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-            {description}
-          </div>
+          <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap break-words">{description}</div>
         )}
       </div>
     </div>
   );
 
-  // Reusable Component for Skill Bars
-  const SkillBar = ({ name }) => (
-    <div className="mb-4">
-      <div className="uppercase text-[11px] text-gray-600 tracking-widest font-bold mb-1.5">{name}</div>
-      <div className="h-1 bg-gray-200 w-full">
-        <div className="h-full bg-gray-600 w-[85%]"></div> {/* 85% is simulated since schema lacks proficiency levels */}
-      </div>
-    </div>
-  );
-
   return (
-    <div className="max-w-[950px] mx-auto bg-white flex shadow-lg font-sans min-h-[1100px]">
+    <div className="bg-white flex font-sans min-h-[1100px]" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
 
       {/* LEFT COLUMN (SIDEBAR) */}
-      <div className="w-[32%] bg-[#4b4b4b] text-gray-200 p-8 flex flex-col">
+      <div className="w-[32%] bg-[#4b4b4b] text-gray-200 p-8 flex flex-col" style={{ minWidth: 0 }}>
         {/* Profile Image */}
         <div className="mb-8 flex justify-center">
           {displayImage ? (
-            <img
-              src={displayImage}
-              alt={userName}
-              className="w-40 h-40 rounded-full object-cover border-2 border-gray-400"
-            />
+            <img src={displayImage} alt={userName} className="w-40 h-40 rounded-full object-cover border-2 border-gray-400" />
           ) : (
             <div className="w-40 h-40 rounded-full bg-gray-600 flex items-center justify-center border-2 border-gray-400">
               <span className="text-gray-300 text-sm">No Image</span>
@@ -79,38 +65,64 @@ const TwoColumnResumeTemplate = ({
         {/* ABOUT ME */}
         {cvData.summary && (
           <div className="mb-8">
-            <h3 className="uppercase text-sm font-bold tracking-widest text-white mb-3 border-b border-gray-500 pb-2">
-              About Me
-            </h3>
-            <p className="text-[13px] leading-relaxed text-gray-300 text-justify">
-              {cvData.summary}
-            </p>
+            <h3 className="uppercase text-sm font-bold tracking-widest text-white mb-3 border-b border-gray-500 pb-2">About Me</h3>
+            <p className="text-[13px] leading-relaxed text-gray-300 text-justify whitespace-pre-wrap break-words">{cvData.summary}</p>
           </div>
         )}
 
         {/* LINKS */}
         {(cvData.contact?.linkedin || cvData.contact?.github) && (
           <div className="mb-8">
-            <h3 className="uppercase text-sm font-bold tracking-widest text-white mb-3 border-b border-gray-500 pb-2">
-              Links
-            </h3>
+            <h3 className="uppercase text-sm font-bold tracking-widest text-white mb-3 border-b border-gray-500 pb-2">Links</h3>
             <div className="flex flex-col gap-3 text-[13px]">
               {cvData.contact.linkedin && (
                 <div>
                   <span className="font-bold text-white block mb-0.5">LinkedIn:</span>
-                  <a href={`https://${cvData.contact.linkedin}`} className="text-gray-300 hover:text-white underline break-all">
-                    {cvData.contact.linkedin}
-                  </a>
+                  <a href={`https://${cvData.contact.linkedin}`} className="text-gray-300 hover:text-white underline break-all">{cvData.contact.linkedin}</a>
                 </div>
               )}
               {cvData.contact.github && (
                 <div>
                   <span className="font-bold text-white block mb-0.5">GitHub:</span>
-                  <a href={`https://${cvData.contact.github}`} className="text-gray-300 hover:text-white underline break-all">
-                    {cvData.contact.github}
-                  </a>
+                  <a href={`https://${cvData.contact.github}`} className="text-gray-300 hover:text-white underline break-all">{cvData.contact.github}</a>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* TECHNICAL SKILLS — simple tags, no fake bars */}
+        {cvData.technicalSkills && cvData.technicalSkills.length > 0 && (
+          <div className="mb-8">
+            <h3 className="uppercase text-sm font-bold tracking-widest text-white mb-3 border-b border-gray-500 pb-2">Technical Skills</h3>
+            <div className="flex flex-wrap gap-2">
+              {cvData.technicalSkills.map((skill, index) => (
+                <span key={index} className="uppercase text-[11px] text-gray-300 tracking-wider font-medium bg-gray-600/50 px-2.5 py-1 rounded-sm">{skill}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* SOFT SKILLS */}
+        {cvData.softSkills && cvData.softSkills.length > 0 && (
+          <div className="mb-8">
+            <h3 className="uppercase text-sm font-bold tracking-widest text-white mb-3 border-b border-gray-500 pb-2">Soft Skills</h3>
+            <div className="flex flex-wrap gap-2">
+              {cvData.softSkills.map((skill, index) => (
+                <span key={index} className="uppercase text-[11px] text-gray-300 tracking-wider font-medium bg-gray-600/50 px-2.5 py-1 rounded-sm">{skill}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* LANGUAGES — simple tags, no fake bars */}
+        {cvData.language && cvData.language.length > 0 && (
+          <div className="mb-8">
+            <h3 className="uppercase text-sm font-bold tracking-widest text-white mb-3 border-b border-gray-500 pb-2">Languages</h3>
+            <div className="flex flex-wrap gap-2">
+              {cvData.language.map((lang, index) => (
+                <span key={index} className="uppercase text-[11px] text-gray-300 tracking-wider font-medium bg-gray-600/50 px-2.5 py-1 rounded-sm">{lang}</span>
+              ))}
             </div>
           </div>
         )}
@@ -118,9 +130,7 @@ const TwoColumnResumeTemplate = ({
         {/* SIDEBAR CUSTOM SECTIONS (Hobbies, References) */}
         {sidebarCustomSections.map((section, idx) => (
           <div key={idx} className="mb-8">
-            <h3 className="uppercase text-sm font-bold tracking-widest text-white mb-3 border-b border-gray-500 pb-2">
-              {section.title}
-            </h3>
+            <h3 className="uppercase text-sm font-bold tracking-widest text-white mb-3 border-b border-gray-500 pb-2">{section.title}</h3>
             <div className="flex flex-col gap-2 text-[13px] text-gray-300">
               {section.items.map((item, itemIdx) => (
                 <div key={itemIdx}>
@@ -129,7 +139,7 @@ const TwoColumnResumeTemplate = ({
                   ) : (
                     <>
                       <div className="font-bold text-white uppercase">{item.name}</div>
-                      {item.description && <div className="whitespace-pre-line">{item.description}</div>}
+                      {item.description && <div className="whitespace-pre-wrap break-words">{item.description}</div>}
                     </>
                   )}
                 </div>
@@ -140,8 +150,7 @@ const TwoColumnResumeTemplate = ({
       </div>
 
       {/* RIGHT COLUMN (MAIN CONTENT) */}
-      <div className="w-[68%] p-10 flex flex-col">
-
+      <div className="w-[68%] p-10 flex flex-col" style={{ minWidth: 0 }}>
         {/* HEADER AREA */}
         <div className="flex justify-between items-start mb-10">
           <div className="flex-1">
@@ -150,11 +159,8 @@ const TwoColumnResumeTemplate = ({
                 <span key={i} className="block">{name}</span>
               ))}
             </h1>
-            <h2 className="text-[13px] font-bold uppercase tracking-[0.2em] text-gray-500">
-              {cvData.jobTitle}
-            </h2>
+            <h2 className="text-[13px] font-bold uppercase tracking-[0.2em] text-gray-500">{cvData.jobTitle}</h2>
           </div>
-
           <div className="flex flex-col gap-2 text-[12px] text-gray-500 text-right">
             {(cvData.address?.street || cvData.address?.city) && (
               <div className="flex items-center justify-end gap-2">
@@ -176,23 +182,27 @@ const TwoColumnResumeTemplate = ({
             )}
           </div>
         </div>
+
         {(() => {
           const mainBlocks = {
             experience: cvData.experience && cvData.experience.length > 0 ? (
               <div key="experience" className="mb-6">
                 <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-6 border-b border-gray-400 pb-1">Work Experience</h3>
                 <div className="flex flex-col">
-                  {cvData.experience.map((exp, index) => (
-                    <TimelineItem
-                      key={index}
-                      leftText1={exp.institutionName}
-                      leftText2={""} 
-                      leftText3={exp.duration}
-                      title={exp.position}
-                      description={exp.summary}
-                      isLast={index === cvData.experience.length - 1}
-                    />
-                  ))}
+                  {cvData.experience.map((exp, index) => {
+                    const dur = fmtDuration(exp.durationFrom, exp.durationTo);
+                    return (
+                      <TimelineItem
+                        key={index}
+                        leftText1={exp.institutionName}
+                        leftText2={""}
+                        leftText3={dur}
+                        title={exp.position}
+                        description={exp.summary}
+                        isLast={index === cvData.experience.length - 1}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             ) : null,
@@ -200,41 +210,20 @@ const TwoColumnResumeTemplate = ({
               <div key="education" className="mb-6">
                 <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-6 border-b border-gray-400 pb-1">Education</h3>
                 <div className="flex flex-col">
-                  {cvData.education.map((edu, index) => (
-                    <TimelineItem
-                      key={index}
-                      leftText1={edu.institutionName}
-                      leftText2={""}
-                      leftText3={edu.duration}
-                      title={edu.certification}
-                      description={edu.summary}
-                      isLast={index === cvData.education.length - 1}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : null,
-            technicalSkills: cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
-              <div key="technicalSkills" className="mb-6">
-                <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-4 border-b border-gray-400 pb-1">Technical Skills</h3>
-                <div className="grid grid-cols-2 gap-x-12 gap-y-1">
-                  {cvData.technicalSkills.map((skill, index) => <SkillBar key={index} name={skill} />)}
-                </div>
-              </div>
-            ) : null,
-            softSkills: cvData.softSkills && cvData.softSkills.length > 0 ? (
-              <div key="softSkills" className="mb-6">
-                <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-4 border-b border-gray-400 pb-1">Soft Skills</h3>
-                <div className="grid grid-cols-2 gap-x-12 gap-y-1">
-                  {cvData.softSkills.map((skill, index) => <SkillBar key={index} name={skill} />)}
-                </div>
-              </div>
-            ) : null,
-            language: cvData.language && cvData.language.length > 0 ? (
-              <div key="language" className="mb-6">
-                <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-4 border-b border-gray-400 pb-1">Languages</h3>
-                <div className="grid grid-cols-2 gap-x-12 gap-y-1">
-                  {cvData.language.map((lang, index) => <SkillBar key={index} name={lang} />)}
+                  {cvData.education.map((edu, index) => {
+                    const dur = fmtDuration(edu.durationFrom, edu.durationTo);
+                    return (
+                      <TimelineItem
+                        key={index}
+                        leftText1={edu.institutionName}
+                        leftText2={""}
+                        leftText3={dur}
+                        title={edu.certification}
+                        description={edu.summary}
+                        isLast={index === cvData.education.length - 1}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             ) : null,
@@ -248,27 +237,31 @@ const TwoColumnResumeTemplate = ({
                 <div key={`custom-${idx}`} className="mb-6">
                   <h3 className="uppercase text-[14px] font-bold tracking-widest text-gray-800 mb-6 border-b border-gray-400 pb-1">{section.title}</h3>
                   <div className="flex flex-col">
-                    {section.items.map((item, itemIdx) => (
-                      <TimelineItem
-                        key={itemIdx}
-                        leftText1={item.name}
-                        leftText2={item.link ? "Link Available" : ""}
-                        leftText3={item.duration}
-                        title={item.name}
-                        description={item.description}
-                        isLast={itemIdx === section.items.length - 1}
-                      />
-                    ))}
+                    {section.items.map((item, itemIdx) => {
+                      const dur = fmtDuration(item.durationFrom, item.durationTo);
+                      return (
+                        <TimelineItem
+                          key={itemIdx}
+                          leftText1={dur}
+                          leftText2={""}
+                          leftText3={""}
+                          title={item.link ? (
+                            <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{item.name}</a>
+                          ) : item.name}
+                          description={item.description}
+                          isLast={itemIdx === section.items.length - 1}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               ));
             }
-            if (key === 'summary') return null; // Summary is rendered in the sidebar for template 5
-            if (key === 'skills') return null; // Mapped individually
+            if (key === 'summary') return null;
+            if (key === 'technicalSkills' || key === 'softSkills' || key === 'language') return null; // rendered in sidebar
             return mainBlocks[key];
           });
         })()}
-
       </div>
     </div>
   );
