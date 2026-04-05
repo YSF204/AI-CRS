@@ -9,7 +9,9 @@ const getClient = () => {
   return client;
 };
 
-const buildPrompt = (jobDescription) => `You are a Senior Technical Recruiter and ATS expert.
+const buildPrompt = (
+  jobDescription,
+) => `You are a Senior Technical Recruiter and ATS expert.
 
 Do TWO things with the attached CV:
 
@@ -75,9 +77,9 @@ export const analyzeCVFromFile = async (filePath, jobDescription) => {
   return response.output_text;
 };
 
-
-
-const promptForCvInDatabase = (jobDescription) => `You are a Senior Technical Recruiter and ATS expert.
+const promptForCvInDatabase = (
+  jobDescription,
+) => `You are a Senior Technical Recruiter and ATS expert.
 
 Do ONE thing with the attached CV:
 
@@ -96,8 +98,7 @@ Respond with ONLY a valid JSON object (no markdown, no code fences).
   }
 }`;
 
-
-// for CV in the database 
+// for CV in the database
 export const analyzeCVFromDatabase = async (cvText, jobDescription) => {
   const response = await getClient().responses.create({
     model: "gpt-4.1",
@@ -115,43 +116,48 @@ export const analyzeCVFromDatabase = async (cvText, jobDescription) => {
   return response.output_text;
 };
 
-
-const matchPrompt = () => {
+const matchJobsPrompt = () => {
   return `You are a Senior Technical Recruiter and ATS expert.
 
-You will be given a CANDIDATE CV and a JOB POSTING.
-Your task is to match them and return a structured analysis.
+You will be given a CANDIDATE CV and a list of open JOB POSTINGS.
+Your task is to compare the candidate to each available job and return a ranked list of recommended jobs.
 
-Respond with ONLY a valid JSON object (no markdown, no code fences).
+Respond with ONLY a valid JSON array (no markdown, no code fences).
+The array should be sorted best-first.
 
-{
-  "matchScore": <number 0-100, overall match percentage>,
-  "skillsMatched": ["<skills the candidate has that the job requires>"],
-  "skillsMissing": ["<skills the job requires but the candidate lacks>"],
-  "experienceMatch": <true | false, does candidate meet years of experience?>,
-  "reasoning": "<2-3 sentence summary of why this score was given>"
-}`;
-}
+[
+  {
+    "jobId": "<job id>",
+    "position": "<job title>",
+    "matchScore": <number 0-100>,
+    "skillsMatched": ["<skills the candidate has that the job requires>"],
+    "skillsMissing": ["<skills the job requires but the candidate lacks>"],
+    "reasoning": "<short summary of why this role is a good or poor fit>"
+  }
+]`;
+};
 
-export const matchCVToJob = async (cvText, jobText) => {
+export const matchCVToJobs = async (cvText, jobText) => {
   const response = await getClient().responses.create({
     model: "gpt-4.1",
-    input: [{
-      role: "user",
-      content: [
-        { type: "input_text", text: matchPrompt() },
-        { type: "input_text", text: `--- CANDIDATE CV ---\n${cvText}` },
-        { type: "input_text", text: `--- JOB POSTING ---\n${jobText}` },
-      ],
-    }],
+    input: [
+      {
+        role: "user",
+        content: [
+          { type: "input_text", text: matchJobsPrompt() },
+          { type: "input_text", text: `--- CANDIDATE CV ---\n${cvText}` },
+          { type: "input_text", text: `--- JOB POSTINGS ---\n${jobText}` },
+        ],
+      },
+    ],
   });
 
   return response.output_text;
+};
 
-}
-
-
-const rankCandidatesPrompt = (requiemrents) => ` You are a Senior Technical Recruiter and ATS expert.
+const rankCandidatesPrompt = (
+  requiemrents,
+) => ` You are a Senior Technical Recruiter and ATS expert.
 You will receive multiple candidate CVs, each delimited by "=== CANDIDATE [cvId] ===".
 Rank them strictly based on how well they fit the following position:
 ${requiemrents}
@@ -168,17 +174,18 @@ Return ONLY a valid JSON array (no markdown, no code fences), sorted best-first:
   }
 ]`;
 
-
-export const rankCandidates = async (requiemrentsText , CV) => {
+export const rankCandidates = async (requiemrentsText, CV) => {
   const response = await getClient().responses.create({
     model: "gpt-4.1",
-    input: [{
-      role: "user",
-      content: [
-        { type: "input_text", text: rankCandidatesPrompt(requiemrentsText) },
-        { type: "input_text", text: CV.join("\n\n") },
-      ],
-    }],
+    input: [
+      {
+        role: "user",
+        content: [
+          { type: "input_text", text: rankCandidatesPrompt(requiemrentsText) },
+          { type: "input_text", text: CV.join("\n\n") },
+        ],
+      },
+    ],
   });
   return response.output_text;
 };

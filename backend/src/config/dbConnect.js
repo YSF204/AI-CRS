@@ -4,8 +4,8 @@ const TIMEOUT = 5000;
 
 const connectDB = async () => {
   const CLUSTERS = [
-    { uri: process.env.MONGODB_URI,           label: "Bahrain (primary)"   },
-    { uri: process.env.MONGODB_URL_FRANKFURT, label: "Frankfurt (fallback)" },
+    { uri: process.env.MONGODB_URL_FRANKFURT, label: "Frankfurt (primary)" },
+    { uri: process.env.MONGODB_URI, label: "Bahrain (fallback)" },
   ];
 
   for (const { uri, label } of CLUSTERS) {
@@ -20,7 +20,8 @@ const connectDB = async () => {
       return;
     } catch (err) {
       console.warn(`[${label}] failed — ${err.message}`);
-      if (mongoose.connection.readyState !== 0) await mongoose.disconnect().catch(() => {});
+      if (mongoose.connection.readyState !== 0)
+        await mongoose.disconnect().catch(() => {});
     }
   }
 
@@ -29,4 +30,3 @@ const connectDB = async () => {
 };
 
 export default connectDB;
-

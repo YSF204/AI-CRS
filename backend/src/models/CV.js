@@ -68,12 +68,12 @@ const cvSchema = new mongoose.Schema(
         durationFrom: {
           type: String,
           trim: true,
-          default: '',
+          default: "",
         },
         durationTo: {
           type: String,
           trim: true,
-          default: '',
+          default: "",
         },
         position: {
           type: String,
@@ -96,12 +96,12 @@ const cvSchema = new mongoose.Schema(
         durationFrom: {
           type: String,
           trim: true,
-          default: '',
+          default: "",
         },
         durationTo: {
           type: String,
           trim: true,
-          default: '',
+          default: "",
         },
         certification: {
           type: String,
@@ -131,14 +131,19 @@ const cvSchema = new mongoose.Schema(
         title: {
           type: String,
           trim: true,
-          default: '',
+          default: "",
+        },
+        sectionType: {
+          type: String,
+          enum: ["projects", "hobbies", "other"],
+          default: "other",
         },
         items: [
           {
             name: {
               type: String,
               trim: true,
-              default: '',
+              default: "",
             },
             description: {
               type: String,
@@ -147,12 +152,12 @@ const cvSchema = new mongoose.Schema(
             durationFrom: {
               type: String,
               trim: true,
-              default: '',
+              default: "",
             },
             durationTo: {
               type: String,
               trim: true,
-              default: '',
+              default: "",
             },
             link: {
               type: String,
@@ -175,13 +180,13 @@ const cvSchema = new mongoose.Schema(
     layout: {
       sectionOrder: {
         type: [String],
-        default: []
+        default: [],
       },
       visibleSections: {
         type: Map,
         of: Boolean,
-        default: {}
-      }
+        default: {},
+      },
     },
   },
   {
