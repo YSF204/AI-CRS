@@ -8,6 +8,8 @@ export function useApplyJob() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const appId = searchParams.get("appId");
+  const editMethod = searchParams.get("method");
+  const forceFresh = searchParams.get("fresh") === "true";
   const isEdit = !!appId;
 
   const [step, setStep] = useState("upload"); // upload, analyzing, analysis, result
@@ -63,31 +65,48 @@ export function useApplyJob() {
         const res = await api.get(`/applications/${appId}`);
         const application = res.data?.data?.application;
         if (application) {
-          if (application.cvId) {
+          const requestedMethod = editMethod || (forceFresh ? null : application.applicationMethod);
+
+          if (requestedMethod === "existingCv") {
             setApplicationMethod("existingCv");
-            setSelectedCvId(application.cvId._id);
-          } else {
+            setSelectedCvId(application.cvId?._id || "");
+          } else if (requestedMethod === "uploadPdf") {
+            setApplicationMethod("uploadPdf");
+          } else if (requestedMethod === "manual") {
             setApplicationMethod("manual");
-            setManualFormData({
-              firstName: application.applicantInfo.fullName.split(" ")[0] || "",
-              lastName: application.applicantInfo.fullName.split(" ").slice(1).join(" ") || "",
-              email: application.applicantInfo.email || "",
-              phone: application.applicantInfo.phone || "",
-              yearsOfExperience: application.applicantInfo.yearsOfExperience || "",
-              technicalSkills: application.applicantInfo.technicalSkills || [],
-              softSkills: application.applicantInfo.softSkills || [],
-              languages: application.applicantInfo.languages || [],
-              summary: application.applicantInfo.summary || "",
-            });
+          } else if (!forceFresh) {
+            if (application.applicationMethod === "uploadPdf") {
+              setApplicationMethod("uploadPdf");
+            } else if (application.cvId) {
+              setApplicationMethod("existingCv");
+              setSelectedCvId(application.cvId._id || "");
+            } else {
+              setApplicationMethod("manual");
+            }
           }
-          setMatchAnalysis(application.matchDetails);
+
+          setManualFormData({
+            firstName: application.applicantInfo?.fullName?.split(" ")[0] || "",
+            lastName: application.applicantInfo?.fullName?.split(" ").slice(1).join(" ") || "",
+            email: application.applicantInfo?.email || "",
+            phone: application.applicantInfo?.phone || "",
+            yearsOfExperience: application.applicantInfo?.yearsOfExperience || "",
+            technicalSkills: application.applicantInfo?.technicalSkills || [],
+            softSkills: application.applicantInfo?.softSkills || [],
+            languages: application.applicantInfo?.languages || [],
+            summary: application.applicantInfo?.summary || "",
+          });
+          
+          if (application.matchDetails) {
+            setMatchAnalysis(application.matchDetails);
+          }
         }
       } catch (error) {
         console.error("Failed to load application:", error);
       }
     };
     loadApplication();
-  }, [isEdit, appId]);
+  }, [isEdit, appId, editMethod, forceFresh]);
 
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];

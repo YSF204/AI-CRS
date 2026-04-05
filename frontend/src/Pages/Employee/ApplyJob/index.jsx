@@ -1,6 +1,6 @@
 import React from "react";
 import { ChevronLeft, Loader } from "lucide-react";
-import DashboardNav from "../../../../components/shared/DashboardNav";
+import DashboardNav from "../../../components/shared/DashboardNav";
 import { useApplyJob } from "./hooks/useApplyJob";
 
 // Subcomponents
