@@ -44,12 +44,25 @@ export const CUSTOM_SECTION_TYPES = [
     value: "projects",
     label: "Projects",
     fields: ["name", "description", "durationFrom", "durationTo", "link"],
+    defaultTitle: "Projects",
   },
-  { value: "hobbies", label: "Hobbies", fields: ["name", "description"] },
+  {
+    value: "hobbies",
+    label: "Hobbies",
+    fields: ["name", "description"],
+    defaultTitle: "Hobbies",
+  },
+  {
+    value: "certifications",
+    label: "Certifications",
+    fields: ["name", "description", "durationFrom", "durationTo", "link"],
+    defaultTitle: "Certifications",
+  },
   {
     value: "other",
     label: "Other (Custom)",
     fields: ["name", "description", "durationFrom", "durationTo", "link"],
+    defaultTitle: "",
   },
 ];
 

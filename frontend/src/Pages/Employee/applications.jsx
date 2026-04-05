@@ -1,64 +1,10 @@
-import React, { useMemo } from "react";
-import {
-  ClipboardList,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  FileText,
-  Edit2,
-} from "lucide-react";
+import React, { useMemo, useState } from "react";
+import { ClipboardList } from "lucide-react";
 import DashboardNav from "../../components/shared/DashboardNav";
 import StatsBar from "../../components/shared/StatsBar";
+import ApplicationDetailsModal from "../../components/Employee/ApplicationDetailsModal";
 import useFetch from "../../hooks/useFetch";
 import api from "../../services/api";
-
-const getStatusBadgeStyle = (status) => {
-  const statusMap = {
-    pending: {
-      bg: "bg-blue-100",
-      text: "text-blue-900",
-      label: "📤 Applied",
-      icon: FileText,
-    },
-    accepted: {
-      bg: "bg-green-100",
-      text: "text-green-900",
-      label: "✅ Accepted",
-      icon: CheckCircle,
-    },
-    rejected: {
-      bg: "bg-red-100",
-      text: "text-red-900",
-      label: "❌ Rejected",
-      icon: AlertCircle,
-    },
-    Applied: {
-      bg: "bg-blue-100",
-      text: "text-blue-900",
-      label: "📤 Applied",
-      icon: FileText,
-    },
-    "Under Review": {
-      bg: "bg-yellow-100",
-      text: "text-yellow-900",
-      label: "⏳ Under Review",
-      icon: Clock,
-    },
-    Shortlisted: {
-      bg: "bg-green-100",
-      text: "text-green-900",
-      label: "✅ Shortlisted",
-      icon: CheckCircle,
-    },
-    Rejected: {
-      bg: "bg-red-100",
-      text: "text-red-900",
-      label: "❌ Rejected",
-      icon: AlertCircle,
-    },
-  };
-  return statusMap[status] || statusMap["pending"];
-};
 
 export default function Applications() {
   const {
@@ -72,6 +18,30 @@ export default function Applications() {
     },
     { initialData: [] },
   );
+
+  const [selectedApplication, setSelectedApplication] = useState(null);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleApplicationClick = async (app) => {
+    setSelectedApplication(app);
+    // Fetch full job details
+    try {
+      const res = await api.get(`/jobs/${app.jobId._id || app.jobId}`);
+      setSelectedJob(res.data?.data?.job);
+    } catch (error) {
+      console.error("Failed to fetch job details:", error);
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setTimeout(() => {
+      setSelectedApplication(null);
+      setSelectedJob(null);
+    }, 300);
+  };
 
   const stats = useMemo(() => {
     return [
@@ -146,66 +116,23 @@ export default function Applications() {
           /* Applications Grid */
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {applications.map((app) => {
-              const statusStyle = getStatusBadgeStyle(app.status || "Applied");
-              const StatusIcon = statusStyle.icon;
-
               return (
                 <div
                   key={app._id}
                   className="brutal-card p-6 bg-(--card-bg) hover:border-black transition-all border-4 border-(--border-color) hover:scale-105 cursor-pointer"
-                  onClick={() =>
-                    navigate(
-                      `/employee/apply-job/${app.jobId._id}?appId=${app._id}`,
-                    )
-                  }
+                  onClick={() => handleApplicationClick(app)}
                 >
-                  {/* Status Badge */}
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="inline-flex items-center gap-2 font-['Space_Grotesk'] font-bold text-sm uppercase px-3 py-2 bg-(--yellow) text-black rounded">
-                      <FileText size={14} />
-                      {app.cvId ? "📄 CV" : "✏️ Manual"}
-                    </span>
-                    <span
-                      className={`inline-flex items-center gap-2 font-['Space_Grotesk'] font-bold text-xs uppercase px-3 py-2 rounded ${statusStyle.bg} ${statusStyle.text}`}
-                    >
-                      <StatusIcon size={12} />
-                      {statusStyle.label}
-                    </span>
+                  {/* Application Title and Company */}
+                  <div className="flex flex-col gap-2">
+                    <p className="font-['Space_Grotesk'] font-bold text-base uppercase text-(--fg)">
+                      {app.jobId?.position || "Position"}
+                    </p>
+                    <p className="font-mono text-sm text-(--fg-muted)">
+                      {app.employerId?.company?.name || "Company"}
+                    </p>
                   </div>
-
-                  <p className="font-mono text-sm text-(--fg-muted) mb-4">
-                    {app.employerId?.company?.name || "Company"} •{" "}
-                    {app.jobId?.workSite || "Location TBA"}
-                  </p>
-
-                  {/* Match Percentage */}
-                  {app.matchPercentage && (
-                    <div className="mb-4 p-3 bg-(--yellow) bg-opacity-20 rounded border-2 border-(--yellow)">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-['Space_Grotesk'] font-bold text-sm">
-                          Match Score
-                        </span>
-                        <span className="font-['Space_Grotesk'] font-bold text-lg text-(--yellow)">
-                          {Math.round(app.matchPercentage)}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-(--bg) rounded h-2 border-2 border-(--fg) overflow-hidden">
-                        <div
-                          className="h-full bg-(--yellow)"
-                          style={{ width: `${app.matchPercentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Application Date */}
-                  <p className="font-mono text-xs text-(--fg-muted)">
-                    Applied:{" "}
-                    {new Date(app.createdAt).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
+                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-(--fg-muted)">
+                    Click to view full application details
                   </p>
                 </div>
               );
@@ -213,6 +140,14 @@ export default function Applications() {
           </div>
         )}
       </div>
+
+      {/* Application Details Modal */}
+      <ApplicationDetailsModal
+        application={selectedApplication}
+        job={selectedJob}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+      />
     </div>
   );
 }

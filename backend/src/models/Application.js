@@ -112,6 +112,12 @@ const applicationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    applicationMethod: {
+      type: String,
+      enum: ["existingCv", "uploadPdf", "manual"],
+      required: true,
+      default: "manual",
+    },
   },
   {
     timestamps: true,

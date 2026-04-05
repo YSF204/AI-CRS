@@ -165,24 +165,26 @@ export default function SectionCard({
                   </Field>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <Field label="From Year">
+                  <Field label="Start">
                     <input
+                      type="month"
                       className={`${inpCls}`}
                       value={item.durationFrom}
                       onChange={(e) =>
                         exp.update(i, "durationFrom", e.target.value)
                       }
-                      placeholder="2021"
+                      placeholder="2021-01"
                     />
                   </Field>
-                  <Field label="To Year">
+                  <Field label="End">
                     <input
+                      type="month"
                       className={`${inpCls}`}
                       value={item.durationTo}
                       onChange={(e) =>
                         exp.update(i, "durationTo", e.target.value)
                       }
-                      placeholder="Present"
+                      placeholder="2024-12"
                     />
                   </Field>
                 </div>
@@ -243,24 +245,26 @@ export default function SectionCard({
                   </Field>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <Field label="From Year">
+                  <Field label="Start">
                     <input
+                      type="month"
                       className={`${inpCls}`}
                       value={item.durationFrom}
                       onChange={(e) =>
                         edu.update(i, "durationFrom", e.target.value)
                       }
-                      placeholder="2018"
+                      placeholder="2018-08"
                     />
                   </Field>
-                  <Field label="To Year">
+                  <Field label="End">
                     <input
+                      type="month"
                       className={`${inpCls}`}
                       value={item.durationTo}
                       onChange={(e) =>
                         edu.update(i, "durationTo", e.target.value)
                       }
-                      placeholder="2022"
+                      placeholder="2022-06"
                     />
                   </Field>
                 </div>
@@ -350,7 +354,16 @@ export default function SectionCard({
                       value={section.sectionType || "other"}
                       onChange={(e) => {
                         const newSections = [...form.customSections];
+                        const selectedType = CUSTOM_SECTION_TYPES.find(
+                          (t) => t.value === e.target.value,
+                        );
                         newSections[si].sectionType = e.target.value;
+                        // Auto-set title to defaultTitle for projects and hobbies
+                        if (selectedType?.defaultTitle) {
+                          newSections[si].title = selectedType.defaultTitle;
+                        } else {
+                          newSections[si].title = "";
+                        }
                         setForm((f) => ({ ...f, customSections: newSections }));
                       }}
                     >
@@ -396,9 +409,13 @@ export default function SectionCard({
                           {hasNameField && (
                             <Field
                               label={
-                                sectionTypeConfig.value === "hobbies"
-                                  ? "Hobby"
-                                  : "Name"
+                                sectionTypeConfig.value === "projects"
+                                  ? "Project"
+                                  : sectionTypeConfig.value === "certifications"
+                                    ? "Certification"
+                                    : sectionTypeConfig.value === "hobbies"
+                                      ? "Hobby"
+                                      : "Name"
                               }
                             >
                               <input
@@ -415,13 +432,26 @@ export default function SectionCard({
                                 placeholder={
                                   sectionTypeConfig.value === "projects"
                                     ? "Project name"
-                                    : "Hobby name"
+                                    : sectionTypeConfig.value ===
+                                        "certifications"
+                                      ? "Certification name"
+                                      : sectionTypeConfig.value === "hobbies"
+                                        ? "Hobby name"
+                                        : "Name"
                                 }
                               />
                             </Field>
                           )}
                           {hasLinkField && (
-                            <Field label="Link (optional)">
+                            <Field
+                              label={
+                                sectionTypeConfig.value === "projects"
+                                  ? "Project Link"
+                                  : sectionTypeConfig.value === "certifications"
+                                    ? "Certification Link"
+                                    : "Link (optional)"
+                              }
+                            >
                               <input
                                 className={inpCls}
                                 value={item.link}
@@ -441,8 +471,9 @@ export default function SectionCard({
 
                         {hasDurationFields && (
                           <div className="grid grid-cols-2 gap-2">
-                            <Field label="From Year">
+                            <Field label="Start">
                               <input
+                                type="month"
                                 className={inpCls}
                                 value={item.durationFrom}
                                 onChange={(e) =>
@@ -453,11 +484,12 @@ export default function SectionCard({
                                     e.target.value,
                                   )
                                 }
-                                placeholder="2022"
+                                placeholder="2022-01"
                               />
                             </Field>
-                            <Field label="To Year">
+                            <Field label="End">
                               <input
+                                type="month"
                                 className={inpCls}
                                 value={item.durationTo}
                                 onChange={(e) =>
@@ -468,7 +500,7 @@ export default function SectionCard({
                                     e.target.value,
                                   )
                                 }
-                                placeholder="2024"
+                                placeholder="2024-12"
                               />
                             </Field>
                           </div>

@@ -173,6 +173,7 @@ export const applyForJob = catchAsync(async (req, res, next) => {
 
   let cvData = null;
   let isManualApplication = cvId === "manual" || !cvId;
+  let applicationMethod = "manual";
 
   // If using CV, validate it exists and belongs to user
   if (cvId && cvId !== "manual") {
@@ -185,6 +186,9 @@ export const applyForJob = catchAsync(async (req, res, next) => {
     }
     cvData = cv;
     isManualApplication = false;
+    applicationMethod = req.file ? "uploadPdf" : "existingCv";
+  } else if (req.file) {
+    applicationMethod = "uploadPdf";
   }
 
   // If manual application, validate required manual fields
@@ -214,6 +218,16 @@ export const applyForJob = catchAsync(async (req, res, next) => {
   });
 
   if (existingApplication) {
+    // If trying to use a different application method, reject
+    if (existingApplication.applicationMethod !== applicationMethod) {
+      return next(
+        new AppError(
+          `You already applied using ${existingApplication.applicationMethod}. You must use "Edit Submission" to try a different method, or you cannot apply twice with different methods.`,
+          400,
+        ),
+      );
+    }
+    // Allow re-submission only through edit (this would be handled separately)
     return next(new AppError("You have already applied for this job", 400));
   }
 
@@ -293,9 +307,10 @@ export const applyForJob = catchAsync(async (req, res, next) => {
       ...matchResult.breakdown,
       matchAnalysis,
     },
+    applicationMethod,
   };
 
-  // Add cvId only if using CV method (not manual)
+  // Add cvId only if using CV method (not manual or uploadPdf)
   if (cvId && cvId !== "manual") {
     applicationData.cvId = cvId;
   }
