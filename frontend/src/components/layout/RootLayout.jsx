@@ -1,10 +1,17 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import ChatbotWidget from '../Employee/ChatbotWidget';
 
-/**
- * RootLayout keeps the router outlet mounted consistently.
- * Each page already owns its own transition wrapper, so animating the
- * outlet itself can cause blank states during client-side navigation.
- */
 export default function RootLayout() {
-  return <Outlet />;
+  const { user } = useAuth();
+  const location = useLocation();
+
+  const showChatbot = user?.role === 'EMPLOYEE';
+
+  return (
+    <>
+      <Outlet />
+      {showChatbot && <ChatbotWidget key={location.pathname} />}
+    </>
+  );
 }
