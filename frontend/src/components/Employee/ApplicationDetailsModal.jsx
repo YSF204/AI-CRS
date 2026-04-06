@@ -1,5 +1,6 @@
 import React from "react";
-import { X, CheckCircle, AlertCircle, Clock, Globe, Briefcase, GraduationCap, Laptop } from "lucide-react";
+import { X, CheckCircle, AlertCircle, Clock, Globe, Briefcase, GraduationCap, Laptop, Edit3 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const STATUS_CONFIG = {
   "Under Review": { bg: "var(--yellow)", color: "#000", icon: <Clock size={16} /> },
@@ -9,6 +10,7 @@ const STATUS_CONFIG = {
 };
 
 export default function ApplicationDetailsModal({ application, job, isOpen, onClose }) {
+  const navigate = useNavigate();
   if (!isOpen || !application) return null;
 
   const status = application.status || "Under Review";
@@ -171,7 +173,19 @@ export default function ApplicationDetailsModal({ application, job, isOpen, onCl
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t-4 border-black bg-[var(--bg)] flex justify-end">
+        <div className="p-6 border-t-4 border-black bg-[var(--bg)] flex justify-end gap-4">
+          {(status === "Under Review" || status === "pending") && (
+            <button
+              onClick={() => {
+                onClose();
+                navigate(`/employee/apply-job/${job?._id || application.jobId?._id || application.jobId}?appId=${application._id}&method=${application.applicationMethod || "manual"}`);
+              }}
+              className="brutal-btn px-6 py-3 font-bold uppercase tracking-widest text-sm flex items-center gap-2"
+              style={{ background: "var(--teal)", color: "#000" }}
+            >
+              <Edit3 size={16} /> Edit Submission
+            </button>
+          )}
           <button
             onClick={onClose}
             className="brutal-btn px-8 py-3 bg-[var(--yellow)] font-black uppercase tracking-widest text-sm"

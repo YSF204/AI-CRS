@@ -181,14 +181,19 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
     const str = (v) => (Array.isArray(v) ? v.join("\n• ") : v || "N/A");
 
     const cvData = parsed.cvData || {};
+    
+    // Scrub empty AI extraction entries to avoid Mongoose validation crashes
+    const scrubbedExperience = (cvData.experience || []).filter(e => e.institutionName?.trim() && e.position?.trim());
+    const scrubbedEducation = (cvData.education || []).filter(e => e.institutionName?.trim() && e.certification?.trim());
+
     const cv = await CV.create({
         userId: req.user._id,
         jobTitle: cvData.jobTitle || "Uploaded CV",
         summary: cvData.summary || "Extracted from uploaded PDF",
         contact: cvData.contact || {},
         address: cvData.address || { city: "N/A", street: "N/A" },
-        experience: cvData.experience || [],
-        education: cvData.education || [],
+        experience: scrubbedExperience,
+        education: scrubbedEducation,
         technicalSkills: cvData.technicalSkills || [],
         softSkills: cvData.softSkills || [],
         language: cvData.language || [],

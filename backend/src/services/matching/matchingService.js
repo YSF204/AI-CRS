@@ -182,44 +182,148 @@ export const generateAIMatchAnalysis = async (
   jobInfo,
   jobId = null,
   userId = null,
+  inputType = "EXISTING_PROFILE",
+  rawCvText = null
 ) => {
   try {
-    // Add timestamp to ensure unique requests
-    const timestamp = Date.now();
-    const uniqueId = Math.random().toString(36).substring(7);
+    const candidateProfileContent = rawCvText 
+      ? rawCvText 
+      : JSON.stringify(applicantInfo, null, 2);
 
-    const prompt = `[Analysis ID: ${timestamp}-${uniqueId} | Job: ${jobId || "N/A"} | User: ${userId || "N/A"}]
+    const prompt = `You are an expert AI Recruitment Analyst integrated into a professional recruitment platform called AI-CRS. 
+Your job is to perform a deep, structured, and honest analysis of a candidate's profile against a specific 
+job's requirements, and produce a comprehensive fit report including an overall match percentage.
 
-You are an expert HR recruiter and career advisor. Analyze the match between a job applicant and a job position. Provide detailed, individualized feedback specific to this candidate's profile.
+You analyze three possible input types:
+- A parsed CV (uploaded document)
+- A manually filled application form
+- A pre-existing candidate profile from the system
 
-APPLICANT PROFILE:
-Name: ${applicantInfo.fullName || "Candidate"}
-Email: ${applicantInfo.email || "Not provided"}
-Summary: ${applicantInfo.summary || "Not provided"}
-Years of Experience: ${applicantInfo.yearsOfExperience || 0} years
-Technical Skills (${applicantInfo.technicalSkills?.length || 0}): ${applicantInfo.technicalSkills?.join(", ") || "None listed"}
-Soft Skills (${applicantInfo.softSkills?.length || 0}): ${applicantInfo.softSkills?.join(", ") || "None listed"}
-Languages: ${applicantInfo.languages?.join(", ") || "None listed"}
+Regardless of the input type, you extract the same structured information and run the same analysis.
 
-JOB REQUIREMENTS:
-Position: ${jobInfo.position}
-Description: ${jobInfo.description}
-Years Required: ${jobInfo.yearsOfExperience}
-Technical Skills Needed: ${jobInfo.technicalSkills?.join(", ") || "Not specified"}
-Soft Skills Needed: ${jobInfo.softSkills?.join(", ") || "Not specified"}
-Languages Needed: ${jobInfo.language?.join(", ") || "Not specified"}
+---
 
-IMPORTANT: Provide a specific, personalized analysis for THIS EXACT candidate based on their unique profile.
+## ANALYSIS FRAMEWORK
 
-Analyze and provide:
-1. Key matching strengths between this specific candidate and this specific job
-2. Specific gaps or concerns for this candidate
-3. Overall fit assessment with reasoning
+You will evaluate the candidate across 6 weighted dimensions:
 
-Be specific about skills gaps or matches. Reference the actual skills listed above. Keep analysis to 3-4 sentences, professional, and actionable.`;
+1. TECHNICAL SKILLS MATCH         — Weight: 30%
+   - Compare candidate's listed skills vs. the job's required and preferred skills.
+   - Partial matches count (e.g., knows React but job wants Vue → partial frontend match).
+   - Missing critical skills reduce this score significantly.
+   - Bonus points for skills listed as "nice to have" that the candidate has.
+
+2. EXPERIENCE MATCH               — Weight: 25%
+   - Compare years of relevant experience vs. required years.
+   - Consider quality of experience: relevant industry, similar role titles, scope of work.
+   - Overqualification is noted but does not heavily penalize.
+   - No experience in the field = very low score even if years are high elsewhere.
+
+3. EDUCATION & CERTIFICATIONS     — Weight: 15%
+   - Compare education level and field of study vs. job requirements.
+   - Industry certifications (e.g., AWS, PMP, CPA) are weighted heavily if job requires them.
+   - If job doesn't require specific education and candidate has a degree → neutral/positive.
+
+4. SOFT SKILLS & CULTURE FIT      — Weight: 10%
+   - Infer soft skills from CV language, job descriptions written by the candidate, achievements.
+   - Match against soft skills listed in the job posting (e.g., teamwork, leadership, communication).
+   - Score based on evidence found in the candidate's profile.
+
+5. LANGUAGE & LOCATION FIT        — Weight: 10%
+   - Check if the candidate meets language requirements.
+   - Check location/remote compatibility if specified.
+   - Penalize only if the job has hard requirements the candidate clearly does not meet.
+
+6. ACHIEVEMENTS & ADDED VALUE     — Weight: 10%
+   - Does the candidate show measurable results? (e.g., "increased sales by 30%", "led team of 10")
+   - Awards, publications, portfolios, open source contributions, etc.
+   - These differentiate candidates with similar base scores.
+
+---
+
+## SCORING RULES
+
+- Calculate a weighted score for each dimension (0–100).
+- Compute the OVERALL FIT PERCENTAGE as the weighted average of all 6 dimensions.
+- Apply a final adjustment:
+    • If the candidate is missing ANY hard-requirement skill marked as mandatory → cap overall at 65%
+    • If the candidate meets ALL mandatory requirements perfectly → allow score up to 100%
+    • If the CV/profile is incomplete or vague → reduce confidence and note it explicitly
+
+---
+
+## OUTPUT FORMAT
+
+Return ONLY a valid JSON object. No markdown, no preamble, no explanation outside the JSON.
+
+{
+  "candidate_name": "string or 'Unknown' if not found",
+  "job_title": "string",
+  "company": "string",
+  "overall_fit_percentage": 0,
+  "fit_label": "Excellent Fit | Strong Fit | Good Fit | Moderate Fit | Weak Fit | Not Recommended",
+  "confidence_level": "High | Medium | Low",
+  "confidence_note": "Short reason for confidence level",
+  "dimension_scores": {
+    "technical_skills": { "score": 0, "weight": 30, "weighted_contribution": 0, "summary": "string" },
+    "experience": { "score": 0, "weight": 25, "weighted_contribution": 0, "summary": "string" },
+    "education_certifications": { "score": 0, "weight": 15, "weighted_contribution": 0, "summary": "string" },
+    "soft_skills_culture": { "score": 0, "weight": 10, "weighted_contribution": 0, "summary": "string" },
+    "language_location": { "score": 0, "weight": 10, "weighted_contribution": 0, "summary": "string" },
+    "achievements_value": { "score": 0, "weight": 10, "weighted_contribution": 0, "summary": "string" }
+  },
+  "strengths": ["Clear strength point 1"],
+  "gaps": [ { "gap": "Name of the gap", "severity": "Critical", "suggestion": "What the candidate could do to close this gap" } ],
+  "matched_skills": ["skill1"],
+  "missing_required_skills": ["skill1"],
+  "missing_optional_skills": ["skill1"],
+  "bonus_skills": ["skill1"],
+  "experience_verdict": {
+    "required_years": 0,
+    "candidate_years": 0,
+    "relevant_years": 0,
+    "verdict": "Meets requirement"
+  },
+  "recruiter_summary": "A 3–4 sentence professional paragraph...",
+  "candidate_advice": "A 2–3 sentence message...",
+  "hiring_recommendation": "Strongly Recommend | Recommend | Recommend with Reservations | Do Not Recommend"
+}
+
+---
+
+## EDGE CASES
+- If candidate profile is empty → return: { "error": "invalid_input", "message": "..." }
+
+Perform a full candidate-to-job fit analysis using the following data.
+
+<input_type>${inputType}</input_type>
+
+<candidate_profile>
+${candidateProfileContent}
+</candidate_profile>
+
+<job_listing>
+${JSON.stringify({
+  job_id: jobId,
+  job_title: jobInfo.position || jobInfo.job_title,
+  company: jobInfo.company,
+  description: jobInfo.description,
+  required_skills: jobInfo.technicalSkills || jobInfo.required_skills,
+  preferred_skills: jobInfo.softSkills || jobInfo.preferred_skills,
+  required_experience_years: jobInfo.yearsOfExperience || jobInfo.required_experience_years,
+  required_education: jobInfo.required_education || "",
+  required_certifications: [],
+  required_languages: jobInfo.language || jobInfo.required_languages,
+  location: jobInfo.location || jobInfo.workSite,
+  job_type: jobInfo.jobType || "",
+  seniority_level: jobInfo.seniorityLevel || ""
+}, null, 2)}
+</job_listing>
+
+Return only the JSON analysis object as described. No extra text.`;
 
     const response = await getClient().models.generateContent({
-      model: "gemini-2.0-flash-lite",
+      model: "gemini-2.0-flash-lite", // Using Gemini 2.0 as it was natively configured
       contents: [
         {
           role: "user",
@@ -228,10 +332,11 @@ Be specific about skills gaps or matches. Reference the actual skills listed abo
       ],
     });
 
-    return response.text;
+    const cleanJson = response.text.replace(/```json|```/g, "").trim();
+    return JSON.parse(cleanJson);
   } catch (error) {
     console.error("Error generating AI match analysis:", error);
-    return buildLocalFallbackAnalysis(applicantInfo, jobInfo);
+    return null;
   }
 };
 

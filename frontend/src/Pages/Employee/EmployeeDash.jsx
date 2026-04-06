@@ -20,14 +20,7 @@ const QUICK_ACTIONS = [
     btnLabel: "TRACK",
     btnColor: "var(--teal)",
   },
-  {
-    icon: FileText,
-    label: "FIND BY CV",
-    sub: "Search jobs using your CV",
-    href: "/employee/find-job-by-cv",
-    btnLabel: "SEARCH",
-    btnColor: "var(--yellow)",
-  },
+
   {
     icon: User,
     label: "PROFILE",

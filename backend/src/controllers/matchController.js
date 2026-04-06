@@ -87,31 +87,46 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
     return next(new AppError("No jobs found", 404));
   }
 
-  const jobsText = jobs
-    .map(
-      (job, i) =>
-        `Job ${i + 1} 
-        [ID: ${job._id}] 
-        | ${job.position} 
-        | Skills: ${job.technicalSkills?.join(", ")} 
-        | SoftSkills: ${job.softSkills?.join(", ")} 
-        | Experience: ${job.yearsOfExperience}y 
-        | Site: ${job.workSite}`,
-    )
-    .join("\n");
+  const jobsText = JSON.stringify(jobs.map((job) => ({
+    job_id: job._id.toString(),
+    job_title: job.position,
+    company: "Employer", // We don't populate employerId here, so just put generic or modify if employerId is populated
+    description: job.description,
+    required_skills: job.technicalSkills || [],
+    preferred_skills: job.softSkills || [],
+    required_experience_years: job.yearsOfExperience || 0,
+    required_education: "",
+    field: job.position || ""
+  })));
 
   let parsed;
   try {
     const match = await matchCVToJobs(cvText, jobsText);
     const clean = match.replace(/```json|```/g, "").trim();
     parsed = JSON.parse(clean);
+    
     if (!Array.isArray(parsed)) {
+      if (parsed.error) {
+        return next(new AppError(parsed.message || "CV Match error", 400));
+      }
       throw new Error("Expected AI match response to be an array");
     }
+    
+    parsed = parsed.map(job => ({
+      jobId: job.job_id,
+      position: job.job_title,
+      matchScore: job.relevance_score,
+      skillsMatched: job.match_reasons || [],
+      skillsMissing: job.missing_skills || [],
+      reasoning: job.recommendation_note || ""
+    }));
   } catch (error) {
     console.error("AI recommendation error:", error);
     parsed = buildLocalJobRecommendations(cv, jobs);
   }
+  
+  // Filter out low scores (using 40 as threshold for related fields)
+  parsed = parsed.filter(job => job.matchScore >= 40);
 
   res.status(200).json({
     success: true,

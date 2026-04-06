@@ -154,6 +154,11 @@ export default function FindJobByCV() {
                   {item.workSite || item.location || "Location not available"}
                 </p>
               </div>
+              {item.matchScore != null && (
+                <div className="brutal-card px-3 py-1 font-mono text-sm font-bold bg-(--yellow) text-black border-2 border-black whitespace-nowrap">
+                  {item.matchScore}% Match
+                </div>
+              )}
             </div>
 
             {item.reasoning && (

@@ -50,7 +50,7 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
       pdfPath: req.file.path,
     };
     applicantInfo = {
-      fullName: "Uploaded CV",
+      fullName: req.user.firstName ? `${req.user.firstName} ${req.user.lastName}` : "Uploaded CV",
       email: "",
       phone: "",
       linkedin: "",
@@ -72,7 +72,7 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
     }
 
     applicantInfo = {
-      fullName: cv.fullName || "",
+      fullName: cv.fullName || (req.user.firstName ? `${req.user.firstName} ${req.user.lastName}` : "Candidate"),
       email: cv.contact?.email || "",
       phone: cv.contact?.phone || "",
       linkedin: cv.contact?.linkedin || "",
@@ -97,34 +97,42 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
 
   // Calculate match percentage
   const matchResult = calculateMatchPercentage(applicantInfo, job);
-  const percentageScore = matchResult.percentage;
-
   // Generate AI analysis
-  let matchAnalysis = "";
+  let percentageScore = matchResult.percentage;
+  let strengths = [];
+  let weaknesses = [];
+  let matchAnalysisStr = "";
+  
   try {
-    matchAnalysis = await generateAIMatchAnalysis(
+    const aiAnalysis = await generateAIMatchAnalysis(
       applicantInfo,
-      {
-        position: job.position,
-        description: job.description,
-        yearsOfExperience: job.yearsOfExperience,
-        technicalSkills: job.technicalSkills,
-        softSkills: job.softSkills,
-        language: job.language,
-      },
+      job,
       job._id,
       req.user._id,
+      cvId ? "EXISTING_PROFILE" : "CV_UPLOAD"
     );
+    
+    if (aiAnalysis && !aiAnalysis.error) {
+      percentageScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : percentageScore;
+      strengths = aiAnalysis.strengths || [];
+      weaknesses = (aiAnalysis.gaps || []).map(g => `${g.severity} Gap: ${g.gap} - ${g.suggestion}`);
+      matchAnalysisStr = aiAnalysis.recruiter_summary || JSON.stringify(aiAnalysis);
+    } else {
+      matchAnalysisStr = aiAnalysis?.message || "Analysis generation failed or invalid input";
+    }
   } catch (error) {
     console.error("AI analysis error:", error);
-    matchAnalysis = "Analysis generation failed";
+    matchAnalysisStr = "Analysis generation failed";
   }
 
-  // Extract strengths and weaknesses from AI analysis
-  const { strengths, weaknesses } = extractStrengthsWeaknesses(
-    matchAnalysis,
-    matchResult.breakdown,
-  );
+  if (strengths.length === 0 && weaknesses.length === 0) {
+    const ext = extractStrengthsWeaknesses(
+      matchAnalysisStr,
+      matchResult.breakdown,
+    );
+    strengths = ext.strengths;
+    weaknesses = ext.weaknesses;
+  }
 
   // Return analysis without creating application
   res.status(200).json({
@@ -133,7 +141,7 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
       matchPercentage: percentageScore,
       matchDetails: {
         ...matchResult.breakdown,
-        matchAnalysis,
+        matchAnalysis: matchAnalysisStr,
       },
       strengths,
       weaknesses,
@@ -218,17 +226,16 @@ export const applyForJob = catchAsync(async (req, res, next) => {
   });
 
   if (existingApplication) {
-    // If trying to use a different application method, reject
-    if (existingApplication.applicationMethod !== applicationMethod) {
-      return next(
-        new AppError(
-          `You already applied using ${existingApplication.applicationMethod}. You must use "Edit Submission" to try a different method, or you cannot apply twice with different methods.`,
-          400,
-        ),
-      );
-    }
-    // Allow re-submission only through edit (this would be handled separately)
-    return next(new AppError("You have already applied for this job", 400));
+    // Return a 409 Conflict with the existing application details to prompt the user for editing
+    return res.status(409).json({
+      success: false,
+      message: "You have already applied for this job.",
+      data: {
+        alreadyApplied: true,
+        applicationId: existingApplication._id,
+        status: existingApplication.status,
+      },
+    });
   }
 
   // Prepare applicant info - use CV data or manual data
@@ -264,27 +271,26 @@ export const applyForJob = catchAsync(async (req, res, next) => {
 
   // Calculate match percentage
   const matchResult = calculateMatchPercentage(finalApplicantInfo, job);
-  const percentageScore = matchResult.percentage;
+  let percentageScore = matchResult.percentage;
 
   // Generate AI analysis
-  let matchAnalysis = "";
+  let matchAnalysisStr = "";
   try {
-    matchAnalysis = await generateAIMatchAnalysis(
+    const aiAnalysis = await generateAIMatchAnalysis(
       finalApplicantInfo,
-      {
-        position: job.position,
-        description: job.description,
-        yearsOfExperience: job.yearsOfExperience,
-        technicalSkills: job.technicalSkills,
-        softSkills: job.softSkills,
-        language: job.language,
-      },
+      job,
       job._id,
       userId,
+      isManualApplication ? "MANUAL_FORM" : (req.file ? "CV_UPLOAD" : "EXISTING_PROFILE")
     );
+    
+    if (aiAnalysis && !aiAnalysis.error) {
+      percentageScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : percentageScore;
+      matchAnalysisStr = aiAnalysis.recruiter_summary || "";
+    }
   } catch (error) {
     console.error("AI analysis error:", error);
-    matchAnalysis = "Analysis generation failed";
+    matchAnalysisStr = "Analysis generation failed";
   }
 
   // If percentage < 50%, reject the application
@@ -305,7 +311,7 @@ export const applyForJob = catchAsync(async (req, res, next) => {
     matchPercentage: percentageScore,
     matchDetails: {
       ...matchResult.breakdown,
-      matchAnalysis,
+      matchAnalysis: matchAnalysisStr,
     },
     applicationMethod,
   };
@@ -408,7 +414,7 @@ export const applyForJob = catchAsync(async (req, res, next) => {
   }
 
   // Send HTML confirmation email to applicant
-  if (applicantInfo.email) {
+  if (finalApplicantInfo.email) {
     try {
       const confirmationEmail = `
         <!DOCTYPE html>
@@ -459,7 +465,7 @@ export const applyForJob = catchAsync(async (req, res, next) => {
       `;
 
       await sendEmail({
-        email: applicantInfo.email,
+        email: finalApplicantInfo.email,
         subject: `Application Confirmation: ${finalApplicantInfo.fullName} - ${job.position}`,
         html: confirmationEmail,
       });
@@ -654,27 +660,26 @@ export const updateApplication = catchAsync(async (req, res, next) => {
 
   // Recalculate match percentage
   const matchResult = calculateMatchPercentage(finalApplicantInfo, job);
-  const percentageScore = matchResult.percentage;
+  let percentageScore = matchResult.percentage;
 
   // Generate AI analysis
-  let matchAnalysis = "";
+  let matchAnalysisStr = "";
   try {
-    matchAnalysis = await generateAIMatchAnalysis(
+    const aiAnalysis = await generateAIMatchAnalysis(
       finalApplicantInfo,
-      {
-        position: job.position,
-        description: job.description,
-        yearsOfExperience: job.yearsOfExperience,
-        technicalSkills: job.technicalSkills,
-        softSkills: job.softSkills,
-        language: job.language,
-      },
+      job,
       job._id,
       userId,
+      isManualApplication ? "MANUAL_FORM" : (cvId ? "EXISTING_PROFILE" : "CV_UPLOAD")
     );
+    
+    if (aiAnalysis && !aiAnalysis.error) {
+      percentageScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : percentageScore;
+      matchAnalysisStr = aiAnalysis.recruiter_summary || JSON.stringify(aiAnalysis);
+    }
   } catch (error) {
     console.error("AI analysis error:", error);
-    matchAnalysis = "Analysis generation failed";
+    matchAnalysisStr = "Analysis generation failed";
   }
 
   // Update application
@@ -682,7 +687,7 @@ export const updateApplication = catchAsync(async (req, res, next) => {
   application.matchPercentage = percentageScore;
   application.matchDetails = {
     ...matchResult.breakdown,
-    matchAnalysis,
+    matchAnalysis: matchAnalysisStr,
   };
 
   // Update cvId

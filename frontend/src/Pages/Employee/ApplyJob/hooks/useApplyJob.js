@@ -150,7 +150,29 @@ export function useApplyJob() {
       formData.append("jobId", jobId);
 
       if (applicationMethod === "uploadPdf" && cvFile) {
-        formData.append("cvFile", cvFile);
+        // Transform the uploaded PDF into a permanent CV object to prevent ObjectId failures later
+        const uploadForm = new FormData();
+        uploadForm.append("cvFile", cvFile);
+        
+        const uploadRes = await api.post("/cvs/upload/analyze", uploadForm, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        
+        const newCvId = uploadRes.data?.data?.cv?._id;
+        if (!newCvId) throw new Error("Failed to parse and save uploaded PDF as CV");
+        
+        // Quietly switch context to 'existingCv'
+        setSelectedCvId(newCvId);
+        setApplicationMethod("existingCv");
+        
+        // Refresh CV list in background so it appears in the dropdown seamlessly
+        api.get("/cvs").then(res => {
+          if (res.data?.data?.cvs) {
+            setCvs(res.data.data.cvs);
+          }
+        }).catch(err => console.error("Ignored cv reload err", err));
+
+        formData.append("cvId", newCvId);
       } else if (applicationMethod === "existingCv" && selectedCvId) {
         formData.append("cvId", selectedCvId);
       }
@@ -187,7 +209,18 @@ export function useApplyJob() {
         applicationMessage: isEdit ? "Application updated successfully" : response.data.message,
       });
     } catch (error) {
-      alert(error.response?.data?.message || "Application submission failed");
+      if (error.response?.status === 409 && error.response?.data?.data?.alreadyApplied) {
+        const { applicationId, status } = error.response.data.data;
+        if (status !== 'pending') {
+          alert("You have already applied and your application is currently under review or closed. Editing is disabled.");
+        } else {
+          if (window.confirm("You have already applied for this job. Would you like to edit your submission instead?")) {
+            navigate(`/employee/apply-job/${jobId}?appId=${applicationId}&method=${applicationMethod}`);
+          }
+        }
+      } else {
+        alert(error.response?.data?.message || "Application submission failed");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -228,7 +261,18 @@ export function useApplyJob() {
         applicationMessage: isEdit ? "Application updated successfully" : response.data.message,
       });
     } catch (error) {
-      alert(error.response?.data?.message || "Application submission failed");
+      if (error.response?.status === 409 && error.response?.data?.data?.alreadyApplied) {
+        const { applicationId, status } = error.response.data.data;
+        if (status !== 'pending') {
+          alert("You have already applied and your application is currently under review or closed. Editing is disabled.");
+        } else {
+          if (window.confirm("You have already applied for this job. Would you like to edit your submission instead?")) {
+            navigate(`/employee/apply-job/${jobId}?appId=${applicationId}&method=manual`);
+          }
+        }
+      } else {
+        alert(error.response?.data?.message || "Application submission failed");
+      }
     } finally {
       setSubmitting(false);
     }
