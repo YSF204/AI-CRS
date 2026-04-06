@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import DashboardNav from "../../../components/shared/DashboardNav";
 import { useAuth } from "../../../context/AuthContext";
 import api from "../../../services/api";
@@ -7,6 +7,7 @@ import { DEFAULT_SECTION_ORDER } from "./constants";
 import { TEMPLATES } from "../../../Features/CVManagement/index.js";
 import useCVForm from "./hooks/useCVForm";
 import ActionBar from "./components/ActionBar";
+import AnalysisModal from "./components/AnalysisModal";
 import Toast from "./components/Toast";
 import Sidebar from "./components/Sidebar";
 import EditorContent from "./components/EditorContent";
@@ -17,10 +18,12 @@ export default function CVEditor() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [cv, setCv] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showExitPrompt, setShowExitPrompt] = useState(false);
   const [toast, setToast] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeSections, setActiveSections] = useState(["summary"]);
@@ -28,6 +31,9 @@ export default function CVEditor() {
   const [showPreview, setShowPreview] = useState(false);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
   const [dragOverKey, setDragOverKey] = useState(null);
   const dragItemRef = useRef(null);
   const previewRef = useRef(null);
@@ -58,6 +64,20 @@ export default function CVEditor() {
     [getFilteredFormData, activeSections],
   );
 
+  const isComplete = () => {
+    return form.fullName?.trim() && form.jobTitle?.trim() && form.contact?.email?.trim();
+  };
+
+  const handleBack = () => {
+    if (id === "new" && !saving) {
+      if (!isComplete()) {
+        setShowExitPrompt(true);
+        return;
+      }
+    }
+    navigate("/employee/cvs");
+  };
+
   // ── Load CV ───────────────────────────────────────────────────────────────────
   useEffect(() => {
     const load = async () => {
@@ -65,6 +85,35 @@ export default function CVEditor() {
         if (!value) return "";
         return /^\d{4}$/.test(value) ? `${value}-01` : value;
       };
+
+      if (id === "new") {
+        const d = {
+          jobTitle: location.state?.jobTitle || "",
+          templateId: location.state?.templateId || 1,
+        };
+        setCv(d);
+        setForm({
+          fullName: "",
+          jobTitle: d.jobTitle,
+          summary: "",
+          contact: { phone: "", email: "", github: "", linkedin: "" },
+          address: { city: "", street: "" },
+          experience: [],
+          education: [],
+          technicalSkills: [],
+          softSkills: [],
+          language: [],
+          customSections: [],
+          profileImage: "",
+          layout: {
+            sectionOrder: [...DEFAULT_SECTION_ORDER],
+            visibleSections: {},
+          },
+        });
+        setActiveSections(["summary"]);
+        setLoading(false);
+        return;
+      }
 
       try {
         const res = await api.get(`/cvs/${id}`);
@@ -156,7 +205,88 @@ export default function CVEditor() {
   }, [id]);
 
   // ── Save ──────────────────────────────────────────────────────────────────────
+  const handleAnalyze = async () => {
+    setAnalyzing(true);
+    try {
+      const filtered = filteredFormData();
+      const response = await api.post("/cvs/analyze-section", {
+        section: "fullCv",
+        data: filtered,
+        fullName: userName,
+      });
+
+      if (response.data?.success && response.data?.data) {
+        setAnalysisResult(response.data.data);
+        setShowAnalysis(true);
+      } else {
+        showToast("error", "Unable to generate analysis. Please try again.");
+      }
+    } catch (err) {
+      showToast(
+        "error",
+        err?.response?.data?.message || err?.message || "Analysis failed.",
+      );
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleApplyAnalysis = (analysis) => {
+    if (!analysis) return;
+
+    let applied = false;
+    setForm((prev) => {
+      const next = { ...prev };
+
+      if (analysis.fieldUpdates) {
+        if (analysis.fieldUpdates.jobTitle) {
+          next.jobTitle = analysis.fieldUpdates.jobTitle;
+          applied = true;
+        }
+        if (analysis.fieldUpdates.summary) {
+          next.summary = analysis.fieldUpdates.summary;
+          applied = true;
+        }
+        if (analysis.fieldUpdates.contact) {
+          next.contact = { ...next.contact, ...analysis.fieldUpdates.contact };
+          applied = true;
+        }
+        if (analysis.fieldUpdates.language) {
+          next.language = analysis.fieldUpdates.language;
+          applied = true;
+        }
+        if (analysis.fieldUpdates.customSections) {
+          next.customSections = analysis.fieldUpdates.customSections;
+          applied = true;
+        }
+      }
+
+      if (!applied && analysis.rewrittenSummary) {
+        next.summary = analysis.rewrittenSummary;
+        applied = true;
+      }
+
+      return next;
+    });
+
+    if (applied) {
+      showToast("success", "Selected changes applied to your CV.");
+    } else {
+      showToast(
+        "info",
+        "No changes were selected. Review the suggestions and select changes to apply.",
+      );
+    }
+
+    setShowAnalysis(false);
+  };
+
   const handleSave = async () => {
+    if (id === "new" && !isComplete()) {
+      showToast("error", "Please fill required fields (Full Name, Job Title, Email).");
+      return;
+    }
+
     setSaving(true);
     try {
       const filtered = filteredFormData();
@@ -164,7 +294,8 @@ export default function CVEditor() {
       activeSections.forEach((k) => {
         visibleSections[k] = true;
       });
-      await api.patch(`/cvs/${id}`, {
+      
+      const payload = {
         ...filtered,
         experience: filtered.experience.map((e) => ({ ...e })),
         education: filtered.education.map((e) => ({ ...e })),
@@ -194,8 +325,16 @@ export default function CVEditor() {
           })),
         profileImage: form.profileImage,
         layout: { sectionOrder: [...activeSections], visibleSections },
-      });
-      showToast("success", "CV saved!");
+      };
+
+      if (id === "new") {
+        const res = await api.post(`/cvs`, payload);
+        showToast("success", "CV created!");
+        navigate(`/employee/cv-editor/${res.data.data.cv._id}`, { replace: true });
+      } else {
+        await api.patch(`/cvs/${id}`, payload);
+        showToast("success", "CV saved!");
+      }
     } catch (err) {
       showToast("error", err?.response?.data?.message || "Failed to save.");
     } finally {
@@ -245,6 +384,10 @@ export default function CVEditor() {
 
   // ── Download PDF ──────────────────────────────────────────────────────────────
   const handleDownloadPdf = async () => {
+    if (id === "new") {
+      showToast("error", "Please save the CV first to download it as PDF.");
+      return;
+    }
     setDownloadingPdf(true);
     try {
       const el = previewRef.current?.querySelector("[data-cv-content]");
@@ -342,11 +485,14 @@ export default function CVEditor() {
       <ActionBar
         form={form}
         saving={saving}
+        analyzing={analyzing}
         downloadingPdf={downloadingPdf}
         onSave={handleSave}
+        onAnalyze={handleAnalyze}
         onPreview={() => setShowPreview(true)}
         onDownloadPdf={handleDownloadPdf}
         onChangeTemplate={() => setShowTemplateSelector(true)}
+        onBack={handleBack}
       />
 
       {/* ── Toast ── */}
@@ -413,6 +559,15 @@ export default function CVEditor() {
         templateId={cv?.templateId || 1}
         downloadingPdf={downloadingPdf}
         onDownloadPdf={handleDownloadPdf}
+      />
+
+      {/* ── Analysis Modal ── */}
+      <AnalysisModal
+        show={showAnalysis}
+        analysis={analysisResult}
+        currentData={form}
+        onClose={() => setShowAnalysis(false)}
+        onApply={handleApplyAnalysis}
       />
 
       {/* ── Template Selector Modal ── */}
@@ -529,6 +684,20 @@ export default function CVEditor() {
                   </span>
                 </button>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Exit Prompt Modal ── */}
+      {showExitPrompt && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="brutal-card bg-[var(--card-bg)] p-6 max-w-sm w-full mx-4 flex flex-col gap-4">
+            <h3 className="font-['Space_Grotesk'] font-bold text-lg">Unsaved CV</h3>
+            <p className="font-mono text-sm">You haven't filled all the required fields (Full Name, Job Title, Email). Do you want to cancel the creation or complete it?</p>
+            <div className="flex gap-3 justify-end mt-2">
+              <button disabled={saving} onClick={() => navigate("/employee/cvs")} className="brutal-btn-outline px-4 py-2">Cancel Creation</button>
+              <button onClick={() => setShowExitPrompt(false)} className="brutal-btn px-4 py-2 bg-[var(--yellow)] text-[#0a0a0a]">Complete Fields</button>
             </div>
           </div>
         </div>

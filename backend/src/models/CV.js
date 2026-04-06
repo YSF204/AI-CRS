@@ -135,7 +135,7 @@ const cvSchema = new mongoose.Schema(
         },
         sectionType: {
           type: String,
-          enum: ["projects", "hobbies", "other"],
+          enum: ["projects", "hobbies", "other", "certifications"],
           default: "other",
         },
         items: [

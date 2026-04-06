@@ -1,24 +1,27 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Save, Eye, Download, Layers } from "lucide-react";
+import { ArrowLeft, Save, Eye, Download, Layers, Sparkles } from "lucide-react";
 
 export default function ActionBar({
   form,
   saving,
+  analyzing,
   downloadingPdf,
   onSave,
   onPreview,
+  onAnalyze,
   onDownloadPdf,
   onChangeTemplate,
+  onBack,
 }) {
   return (
     <div className="flex-shrink-0 flex items-center gap-3 px-5 py-2.5 border-t-2 border-b-[3px] border-[var(--border-color)] bg-[var(--bg)]">
-      <Link
-        to="/employee/cvs"
+      <button
+        onClick={onBack}
         className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--fg-muted)] px-3 py-1.5 border-2 border-[var(--border-color)] bg-[var(--card-bg)] hover:text-[var(--fg)] transition-colors no-underline"
       >
         <ArrowLeft size={12} /> Back
-      </Link>
+      </button>
       <div className="flex-1">
         <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--fg-muted)]">
           Editing
@@ -28,6 +31,17 @@ export default function ActionBar({
         </div>
       </div>
       <div className="flex items-center gap-2">
+        {/* Analyze button */}
+        <button
+          onClick={onAnalyze}
+          disabled={analyzing}
+          className="flex items-center gap-2 font-['Space_Grotesk'] font-black text-xs uppercase tracking-wider px-4 py-2.5 bg-[var(--card-bg)] text-[var(--fg)] border-[3px] border-[var(--border-color)] transition-all hover:border-[var(--fg)] hover:translate-x-0.5 hover:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            boxShadow: analyzing ? "none" : "3px 3px 0 var(--border-color)",
+          }}
+        >
+          <Sparkles size={13} /> {analyzing ? "Analyzing…" : "Analyze"}
+        </button>
         {/* Change Template button */}
         <button
           onClick={onChangeTemplate}
