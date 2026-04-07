@@ -1,170 +1,167 @@
 import React from "react";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, CheckCircle2, XCircle, Zap, AlertTriangle, ArrowRight } from "lucide-react";
 
 export default function AnalysisScreen({ job, matchAnalysis, setStep, setMatchAnalysis, setCvFile, handleSubmitApplication, submitting, isEdit }) {
-  const matchPercentage = matchAnalysis.matchPercentage || 0;
+  const matchPercentage = matchAnalysis?.matchPercentage || (matchAnalysis?.overall_fit_percentage || 0);
   const isQualified = matchPercentage >= 50;
-  const matchBreakdown = matchAnalysis.matchDetails;
+  
+  // Extract details handles both the new AI schema and the old schema
+  const matchDetails = matchAnalysis.matchDetails || {};
+  const aiSummary = matchAnalysis.recruiter_summary || matchDetails.matchAnalysis || "";
+  const strengthsList = matchAnalysis.strengths || [];
+  const weaknessesList = matchAnalysis.weaknesses || [];
 
   return (
-    <div className="max-w-3xl mx-auto">
-      {/* Header */}
-      <div className="mb-8">
-        <button
-          onClick={() => {
-            setStep("upload");
-            setMatchAnalysis(null);
-            setCvFile(null);
-          }}
-          className="flex items-center gap-2 mb-4 text-[var(--teal)] hover:text-[var(--yellow)] transition-colors"
-        >
-          <ChevronLeft size={18} />
-          <span className="font-mono text-sm font-bold">Back</span>
-        </button>
-        <h1 className="text-3xl font-bold font-['Space_Grotesk'] uppercase tracking-tight mb-2">
-          Match Analysis
-        </h1>
-        <p className="font-mono text-sm text-[var(--fg-muted)]">
-          Applying for {job.position}
-        </p>
+    <div className="max-w-4xl mx-auto flex flex-col gap-8 pb-10 bg-[var(--bg)] p-4 sm:p-8 border-[6px] border-black shadow-[12px_12px_0px_#000]">
+      {/* Header Area */}
+      <div className="flex items-center justify-between border-b-[6px] border-black pb-6">
+        <div>
+          <button
+            onClick={() => {
+              setStep("upload");
+              setMatchAnalysis(null);
+              setCvFile(null);
+            }}
+            className="flex items-center gap-2 mb-4 text-black hover:bg-black hover:text-white transition-colors font-mono font-bold uppercase tracking-widest text-xs border-4 border-black px-4 py-2"
+          >
+            <ChevronLeft size={16} /> Retour
+          </button>
+          <h1 className="text-4xl md:text-5xl font-black font-['Space_Grotesk'] uppercase tracking-tight text-black">
+            Action Analysis
+          </h1>
+          <p className="font-mono text-base text-black font-bold uppercase tracking-widest mt-2 border-2 border-black inline-block px-3 py-1 bg-[var(--yellow)]">
+            POSITION: {job.position}
+          </p>
+        </div>
       </div>
 
-      {/* Match Score */}
-      <div
-        className="brutal-card p-8 mb-6 text-center border-4"
-        style={{
-          background: isQualified ? "rgba(78, 205, 196, 0.1)" : "rgba(255, 107, 107, 0.1)",
-          borderColor: isQualified ? "--teal" : "var(--coral)",
-        }}
-      >
-        <p className="font-mono text-xs font-bold text-[var(--fg-muted)] mb-2 uppercase">
-          Overall Match Score
-        </p>
-        <p
-          className="text-5xl font-bold mb-4"
-          style={{ color: isQualified ? "--teal" : "var(--coral)" }}
-        >
-          {matchPercentage}%
-        </p>
-        <p
-          className="font-['Space_Grotesk'] font-bold uppercase tracking-wider"
-          style={{ color: isQualified ? "--teal" : "var(--coral)" }}
-        >
-          {isQualified ? "✓ Qualified to Apply" : "✗ Below Threshold"}
-        </p>
-      </div>
+      {/* Main Score Area */}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Massive Score Block */}
+        <div className="flex-1 border-[6px] border-black p-8 flex flex-col items-center justify-center bg-white shadow-[8px_8px_0px_#000] relative">
+          <div className="absolute top-4 right-4 bg-white text-black p-2 border-4 border-black shadow-[4px_4px_0px_#000]">
+            {isQualified ? <CheckCircle2 size={32} /> : <XCircle size={32} />}
+          </div>
+          
+          <span className="font-mono font-black text-sm uppercase tracking-[0.2em] text-black mb-2 px-4 py-1 border-2 border-black">
+            Overall AI Score
+          </span>
+          
+          <h2 className="text-8xl md:text-[9rem] font-black leading-none text-black">
+            {matchPercentage}<span className="text-4xl">%</span>
+          </h2>
+        </div>
 
-      {/* Match Breakdown */}
-      <div className="brutal-card bg-[var(--card-bg)] p-6 mb-6">
-        <h2 className="font-['Space_Grotesk'] font-bold text-sm uppercase tracking-wider mb-4">
-          Match Breakdown
-        </h2>
-        <div className="space-y-3">
-          {[
-            { label: "Technical Skills", score: matchBreakdown?.technicalSkillsMatch || 0, weight: "(40%)" },
-            { label: "Experience", score: matchBreakdown?.experienceMatch || 0, weight: "(30%)" },
-            { label: "Soft Skills", score: matchBreakdown?.softSkillsMatch || 0, weight: "(15%)" },
-            { label: "Languages", score: matchBreakdown?.languagesMatch || 0, weight: "(15%)" },
-          ].map((item, i) => (
-            <div key={i} className="flex items-center gap-4">
-              <div className="flex-1">
-                <div className="flex justify-between mb-1">
-                  <span className="font-mono text-xs font-bold">
-                    {item.label} {item.weight}
+        {/* Breakdown Panel */}
+        <div className="flex-[1.5] border-[6px] border-black p-6 bg-white shadow-[8px_8px_0px_#000] flex flex-col">
+          <h3 className="font-black font-['Space_Grotesk'] text-2xl uppercase border-b-4 border-black pb-4 mb-6 flex items-center gap-3 text-black">
+            <Zap size={24} /> Matrix Map
+          </h3>
+          <div className="flex-1 flex flex-col justify-around gap-4">
+            {[
+              { label: "Technical Capabilities", score: matchDetails?.technicalSkillsMatch || 0, color: "var(--teal)" },
+              { label: "Experience Match", score: matchDetails?.experienceMatch || 0, color: "var(--yellow)" },
+              { label: "Interpersonal Skills", score: matchDetails?.softSkillsMatch || 0, color: "var(--coral)" },
+            ].map((item, i) => (
+              <div key={i} className="flex flex-col gap-1">
+                <div className="flex justify-between items-end">
+                  <span className="font-mono text-sm font-bold uppercase text-black">
+                    {item.label}
                   </span>
-                  <span className="font-mono text-xs font-bold" style={{ color: "var(--yellow)" }}>
+                  <span className="font-mono text-2xl font-black text-black">
                     {item.score}%
                   </span>
                 </div>
-                <div className="w-full h-2 bg-[var(--border-color)]" style={{ borderRadius: "2px", overflow: "hidden" }}>
+                {/* Clean progress bar */}
+                <div className="w-full h-8 border-[3px] border-black bg-[#eee] relative">
                   <div
-                    style={{ background: "var(--teal)", width: `${item.score}%`, height: "100%", transition: "width 0.3s ease" }}
+                    className="h-full absolute top-0 left-0 border-r-[3px] border-black"
+                    style={{ 
+                      width: `${item.score}%`, 
+                      backgroundColor: item.color
+                    }}
                   />
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* AI Analysis */}
-      {matchAnalysis.matchDetails?.matchAnalysis && (
-        <div className="brutal-card bg-[var(--card-bg)] p-6 mb-6">
-          <h2 className="font-['Space_Grotesk'] font-bold text-sm uppercase tracking-wider mb-4">
-            AI Analysis
-          </h2>
-          <p className="font-mono text-sm leading-relaxed text-[var(--fg-muted)]">
-            {matchAnalysis.matchDetails.matchAnalysis}
+      {/* Summary Notes */}
+      {aiSummary && (
+        <div className="border-[6px] border-black p-6 bg-white shadow-[8px_8px_0px_#000]">
+          <h3 className="font-black font-['Space_Grotesk'] text-2xl uppercase mb-4 text-black border-b-4 border-black inline-block pb-1">
+            Recruiter Summary
+          </h3>
+          <p className="font-mono text-base font-bold text-black leading-relaxed">
+            {aiSummary}
           </p>
         </div>
       )}
 
-      {/* Strengths */}
-      {matchAnalysis.strengths && matchAnalysis.strengths.length > 0 && (
-        <div className="brutal-card bg-[var(--card-bg)] p-6 mb-6">
-          <h2 className="font-['Space_Grotesk'] font-bold text-sm uppercase tracking-wider mb-4" style={{ color: "var(--teal)" }}>
-            ✓ Your Strengths
-          </h2>
-          <ul className="space-y-2">
-            {matchAnalysis.strengths.map((strength, i) => (
-              <li key={i} className="flex gap-2 font-mono text-sm text-[var(--fg-muted)]">
-                <span style={{ color: "var(--teal)", fontWeight: "bold" }}>•</span>
-                <span>{strength}</span>
-              </li>
-            ))}
-          </ul>
+      {/* Grid for Strengths and Weaknesses */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="border-[6px] border-black p-6 bg-white shadow-[8px_8px_0px_#000]">
+          <h3 className="font-black font-['Space_Grotesk'] text-xl uppercase mb-4 text-black bg-[var(--teal)] px-3 py-1 inline-block border-2 border-black">
+            Detected Strengths
+          </h3>
+          {strengthsList.length > 0 ? (
+            <ul className="space-y-3">
+              {strengthsList.map((strength, i) => (
+                <li key={i} className="flex gap-3 font-mono text-sm font-bold text-black items-start">
+                  <span className="font-black text-xl leading-none mt-1 text-[var(--teal)]">+</span>
+                  {strength}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="font-mono text-sm text-[var(--fg-muted)] italic">No strengths listed.</p>
+          )}
         </div>
-      )}
 
-      {/* Weaknesses */}
-      {matchAnalysis.weaknesses && matchAnalysis.weaknesses.length > 0 && (
-        <div className="brutal-card bg-[var(--card-bg)] p-6 mb-6">
-          <h2 className="font-['Space_Grotesk'] font-bold text-sm uppercase tracking-wider mb-4" style={{ color: "var(--coral)" }}>
-            ⚠ Areas to Improve
-          </h2>
-          <ul className="space-y-2">
-            {matchAnalysis.weaknesses.map((weakness, i) => (
-              <li key={i} className="flex gap-2 font-mono text-sm text-[var(--fg-muted)]">
-                <span style={{ color: "var(--coral)", fontWeight: "bold" }}>•</span>
-                <span>{weakness}</span>
-              </li>
-            ))}
-          </ul>
+        <div className="border-[6px] border-black p-6 bg-white shadow-[8px_8px_0px_#000]">
+          <h3 className="font-black font-['Space_Grotesk'] text-xl uppercase mb-4 text-black bg-[var(--coral)] px-3 py-1 inline-block border-2 border-black">
+            Missing Elements
+          </h3>
+          {weaknessesList.length > 0 ? (
+            <ul className="space-y-3">
+              {weaknessesList.map((weakness, i) => (
+                <li key={i} className="flex gap-3 font-mono text-sm font-bold text-black items-start">
+                  <span className="font-black text-xl leading-none mt-1 text-[var(--coral)]">-</span>
+                  {weakness}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="font-mono text-sm text-[var(--fg-muted)] italic">No elements missing.</p>
+          )}
         </div>
-      )}
+      </div>
 
-      {/* Action Buttons */}
-      <div className="flex gap-3">
-        <button
-          onClick={() => {
-            setStep("upload");
-            setMatchAnalysis(null);
-            setCvFile(null);
-          }}
-          className="flex-1 brutal-btn px-4 py-3 font-bold uppercase"
-          style={{ background: "var(--fg-muted)", color: "#0a0a0a" }}
-        >
-          Back
-        </button>
-        {isQualified && (
-          <button
-            onClick={handleSubmitApplication}
-            disabled={submitting}
-            className="flex-1 brutal-btn px-4 py-3 font-bold uppercase disabled:opacity-50"
-            style={{ background: submitting ? "--fg-muted" : "var(--yellow)", color: "#0a0a0a" }}
-          >
-            {submitting ? "Submitting..." : isEdit ? "Update Application" : "Apply Now"}
-          </button>
+      {/* Application Actions */}
+      <div className="mt-4 pt-6 border-t-[6px] border-black">
+        {!isQualified && (
+           <div className="flex items-center gap-4 bg-[var(--yellow)] border-4 border-black p-4 mb-6 shadow-[4px_4px_0px_#000]">
+              <AlertTriangle className="text-black shrink-0" size={32} />
+              <p className="font-mono text-sm text-black font-bold">
+                WARNING: Your score is below 50%. Proceed with application at your own discretion.
+              </p>
+           </div>
         )}
+
+        <button
+          onClick={handleSubmitApplication}
+          disabled={submitting}
+          className="w-full flex items-center justify-center gap-4 bg-[var(--teal)] hover:bg-[#fff] text-black border-[6px] border-black py-6 px-10 shadow-[8px_8px_0px_#000] hover:translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_#000] transition-all disabled:opacity-50"
+        >
+          <span className="font-black font-['Space_Grotesk'] text-3xl uppercase tracking-widest">
+            {submitting ? "Processing..." : (isEdit ? "Update Submission" : "Submit Application")}
+          </span>
+          {!submitting && <ArrowRight size={32} />}
+        </button>
       </div>
 
-      {!isQualified && (
-        <div className="mt-4 brutal-card bg-[rgba(255,107,107,0.1)] border-4 border-[var(--coral)] p-4">
-          <p className="font-mono text-sm text-[var(--fg-muted)]">
-            Your match percentage is below 50%. You cannot apply for this position. Consider improving your skills or experience in areas marked above.
-          </p>
-        </div>
-      )}
     </div>
   );
 }

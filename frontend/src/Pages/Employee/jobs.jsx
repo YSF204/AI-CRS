@@ -8,6 +8,7 @@ import JobItem from "../../components/Employee/JobItem";
 import api from "../../services/api";
 import useFetch from "../../hooks/useFetch";
 import { getRelativeTime } from "../../utils/dateFormatter";
+import ApplyJobModal from "./ApplyJob";
 
 const toRoleType = (value) => {
   if (value === "FULL_TIME") return "Full-time";
@@ -21,6 +22,7 @@ export default function Jobs() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [selectedJobId, setSelectedJobId] = useState(null);
+  const [applyJobId, setApplyJobId] = useState(null);
   const debouncedQuery = useDebounce(query, 250);
 
   const {
@@ -65,7 +67,7 @@ export default function Jobs() {
   }, [jobs, filtered.length]);
 
   const handleApply = (job) => {
-    navigate(`/employee/apply-job/${job.id}`);
+    setApplyJobId(job.id);
   };
 
   return (
@@ -335,6 +337,10 @@ export default function Jobs() {
           )}
         </div>
       </div>
+      
+      {applyJobId && (
+        <ApplyJobModal jobId={applyJobId} onClose={() => setApplyJobId(null)} />
+      )}
     </div>
   );
 }

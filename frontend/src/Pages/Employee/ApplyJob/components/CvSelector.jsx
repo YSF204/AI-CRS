@@ -1,7 +1,7 @@
 import React from "react";
 import { Loader } from "lucide-react";
 
-export default function CvSelector({ cvs, selectedCvId, setSelectedCvId, setMatchAnalysis, handleAnalyzeCv, analyzing }) {
+export default function CvSelector({ cvs, selectedCvId, setSelectedCvId, setMatchAnalysis, handleAnalyzeCv, handleApplyDirectly, analyzing, isEdit }) {
   return (
     <>
       <div className="brutal-card bg-[var(--card-bg)] p-6">
@@ -37,18 +37,32 @@ export default function CvSelector({ cvs, selectedCvId, setSelectedCvId, setMatc
         </p>
       </div>
 
-      <button
-        onClick={handleAnalyzeCv}
-        disabled={analyzing || !selectedCvId}
-        className="w-full brutal-btn px-6 py-4 font-bold uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50"
-        style={{
-          background: analyzing || !selectedCvId ? "--fg-muted" : "var(--yellow)",
-          color: "#0a0a0a",
-        }}
-      >
-        {analyzing && <Loader size={16} className="animate-spin" />}
-        {analyzing ? "Analyzing..." : "Analyze & Preview Match"}
-      </button>
+      <div className="flex gap-4 mt-6">
+        <button
+          onClick={handleAnalyzeCv}
+          disabled={!selectedCvId || analyzing}
+          className="flex-1 brutal-btn px-4 py-3 font-bold uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
+          style={{ background: "var(--yellow)", color: "#0a0a0a" }}
+        >
+          {analyzing ? (
+            <>
+              <Loader className="animate-spin" size={18} />
+              Analyzing Match...
+            </>
+          ) : (
+            "Analyze & Continue"
+          )}
+        </button>
+        <button
+          onClick={handleApplyDirectly}
+          disabled={!selectedCvId || analyzing}
+          className="flex-1 brutal-btn px-4 py-3 font-bold uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2 border-2 border-black"
+          style={{ background: "var(--teal)", color: "#0a0a0a" }}
+          title={isEdit ? "Update your application instantly without running AI tests" : "Submit the application immediately without AI analysis"}
+        >
+          {isEdit ? "Update Directly" : "Apply Directly"}
+        </button>
+      </div>
     </>
   );
 }

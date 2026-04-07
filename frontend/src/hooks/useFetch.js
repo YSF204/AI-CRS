@@ -25,6 +25,7 @@ export default function useFetch(fetcher, options = {}) {
       setData(result);
       return result;
     } catch (err) {
+      console.error("useFetch error:", err);
       setError(err);
       throw err;
     } finally {

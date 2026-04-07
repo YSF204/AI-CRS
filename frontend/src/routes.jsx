@@ -15,6 +15,7 @@ import CVTemplates from "./Pages/Employee/CVTemplates";
 import CVEditor from "./Pages/Employee/CVEditor";
 import EmployeeDash from "./Pages/Employee/EmployeeDash";
 import Jobs from "./Pages/Employee/jobs";
+import JobDetails from "./Pages/Employee/JobDetails";
 import ApplyJob from "./Pages/Employee/ApplyJob";
 import FindJobByCV from "./Pages/Employee/FindJobByCV";
 import Profile from "./Pages/Employee/Profile";
@@ -23,6 +24,7 @@ import EditJob from "./Pages/Employer/EditJob";
 import EmployerDash from "./Pages/Employer/EmployerDash";
 import FindTalent from "./Pages/Employer/FindTalent";
 import ManageJobs from "./Pages/Employer/ManageJobs";
+import JobApplications from "./Pages/Employer/JobApplications";
 import PendingActivation from "./Pages/Employer/PendingActivation";
 import PostJob from "./Pages/Employer/PostJob";
 import AuthPage from "./Pages/Public/Auth/AuthPage";
@@ -148,6 +150,16 @@ export const router = createBrowserRouter([
         ),
       },
       {
+        path: "/employee/jobs/:jobId",
+        element: (
+          <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+            <PageTransition>
+              <JobDetails />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "/employee/applications",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
@@ -251,6 +263,16 @@ export const router = createBrowserRouter([
           <ProtectedRoute allowedRoles={["EMPLOYER"]}>
             <PageTransition>
               <ManageJobs />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/employer/jobs/:jobId/applications",
+        element: (
+          <ProtectedRoute allowedRoles={["EMPLOYER"]}>
+            <PageTransition>
+              <JobApplications />
             </PageTransition>
           </ProtectedRoute>
         ),

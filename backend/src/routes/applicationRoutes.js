@@ -4,6 +4,7 @@ import {
   applyForJob,
   getMyApplications,
   getEmployerApplications,
+  getApplicationsByJob,
   getApplicationById,
   updateApplication,
   updateApplicationStatus,
@@ -21,14 +22,17 @@ applicationRouter.use(authenticate);
 
 // Employee routes
 applicationRouter.post("/analyze-cv", isEmployee, uploadCV, analyzeCv);
-applicationRouter.post("/", isEmployee, applyForJob);
+applicationRouter.post("/", isEmployee, uploadCV, applyForJob);
 applicationRouter.get("/my-applications", getMyApplications);
-applicationRouter.get("/:id", getApplicationById);
-applicationRouter.patch("/:id", isEmployee, updateApplication);
-applicationRouter.delete("/:id", deleteApplication);
 
 // Employer routes
 applicationRouter.get("/employer/all", isEmployer, getEmployerApplications);
+applicationRouter.get("/employer/job/:jobId", isEmployer, getApplicationsByJob);
 applicationRouter.patch("/:id/status", isEmployer, updateApplicationStatus);
+
+// Shared routes (after specific prefixes)
+applicationRouter.get("/:id", getApplicationById);
+applicationRouter.patch("/:id", isEmployee, uploadCV, updateApplication);
+applicationRouter.delete("/:id", deleteApplication);
 
 export default applicationRouter;

@@ -7,7 +7,7 @@ import JobCard from './JobCard';
  * Renders the full jobs section: heading, loading/empty states, and the grid of JobCards.
  * Receives jobs array and callbacks from the parent.
  */
-export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJobUpdated, viewAllLink, totalJobsCount }) {
+export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJobUpdated, onViewCandidates, viewAllLink, totalJobsCount }) {
   return (
     <div style={{ gridColumn: 'span 12' }}>
       {/* Section heading */}
@@ -45,7 +45,13 @@ export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJob
         <div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 'clamp(1rem, 2.4%, 1.6rem)' }}>
             {jobs.map((job) => (
-              <JobCard key={job._id} job={job} onDelete={onJobDeleted} onUpdate={onJobUpdated} />
+              <JobCard
+                key={job._id}
+                job={job}
+                onDelete={onJobDeleted}
+                onUpdate={onJobUpdated}
+                onViewCandidates={onViewCandidates}
+              />
             ))}
           </div>
 

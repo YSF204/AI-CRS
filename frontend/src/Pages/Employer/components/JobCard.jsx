@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Trash2, DollarSign, Wifi, Clock, Briefcase, Power, Edit } from 'lucide-react';
+import { Trash2, DollarSign, Wifi, Clock, Briefcase, Power, Edit, Users } from 'lucide-react';
 import api from '../../../services/api';
 
 const fmt = (n) => (n == null ? '—' : n.toLocaleString());
@@ -16,7 +16,7 @@ const ago = (d) => {
  * Displays one job posting. Handles its own delete action and reports
  * the deleted ID back to the parent via onDelete(id).
  */
-export default function JobCard({ job, onDelete, onUpdate }) {
+export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
   const [deleting, setDeleting] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(job.status);
@@ -143,6 +143,18 @@ export default function JobCard({ job, onDelete, onUpdate }) {
         >
           <Edit size={13} /> EDIT
         </Link>
+        <button
+          onClick={() => onViewCandidates && onViewCandidates(job._id)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 4,
+            padding: '8px 13px', fontFamily: "'DM Mono', monospace", fontSize: 11,
+            fontWeight: 700, textTransform: 'uppercase',
+            background: '#E0E7FF', color: '#0a0a0a',
+            border: '2px solid #0a0a0a', cursor: 'pointer',
+          }}
+        >
+          <Users size={13} /> View Candidates
+        </button>
         
         <button
           onClick={handleDelete}

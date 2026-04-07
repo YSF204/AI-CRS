@@ -1,10 +1,10 @@
-import { GoogleGenAI } from "@google/genai";
+import OpenAI from "openai";
 
 let client;
 
 const getClient = () => {
   if (!client) {
-    client = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   }
   return client;
 };
@@ -260,6 +260,17 @@ Return ONLY a valid JSON object. No markdown, no preamble, no explanation outsid
   "candidate_name": "string or 'Unknown' if not found",
   "job_title": "string",
   "company": "string",
+  "applicant_form": {
+    "fullName": "string",
+    "email": "string",
+    "phone": "string",
+    "yearsOfExperience": <number>,
+    "technicalSkills": ["skill"],
+    "softSkills": ["skill"],
+    "languages": ["lang"],
+    "summary": "string",
+    "additionalInformation": "string"
+  },
   "overall_fit_percentage": 0,
   "fit_label": "Excellent Fit | Strong Fit | Good Fit | Moderate Fit | Weak Fit | Not Recommended",
   "confidence_level": "High | Medium | Low",
@@ -291,7 +302,9 @@ Return ONLY a valid JSON object. No markdown, no preamble, no explanation outsid
 
 ---
 
-## EDGE CASES
+## EDGE CASES & SAFEGUARDS
+- If the candidate profile contains random characters, keyboard smashes (e.g., 'adjadlandlaismdasljn'), gibberish, or lacks any coherent professional information:
+  → YOU MUST return an overall_fit_percentage of 0, set "fit_label" to "Not Recommended", and note in "recruiter_summary" that the input was invalid or gibberish. Do NOT hallucinate a match for incoherent text!
 - If candidate profile is empty → return: { "error": "invalid_input", "message": "..." }
 
 Perform a full candidate-to-job fit analysis using the following data.
@@ -322,17 +335,18 @@ ${JSON.stringify({
 
 Return only the JSON analysis object as described. No extra text.`;
 
-    const response = await getClient().models.generateContent({
-      model: "gemini-2.0-flash-lite", // Using Gemini 2.0 as it was natively configured
-      contents: [
+    const response = await getClient().chat.completions.create({
+      model: "gpt-4o",
+      messages: [
         {
           role: "user",
-          parts: [{ text: prompt }],
+          content: prompt,
         },
       ],
+      response_format: { type: "json_object" }
     });
 
-    const cleanJson = response.text.replace(/```json|```/g, "").trim();
+    const cleanJson = response.choices[0].message.content.trim();
     return JSON.parse(cleanJson);
   } catch (error) {
     console.error("Error generating AI match analysis:", error);

@@ -7,7 +7,6 @@ import { DEFAULT_SECTION_ORDER } from "./constants";
 import { TEMPLATES } from "../../../Features/CVManagement/index.js";
 import useCVForm from "./hooks/useCVForm";
 import ActionBar from "./components/ActionBar";
-import AnalysisModal from "./components/AnalysisModal";
 import Toast from "./components/Toast";
 import Sidebar from "./components/Sidebar";
 import EditorContent from "./components/EditorContent";
@@ -562,6 +561,7 @@ export default function CVEditor() {
       />
 
       {/* ── Analysis Modal ── */}
+      {/* 
       <AnalysisModal
         show={showAnalysis}
         analysis={analysisResult}
@@ -569,6 +569,7 @@ export default function CVEditor() {
         onClose={() => setShowAnalysis(false)}
         onApply={handleApplyAnalysis}
       />
+      */}
 
       {/* ── Template Selector Modal ── */}
       {showTemplateSelector && (

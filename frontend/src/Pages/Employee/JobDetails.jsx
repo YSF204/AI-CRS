@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
@@ -11,6 +11,7 @@ import DashboardNav from "../../components/shared/DashboardNav";
 import api from "../../services/api";
 import useFetch from "../../hooks/useFetch";
 import { getRelativeTime } from "../../utils/dateFormatter";
+import ApplyJobModal from "./ApplyJob";
 
 const toRoleType = (value) => {
   if (value === "FULL_TIME") return "Full-time";
@@ -23,6 +24,7 @@ const toRoleType = (value) => {
 export default function JobDetails() {
   const { jobId } = useParams();
   const navigate = useNavigate();
+  const [applyJobId, setApplyJobId] = useState(null);
 
   const {
     data: job,
@@ -208,7 +210,7 @@ export default function JobDetails() {
           {/* Apply Button */}
           <div className="flex gap-4">
             <button
-              onClick={() => navigate(`/employee/apply/${job._id}`)}
+              onClick={() => setApplyJobId(job._id)}
               className="flex-1 brutal-btn px-6 py-4 font-bold uppercase tracking-wider flex items-center justify-center gap-2 text-lg"
               style={{ background: "var(--yellow)", color: "#0a0a0a" }}
             >
@@ -218,6 +220,10 @@ export default function JobDetails() {
           </div>
         </div>
       </div>
+      
+      {applyJobId && (
+        <ApplyJobModal jobId={applyJobId} onClose={() => setApplyJobId(null)} />
+      )}
     </div>
   );
 }

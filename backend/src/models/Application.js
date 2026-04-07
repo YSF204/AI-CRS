@@ -25,18 +25,30 @@ const applicationSchema = new mongoose.Schema(
     applicantInfo: {
       fullName: {
         type: String,
-        required: true,
+        required: false,
+        default: "Candidate",
         trim: true,
       },
       email: {
         type: String,
-        required: true,
+        required: false,
+        default: "",
         lowercase: true,
         trim: true,
       },
       phone: {
         type: String,
         trim: true,
+      },
+      linkedin: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      portfolioUrl: {
+        type: String,
+        trim: true,
+        default: "",
       },
       summary: {
         type: String,
@@ -58,6 +70,44 @@ const applicationSchema = new mongoose.Schema(
         type: [String],
         default: [],
       },
+      additionalInformation: {
+        type: String,
+        trim: true,
+        default: "",
+      },
+      certifications: {
+        type: [String],
+        default: [],
+      },
+      education: [
+        {
+          institutionName: {
+            type: String,
+            trim: true,
+            default: "",
+          },
+          certification: {
+            type: String,
+            trim: true,
+            default: "",
+          },
+          durationFrom: {
+            type: String,
+            trim: true,
+            default: "",
+          },
+          durationTo: {
+            type: String,
+            trim: true,
+            default: "",
+          },
+          summary: {
+            type: String,
+            trim: true,
+            default: "",
+          },
+        },
+      ],
     },
     cvFile: {
       filename: {
@@ -73,7 +123,8 @@ const applicationSchema = new mongoose.Schema(
     },
     matchPercentage: {
       type: Number,
-      required: true,
+      required: false,
+      default: null,
       min: 0,
       max: 100,
     },

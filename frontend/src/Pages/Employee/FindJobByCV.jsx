@@ -1,25 +1,56 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Search, Upload, ArrowRight } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Briefcase,
+  ChevronRight,
+  FileText,
+  RefreshCw,
+  Sparkles,
+  Upload,
+} from "lucide-react";
 import DashboardNav from "../../components/shared/DashboardNav";
 import StatsBar from "../../components/shared/StatsBar";
 import api from "../../services/api";
 import useFetch from "../../hooks/useFetch";
 
-const CV_SEARCH_MODES = {
-  EXISTING: "existing",
-  UPLOAD: "upload",
-};
+const FIND_BY_CV_CACHE_KEY = "employee-find-job-by-cv-state";
 
 export default function FindJobByCV() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState(CV_SEARCH_MODES.EXISTING);
   const [selectedCvId, setSelectedCvId] = useState("");
   const [jobs, setJobs] = useState(null);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [lastAction, setLastAction] = useState("none");
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      const cached = sessionStorage.getItem(FIND_BY_CV_CACHE_KEY);
+      if (!cached) return;
+      const parsed = JSON.parse(cached);
+      if (parsed?.selectedCvId) setSelectedCvId(parsed.selectedCvId);
+      if (parsed?.jobs) setJobs(parsed.jobs);
+      if (parsed?.error) setError(parsed.error);
+      if (parsed?.lastAction) setLastAction(parsed.lastAction);
+    } catch {
+      // Ignore malformed cache payloads.
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(
+        FIND_BY_CV_CACHE_KEY,
+        JSON.stringify({ selectedCvId, jobs, error, lastAction }),
+      );
+    } catch {
+      // Ignore storage write errors.
+    }
+  }, [selectedCvId, jobs, error, lastAction]);
 
   const {
     data: cvs = [],
@@ -34,31 +65,67 @@ export default function FindJobByCV() {
     { initialData: [] },
   );
 
+  useEffect(() => {
+    if (!selectedCvId && Array.isArray(cvs) && cvs.length > 0) {
+      setSelectedCvId(cvs[0]._id);
+    }
+  }, [cvs, selectedCvId]);
+
+  const selectedCv = useMemo(
+    () => cvs.find((cv) => cv._id === selectedCvId) || null,
+    [cvs, selectedCvId],
+  );
+
+  const normalizedJobs = useMemo(() => {
+    if (!jobs) return [];
+    const items = Array.isArray(jobs) ? jobs : [jobs];
+
+    return items
+      .map((item, index) => {
+        const rawId = item.jobId || item.job_id || item._id || item.id;
+        const id = typeof rawId === "object" ? rawId?._id : rawId;
+        const score =
+          item.matchScore ?? item.relevance_score ?? item.relevanceScore;
+
+        return {
+          key: id || index,
+          id,
+          title: item.position || item.jobTitle || item.title || "Matched Job",
+          location: item.workSite || item.location || "Location not available",
+          company: item.company || item.companyName || "Company",
+          match: Number.isFinite(Number(score)) ? Number(score) : null,
+          reasoning: item.reasoning || item.recommendation_note,
+          skillsMatched: item.skillsMatched || item.match_reasons || [],
+          skillsMissing: item.skillsMissing || item.missing_skills || [],
+        };
+      })
+      .sort((a, b) => (b.match ?? -1) - (a.match ?? -1));
+  }, [jobs]);
+
   const stats = useMemo(() => {
     const safeCvs = Array.isArray(cvs) ? cvs : [];
     return [
       { label: "Saved CVs", value: safeCvs.length, color: "var(--blue)" },
       {
-        label: "Upload Mode",
-        value: mode === CV_SEARCH_MODES.UPLOAD ? 1 : 0,
-        color: "var(--yellow)",
-      },
-      {
         label: "Found Jobs",
-        value: jobs ? (Array.isArray(jobs) ? jobs.length : 1) : 0,
+        value: normalizedJobs.length,
         color: "var(--mint)",
       },
+      {
+        label: "Last Search",
+        value:
+          lastAction === "saved"
+            ? "Saved CV"
+            : lastAction === "upload"
+              ? "Uploaded PDF"
+              : "-",
+        color: "var(--yellow)",
+      },
     ];
-  }, [cvs, mode, jobs]);
+  }, [cvs, normalizedJobs.length, lastAction]);
 
   const setPageError = (err, fallback) =>
     setError(err?.response?.data?.message || err?.message || fallback);
-
-  const handleSelectMode = (selected) => {
-    setMode(selected);
-    setError("");
-    setJobs(null);
-  };
 
   const handleFindWithExisting = async () => {
     if (!selectedCvId) {
@@ -68,12 +135,12 @@ export default function FindJobByCV() {
 
     setLoading(true);
     setError("");
-    setJobs(null);
 
     try {
       const res = await api.post(`/cvs/${selectedCvId}/recommend-jobs`);
       const match = res.data?.data?.match;
       setJobs(match || []);
+      setLastAction("saved");
     } catch (err) {
       setPageError(err, "Unable to find jobs with the selected CV.");
     } finally {
@@ -92,7 +159,6 @@ export default function FindJobByCV() {
 
     setUploading(true);
     setError("");
-    setJobs(null);
 
     try {
       const formData = new FormData();
@@ -109,62 +175,125 @@ export default function FindJobByCV() {
 
       await refreshCvs();
       setSelectedCvId(createdCv._id);
-      setMode(CV_SEARCH_MODES.EXISTING);
 
       const matchRes = await api.post(`/cvs/${createdCv._id}/recommend-jobs`);
       const match = matchRes.data?.data?.match;
       setJobs(match || []);
+      setLastAction("upload");
     } catch (err) {
       setPageError(err, "Unable to upload the PDF and search jobs.");
     } finally {
       setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
-  const displayJobs = () => {
-    if (!jobs || (Array.isArray(jobs) && jobs.length === 0)) {
+  const goToJob = (jobId) => {
+    if (!jobId) return;
+    navigate(`/employee/jobs/${jobId}`, {
+      state: { source: "find-job-by-cv" },
+    });
+  };
+
+  const clearResults = () => {
+    setJobs(null);
+    setError("");
+  };
+
+  const renderResults = () => {
+    if (!jobs) {
       return (
-        <div className="brutal-card p-8 text-center bg-(--card-bg)">
-          <p className="font-mono text-sm text-(--fg-muted)">
-            No job matches were found yet.
-          </p>
+        <div className="brutal-card p-8 bg-(--card-bg) border-4 border-(--border-color)">
+          <div className="flex items-start gap-4">
+            <div className="h-10 w-10 shrink-0 border-2 border-black bg-(--yellow) flex items-center justify-center">
+              <Sparkles size={18} />
+            </div>
+            <div>
+              <p className="font-['Space_Grotesk'] font-bold uppercase text-lg mb-1">
+                Choose One, Then Search
+              </p>
+              <p className="font-mono text-sm text-(--fg-muted)">
+                Pick a saved CV or upload a PDF. You do not need to switch modes.
+              </p>
+            </div>
+          </div>
         </div>
       );
     }
 
-    const items = Array.isArray(jobs) ? jobs : [jobs];
+    if (normalizedJobs.length === 0) {
+      return (
+        <div className="brutal-card p-8 bg-(--card-bg) border-4 border-(--border-color)">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="text-(--coral) shrink-0" />
+            <div>
+              <p className="font-['Space_Grotesk'] font-bold uppercase text-lg mb-1">
+                No Strong Matches Right Now
+              </p>
+              <p className="font-mono text-sm text-(--fg-muted)">
+                Try another CV or upload a more complete one. You can also
+                browse all open jobs.
+              </p>
+              <div className="flex flex-wrap gap-3 mt-4">
+                <button
+                  type="button"
+                  className="brutal-btn px-4 py-2 font-bold"
+                  style={{ background: "var(--teal)", color: "#0a0a0a" }}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Upload another PDF
+                </button>
+                <button
+                  type="button"
+                  className="brutal-btn px-4 py-2 font-bold"
+                  style={{ background: "var(--yellow)", color: "#0a0a0a" }}
+                  onClick={() => navigate("/employee/jobs")}
+                >
+                  Browse all jobs
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="grid grid-cols-1 gap-5">
-        {items.map((item, index) => (
+        {normalizedJobs.map((item, index) => (
           <div
-            key={item.jobId || item._id || index}
-            className="brutal-card p-6 bg-(--card-bg) border-4 border-(--border-color) cursor-pointer hover:border-black transition-all"
-            onClick={() => navigate(`/employee/apply-job/${item.jobId}`)}
+            key={item.key || index}
+            className="brutal-card p-6 bg-(--card-bg) border-4 border-(--border-color) hover:border-black transition-all"
           >
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-start justify-between gap-3 mb-4">
               <div>
                 <h2 className="font-['Space_Grotesk'] font-bold text-xl uppercase mb-1">
-                  {item.position ||
-                    item.jobTitle ||
-                    item.title ||
-                    "Matched Job"}
+                  {item.title}
                 </h2>
                 <p className="font-mono text-sm text-(--fg-muted)">
-                  {item.workSite || item.location || "Location not available"}
+                  {item.company} • {item.location}
                 </p>
               </div>
-              {item.matchScore != null && (
-                <div className="brutal-card px-3 py-1 font-mono text-sm font-bold bg-(--yellow) text-black border-2 border-black whitespace-nowrap">
-                  {item.matchScore}% Match
+              {item.match !== null && (
+                <div
+                  className="brutal-card px-3 py-1 font-mono text-sm font-bold border-2 border-black whitespace-nowrap"
+                  style={{
+                    background:
+                      item.match >= 80
+                        ? "var(--mint)"
+                        : item.match >= 60
+                          ? "var(--yellow)"
+                          : "var(--coral)",
+                    color: "#0a0a0a",
+                  }}
+                >
+                  {item.match}% Match
                 </div>
               )}
             </div>
 
             {item.reasoning && (
-              <p className="font-mono text-sm text-(--fg) mb-4">
-                {item.reasoning}
-              </p>
+              <p className="font-mono text-sm text-(--fg) mb-4">{item.reasoning}</p>
             )}
 
             {item.skillsMatched?.length > 0 && (
@@ -172,14 +301,12 @@ export default function FindJobByCV() {
                 <p className="font-bold uppercase text-xs tracking-[0.2em] text-(--fg-muted)">
                   Matched Skills
                 </p>
-                <p className="font-mono text-sm">
-                  {item.skillsMatched.join(", ")}
-                </p>
+                <p className="font-mono text-sm">{item.skillsMatched.join(", ")}</p>
               </div>
             )}
 
             {item.skillsMissing?.length > 0 && (
-              <div>
+              <div className="mb-4">
                 <p className="font-bold uppercase text-xs tracking-[0.2em] text-(--fg-muted)">
                   Missing Skills
                 </p>
@@ -188,6 +315,16 @@ export default function FindJobByCV() {
                 </p>
               </div>
             )}
+
+            <button
+              type="button"
+              className="brutal-btn px-4 py-2 font-bold inline-flex items-center gap-2"
+              style={{ background: "var(--teal)", color: "#0a0a0a" }}
+              onClick={() => goToJob(item.id)}
+            >
+              View & Apply
+              <ChevronRight size={16} />
+            </button>
           </div>
         ))}
       </div>
@@ -207,8 +344,8 @@ export default function FindJobByCV() {
                 Find Jobs By CV
               </h1>
               <p className="font-mono text-sm text-(--fg-muted) mt-1 max-w-2xl">
-                Choose an existing CV or upload a PDF, then search open jobs
-                tailored to that resume.
+                A simpler flow: pick a saved CV or upload a PDF, then get matched
+                jobs instantly.
               </p>
             </div>
             <button
@@ -234,57 +371,16 @@ export default function FindJobByCV() {
           </div>
         )}
 
-        <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
+        <div className="grid gap-6 xl:grid-cols-[420px_1fr]">
           <div className="space-y-6">
             <div className="brutal-card p-6 border-4 border-black bg-(--card-bg)">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="font-['Space_Grotesk'] font-bold uppercase text-lg">
-                  Search Mode
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 gap-4">
-                <button
-                  type="button"
-                  className={`brutal-btn px-5 py-4 text-left ${
-                    mode === CV_SEARCH_MODES.EXISTING
-                      ? "border-black bg-(--yellow)"
-                      : "border-(--border-color) bg-(--card-bg)"
-                  }`}
-                  onClick={() => handleSelectMode(CV_SEARCH_MODES.EXISTING)}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold uppercase">Existing CV</span>
-                    <span className="font-mono text-xs text-(--fg-muted)">
-                      Select one of your saved resumes
-                    </span>
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  className={`brutal-btn px-5 py-4 text-left ${
-                    mode === CV_SEARCH_MODES.UPLOAD
-                      ? "border-black bg-(--teal)"
-                      : "border-(--border-color) bg-(--card-bg)"
-                  }`}
-                  onClick={() => handleSelectMode(CV_SEARCH_MODES.UPLOAD)}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold uppercase">Upload PDF</span>
-                    <span className="font-mono text-xs text-(--fg-muted)">
-                      Upload a new resume and search jobs
-                    </span>
-                  </div>
-                </button>
-              </div>
-            </div>
-
-            <div className="brutal-card p-6 border-4 border-black bg-(--card-bg)">
               <h2 className="font-['Space_Grotesk'] font-bold uppercase text-lg mb-4">
-                Quick Actions
+                Choose Resume Source
               </h2>
-              {mode === CV_SEARCH_MODES.EXISTING ? (
-                <div className="space-y-4">
+
+              <div className="space-y-5">
+                <div className="brutal-card p-4 border-2 border-(--border-color) bg-(--bg)">
+                  <p className="font-bold uppercase text-sm mb-3">Use Saved CV</p>
                   <select
                     value={selectedCvId}
                     onChange={(e) => setSelectedCvId(e.target.value)}
@@ -298,55 +394,102 @@ export default function FindJobByCV() {
                       </option>
                     ))}
                   </select>
+
+                  {selectedCv && (
+                    <p className="font-mono text-xs text-(--fg-muted) mt-2">
+                      Selected: {selectedCv.jobTitle || "Untitled CV"}
+                    </p>
+                  )}
+
                   <button
                     type="button"
                     onClick={handleFindWithExisting}
-                    disabled={!selectedCvId || loading}
-                    className="brutal-btn px-5 py-3 font-bold w-full"
+                    disabled={!selectedCvId || loading || uploading}
+                    className="mt-3 brutal-btn px-5 py-3 font-bold w-full inline-flex items-center justify-center gap-2"
                     style={{ background: "var(--yellow)", color: "#0a0a0a" }}
                   >
-                    {loading ? "Searching..." : "Find jobs with selected CV"}
+                    {loading ? (
+                      <>
+                        <RefreshCw size={16} className="animate-spin" />
+                        Matching with selected CV...
+                      </>
+                    ) : (
+                      "Find jobs with selected CV"
+                    )}
                   </button>
                 </div>
-              ) : (
-                <div className="space-y-4">
+
+                <div className="flex items-center gap-3">
+                  <div className="h-[2px] bg-(--border-color) flex-1" />
+                  <span className="font-mono text-xs uppercase text-(--fg-muted)">or</span>
+                  <div className="h-[2px] bg-(--border-color) flex-1" />
+                </div>
+
+                <div className="brutal-card p-4 border-2 border-(--border-color) bg-(--bg)">
+                  <p className="font-bold uppercase text-sm mb-3">Upload New PDF</p>
                   <input
                     ref={fileInputRef}
                     type="file"
                     accept=".pdf"
                     onChange={handleUploadAndFind}
                     className="hidden"
-                    disabled={uploading}
+                    disabled={uploading || loading}
                   />
+
                   <button
                     type="button"
-                    className="brutal-btn px-5 py-3 font-bold w-full"
+                    className="brutal-btn px-5 py-5 font-bold w-full border-dashed border-4 inline-flex items-center justify-center gap-2"
                     style={{ background: "var(--teal)", color: "#0a0a0a" }}
                     onClick={() => fileInputRef.current?.click()}
-                    disabled={uploading}
+                    disabled={uploading || loading}
                   >
-                    {uploading ? "Uploading..." : "Upload PDF and find jobs"}
+                    {uploading ? (
+                      <>
+                        <RefreshCw size={16} className="animate-spin" />
+                        Uploading and matching...
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={16} />
+                        Upload PDF and find jobs
+                      </>
+                    )}
                   </button>
-                  <p className="font-mono text-sm text-(--fg-muted)">
-                    Upload a new PDF resume and automatically search open roles
-                    that fit.
+
+                  <p className="font-mono text-xs text-(--fg-muted) mt-2">
+                    Best when testing a new resume version quickly.
                   </p>
                 </div>
-              )}
+              </div>
             </div>
           </div>
 
           <div className="space-y-6">
             <div className="brutal-card p-6 border-4 border-black bg-(--card-bg)">
-              <h2 className="font-['Space_Grotesk'] font-bold uppercase text-lg mb-4">
-                Results
-              </h2>
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <h2 className="font-['Space_Grotesk'] font-bold uppercase text-lg inline-flex items-center gap-2">
+                  <Briefcase size={18} />
+                  Results
+                </h2>
+                {jobs && (
+                  <button
+                    type="button"
+                    onClick={clearResults}
+                    className="brutal-btn px-3 py-1 font-bold text-xs"
+                    style={{ background: "var(--card-bg)", color: "var(--fg)" }}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
               {loading || uploading ? (
-                <div className="font-mono text-sm text-(--fg-muted)">
+                <div className="brutal-card p-6 bg-(--bg) border-2 border-(--border-color) font-mono text-sm text-(--fg-muted) inline-flex items-center gap-2">
+                  <RefreshCw size={16} className="animate-spin" />
                   Searching for job matches...
                 </div>
               ) : (
-                displayJobs()
+                renderResults()
               )}
             </div>
           </div>

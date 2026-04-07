@@ -4,6 +4,14 @@ import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import Job from "../models/Job.js";
 
+const withTimeout = (promise, ms) =>
+  Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("AI recommendation timed out")), ms),
+    ),
+  ]);
+
 const buildLocalJobRecommendations = (cv, jobs) => {
   const cvTech = new Set(
     (cv.technicalSkills || []).map((s) => s.toLowerCase()),
@@ -53,6 +61,38 @@ const buildLocalJobRecommendations = (cv, jobs) => {
     .sort((a, b) => b.matchScore - a.matchScore);
 };
 
+const normalizeAiMatches = (parsedMatches, jobs) => {
+  const jobsById = new Map(jobs.map((job) => [job._id.toString(), job]));
+  const jobsByTitle = new Map(
+    jobs.map((job) => [job.position?.toLowerCase().trim(), job]),
+  );
+
+  return parsedMatches
+    .map((job) => {
+      const rawId = String(job.job_id || "").trim();
+      const rawTitle = String(job.job_title || "").trim();
+      let matchedJob = jobsById.get(rawId);
+
+      // AI may output a wrong/empty id; fallback to title match against known open jobs.
+      if (!matchedJob && rawTitle) {
+        matchedJob = jobsByTitle.get(rawTitle.toLowerCase());
+      }
+
+      if (!matchedJob) return null;
+
+      return {
+        jobId: matchedJob._id.toString(),
+        position: matchedJob.position,
+        workSite: matchedJob.workSite,
+        matchScore: Number(job.relevance_score) || 0,
+        skillsMatched: job.match_reasons || [],
+        skillsMissing: job.missing_skills || [],
+        reasoning: job.recommendation_note || "",
+      };
+    })
+    .filter(Boolean);
+};
+
 export const recommendJobs = catchAsync(async (req, res, next) => {
   const { id: cvId } = req.params;
   const cv = await CV.findById(cvId);
@@ -87,7 +127,14 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
     return next(new AppError("No jobs found", 404));
   }
 
-  const jobsText = JSON.stringify(jobs.map((job) => ({
+  // Fast pre-ranking to reduce prompt size and model latency.
+  // We only send the top candidates to AI, then still return normalized matches.
+  const localRanked = buildLocalJobRecommendations(cv, jobs);
+  const candidateIds = new Set(localRanked.slice(0, 35).map((j) => j.jobId));
+  const candidateJobs = jobs.filter((job) => candidateIds.has(job._id.toString()));
+  const aiInputJobs = candidateJobs.length > 0 ? candidateJobs : jobs;
+
+  const jobsText = JSON.stringify(aiInputJobs.map((job) => ({
     job_id: job._id.toString(),
     job_title: job.position,
     company: "Employer", // We don't populate employerId here, so just put generic or modify if employerId is populated
@@ -101,7 +148,7 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
 
   let parsed;
   try {
-    const match = await matchCVToJobs(cvText, jobsText);
+    const match = await withTimeout(matchCVToJobs(cvText, jobsText), 5500);
     const clean = match.replace(/```json|```/g, "").trim();
     parsed = JSON.parse(clean);
     
@@ -112,17 +159,10 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
       throw new Error("Expected AI match response to be an array");
     }
     
-    parsed = parsed.map(job => ({
-      jobId: job.job_id,
-      position: job.job_title,
-      matchScore: job.relevance_score,
-      skillsMatched: job.match_reasons || [],
-      skillsMissing: job.missing_skills || [],
-      reasoning: job.recommendation_note || ""
-    }));
+    parsed = normalizeAiMatches(parsed, aiInputJobs);
   } catch (error) {
     console.error("AI recommendation error:", error);
-    parsed = buildLocalJobRecommendations(cv, jobs);
+    parsed = localRanked;
   }
   
   // Filter out low scores (using 40 as threshold for related fields)

@@ -185,6 +185,72 @@ export const matchCVToJobs = async (cvText, jobText) => {
   return response.output_text;
 };
 
+// Analyze a CV against a specific job - uses OpenAI File API for direct PDF processing
+export const analyzeApplicationCV = async (filePath, jobDescription) => {
+  const file = await getClient().files.create({
+    file: fs.createReadStream(filePath),
+    purpose: "assistants",
+  });
+
+  const prompt = `You are an expert AI Recruitment Analyst integrated into a professional recruitment platform called AI-CRS.
+Your job is to perform a deep, structured, and honest analysis of a candidate's CV against a specific job's requirements.
+
+Respond with ONLY a valid JSON object (no markdown, no code fences).
+
+{
+  "candidate_name": "string or 'Unknown' if not found",
+  "job_title": "string",
+  "company": "string",
+  "applicant_form": {
+    "fullName": "string",
+    "email": "string",
+    "phone": "string",
+    "yearsOfExperience": <number>,
+    "technicalSkills": ["skill"],
+    "softSkills": ["skill"],
+    "languages": ["lang"],
+    "summary": "string",
+    "additionalInformation": "string"
+  },
+  "overall_fit_percentage": <number 0-100>,
+  "fit_label": "Excellent Fit | Strong Fit | Good Fit | Moderate Fit | Weak Fit | Not Recommended",
+  "confidence_level": "High | Medium | Low",
+  "confidence_note": "Short reason for confidence level",
+  "dimension_scores": {
+    "technical_skills": { "score": <number 0-100>, "summary": "string" },
+    "experience": { "score": <number 0-100>, "summary": "string" },
+    "education_certifications": { "score": <number 0-100>, "summary": "string" },
+    "soft_skills_culture": { "score": <number 0-100>, "summary": "string" },
+    "language_location": { "score": <number 0-100>, "summary": "string" },
+    "achievements_value": { "score": <number 0-100>, "summary": "string" }
+  },
+  "strengths": ["Clear strength point 1"],
+  "gaps": [{ "gap": "Name of the gap", "severity": "Critical|High|Medium|Low", "suggestion": "What the candidate could do to close this gap" }],
+  "matched_skills": ["skill1"],
+  "missing_required_skills": ["skill1"],
+  "recruiter_summary": "A 3-4 sentence professional paragraph summarizing the candidate's fit for this role."
+}
+
+Target job: "${jobDescription}"
+
+Analyze the attached PDF CV and return the JSON analysis object. No extra text.`;
+
+  const response = await getClient().responses.create({
+    model: "gpt-4.1",
+    input: [
+      {
+        role: "user",
+        content: [
+          { type: "input_text", text: prompt },
+          { type: "input_file", file_id: file.id },
+        ],
+      },
+    ],
+  });
+
+  return response.output_text;
+};
+
 const rankCandidatesPrompt = (
   requiemrents,
 ) => ` You are a Senior Technical Recruiter and ATS expert.

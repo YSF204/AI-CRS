@@ -30,6 +30,7 @@ export default function ManageJobs() {
   };
 
   const goPostJob = () => navigate('/employer/post-job');
+  const goViewCandidates = (jobId) => navigate(`/employer/jobs/${jobId}/applications`);
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', padding: 'clamp(1.5rem, 4%, 2.5rem)', overflowX: 'hidden' }}>
@@ -53,6 +54,7 @@ export default function ManageJobs() {
           onPostJob={goPostJob} 
           onJobDeleted={handleJobDeleted} 
           onJobUpdated={handleJobUpdated}
+          onViewCandidates={goViewCandidates}
         />
       </div>
     </div>

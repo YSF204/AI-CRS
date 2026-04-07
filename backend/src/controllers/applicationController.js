@@ -10,6 +10,7 @@ import {
   generateAIMatchAnalysis,
   extractStrengthsWeaknesses,
 } from "../services/matching/matchingService.js";
+import { analyzeApplicationCV } from "../integrations/ai/openai.js";
 import { sendEmail } from "../utils/email.js";
 
 // ================================== //
@@ -30,36 +31,49 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
 
   let cv;
   let applicantInfo;
+  let rawCvText = null;
 
-  // Handle uploaded PDF file
+  // Handle uploaded PDF file - use OpenAI File API directly (no pdf-parse)
   if (req.file) {
-    // For now, create a temporary CV record for the uploaded file
-    cv = {
-      _id: "temp_" + Date.now(),
-      userId,
-      fullName: "Uploaded CV",
-      contact: {
-        email: "",
-        phone: "",
-      },
-      summary: "",
-      technicalSkills: [],
-      softSkills: [],
-      yearsOfExperience: 0,
-      language: [],
-      pdfPath: req.file.path,
-    };
+    // Use OpenAI File API to analyze PDF directly
+    const aiAnalysis = await analyzeApplicationCV(req.file.path, job?.description || "");
+    let parsedAnalysis;
+    try {
+      parsedAnalysis = JSON.parse(aiAnalysis);
+    } catch (e) {
+      console.error("Failed to parse AI analysis JSON:", e);
+      parsedAnalysis = null;
+    }
+
+    // Extract applicant info from AI analysis
     applicantInfo = {
-      fullName: req.user.firstName ? `${req.user.firstName} ${req.user.lastName}` : "Uploaded CV",
+      fullName: parsedAnalysis?.candidate_name || req.user.firstName ? `${req.user.firstName} ${req.user.lastName}` : "Uploaded CV",
       email: "",
       phone: "",
       linkedin: "",
       github: "",
       summary: "",
-      technicalSkills: [],
+      technicalSkills: parsedAnalysis?.matched_skills || [],
       softSkills: [],
       yearsOfExperience: 0,
       languages: [],
+    };
+
+    // For now, create a temporary CV record for the uploaded file
+    cv = {
+      _id: "temp_" + Date.now(),
+      userId,
+      fullName: applicantInfo.fullName,
+      contact: {
+        email: "",
+        phone: "",
+      },
+      summary: "",
+      technicalSkills: applicantInfo.technicalSkills,
+      softSkills: [],
+      yearsOfExperience: 0,
+      language: [],
+      pdfPath: req.file.path,
     };
   } else {
     // Handle existing CV
@@ -95,34 +109,59 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
     return next(new AppError("This job is no longer open", 400));
   }
 
-  // Calculate match percentage
+  // Calculate match percentage and AI analysis
   const matchResult = calculateMatchPercentage(applicantInfo, job);
-  // Generate AI analysis
   let percentageScore = matchResult.percentage;
   let strengths = [];
   let weaknesses = [];
   let matchAnalysisStr = "";
-  
-  try {
-    const aiAnalysis = await generateAIMatchAnalysis(
-      applicantInfo,
-      job,
-      job._id,
-      req.user._id,
-      cvId ? "EXISTING_PROFILE" : "CV_UPLOAD"
-    );
-    
-    if (aiAnalysis && !aiAnalysis.error) {
-      percentageScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : percentageScore;
-      strengths = aiAnalysis.strengths || [];
-      weaknesses = (aiAnalysis.gaps || []).map(g => `${g.severity} Gap: ${g.gap} - ${g.suggestion}`);
-      matchAnalysisStr = aiAnalysis.recruiter_summary || JSON.stringify(aiAnalysis);
-    } else {
-      matchAnalysisStr = aiAnalysis?.message || "Analysis generation failed or invalid input";
+
+  // For uploaded PDFs, we already have AI analysis from analyzeApplicationCV
+  // For existing CVs, generate AI analysis
+  if (req.file) {
+    // Re-analyze with full context for the response
+    try {
+      const aiAnalysis = await analyzeApplicationCV(req.file.path, job.description || "");
+      let parsedAnalysis;
+      try {
+        parsedAnalysis = JSON.parse(aiAnalysis);
+      } catch (e) {
+        parsedAnalysis = null;
+      }
+
+      if (parsedAnalysis) {
+        percentageScore = parsedAnalysis.overall_fit_percentage || percentageScore;
+        strengths = parsedAnalysis.strengths || [];
+        weaknesses = (parsedAnalysis.gaps || []).map(g => `${g.severity} Gap: ${g.gap} - ${g.suggestion}`);
+        matchAnalysisStr = parsedAnalysis.recruiter_summary || "";
+      }
+    } catch (error) {
+      console.error("AI analysis error:", error);
+      matchAnalysisStr = "Analysis generation failed";
     }
-  } catch (error) {
-    console.error("AI analysis error:", error);
-    matchAnalysisStr = "Analysis generation failed";
+  } else {
+    // Existing CV - use generateAIMatchAnalysis
+    try {
+      const aiAnalysis = await generateAIMatchAnalysis(
+        applicantInfo,
+        job,
+        job._id,
+        req.user._id,
+        "EXISTING_PROFILE"
+      );
+
+      if (aiAnalysis && !aiAnalysis.error) {
+        percentageScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : percentageScore;
+        strengths = aiAnalysis.strengths || [];
+        weaknesses = (aiAnalysis.gaps || []).map(g => `${g.severity} Gap: ${g.gap} - ${g.suggestion}`);
+        matchAnalysisStr = aiAnalysis.recruiter_summary || JSON.stringify(aiAnalysis);
+      } else {
+        matchAnalysisStr = aiAnalysis?.message || "Analysis generation failed or invalid input";
+      }
+    } catch (error) {
+      console.error("AI analysis error:", error);
+      matchAnalysisStr = "Analysis generation failed";
+    }
   }
 
   if (strengths.length === 0 && weaknesses.length === 0) {
@@ -166,11 +205,17 @@ export const applyForJob = catchAsync(async (req, res, next) => {
     fullName,
     email,
     phone,
+    linkedin,
+    portfolioUrl,
     yearsOfExperience,
     technicalSkills,
     softSkills,
     languages,
+    certifications,
+    education,
     summary,
+    additionalInformation,
+    skipAnalysis,
   } = req.body;
   const userId = req.user._id;
 
@@ -182,6 +227,8 @@ export const applyForJob = catchAsync(async (req, res, next) => {
   let cvData = null;
   let isManualApplication = cvId === "manual" || !cvId;
   let applicationMethod = "manual";
+  let rawCvText = null;
+  let parsedPdfAnalysis = null;
 
   // If using CV, validate it exists and belongs to user
   if (cvId && cvId !== "manual") {
@@ -197,17 +244,21 @@ export const applyForJob = catchAsync(async (req, res, next) => {
     applicationMethod = req.file ? "uploadPdf" : "existingCv";
   } else if (req.file) {
     applicationMethod = "uploadPdf";
+    // Use OpenAI File API directly - no pdf-parse needed
+    rawCvText = null;
+    try {
+      const aiAnalysis = await analyzeApplicationCV(req.file.path, "");
+      try {
+        parsedPdfAnalysis = JSON.parse(aiAnalysis);
+      } catch (e) {
+        parsedPdfAnalysis = null;
+      }
+    } catch (err) {
+      console.error("PDF analysis failed", err);
+    }
   }
 
-  // If manual application, validate required manual fields
-  if (isManualApplication && !fullName) {
-    return next(
-      new AppError(
-        "Applicant information is required for manual application",
-        400,
-      ),
-    );
-  }
+  // Removed strict validation block for missing applicantInfo.fullName
 
   // Check if job exists
   const job = await Job.findById(jobId).populate("employerId");
@@ -226,9 +277,9 @@ export const applyForJob = catchAsync(async (req, res, next) => {
   });
 
   if (existingApplication) {
-    // Return a 409 Conflict with the existing application details to prompt the user for editing
-    return res.status(409).json({
-      success: false,
+    // Return a non-error response so frontend can show a friendly notice without 409 conflicts.
+    return res.status(200).json({
+      success: true,
       message: "You have already applied for this job.",
       data: {
         alreadyApplied: true,
@@ -246,60 +297,107 @@ export const applyForJob = catchAsync(async (req, res, next) => {
       email: cvData.contact?.email || "",
       phone: cvData.contact?.phone || "",
       linkedin: cvData.contact?.linkedin || "",
-      github: cvData.contact?.github || "",
+      portfolioUrl: "",
       summary: cvData.summary || "",
       technicalSkills: cvData.technicalSkills || [],
       softSkills: cvData.softSkills || [],
       yearsOfExperience: cvData.yearsOfExperience || 0,
       languages: cvData.language || [],
+      additionalInformation: cvData.additionalInformation || "",
+      certifications: [
+        ...new Set((cvData.education || []).map((e) => e?.certification).filter(Boolean)),
+      ],
+      education: (cvData.education || []).map((e) => ({
+        institutionName: e?.institutionName || "",
+        certification: e?.certification || "",
+        durationFrom: e?.durationFrom || "",
+        durationTo: e?.durationTo || "",
+        summary: e?.summary || "",
+      })),
+    };
+  } else if (parsedPdfAnalysis?.cvData) {
+    const cvInfo = parsedPdfAnalysis.cvData;
+    finalApplicantInfo = {
+      fullName: cvInfo.jobTitle || fullName || "Candidate",
+      email: cvInfo.contact?.email || email || "",
+      phone: cvInfo.contact?.phone || phone || "",
+      linkedin: cvInfo.contact?.linkedin || linkedin || "",
+      portfolioUrl: portfolioUrl || "",
+      summary: cvInfo.summary || summary || "",
+      technicalSkills: cvInfo.technicalSkills || [],
+      softSkills: cvInfo.softSkills || [],
+      yearsOfExperience: cvInfo.yearsOfExperience || yearsOfExperience || 0,
+      languages: cvInfo.language || [],
+      additionalInformation: cvInfo.additionalInformation || additionalInformation || "",
+      certifications: cvInfo.certifications || certifications || [],
+      education: (cvInfo.education || education || []).map((e) => ({
+        institutionName: e?.institutionName || "",
+        certification: e?.certification || "",
+        durationFrom: e?.durationFrom || "",
+        durationTo: e?.durationTo || "",
+        summary: e?.summary || "",
+      })),
     };
   } else {
     // Manual application data
     finalApplicantInfo = {
-      fullName: fullName || "",
-      email: email || "",
+      fullName: fullName || (req.user.firstName ? `${req.user.firstName} ${req.user.lastName}` : "Candidate"),
+      email: email || req.user.email || "",
       phone: phone || "",
-      linkedin: "",
-      github: "",
+      linkedin: linkedin || "",
+      portfolioUrl: portfolioUrl || "",
       summary: summary || "",
       technicalSkills: technicalSkills || [],
       softSkills: softSkills || [],
       yearsOfExperience: parseInt(yearsOfExperience) || 0,
       languages: languages || [],
+      additionalInformation: additionalInformation || "",
+      certifications: certifications || [],
+      education: (education || []).map((e) => ({
+        institutionName: e?.institutionName || "",
+        certification: e?.certification || "",
+        durationFrom: e?.durationFrom || "",
+        durationTo: e?.durationTo || "",
+        summary: e?.summary || "",
+      })),
     };
   }
 
-  // Calculate match percentage
+  // Background AI Call Logic
   const matchResult = calculateMatchPercentage(finalApplicantInfo, job);
   let percentageScore = matchResult.percentage;
-
-  // Generate AI analysis
   let matchAnalysisStr = "";
-  try {
-    const aiAnalysis = await generateAIMatchAnalysis(
-      finalApplicantInfo,
-      job,
-      job._id,
-      userId,
-      isManualApplication ? "MANUAL_FORM" : (req.file ? "CV_UPLOAD" : "EXISTING_PROFILE")
-    );
-    
-    if (aiAnalysis && !aiAnalysis.error) {
-      percentageScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : percentageScore;
-      matchAnalysisStr = aiAnalysis.recruiter_summary || "";
-    }
-  } catch (error) {
-    console.error("AI analysis error:", error);
-    matchAnalysisStr = "Analysis generation failed";
-  }
 
-  // If percentage < 50%, reject the application
-  if (percentageScore < 50) {
-    return res.status(400).json({
-      success: false,
-      message: `Application rejected. Your match percentage is ${percentageScore}%, which is below the required 50% threshold.`,
-      matchPercentage: percentageScore,
-    });
+  if (skipAnalysis === "true" || skipAnalysis === true) {
+    percentageScore = null;
+    matchAnalysisStr = "AI match score is currently pending background analysis. We will notify you once it's complete.";
+  } else if (req.file) {
+    // Uploaded PDF - reuse earlier analysis if parsed
+    if (parsedPdfAnalysis) {
+      percentageScore = parsedPdfAnalysis.overall_fit_percentage || percentageScore;
+      matchAnalysisStr = parsedPdfAnalysis.recruiter_summary || "";
+    } else {
+      matchAnalysisStr = "Analysis unavailable for uploaded PDF.";
+    }
+  } else if (!isManualApplication) {
+    // Existing CV - use generateAIMatchAnalysis
+    try {
+      const aiAnalysis = await generateAIMatchAnalysis(
+        finalApplicantInfo,
+        job,
+        job._id,
+        userId,
+        "EXISTING_PROFILE"
+      );
+
+      if (aiAnalysis && !aiAnalysis.error) {
+        percentageScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : percentageScore;
+        matchAnalysisStr = aiAnalysis.recruiter_summary || "";
+      }
+    } catch (error) {
+      console.error("AI analysis error:", error);
+      matchAnalysisStr = "Analysis generation failed";
+    }
   }
 
   // Create application
@@ -315,6 +413,13 @@ export const applyForJob = catchAsync(async (req, res, next) => {
     },
     applicationMethod,
   };
+
+  if (req.file) {
+    applicationData.cvFile = {
+      filename: req.file.originalname,
+      path: req.file.path,
+    };
+  }
 
   // Add cvId only if using CV method (not manual or uploadPdf)
   if (cvId && cvId !== "manual") {
@@ -335,7 +440,7 @@ export const applyForJob = catchAsync(async (req, res, next) => {
           <style>
             body { font-family: Arial, sans-serif; color: #333; }
             .container { max-width: 600px; margin: 0 auto; }
-            .header { background: linear-gradient(135deg, #4ecd c4, #1a1a2e); color: white; padding: 20px; text-align: center; }
+            .header { background: linear-gradient(135deg, #4ecdc4, #1a1a2e); color: white; padding: 20px; text-align: center; }
             .content { padding: 20px; background: #f8f9fa; }
             .match-score { font-size: 24px; font-weight: bold; color: #4ecdc4; text-align: center; margin: 20px 0; }
             .breakdown { margin: 20px 0; }
@@ -386,7 +491,7 @@ export const applyForJob = catchAsync(async (req, res, next) => {
               
               <div class="analysis">
                 <h4>AI Analysis</h4>
-                <p>${matchAnalysis}</p>
+                <p>${matchAnalysisStr}</p>
               </div>
               
               <p><strong>Summary:</strong> ${finalApplicantInfo.summary}</p>
@@ -474,14 +579,70 @@ export const applyForJob = catchAsync(async (req, res, next) => {
     }
   }
 
+  // Send response immediately
   res.status(201).json({
     success: true,
-    message: `Application submitted successfully!`,
+    message: "Application submitted successfully",
     data: {
-      application,
-      matchPercentage: percentageScore,
+      application: application._id,
     },
+    matchPercentage: percentageScore,
   });
+  
+  // Background AI generation for skipAnalysis
+  if (skipAnalysis === "true" || skipAnalysis === true) {
+    setImmediate(async () => {
+      try {
+        console.log(`[Background AI] Starting analysis for app ${application._id}`);
+        let aiAnalysis;
+
+        if (req.file) {
+          // Uploaded PDF - use OpenAI File API directly
+          aiAnalysis = await analyzeApplicationCV(req.file.path, job.description || "");
+        } else if (!isManualApplication) {
+          // Existing CV - use generateAIMatchAnalysis
+          aiAnalysis = await generateAIMatchAnalysis(
+            finalApplicantInfo,
+            job,
+            job._id,
+            userId,
+            "EXISTING_PROFILE"
+          );
+        } else {
+          // Manual form - use generateAIMatchAnalysis
+          aiAnalysis = await generateAIMatchAnalysis(
+            finalApplicantInfo,
+            job,
+            job._id,
+            userId,
+            "MANUAL_FORM"
+          );
+        }
+
+        let newScore = matchResult.percentage;
+        let newAnalysisStr = "";
+
+        if (aiAnalysis && !aiAnalysis.error) {
+          newScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : newScore;
+          newAnalysisStr = aiAnalysis.recruiter_summary || "";
+        } else {
+          newAnalysisStr = "Background AI Analysis failed.";
+        }
+
+        await Application.findByIdAndUpdate(application._id, {
+          matchPercentage: newScore,
+          "matchDetails.matchAnalysis": newAnalysisStr
+        });
+        console.log(`[Background AI] Completed for app ${application._id} with score ${newScore}`);
+      } catch (err) {
+        console.error(`[Background AI] Error for app ${application._id}:`, err);
+        await Application.findByIdAndUpdate(application._id, {
+          matchPercentage: 0,
+          "matchDetails.matchAnalysis": "Failed to analyze during background check."
+        });
+      }
+    });
+  }
 });
 
 // ================================== //
@@ -535,6 +696,38 @@ export const getEmployerApplications = catchAsync(async (req, res) => {
 });
 
 // ================================== //
+//   GET APPLICATIONS FOR A JOB       //
+// ================================== //
+export const getApplicationsByJob = catchAsync(async (req, res, next) => {
+  const employer = await Employer.findOne({ userId: req.user._id });
+  const { jobId } = req.params;
+
+  if (!employer) {
+    return res.status(404).json({
+      success: false,
+      message: "Employer profile not found",
+    });
+  }
+
+  // Ensure the job belongs to this employer
+  const job = await Job.findOne({ _id: jobId, employerId: employer._id });
+  if (!job) {
+    return next(new AppError("Job not found or not owned by you", 404));
+  }
+
+  const applications = await Application.find({ jobId })
+    .populate("userId", "firstName lastName email")
+    .populate("cvId")
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    success: true,
+    count: applications.length,
+    data: { applications },
+  });
+});
+
+// ================================== //
 //   GET APPLICATION BY ID            //
 // ================================== //
 export const getApplicationById = catchAsync(async (req, res, next) => {
@@ -575,11 +768,16 @@ export const updateApplication = catchAsync(async (req, res, next) => {
     fullName,
     email,
     phone,
+    linkedin,
+    portfolioUrl,
     yearsOfExperience,
     technicalSkills,
     softSkills,
     languages,
+    certifications,
+    education,
     summary,
+    additionalInformation,
   } = req.body;
   const userId = req.user._id;
 
@@ -602,10 +800,11 @@ export const updateApplication = catchAsync(async (req, res, next) => {
   }
 
   let cvData = null;
-  let isManualApplication = cvId === "manual" || !cvId;
+  let isManualApplication = (cvId === "manual" || !cvId) && !req.file;
+  let parsedPdfAnalysis = null;
 
   // If using CV, validate it exists and belongs to user
-  if (cvId && cvId !== "manual") {
+  if (!req.file && cvId && cvId !== "manual") {
     const cv = await CV.findById(cvId);
     if (!cv) {
       return next(new AppError("CV not found", 404));
@@ -615,6 +814,15 @@ export const updateApplication = catchAsync(async (req, res, next) => {
     }
     cvData = cv;
     isManualApplication = false;
+  } else if (req.file) {
+    isManualApplication = false;
+    application.applicationMethod = "uploadPdf";
+    try {
+      const aiAnalysis = await analyzeApplicationCV(req.file.path, job.description || "");
+      parsedPdfAnalysis = JSON.parse(aiAnalysis);
+    } catch (err) {
+      console.error("PDF analysis failed", err);
+    }
   }
 
   // If manual application, validate required manual fields
@@ -635,12 +843,46 @@ export const updateApplication = catchAsync(async (req, res, next) => {
       email: cvData.contact?.email || "",
       phone: cvData.contact?.phone || "",
       linkedin: cvData.contact?.linkedin || "",
-      github: cvData.contact?.github || "",
+      portfolioUrl: "",
       summary: cvData.summary || "",
       technicalSkills: cvData.technicalSkills || [],
       softSkills: cvData.softSkills || [],
       yearsOfExperience: cvData.yearsOfExperience || 0,
       languages: cvData.language || [],
+      additionalInformation: cvData.additionalInformation || "",
+      certifications: [
+        ...new Set((cvData.education || []).map((e) => e?.certification).filter(Boolean)),
+      ],
+      education: (cvData.education || []).map((e) => ({
+        institutionName: e?.institutionName || "",
+        certification: e?.certification || "",
+        durationFrom: e?.durationFrom || "",
+        durationTo: e?.durationTo || "",
+        summary: e?.summary || "",
+      })),
+    };
+  } else if (parsedPdfAnalysis?.cvData) {
+    const cvInfo = parsedPdfAnalysis.cvData;
+    finalApplicantInfo = {
+      fullName: cvInfo.jobTitle || fullName || "",
+      email: cvInfo.contact?.email || email || "",
+      phone: cvInfo.contact?.phone || phone || "",
+      linkedin: cvInfo.contact?.linkedin || linkedin || "",
+      portfolioUrl: portfolioUrl || "",
+      summary: cvInfo.summary || summary || "",
+      technicalSkills: cvInfo.technicalSkills || [],
+      softSkills: cvInfo.softSkills || [],
+      yearsOfExperience: cvInfo.yearsOfExperience || yearsOfExperience || 0,
+      languages: cvInfo.language || [],
+      additionalInformation: cvInfo.additionalInformation || additionalInformation || "",
+      certifications: cvInfo.certifications || certifications || [],
+      education: (cvInfo.education || education || []).map((e) => ({
+        institutionName: e?.institutionName || "",
+        certification: e?.certification || "",
+        durationFrom: e?.durationFrom || "",
+        durationTo: e?.durationTo || "",
+        summary: e?.summary || "",
+      })),
     };
   } else {
     // Manual application data
@@ -648,38 +890,53 @@ export const updateApplication = catchAsync(async (req, res, next) => {
       fullName: fullName || "",
       email: email || "",
       phone: phone || "",
-      linkedin: "",
-      github: "",
+      linkedin: linkedin || "",
+      portfolioUrl: portfolioUrl || "",
       summary: summary || "",
       technicalSkills: technicalSkills || [],
       softSkills: softSkills || [],
       yearsOfExperience: parseInt(yearsOfExperience) || 0,
       languages: languages || [],
+      additionalInformation: additionalInformation || "",
+      certifications: certifications || [],
+      education: (education || []).map((e) => ({
+        institutionName: e?.institutionName || "",
+        certification: e?.certification || "",
+        durationFrom: e?.durationFrom || "",
+        durationTo: e?.durationTo || "",
+        summary: e?.summary || "",
+      })),
     };
   }
 
-  // Recalculate match percentage
+  // Recalculate match percentage (lightweight local score only - no AI re-analysis on update)
+  const { skipAnalysis } = req.body;
   const matchResult = calculateMatchPercentage(finalApplicantInfo, job);
   let percentageScore = matchResult.percentage;
-
-  // Generate AI analysis
   let matchAnalysisStr = "";
-  try {
-    const aiAnalysis = await generateAIMatchAnalysis(
-      finalApplicantInfo,
-      job,
-      job._id,
-      userId,
-      isManualApplication ? "MANUAL_FORM" : (cvId ? "EXISTING_PROFILE" : "CV_UPLOAD")
-    );
-    
-    if (aiAnalysis && !aiAnalysis.error) {
-      percentageScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : percentageScore;
-      matchAnalysisStr = aiAnalysis.recruiter_summary || JSON.stringify(aiAnalysis);
+
+  // Only run AI analysis if explicitly requested (skipAnalysis !== true)
+  if (skipAnalysis !== true && skipAnalysis !== "true") {
+    try {
+      const aiAnalysis = await generateAIMatchAnalysis(
+        finalApplicantInfo,
+        job,
+        job._id,
+        userId,
+        isManualApplication ? "MANUAL_FORM" : (cvId ? "EXISTING_PROFILE" : "CV_UPLOAD")
+      );
+
+      if (aiAnalysis && !aiAnalysis.error) {
+        percentageScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : percentageScore;
+        matchAnalysisStr = aiAnalysis.recruiter_summary || JSON.stringify(aiAnalysis);
+      }
+    } catch (error) {
+      console.error("AI analysis error:", error);
+      matchAnalysisStr = "Analysis generation failed";
     }
-  } catch (error) {
-    console.error("AI analysis error:", error);
-    matchAnalysisStr = "Analysis generation failed";
+  } else {
+    // Preserve existing match analysis when skipping
+    matchAnalysisStr = application.matchDetails?.matchAnalysis || "";
   }
 
   // Update application
@@ -691,10 +948,17 @@ export const updateApplication = catchAsync(async (req, res, next) => {
   };
 
   // Update cvId
-  if (cvId && cvId !== "manual") {
+  if (cvId && cvId !== "manual" && !req.file) {
     application.cvId = cvId;
   } else {
     application.cvId = undefined;
+  }
+
+  if (req.file) {
+    application.cvFile = {
+      filename: req.file.originalname,
+      path: req.file.path,
+    };
   }
 
   await application.save();

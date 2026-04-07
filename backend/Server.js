@@ -27,8 +27,25 @@ import applicationRouter from "./src/routes/applicationRoutes.js";
 import chatRouter from "./src/routes/chatRoutes.js";
 const app = express();
 const PORT = process.env.PORT || 3001;
-app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: false,
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "frame-ancestors": [
+          "'self'",
+          "http://localhost:5173",
+          "http://127.0.0.1:5173",
+        ],
+      },
+    },
+  }),
+);
 app.use(cors({ origin: true, credentials: true }));
+// Serve uploaded assets (e.g., CV PDFs) statically
+app.use("/uploads", express.static(path.join(process.cwd(), "src", "uploads")));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(mongoSanitize());
