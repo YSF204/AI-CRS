@@ -12,6 +12,12 @@ import {
 } from "../services/matching/matchingService.js";
 import { analyzeApplicationCV } from "../integrations/ai/openai.js";
 import { sendEmail } from "../utils/email.js";
+import {
+  extractCertifications,
+  calculateExperienceYears,
+  buildNormalizedProfile,
+  extractApplicantInfoFromParsedCV,
+} from "../utils/profileNormalizer.js";
 
 // ================================== //
 //      ANALYZE CV FOR A JOB          //
@@ -30,53 +36,48 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
   }
 
   let cv;
-  let applicantInfo;
-  let rawCvText = null;
+  let normalizedProfile;
+  let parsedPdfAnalysis = null;
 
   // Handle uploaded PDF file - use OpenAI File API directly (no pdf-parse)
   if (req.file) {
     // Use OpenAI File API to analyze PDF directly
     const aiAnalysis = await analyzeApplicationCV(req.file.path, job?.description || "");
-    let parsedAnalysis;
     try {
-      parsedAnalysis = JSON.parse(aiAnalysis);
+      parsedPdfAnalysis = JSON.parse(aiAnalysis);
     } catch (e) {
       console.error("Failed to parse AI analysis JSON:", e);
-      parsedAnalysis = null;
+      parsedPdfAnalysis = null;
     }
 
-    // Extract applicant info from AI analysis
-    applicantInfo = {
-      fullName: parsedAnalysis?.candidate_name || req.user.firstName ? `${req.user.firstName} ${req.user.lastName}` : "Uploaded CV",
-      email: "",
-      phone: "",
-      linkedin: "",
-      github: "",
-      summary: "",
-      technicalSkills: parsedAnalysis?.matched_skills || [],
-      softSkills: [],
-      yearsOfExperience: 0,
-      languages: [],
-    };
+    // Extract applicant info from parsed CV using canonical normalizer
+    const extractedInfo = extractApplicantInfoFromParsedCV(parsedPdfAnalysis, req.user);
 
-    // For now, create a temporary CV record for the uploaded file
+    // Build normalized profile for scoring
+    normalizedProfile = buildNormalizedProfile({
+      applicantInfo: extractedInfo,
+      experience: extractedInfo.experience || [],
+      education: extractedInfo.education || [],
+      customSections: [],
+    });
+
     cv = {
       _id: "temp_" + Date.now(),
       userId,
-      fullName: applicantInfo.fullName,
+      fullName: normalizedProfile.fullName,
       contact: {
-        email: "",
-        phone: "",
+        email: normalizedProfile.email,
+        phone: normalizedProfile.phone,
       },
-      summary: "",
-      technicalSkills: applicantInfo.technicalSkills,
-      softSkills: [],
-      yearsOfExperience: 0,
-      language: [],
+      summary: normalizedProfile.summary,
+      technicalSkills: normalizedProfile.technicalSkills,
+      softSkills: normalizedProfile.softSkills,
+      language: normalizedProfile.languages,
+      certifications: normalizedProfile.certifications,
       pdfPath: req.file.path,
     };
   } else {
-    // Handle existing CV
+    // Handle existing CV - use canonical normalization
     cv = await CV.findById(cvId);
     if (!cv) {
       return next(new AppError("CV not found", 404));
@@ -85,18 +86,21 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
       return next(new AppError("Not authorized to use this CV", 403));
     }
 
-    applicantInfo = {
-      fullName: cv.fullName || (req.user.firstName ? `${req.user.firstName} ${req.user.lastName}` : "Candidate"),
-      email: cv.contact?.email || "",
-      phone: cv.contact?.phone || "",
-      linkedin: cv.contact?.linkedin || "",
-      github: cv.contact?.github || "",
-      summary: cv.summary || "",
-      technicalSkills: cv.technicalSkills || [],
-      softSkills: cv.softSkills || [],
-      yearsOfExperience: cv.yearsOfExperience || 0,
-      languages: cv.language || [],
-    };
+    // Build normalized profile from existing CV
+    normalizedProfile = buildNormalizedProfile({
+      applicantInfo: {
+        fullName: cv.fullName,
+        email: cv.contact?.email,
+        phone: cv.contact?.phone,
+        technicalSkills: cv.technicalSkills,
+        softSkills: cv.softSkills,
+        languages: cv.language,
+      },
+      experience: cv.experience || [],
+      education: cv.education || [],
+      customSections: cv.customSections || [],
+      cvData: cv,
+    });
   }
 
   // Check if job exists
@@ -109,41 +113,26 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
     return next(new AppError("This job is no longer open", 400));
   }
 
-  // Calculate match percentage and AI analysis
-  const matchResult = calculateMatchPercentage(applicantInfo, job);
+  // CANONICAL SCORING: Always use calculateMatchPercentage with normalized profile
+  // AI is used for narrative/summary ONLY, not for the percentage score
+  const matchResult = calculateMatchPercentage(normalizedProfile, job);
   let percentageScore = matchResult.percentage;
   let strengths = [];
   let weaknesses = [];
   let matchAnalysisStr = "";
 
-  // For uploaded PDFs, we already have AI analysis from analyzeApplicationCV
-  // For existing CVs, generate AI analysis
+  // Generate AI analysis for narrative content only (strengths, weaknesses, summary)
+  // The percentage score remains canonical regardless of AI output
   if (req.file) {
-    // Re-analyze with full context for the response
-    try {
-      const aiAnalysis = await analyzeApplicationCV(req.file.path, job.description || "");
-      let parsedAnalysis;
-      try {
-        parsedAnalysis = JSON.parse(aiAnalysis);
-      } catch (e) {
-        parsedAnalysis = null;
-      }
-
-      if (parsedAnalysis) {
-        percentageScore = parsedAnalysis.overall_fit_percentage || percentageScore;
-        strengths = parsedAnalysis.strengths || [];
-        weaknesses = (parsedAnalysis.gaps || []).map(g => `${g.severity} Gap: ${g.gap} - ${g.suggestion}`);
-        matchAnalysisStr = parsedAnalysis.recruiter_summary || "";
-      }
-    } catch (error) {
-      console.error("AI analysis error:", error);
-      matchAnalysisStr = "Analysis generation failed";
+    if (parsedPdfAnalysis) {
+      strengths = parsedPdfAnalysis.strengths || [];
+      weaknesses = (parsedPdfAnalysis.gaps || []).map(g => `${g.severity} Gap: ${g.gap} - ${g.suggestion}`);
+      matchAnalysisStr = parsedPdfAnalysis.recruiter_summary || "";
     }
   } else {
-    // Existing CV - use generateAIMatchAnalysis
     try {
       const aiAnalysis = await generateAIMatchAnalysis(
-        applicantInfo,
+        normalizedProfile,
         job,
         job._id,
         req.user._id,
@@ -151,12 +140,9 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
       );
 
       if (aiAnalysis && !aiAnalysis.error) {
-        percentageScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : percentageScore;
         strengths = aiAnalysis.strengths || [];
         weaknesses = (aiAnalysis.gaps || []).map(g => `${g.severity} Gap: ${g.gap} - ${g.suggestion}`);
-        matchAnalysisStr = aiAnalysis.recruiter_summary || JSON.stringify(aiAnalysis);
-      } else {
-        matchAnalysisStr = aiAnalysis?.message || "Analysis generation failed or invalid input";
+        matchAnalysisStr = aiAnalysis.recruiter_summary || "";
       }
     } catch (error) {
       console.error("AI analysis error:", error);
@@ -187,9 +173,9 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
       jobId,
       cvId: cvId || cv._id,
       applicantInfo: {
-        fullName: applicantInfo.fullName || "Candidate",
-        email: applicantInfo.email || "",
-        phone: applicantInfo.phone || "",
+        fullName: normalizedProfile.fullName || "Candidate",
+        email: normalizedProfile.email || "",
+        phone: normalizedProfile.phone || "",
       },
     },
   });
@@ -289,70 +275,64 @@ export const applyForJob = catchAsync(async (req, res, next) => {
     });
   }
 
-  // Prepare applicant info - use CV data or manual data
-  let finalApplicantInfo;
+  // Prepare applicant info - use canonical normalization for all paths
+  let normalizedProfile;
+  let rawCvTextForAI = null;
+
   if (cvData) {
-    finalApplicantInfo = {
-      fullName: cvData.fullName || "",
-      email: cvData.contact?.email || "",
-      phone: cvData.contact?.phone || "",
-      linkedin: cvData.contact?.linkedin || "",
-      portfolioUrl: "",
-      summary: cvData.summary || "",
-      technicalSkills: cvData.technicalSkills || [],
-      softSkills: cvData.softSkills || [],
-      yearsOfExperience: cvData.yearsOfExperience || 0,
-      languages: cvData.language || [],
-      additionalInformation: cvData.additionalInformation || "",
-      certifications: [
-        ...new Set((cvData.education || []).map((e) => e?.certification).filter(Boolean)),
-      ],
-      education: (cvData.education || []).map((e) => ({
-        institutionName: e?.institutionName || "",
-        certification: e?.certification || "",
-        durationFrom: e?.durationFrom || "",
-        durationTo: e?.durationTo || "",
-        summary: e?.summary || "",
-      })),
-    };
+    // Existing CV - use canonical normalization
+    normalizedProfile = buildNormalizedProfile({
+      applicantInfo: {
+        fullName: cvData.fullName,
+        email: cvData.contact?.email,
+        phone: cvData.contact?.phone,
+        technicalSkills: cvData.technicalSkills,
+        softSkills: cvData.softSkills,
+        languages: cvData.language,
+        certifications,
+      },
+      experience: cvData.experience || [],
+      education: cvData.education || [],
+      customSections: cvData.customSections || [],
+      cvData: cvData,
+    });
   } else if (parsedPdfAnalysis?.cvData) {
-    const cvInfo = parsedPdfAnalysis.cvData;
-    finalApplicantInfo = {
-      fullName: cvInfo.jobTitle || fullName || "Candidate",
-      email: cvInfo.contact?.email || email || "",
-      phone: cvInfo.contact?.phone || phone || "",
-      linkedin: cvInfo.contact?.linkedin || linkedin || "",
-      portfolioUrl: portfolioUrl || "",
-      summary: cvInfo.summary || summary || "",
-      technicalSkills: cvInfo.technicalSkills || [],
-      softSkills: cvInfo.softSkills || [],
-      yearsOfExperience: cvInfo.yearsOfExperience || yearsOfExperience || 0,
-      languages: cvInfo.language || [],
-      additionalInformation: cvInfo.additionalInformation || additionalInformation || "",
-      certifications: cvInfo.certifications || certifications || [],
-      education: (cvInfo.education || education || []).map((e) => ({
-        institutionName: e?.institutionName || "",
-        certification: e?.certification || "",
-        durationFrom: e?.durationFrom || "",
-        durationTo: e?.durationTo || "",
-        summary: e?.summary || "",
-      })),
-    };
+    // Uploaded PDF - extract and normalize
+    const extractedInfo = extractApplicantInfoFromParsedCV(parsedPdfAnalysis, req.user);
+    normalizedProfile = buildNormalizedProfile({
+      applicantInfo: {
+        ...extractedInfo,
+        certifications: extractedInfo.certifications || certifications || [],
+      },
+      experience: extractedInfo.experience || [],
+      education: extractedInfo.education || [],
+      customSections: [],
+    });
+    // Merge manual form data if provided
+    if (fullName) normalizedProfile.fullName = fullName;
+    if (email) normalizedProfile.email = email;
+    if (phone) normalizedProfile.phone = phone;
+    if (linkedin) normalizedProfile.linkedin = linkedin;
+    if (portfolioUrl) normalizedProfile.portfolioUrl = portfolioUrl;
+    if (summary) normalizedProfile.summary = summary;
+    if (additionalInformation) normalizedProfile.additionalInformation = additionalInformation;
   } else {
-    // Manual application data
-    finalApplicantInfo = {
-      fullName: fullName || (req.user.firstName ? `${req.user.firstName} ${req.user.lastName}` : "Candidate"),
-      email: email || req.user.email || "",
-      phone: phone || "",
-      linkedin: linkedin || "",
-      portfolioUrl: portfolioUrl || "",
-      summary: summary || "",
-      technicalSkills: technicalSkills || [],
-      softSkills: softSkills || [],
-      yearsOfExperience: parseInt(yearsOfExperience) || 0,
-      languages: languages || [],
-      additionalInformation: additionalInformation || "",
-      certifications: certifications || [],
+    // Manual application - build normalized profile from form data
+    normalizedProfile = buildNormalizedProfile({
+      applicantInfo: {
+        fullName: fullName || (req.user.firstName ? `${req.user.firstName} ${req.user.lastName}` : "Candidate"),
+        email: email || req.user.email || "",
+        phone: phone || "",
+        linkedin: linkedin || "",
+        portfolioUrl: portfolioUrl || "",
+        summary: summary || "",
+        technicalSkills: technicalSkills || [],
+        softSkills: softSkills || [],
+        languages: languages || [],
+        yearsOfExperience: parseInt(yearsOfExperience) || 0,
+        certifications: certifications || [],
+        additionalInformation: additionalInformation || "",
+      },
       education: (education || []).map((e) => ({
         institutionName: e?.institutionName || "",
         certification: e?.certification || "",
@@ -360,30 +340,33 @@ export const applyForJob = catchAsync(async (req, res, next) => {
         durationTo: e?.durationTo || "",
         summary: e?.summary || "",
       })),
-    };
+      customSections: [],
+    });
   }
 
-  // Background AI Call Logic
-  const matchResult = calculateMatchPercentage(finalApplicantInfo, job);
+  // CANONICAL SCORING: Always use calculateMatchPercentage with normalized profile
+  // AI is used for narrative/summary ONLY, not for the percentage score
+  const matchResult = calculateMatchPercentage(normalizedProfile, job);
   let percentageScore = matchResult.percentage;
   let matchAnalysisStr = "";
 
   if (skipAnalysis === "true" || skipAnalysis === true) {
-    percentageScore = null;
+    // For skipAnalysis, return canonical score immediately with placeholder message
+    // Background job will update the text analysis only, not the percentage
+    percentageScore = matchResult.percentage;
     matchAnalysisStr = "AI match score is currently pending background analysis. We will notify you once it's complete.";
   } else if (req.file) {
-    // Uploaded PDF - reuse earlier analysis if parsed
+    // Uploaded PDF - use AI for narrative only, keep canonical score
     if (parsedPdfAnalysis) {
-      percentageScore = parsedPdfAnalysis.overall_fit_percentage || percentageScore;
       matchAnalysisStr = parsedPdfAnalysis.recruiter_summary || "";
     } else {
       matchAnalysisStr = "Analysis unavailable for uploaded PDF.";
     }
   } else if (!isManualApplication) {
-    // Existing CV - use generateAIMatchAnalysis
+    // Existing CV - use AI for narrative only
     try {
       const aiAnalysis = await generateAIMatchAnalysis(
-        finalApplicantInfo,
+        normalizedProfile,
         job,
         job._id,
         userId,
@@ -391,7 +374,6 @@ export const applyForJob = catchAsync(async (req, res, next) => {
       );
 
       if (aiAnalysis && !aiAnalysis.error) {
-        percentageScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : percentageScore;
         matchAnalysisStr = aiAnalysis.recruiter_summary || "";
       }
     } catch (error) {
@@ -400,12 +382,26 @@ export const applyForJob = catchAsync(async (req, res, next) => {
     }
   }
 
-  // Create application
+  // Create application with normalized profile data
   const applicationData = {
     userId,
     jobId,
     employerId: job.employerId._id,
-    applicantInfo: finalApplicantInfo,
+    applicantInfo: {
+      fullName: normalizedProfile.fullName,
+      email: normalizedProfile.email,
+      phone: normalizedProfile.phone,
+      linkedin: normalizedProfile.linkedin || "",
+      portfolioUrl: normalizedProfile.portfolioUrl || "",
+      summary: normalizedProfile.summary,
+      technicalSkills: normalizedProfile.technicalSkills,
+      softSkills: normalizedProfile.softSkills,
+      yearsOfExperience: normalizedProfile.yearsOfExperience,
+      languages: normalizedProfile.languages,
+      additionalInformation: normalizedProfile.additionalInformation || "",
+      certifications: normalizedProfile.certifications,
+      education: normalizedProfile.education,
+    },
     matchPercentage: percentageScore,
     matchDetails: {
       ...matchResult.breakdown,
@@ -459,17 +455,16 @@ export const applyForJob = catchAsync(async (req, res, next) => {
             <div class="content">
               <p>Hi ${employer?.company?.name || "Employer"},</p>
               <p>You have received a new application for the position of <strong>${job.position}</strong>.</p>
-              
+
               <h3>Candidate Information</h3>
-              <p><strong>Name:</strong> ${finalApplicantInfo.fullName}</p>
-              <p><strong>Email:</strong> ${finalApplicantInfo.email}</p>
-              <p><strong>Phone:</strong> ${finalApplicantInfo.phone}</p>
-              ${finalApplicantInfo.linkedin ? `<p><strong>LinkedIn:</strong> ${finalApplicantInfo.linkedin}</p>` : ""}
-              ${finalApplicantInfo.github ? `<p><strong>GitHub:</strong> ${finalApplicantInfo.github}</p>` : ""}
-              
+              <p><strong>Name:</strong> ${normalizedProfile.fullName}</p>
+              <p><strong>Email:</strong> ${normalizedProfile.email}</p>
+              <p><strong>Phone:</strong> ${normalizedProfile.phone}</p>
+              ${normalizedProfile.linkedin ? `<p><strong>LinkedIn:</strong> ${normalizedProfile.linkedin}</p>` : ""}
+
               <h3>Match Analysis</h3>
               <div class="match-score">${percentageScore}% Match</div>
-              
+
               <div class="breakdown">
                 <div class="breakdown-row">
                   <span class="breakdown-label">Technical Skills:</span>
@@ -488,14 +483,14 @@ export const applyForJob = catchAsync(async (req, res, next) => {
                   <span class="breakdown-value">${matchResult.breakdown.languagesMatch}%</span>
                 </div>
               </div>
-              
+
               <div class="analysis">
                 <h4>AI Analysis</h4>
                 <p>${matchAnalysisStr}</p>
               </div>
-              
-              <p><strong>Summary:</strong> ${finalApplicantInfo.summary}</p>
-              
+
+              <p><strong>Summary:</strong> ${normalizedProfile.summary}</p>
+
               <p>Log in to your dashboard to review this application and contact the candidate.</p>
             </div>
             <div class="footer">
@@ -508,7 +503,7 @@ export const applyForJob = catchAsync(async (req, res, next) => {
 
       await sendEmail({
         email: employer.company.contactEmail,
-        subject: `New Application: ${finalApplicantInfo.fullName} for ${job.position}`,
+        subject: `New Application: ${normalizedProfile.fullName} for ${job.position}`,
         html: htmlEmail,
       });
       application.isNotified = true;
@@ -519,7 +514,7 @@ export const applyForJob = catchAsync(async (req, res, next) => {
   }
 
   // Send HTML confirmation email to applicant
-  if (finalApplicantInfo.email) {
+  if (normalizedProfile.email) {
     try {
       const confirmationEmail = `
         <!DOCTYPE html>
@@ -541,23 +536,23 @@ export const applyForJob = catchAsync(async (req, res, next) => {
               <h1>Application Submitted!</h1>
             </div>
             <div class="content">
-              <p>Hi ${finalApplicantInfo.fullName},</p>
+              <p>Hi ${normalizedProfile.fullName},</p>
               <p>Congratulations! Your application for the position of <strong>${job.position}</strong> has been submitted successfully.</p>
-              
+
               <h3>Your Match Score</h3>
               <p style="font-size: 28px; text-align: center; color: #f7b731; font-weight: bold;">${percentageScore}%</p>
-              
+
               <p>We believe you are a strong fit for this role. The employer will review your application and contact you within 1-2 weeks.</p>
-              
+
               <h3>Position Details</h3>
               <p><strong>Title:</strong> ${job.position}</p>
               <p><strong>Location:</strong> ${job.workSite}</p>
               <p><strong>Duration:</strong> ${job.workDuration || "Not specified"}</p>
-              
+
               <p style="text-align: center;">
                 <a href="${process.env.FRONTEND_URL}/employee/applications" class="button">View My Applications</a>
               </p>
-              
+
               <p>Best of luck with your application!</p>
               <p>Best regards,<br>The CV Editor Team</p>
             </div>
@@ -570,8 +565,8 @@ export const applyForJob = catchAsync(async (req, res, next) => {
       `;
 
       await sendEmail({
-        email: finalApplicantInfo.email,
-        subject: `Application Confirmation: ${finalApplicantInfo.fullName} - ${job.position}`,
+        email: normalizedProfile.email,
+        subject: `Application Confirmation: ${normalizedProfile.fullName} - ${job.position}`,
         html: confirmationEmail,
       });
     } catch (error) {
@@ -590,6 +585,7 @@ export const applyForJob = catchAsync(async (req, res, next) => {
   });
   
   // Background AI generation for skipAnalysis
+  // NOTE: Background job updates text analysis ONLY, not the percentage score
   if (skipAnalysis === "true" || skipAnalysis === true) {
     setImmediate(async () => {
       try {
@@ -597,21 +593,18 @@ export const applyForJob = catchAsync(async (req, res, next) => {
         let aiAnalysis;
 
         if (req.file) {
-          // Uploaded PDF - use OpenAI File API directly
           aiAnalysis = await analyzeApplicationCV(req.file.path, job.description || "");
         } else if (!isManualApplication) {
-          // Existing CV - use generateAIMatchAnalysis
           aiAnalysis = await generateAIMatchAnalysis(
-            finalApplicantInfo,
+            normalizedProfile,
             job,
             job._id,
             userId,
             "EXISTING_PROFILE"
           );
         } else {
-          // Manual form - use generateAIMatchAnalysis
           aiAnalysis = await generateAIMatchAnalysis(
-            finalApplicantInfo,
+            normalizedProfile,
             job,
             job._id,
             userId,
@@ -619,25 +612,22 @@ export const applyForJob = catchAsync(async (req, res, next) => {
           );
         }
 
-        let newScore = matchResult.percentage;
         let newAnalysisStr = "";
 
         if (aiAnalysis && !aiAnalysis.error) {
-          newScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : newScore;
+          // Keep canonical score, only update narrative text
           newAnalysisStr = aiAnalysis.recruiter_summary || "";
         } else {
           newAnalysisStr = "Background AI Analysis failed.";
         }
 
         await Application.findByIdAndUpdate(application._id, {
-          matchPercentage: newScore,
           "matchDetails.matchAnalysis": newAnalysisStr
         });
-        console.log(`[Background AI] Completed for app ${application._id} with score ${newScore}`);
+        console.log(`[Background AI] Completed for app ${application._id}`);
       } catch (err) {
         console.error(`[Background AI] Error for app ${application._id}:`, err);
         await Application.findByIdAndUpdate(application._id, {
-          matchPercentage: 0,
           "matchDetails.matchAnalysis": "Failed to analyze during background check."
         });
       }
@@ -835,70 +825,63 @@ export const updateApplication = catchAsync(async (req, res, next) => {
     );
   }
 
-  // Prepare applicant info - use CV data or manual data
-  let finalApplicantInfo;
+  // Prepare applicant info - use canonical normalization for all paths
+  let normalizedProfile;
+
   if (cvData) {
-    finalApplicantInfo = {
-      fullName: cvData.fullName || "",
-      email: cvData.contact?.email || "",
-      phone: cvData.contact?.phone || "",
-      linkedin: cvData.contact?.linkedin || "",
-      portfolioUrl: "",
-      summary: cvData.summary || "",
-      technicalSkills: cvData.technicalSkills || [],
-      softSkills: cvData.softSkills || [],
-      yearsOfExperience: cvData.yearsOfExperience || 0,
-      languages: cvData.language || [],
-      additionalInformation: cvData.additionalInformation || "",
-      certifications: [
-        ...new Set((cvData.education || []).map((e) => e?.certification).filter(Boolean)),
-      ],
-      education: (cvData.education || []).map((e) => ({
-        institutionName: e?.institutionName || "",
-        certification: e?.certification || "",
-        durationFrom: e?.durationFrom || "",
-        durationTo: e?.durationTo || "",
-        summary: e?.summary || "",
-      })),
-    };
+    // Existing CV - use canonical normalization
+    normalizedProfile = buildNormalizedProfile({
+      applicantInfo: {
+        fullName: cvData.fullName,
+        email: cvData.contact?.email,
+        phone: cvData.contact?.phone,
+        technicalSkills: cvData.technicalSkills,
+        softSkills: cvData.softSkills,
+        languages: cvData.language,
+        certifications,
+      },
+      experience: cvData.experience || [],
+      education: cvData.education || [],
+      customSections: cvData.customSections || [],
+      cvData: cvData,
+    });
   } else if (parsedPdfAnalysis?.cvData) {
-    const cvInfo = parsedPdfAnalysis.cvData;
-    finalApplicantInfo = {
-      fullName: cvInfo.jobTitle || fullName || "",
-      email: cvInfo.contact?.email || email || "",
-      phone: cvInfo.contact?.phone || phone || "",
-      linkedin: cvInfo.contact?.linkedin || linkedin || "",
-      portfolioUrl: portfolioUrl || "",
-      summary: cvInfo.summary || summary || "",
-      technicalSkills: cvInfo.technicalSkills || [],
-      softSkills: cvInfo.softSkills || [],
-      yearsOfExperience: cvInfo.yearsOfExperience || yearsOfExperience || 0,
-      languages: cvInfo.language || [],
-      additionalInformation: cvInfo.additionalInformation || additionalInformation || "",
-      certifications: cvInfo.certifications || certifications || [],
-      education: (cvInfo.education || education || []).map((e) => ({
-        institutionName: e?.institutionName || "",
-        certification: e?.certification || "",
-        durationFrom: e?.durationFrom || "",
-        durationTo: e?.durationTo || "",
-        summary: e?.summary || "",
-      })),
-    };
+    // Uploaded PDF - extract and normalize
+    const extractedInfo = extractApplicantInfoFromParsedCV(parsedPdfAnalysis, req.user);
+    normalizedProfile = buildNormalizedProfile({
+      applicantInfo: {
+        ...extractedInfo,
+        certifications: extractedInfo.certifications || certifications || [],
+      },
+      experience: extractedInfo.experience || [],
+      education: extractedInfo.education || [],
+      customSections: [],
+    });
+    // Merge manual form data if provided
+    if (fullName) normalizedProfile.fullName = fullName;
+    if (email) normalizedProfile.email = email;
+    if (phone) normalizedProfile.phone = phone;
+    if (linkedin) normalizedProfile.linkedin = linkedin;
+    if (portfolioUrl) normalizedProfile.portfolioUrl = portfolioUrl;
+    if (summary) normalizedProfile.summary = summary;
+    if (additionalInformation) normalizedProfile.additionalInformation = additionalInformation;
   } else {
-    // Manual application data
-    finalApplicantInfo = {
-      fullName: fullName || "",
-      email: email || "",
-      phone: phone || "",
-      linkedin: linkedin || "",
-      portfolioUrl: portfolioUrl || "",
-      summary: summary || "",
-      technicalSkills: technicalSkills || [],
-      softSkills: softSkills || [],
-      yearsOfExperience: parseInt(yearsOfExperience) || 0,
-      languages: languages || [],
-      additionalInformation: additionalInformation || "",
-      certifications: certifications || [],
+    // Manual application - build normalized profile from form data
+    normalizedProfile = buildNormalizedProfile({
+      applicantInfo: {
+        fullName: fullName || "",
+        email: email || "",
+        phone: phone || "",
+        linkedin: linkedin || "",
+        portfolioUrl: portfolioUrl || "",
+        summary: summary || "",
+        technicalSkills: technicalSkills || [],
+        softSkills: softSkills || [],
+        languages: languages || [],
+        yearsOfExperience: parseInt(yearsOfExperience) || 0,
+        certifications: certifications || [],
+        additionalInformation: additionalInformation || "",
+      },
       education: (education || []).map((e) => ({
         institutionName: e?.institutionName || "",
         certification: e?.certification || "",
@@ -906,20 +889,22 @@ export const updateApplication = catchAsync(async (req, res, next) => {
         durationTo: e?.durationTo || "",
         summary: e?.summary || "",
       })),
-    };
+      customSections: [],
+    });
   }
 
-  // Recalculate match percentage (lightweight local score only - no AI re-analysis on update)
+  // Recalculate match percentage using canonical scorer
   const { skipAnalysis } = req.body;
-  const matchResult = calculateMatchPercentage(finalApplicantInfo, job);
+  const matchResult = calculateMatchPercentage(normalizedProfile, job);
   let percentageScore = matchResult.percentage;
   let matchAnalysisStr = "";
 
   // Only run AI analysis if explicitly requested (skipAnalysis !== true)
+  // AI provides narrative only, not the percentage score
   if (skipAnalysis !== true && skipAnalysis !== "true") {
     try {
       const aiAnalysis = await generateAIMatchAnalysis(
-        finalApplicantInfo,
+        normalizedProfile,
         job,
         job._id,
         userId,
@@ -927,8 +912,7 @@ export const updateApplication = catchAsync(async (req, res, next) => {
       );
 
       if (aiAnalysis && !aiAnalysis.error) {
-        percentageScore = aiAnalysis.overall_fit_percentage != null ? aiAnalysis.overall_fit_percentage : percentageScore;
-        matchAnalysisStr = aiAnalysis.recruiter_summary || JSON.stringify(aiAnalysis);
+        matchAnalysisStr = aiAnalysis.recruiter_summary || "";
       }
     } catch (error) {
       console.error("AI analysis error:", error);
@@ -939,8 +923,22 @@ export const updateApplication = catchAsync(async (req, res, next) => {
     matchAnalysisStr = application.matchDetails?.matchAnalysis || "";
   }
 
-  // Update application
-  application.applicantInfo = finalApplicantInfo;
+  // Update application with normalized profile
+  application.applicantInfo = {
+    fullName: normalizedProfile.fullName,
+    email: normalizedProfile.email,
+    phone: normalizedProfile.phone,
+    linkedin: normalizedProfile.linkedin || "",
+    portfolioUrl: normalizedProfile.portfolioUrl || "",
+    summary: normalizedProfile.summary,
+    technicalSkills: normalizedProfile.technicalSkills,
+    softSkills: normalizedProfile.softSkills,
+    yearsOfExperience: normalizedProfile.yearsOfExperience,
+    languages: normalizedProfile.languages,
+    additionalInformation: normalizedProfile.additionalInformation || "",
+    certifications: normalizedProfile.certifications,
+    education: normalizedProfile.education,
+  };
   application.matchPercentage = percentageScore;
   application.matchDetails = {
     ...matchResult.breakdown,

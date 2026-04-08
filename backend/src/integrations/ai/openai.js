@@ -22,6 +22,13 @@ ${jobDescription ? `Target job: "${jobDescription}"` : ""}
 
 Respond with ONLY a valid JSON object (no markdown, no code fences).
 
+IMPORTANT CERTIFICATION HANDLING:
+- Extract ALL certifications, even if they appear standalone (not tied to a school)
+- Standalone certifications should go into the certifications array, NOT education
+- Education entries are ONLY for degrees/diplomas tied to institutions
+- If a certification appears with an institution (e.g., "AWS Certified at Amazon"), put it in education
+- If a certification appears alone (e.g., "AWS Certified Solutions Architect"), put it in certifications array
+
 {
   "cvData": {
     "jobTitle": "<extracted job title or target role>",
@@ -37,14 +44,16 @@ Respond with ONLY a valid JSON object (no markdown, no code fences).
       "street": "<street or N/A>"
     },
     "experience": [
-      { "institutionName": "<company>", "position": "<role>", "duration": <years as number>, "summary": "<brief description>" }
+      { "institutionName": "<company>", "position": "<role>", "durationFrom": "<YYYY-MM>", "durationTo": "<YYYY-MM or empty if present>", "summary": "<brief description>" }
     ],
     "education": [
-      { "institutionName": "<school>", "certification": "<degree>", "duration": <years as number>, "summary": "<brief description>" }
+      { "institutionName": "<school>", "certification": "<degree/diploma name>", "durationFrom": "<YYYY-MM>", "durationTo": "<YYYY-MM or empty>", "summary": "<brief description>" }
     ],
+    "certifications": ["<standalone certification 1>", "<standalone certification 2>"],
     "technicalSkills": ["<skill1>", "<skill2>"],
     "softSkills": ["<skill1>", "<skill2>"],
-    "language": ["<lang1>", "<lang2>"]
+    "language": ["<lang1>", "<lang2>"],
+    "yearsOfExperience": <total years as number>
   },
   "analysis": {
     "score": <number 0-100>,

@@ -5,6 +5,8 @@ import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import { analyzeCVFromFile, analyzeCVFromDatabase } from "../integrations/ai/openai.js";
 import htmlToPdf from "../utils/pdfGen.js";
+import { extractCertifications, calculateExperienceYears } from "../utils/profileNormalizer.js";
+import { generateAIMatchAnalysis } from "../services/matching/matchingService.js";
 
 
 const verifyOwnership = (cv, userId) => {
@@ -181,10 +183,33 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
     const str = (v) => (Array.isArray(v) ? v.join("\n• ") : v || "N/A");
 
     const cvData = parsed.cvData || {};
-    
+
     // Scrub empty AI extraction entries to avoid Mongoose validation crashes
     const scrubbedExperience = (cvData.experience || []).filter(e => e.institutionName?.trim() && e.position?.trim());
     const scrubbedEducation = (cvData.education || []).filter(e => e.institutionName?.trim() && e.certification?.trim());
+
+    // Extract certifications from all sources: explicit array + education entries
+    const allCertifications = extractCertifications(
+        { certifications: cvData.certifications || [] },
+        cvData.education || [],
+        []
+    );
+
+    // Create custom sections for certifications if any exist
+    const customSections = [];
+    if (allCertifications.length > 0) {
+        customSections.push({
+            title: "Certifications",
+            sectionType: "certifications",
+            items: allCertifications.map(cert => ({
+                name: cert,
+                description: "",
+                durationFrom: "",
+                durationTo: "",
+                link: "",
+            })),
+        });
+    }
 
     const cv = await CV.create({
         userId: req.user._id,
@@ -197,6 +222,7 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
         technicalSkills: cvData.technicalSkills || [],
         softSkills: cvData.softSkills || [],
         language: cvData.language || [],
+        customSections,
         layout: {
             sectionOrder: cvData.layout?.sectionOrder || [],
             visibleSections: cvData.layout?.visibleSections || {},
@@ -332,14 +358,103 @@ export const downloadPDF = catchAsync(async (req, res, next) => {
 
     const filename = `cv_${cv.userId.fullName.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
     res.download(pdfResult.absolutePath, filename, (err) => {
-        
+
         if (fs.existsSync(pdfResult.absolutePath)) {
             fs.unlinkSync(pdfResult.absolutePath);
         }
-        
+
         if (err) {
             return next(new AppError("Error downloading PDF", 500));
         }
+    });
+});
+
+// ================================== //
+//    ANALYZE CV SECTION              //
+// ================================== //
+
+export const analyzeSection = catchAsync(async (req, res, next) => {
+    const { section, data, fullName } = req.body;
+
+    if (!section || !data) {
+        return next(new AppError("Section and data are required", 400));
+    }
+
+    // Build CV text for analysis based on section
+    let cvText = "";
+    const sectionName = section === "fullCv" ? "Full CV" : section.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase());
+
+    if (section === "fullCv") {
+        cvText = [
+            `Job Title: ${data.jobTitle || "N/A"}`,
+            `Summary: ${data.summary || "N/A"}`,
+            `Contact: ${data.contact?.email || "N/A"}, ${data.contact?.phone || "N/A"}`,
+            `Location: ${data.address?.city || ""}, ${data.address?.street || ""}`,
+            `Experience: ${data.experience?.map(e => `${e.position} at ${e.institutionName} (${e.durationFrom || ""} - ${e.durationTo || ""}) - ${e.summary || ""}`).join(" | ") || "None"}`,
+            `Education: ${data.education?.map(e => `${e.certification} at ${e.institutionName} (${e.durationFrom || ""} - ${e.durationTo || ""})`).join(" | ") || "None"}`,
+            `Technical Skills: ${data.technicalSkills?.join(", ") || "None"}`,
+            `Soft Skills: ${data.softSkills?.join(", ") || "None"}`,
+            `Languages: ${data.language?.join(", ") || "None"}`,
+            ...data.customSections?.map(s => `${s.title}: ${s.items?.map(i => `${i.name}${i.description ? " - " + i.description : ""}`).join(", ")}`) || [],
+        ].join("\n");
+    } else {
+        // Section-specific analysis
+        cvText = `${sectionName}:\n${JSON.stringify(data[section] || data, null, 2)}`;
+    }
+
+    // Generate AI analysis for the section
+    const aiAnalysis = await analyzeCVFromDatabase(cvText, "");
+
+    let parsed;
+    try {
+        const clean = aiAnalysis.replace(/```json|```/g, "").trim();
+        parsed = JSON.parse(clean);
+    } catch {
+        return next(new AppError("AI returned an invalid response, please try again", 500));
+    }
+
+    const analysisData = parsed.analysis || {};
+
+    // Build field updates based on AI suggestions
+    const fieldUpdates = {};
+    const str = (v) => (Array.isArray(v) ? v.join("\n• ") : v || "");
+
+    // Extract suggested improvements for specific fields
+    const suggestions = str(analysisData.suggestions);
+    const improvements = str(analysisData.strengths);
+
+    // Generate rewritten summary if analyzing full CV
+    if (section === "fullCv" && data.summary) {
+        // Use AI to suggest a better summary
+        const summaryPrompt = `Improve this professional summary to be more impactful and concise:\n\n${data.summary}`;
+        try {
+            const summaryAnalysis = await analyzeCVFromDatabase(summaryPrompt, "");
+            const summaryParsed = JSON.parse(summaryAnalysis.replace(/```json|```/g, "").trim());
+            if (summaryParsed.analysis?.suggestions) {
+                fieldUpdates.summary = Array.isArray(summaryParsed.analysis.suggestions)
+                    ? summaryParsed.analysis.suggestions.join(" ")
+                    : summaryParsed.analysis.suggestions;
+            }
+        } catch {
+            // Fallback: keep original if AI fails
+        }
+    }
+
+    // Suggest job title improvement if present
+    if (section === "fullCv" && data.jobTitle) {
+        // AI might suggest a more specific or industry-standard title
+        // For now, we'll leave this as a potential future enhancement
+    }
+
+    res.status(200).json({
+        success: true,
+        data: {
+            section,
+            suggestions,
+            improvements,
+            spellingCorrections: [], // Could be added with spell-check AI call
+            fieldUpdates,
+        },
     });
 });
 

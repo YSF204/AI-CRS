@@ -3,6 +3,8 @@ import { matchCVToJobs } from "../integrations/ai/openai.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import Job from "../models/Job.js";
+import { calculateMatchPercentage } from "../services/matching/matchingService.js";
+import { buildNormalizedProfile } from "../utils/profileNormalizer.js";
 
 const withTimeout = (promise, ms) =>
   Promise.race([
@@ -12,12 +14,12 @@ const withTimeout = (promise, ms) =>
     ),
   ]);
 
-const buildLocalJobRecommendations = (cv, jobs) => {
+const buildLocalJobRecommendations = (cv, jobs, normalizedProfile) => {
   const cvTech = new Set(
-    (cv.technicalSkills || []).map((s) => s.toLowerCase()),
+    (normalizedProfile?.technicalSkills || cv.technicalSkills || []).map((s) => s.toLowerCase()),
   );
-  const cvSoft = new Set((cv.softSkills || []).map((s) => s.toLowerCase()));
-  const cvExperience = (cv.experience || []).reduce(
+  const cvSoft = new Set((normalizedProfile?.softSkills || cv.softSkills || []).map((s) => s.toLowerCase()));
+  const cvExperience = normalizedProfile?.yearsOfExperience || (cv.experience || []).reduce(
     (sum, exp) => sum + Number(exp.duration || 0),
     0,
   );
@@ -105,6 +107,22 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
     return next(new AppError("Not authorized to access this CV", 403));
   }
 
+  // Build normalized profile for canonical scoring
+  const normalizedProfile = buildNormalizedProfile({
+    applicantInfo: {
+      fullName: cv.fullName,
+      email: cv.contact?.email,
+      phone: cv.contact?.phone,
+      technicalSkills: cv.technicalSkills,
+      softSkills: cv.softSkills,
+      languages: cv.language,
+    },
+    experience: cv.experience || [],
+    education: cv.education || [],
+    customSections: cv.customSections || [],
+    cvData: cv,
+  });
+
   const cvText = [
     `Summary: ${cv.summary}`,
     `Email: ${cv.contact?.email || "N/A"}`,
@@ -129,7 +147,7 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
 
   // Fast pre-ranking to reduce prompt size and model latency.
   // We only send the top candidates to AI, then still return normalized matches.
-  const localRanked = buildLocalJobRecommendations(cv, jobs);
+  const localRanked = buildLocalJobRecommendations(cv, jobs, normalizedProfile);
   const candidateIds = new Set(localRanked.slice(0, 35).map((j) => j.jobId));
   const candidateJobs = jobs.filter((job) => candidateIds.has(job._id.toString()));
   const aiInputJobs = candidateJobs.length > 0 ? candidateJobs : jobs;
@@ -166,10 +184,27 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
   }
   
   // Filter out low scores (using 40 as threshold for related fields)
-  parsed = parsed.filter(job => job.matchScore >= 40);
+  let filteredJobs = parsed.filter(job => job.matchScore >= 40);
+
+  // Add canonical percentage to each job using the same scorer as Analyze/Apply flows
+  // This ensures the same CV+job always yields the same percentage across all flows
+  filteredJobs = filteredJobs.map((jobMatch) => {
+    const job = jobs.find(j => j._id.toString() === jobMatch.jobId);
+    if (!job) return jobMatch;
+
+    // Calculate canonical percentage using the same function as other flows
+    const matchResult = calculateMatchPercentage(normalizedProfile, job);
+
+    return {
+      ...jobMatch,
+      canonicalPercentage: matchResult.percentage,
+      matchScore: matchResult.percentage, // Use canonical score as the primary display value
+      breakdown: matchResult.breakdown,
+    };
+  });
 
   res.status(200).json({
     success: true,
-    data: { match: parsed },
+    data: { match: filteredJobs },
   });
 });

@@ -12,6 +12,7 @@ import Sidebar from "./components/Sidebar";
 import EditorContent from "./components/EditorContent";
 import LivePreview from "./components/LivePreview";
 import PreviewModal from "./components/PreviewModal";
+import AnalysisModal from "./components/AnalysisModal";
 
 export default function CVEditor() {
   const { id } = useParams();
@@ -293,7 +294,7 @@ export default function CVEditor() {
       activeSections.forEach((k) => {
         visibleSections[k] = true;
       });
-      
+
       const payload = {
         ...filtered,
         experience: filtered.experience.map((e) => ({ ...e })),
@@ -323,6 +324,7 @@ export default function CVEditor() {
               })),
           })),
         profileImage: form.profileImage,
+        templateId: cv?.templateId || 1, // Include templateId in save payload
         layout: { sectionOrder: [...activeSections], visibleSections },
       };
 
@@ -433,6 +435,16 @@ export default function CVEditor() {
   const handleChangeTemplate = async (templateId) => {
     try {
       setSaving(true);
+
+      // For new CVs (unsaved), apply template locally without API call
+      if (id === "new") {
+        setCv((prev) => (prev ? { ...prev, templateId } : { templateId }));
+        setShowTemplateSelector(false);
+        showToast("success", "Template changed!");
+        return;
+      }
+
+      // For existing CVs, persist to backend
       const filtered = filteredFormData();
       await api.patch(`/cvs/${id}`, {
         ...filtered,
@@ -561,7 +573,6 @@ export default function CVEditor() {
       />
 
       {/* ── Analysis Modal ── */}
-      {/* 
       <AnalysisModal
         show={showAnalysis}
         analysis={analysisResult}
@@ -569,7 +580,6 @@ export default function CVEditor() {
         onClose={() => setShowAnalysis(false)}
         onApply={handleApplyAnalysis}
       />
-      */}
 
       {/* ── Template Selector Modal ── */}
       {showTemplateSelector && (

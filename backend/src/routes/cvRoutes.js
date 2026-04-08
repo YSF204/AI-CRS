@@ -9,6 +9,7 @@ import {
   analyzeCVFile,
   getCVAnalyses,
   downloadPDF,
+  analyzeSection,
 } from "../controllers/cvController.js";
 import { authenticate } from "../middleware/Auth.js";
 import { isEmployee } from "../middleware/roleCheck.js";
@@ -36,7 +37,10 @@ cvRouter.get("/:id/analyses", getCVAnalyses);
 // PDF Download (generates on-the-fly)
 cvRouter.post("/:id/download-pdf", downloadPDF);
 
-// job Reccomendation 
+// job Reccomendation
 cvRouter.post("/:id/recommend-jobs", recommendJobs);
+
+// CV Section Analysis
+cvRouter.post("/analyze-section", analyzeSection);
 
 export default cvRouter;

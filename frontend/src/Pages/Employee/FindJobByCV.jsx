@@ -15,8 +15,7 @@ import StatsBar from "../../components/shared/StatsBar";
 import api from "../../services/api";
 import useFetch from "../../hooks/useFetch";
 
-const FIND_BY_CV_CACHE_KEY = "employee-find-job-by-cv-state";
-
+// No session caching - always start fresh on refresh
 export default function FindJobByCV() {
   const navigate = useNavigate();
   const [selectedCvId, setSelectedCvId] = useState("");
@@ -26,31 +25,6 @@ export default function FindJobByCV() {
   const [error, setError] = useState("");
   const [lastAction, setLastAction] = useState("none");
   const fileInputRef = useRef(null);
-
-  useEffect(() => {
-    try {
-      const cached = sessionStorage.getItem(FIND_BY_CV_CACHE_KEY);
-      if (!cached) return;
-      const parsed = JSON.parse(cached);
-      if (parsed?.selectedCvId) setSelectedCvId(parsed.selectedCvId);
-      if (parsed?.jobs) setJobs(parsed.jobs);
-      if (parsed?.error) setError(parsed.error);
-      if (parsed?.lastAction) setLastAction(parsed.lastAction);
-    } catch {
-      // Ignore malformed cache payloads.
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      sessionStorage.setItem(
-        FIND_BY_CV_CACHE_KEY,
-        JSON.stringify({ selectedCvId, jobs, error, lastAction }),
-      );
-    } catch {
-      // Ignore storage write errors.
-    }
-  }, [selectedCvId, jobs, error, lastAction]);
 
   const {
     data: cvs = [],
@@ -112,17 +86,12 @@ export default function FindJobByCV() {
         color: "var(--mint)",
       },
       {
-        label: "Last Search",
-        value:
-          lastAction === "saved"
-            ? "Saved CV"
-            : lastAction === "upload"
-              ? "Uploaded PDF"
-              : "-",
+        label: "Results",
+        value: jobs ? `${normalizedJobs.length} jobs` : "-",
         color: "var(--yellow)",
       },
     ];
-  }, [cvs, normalizedJobs.length, lastAction]);
+  }, [cvs, normalizedJobs.length, jobs]);
 
   const setPageError = (err, fallback) =>
     setError(err?.response?.data?.message || err?.message || fallback);
@@ -198,6 +167,7 @@ export default function FindJobByCV() {
   const clearResults = () => {
     setJobs(null);
     setError("");
+    setLastAction("none");
   };
 
   const renderResults = () => {
