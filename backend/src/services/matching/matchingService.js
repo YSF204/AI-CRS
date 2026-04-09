@@ -9,6 +9,166 @@ const getClient = () => {
   return client;
 };
 
+// ============================================================
+//   SKILL ALIAS MAP
+//   Groups alternative spellings / names for the same skill.
+//   When matching, every alias is treated as the canonical term.
+// ============================================================
+const SKILL_ALIASES = {
+  // JavaScript ecosystem
+  "javascript": ["js", "javascript", "ecmascript", "es6", "es2015", "es2016", "es2017", "es2018", "es2019", "es2020"],
+  "typescript": ["ts", "typescript"],
+  "nodejs": ["node", "node.js", "nodejs", "node js"],
+  "react": ["react", "react.js", "reactjs", "react js"],
+  "nextjs": ["next", "next.js", "nextjs", "next js"],
+  "vue": ["vue", "vue.js", "vuejs", "vue js"],
+  "angular": ["angular", "angularjs", "angular.js"],
+  "express": ["express", "express.js", "expressjs"],
+  "jquery": ["jquery", "jquery.js"],
+  "redux": ["redux", "redux toolkit", "rtk"],
+
+  // Python ecosystem
+  "python": ["python", "python3", "python2", "py"],
+  "django": ["django", "django rest framework", "drf"],
+  "flask": ["flask"],
+  "fastapi": ["fastapi", "fast api"],
+
+  // Java ecosystem
+  "java": ["java", "java se", "java ee", "jvm"],
+  "spring": ["spring", "spring boot", "spring framework", "springboot"],
+
+  // C# / .NET
+  "csharp": ["c#", "csharp", "c sharp"],
+  "dotnet": [".net", "dotnet", "asp.net", "asp net"],
+
+  // Mobile
+  "reactnative": ["react native", "react-native", "reactnative"],
+  "flutter": ["flutter", "dart"],
+  "swift": ["swift", "ios development", "ios"],
+  "kotlin": ["kotlin", "android development", "android"],
+
+  // Databases
+  "sql": ["sql", "structured query language"],
+  "mysql": ["mysql", "my sql"],
+  "postgresql": ["postgresql", "postgres", "psql"],
+  "mongodb": ["mongodb", "mongo", "mongo db"],
+  "redis": ["redis"],
+  "elasticsearch": ["elasticsearch", "elastic search", "opensearch"],
+  "sqlite": ["sqlite", "sqlite3"],
+  "mssql": ["mssql", "sql server", "microsoft sql server", "t-sql", "tsql"],
+
+  // Cloud & DevOps
+  "aws": ["aws", "amazon web services", "amazon aws"],
+  "gcp": ["gcp", "google cloud", "google cloud platform"],
+  "azure": ["azure", "microsoft azure"],
+  "docker": ["docker", "containers", "containerization"],
+  "kubernetes": ["kubernetes", "k8s", "kubectl"],
+  "terraform": ["terraform", "infrastructure as code", "iac"],
+  "cicd": ["ci/cd", "cicd", "continuous integration", "continuous delivery", "continuous deployment", "github actions", "gitlab ci", "jenkins", "circleci"],
+
+  // Version Control
+  "git": ["git", "github", "gitlab", "bitbucket", "version control"],
+
+  // API
+  "restapi": ["rest", "rest api", "restful", "restful api", "http api"],
+  "graphql": ["graphql", "graph ql"],
+
+  // Testing
+  "testing": ["unit testing", "integration testing", "test driven development", "tdd", "bdd", "jest", "mocha", "cypress", "selenium", "pytest"],
+
+  // UI/UX & styling
+  "css": ["css", "css3", "stylesheets"],
+  "html": ["html", "html5"],
+  "tailwind": ["tailwind", "tailwindcss", "tailwind css"],
+  "sass": ["sass", "scss"],
+  "figma": ["figma", "figma design"],
+
+  // Machine Learning / AI
+  "machinelearning": ["machine learning", "ml", "artificial intelligence", "ai", "deep learning", "dl"],
+  "tensorflow": ["tensorflow", "tf"],
+  "pytorch": ["pytorch", "torch"],
+
+  // Soft skills
+  "communication": ["communication", "communication skills", "verbal communication", "written communication"],
+  "teamwork": ["teamwork", "team player", "collaboration", "collaborative"],
+  "leadership": ["leadership", "team lead", "team leader", "managing teams"],
+  "problemsolving": ["problem solving", "problem-solving", "analytical thinking", "critical thinking"],
+  "agile": ["agile", "scrum", "kanban", "agile methodology", "scrum master"],
+};
+
+// Build a reverse lookup: alias → canonical key
+const buildAliasLookup = () => {
+  const lookup = new Map();
+  for (const [canonical, aliases] of Object.entries(SKILL_ALIASES)) {
+    for (const alias of aliases) {
+      lookup.set(alias.toLowerCase(), canonical);
+    }
+  }
+  return lookup;
+};
+const ALIAS_LOOKUP = buildAliasLookup();
+
+// Normalize a single skill string to its canonical form (or itself if unknown)
+const normalizeSkill = (skill) => {
+  const lower = skill.toLowerCase().trim();
+  return ALIAS_LOOKUP.get(lower) || lower;
+};
+
+// ============================================================
+//   IMPLIED SKILLS MAP
+//   If a candidate has skill A, they implicitly also have skill B.
+//   Only one direction (A → B, not B → A).
+// ============================================================
+const IMPLIED_SKILLS = {
+  // TypeScript implies JavaScript
+  "typescript": ["javascript"],
+  // Kubernetes implies Docker/containers
+  "kubernetes": ["docker"],
+  // React implies JavaScript, HTML, CSS
+  "react": ["javascript", "html", "css"],
+  // Vue implies JavaScript, HTML, CSS
+  "vue": ["javascript", "html", "css"],
+  // Angular implies typescript, html, css
+  "angular": ["typescript", "javascript", "html", "css"],
+  // Next.js implies React
+  "nextjs": ["react", "javascript"],
+  // Node.js implies JavaScript
+  "nodejs": ["javascript"],
+  // Express implies Node.js and JavaScript
+  "express": ["nodejs", "javascript"],
+  // Sass implies CSS
+  "sass": ["css"],
+  // Django implies Python
+  "django": ["python"],
+  // Flask implies Python
+  "flask": ["python"],
+  // FastAPI implies Python
+  "fastapi": ["python"],
+  // Spring implies Java
+  "spring": ["java"],
+  // React Native implies JavaScript
+  "reactnative": ["javascript"],
+  // Flutter implies Dart
+  "flutter": ["dart"],
+  // PostgreSQL/MySQL/SQLite/MSSQL implies SQL
+  "postgresql": ["sql"],
+  "mysql": ["sql"],
+  "sqlite": ["sql"],
+  "mssql": ["sql"],
+};
+
+// Expand a list of canonical skills to include implied skills
+const expandWithImpliedSkills = (canonicalSkills) => {
+  const expanded = new Set(canonicalSkills);
+  for (const skill of canonicalSkills) {
+    const implied = IMPLIED_SKILLS[skill] || [];
+    for (const imp of implied) {
+      expanded.add(imp);
+    }
+  }
+  return Array.from(expanded);
+};
+
 /**
  * Calculate job match percentage between applicant and job requirements
  * Weights:
@@ -73,27 +233,44 @@ export const calculateMatchPercentage = (applicantInfo, jobRequirements) => {
 };
 
 /**
- * Calculate skills match between two arrays (case-insensitive, partial matching)
+ * Calculate skills match between two arrays.
+ * Uses:
+ *   1. Alias normalization  — "React.js" = "React", "Node" = "Node.js"
+ *   2. Implied skills       — If applicant knows TypeScript → also knows JavaScript
+ *   3. Partial string match — Fallback for unknown aliases
  */
 const calculateSkillsMatch = (applicantSkills, requiredSkills) => {
   if (!requiredSkills || requiredSkills.length === 0) return 100;
   if (!applicantSkills || applicantSkills.length === 0) return 0;
 
-  const normalizedApplicant = applicantSkills.map((s) =>
-    s.toLowerCase().trim(),
-  );
-  const normalizedRequired = requiredSkills.map((s) => s.toLowerCase().trim());
+  // Normalize required skills to canonical form
+  const canonicalRequired = requiredSkills.map(normalizeSkill);
 
-  const matches = normalizedRequired.filter((skill) =>
-    normalizedApplicant.some(
+  // Normalize applicant skills to canonical form, then expand with implied skills
+  const canonicalApplicant = applicantSkills.map(normalizeSkill);
+  const expandedApplicant = new Set(expandWithImpliedSkills(canonicalApplicant));
+
+  let matchCount = 0;
+  for (const reqSkill of canonicalRequired) {
+    // 1. Direct canonical match
+    if (expandedApplicant.has(reqSkill)) {
+      matchCount++;
+      continue;
+    }
+
+    // 2. Fallback: partial string match for unknown/unlisted skills
+    const reqLower = reqSkill.toLowerCase();
+    const partialMatch = [...expandedApplicant].some(
       (appSkill) =>
-        appSkill.includes(skill) ||
-        skill.includes(appSkill) ||
-        appSkill === skill,
-    ),
-  );
+        appSkill.includes(reqLower) ||
+        reqLower.includes(appSkill)
+    );
+    if (partialMatch) {
+      matchCount += 0.8; // partial credit for fuzzy match
+    }
+  }
 
-  return (matches.length / normalizedRequired.length) * 100;
+  return Math.min((matchCount / canonicalRequired.length) * 100, 100);
 };
 
 /**
@@ -191,15 +368,40 @@ export const generateAIMatchAnalysis = async (
       : JSON.stringify(applicantInfo, null, 2);
 
     const prompt = `You are an expert AI Recruitment Analyst integrated into a professional recruitment platform called AI-CRS. 
-Your job is to perform a deep, structured, and honest analysis of a candidate's profile against a specific 
-job's requirements, and produce a comprehensive fit report including an overall match percentage.
+Your job is to deeply understand a candidate's profile and evaluate their true fit for a specific role — not just compare keywords.
 
-You analyze three possible input types:
-- A parsed CV (uploaded document)
-- A manually filled application form
-- A pre-existing candidate profile from the system
+## CRITICAL INTELLIGENCE RULES — READ CAREFULLY
 
-Regardless of the input type, you extract the same structured information and run the same analysis.
+### 1. UNDERSTAND, DON'T JUST COMPARE TEXT
+You are NOT a keyword matcher. You must reason about what the candidate actually knows and can do.
+
+### 2. IMPLIED SKILLS
+Many skills imply others. A candidate who has skill A also inherently has skill B:
+- TypeScript → also knows JavaScript (TypeScript IS JavaScript with types)
+- Kubernetes → also knows Docker/containers (you cannot use K8s without Docker)
+- React / Vue / Angular → also knows JavaScript, HTML, CSS
+- Next.js → also knows React and JavaScript
+- Node.js / Express → also knows JavaScript
+- Django / Flask / FastAPI → also knows Python
+- Spring Boot → also knows Java
+- PostgreSQL / MySQL / SQLite → also knows SQL
+- Sass/SCSS → also knows CSS
+
+### 3. TRANSFERABLE SKILLS
+Experience in a related technology counts:
+- Someone who built REST APIs in Django can work with Flask/FastAPI
+- SQL expertise transfers across MySQL, PostgreSQL, MSSQL, SQLite
+- AWS experience makes GCP/Azure adaptation fast
+
+### 4. PROJECT EVIDENCE
+If the candidate's work history required skill X (even if X isn't explicitly listed), credit them.
+Example: "Led microservices project on AWS EKS" → implies Docker, Kubernetes, AWS
+
+### 5. CERTIFICATION INTELLIGENCE
+Certifications prove knowledge. "AWS Certified Solutions Architect" = cloud/AWS expertise.
+
+### 6. HONEST GAPS
+Only list a skill as a gap if it is truly missing with no reasonable implication path.
 
 ---
 
@@ -208,10 +410,9 @@ Regardless of the input type, you extract the same structured information and ru
 You will evaluate the candidate across 6 weighted dimensions:
 
 1. TECHNICAL SKILLS MATCH         — Weight: 30%
-   - Compare candidate's listed skills vs. the job's required and preferred skills.
-   - Partial matches count (e.g., knows React but job wants Vue → partial frontend match).
+   - Use the implied skills rules above — do not just compare text.
+   - Credit transferable knowledge. Note what was inferred in the summary.
    - Missing critical skills reduce this score significantly.
-   - Bonus points for skills listed as "nice to have" that the candidate has.
 
 2. EXPERIENCE MATCH               — Weight: 25%
    - Compare years of relevant experience vs. required years.
@@ -271,7 +472,20 @@ Return ONLY a valid JSON object. No markdown, no preamble, no explanation outsid
     "summary": "string",
     "additionalInformation": "string"
   },
-  "overall_fit_percentage": 0,
+  "overall_fit_percentage": <number 0-100>,
+  // HOW TO SCORE overall_fit_percentage:
+  // This is YOUR holistic assessment as an expert recruiter — NOT a formula.
+  // Consider the WHOLE picture: skills (implied + explicit), experience quality, project evidence, certifications.
+  // CALIBRATION:
+  //   90-100%: Near perfect match, candidate has virtually everything required
+  //   75-89%:  Strong fit, has most requirements with minor gaps
+  //   60-74%:  Good fit, solid foundation with some gaps
+  //   45-59%:  Moderate, meets basic needs but has notable gaps
+  //   30-44%:  Weak, missing several key requirements
+  //   0-29%:   Not suitable, significant misalignment
+  // DO NOT be artificially conservative. A candidate whose CV was built to match the job
+  // and demonstrates the required skills (even through implication/inference) should score 75%+.
+  // Only give a low score if there are GENUINE critical gaps.
   "fit_label": "Excellent Fit | Strong Fit | Good Fit | Moderate Fit | Weak Fit | Not Recommended",
   "confidence_level": "High | Medium | Low",
   "confidence_note": "Short reason for confidence level",

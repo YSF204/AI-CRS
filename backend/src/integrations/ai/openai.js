@@ -144,12 +144,14 @@ const matchJobsPrompt = () => {
    - If the candidate is senior, still include junior/mid roles as they may choose to apply.
 
 3. **Relevance Scoring**
-   - Assign each matched job a relevance score from 0 to 100 based on:
-     - Field match (40 points): Does the job belong to the candidate's domain?
-     - Skills match (30 points): How many required skills does the candidate have?
-     - Experience match (20 points): Does the candidate's experience level align?
-     - Education match (10 points): Does the candidate meet the educational requirements?
-   - Only return jobs with a relevance score of 50 or above.
+   - Assign each matched job a relevance score from 0 to 100 based on a realistic holistic assessment.
+   - Consider the WHOLE picture: skills (implied + explicit), experience quality, and domain applicability.
+   - CALIBRATION:
+     - 80-100%: Strong to Perfect match. The candidate is highly qualified for this exact role.
+     - 60-79%: Good match. Meets core needs despite some minor gaps.
+     - 30-59%: Weak match. Missing major requirements.
+   - Do NOT be artificially restrictive. Let capable candidates score 75%+ if their skills match the requirements, especially through inference and implication.
+   - Only return jobs with a relevance score of 30 or above.
    - Sort results from highest to lowest score.
 
 4. **Output Format**
@@ -202,7 +204,48 @@ export const analyzeApplicationCV = async (filePath, jobDescription) => {
   });
 
   const prompt = `You are an expert AI Recruitment Analyst integrated into a professional recruitment platform called AI-CRS.
-Your job is to perform a deep, structured, and honest analysis of a candidate's CV against a specific job's requirements.
+Your job is to deeply understand a candidate's CV and evaluate their fit for a specific role.
+
+## CRITICAL INTELLIGENCE RULES — READ CAREFULLY
+
+### 1. UNDERSTAND, DON'T JUST COMPARE TEXT
+You are NOT a keyword matcher. You must reason about what the candidate actually knows and can do.
+
+### 2. IMPLIED SKILLS
+Many skills imply others. A candidate who has skill A also inherently has skill B:
+- TypeScript → also knows JavaScript (TypeScript IS JavaScript with types)
+- Kubernetes → also knows Docker/containers (you cannot use K8s without Docker)
+- React / Vue / Angular → also knows JavaScript, HTML, CSS
+- Next.js → also knows React and JavaScript
+- Node.js / Express → also knows JavaScript
+- Django / Flask / FastAPI → also knows Python
+- Spring Boot → also knows Java
+- PostgreSQL / MySQL / SQLite → also knows SQL
+- Sass/SCSS → also knows CSS
+- React Native → also knows JavaScript
+
+### 3. TRANSFERABLE SKILLS
+Experience in a related technology or domain should count:
+- Someone who built REST APIs in Django can also work with Flask or FastAPI
+- Someone experienced with AWS can adapt to GCP or Azure faster than a fresh hire
+- A developer who has used Jest/Mocha understands testing principles applicable elsewhere
+- SQL expertise transfers across MySQL, PostgreSQL, SQLite, MSSQL
+
+### 4. PROJECT EVIDENCE
+If the candidate lists a project or role that required skill X (even if X isn't explicitly listed), credit them for X.
+Example: "Built a microservices architecture on AWS EKS" → implies Docker, Kubernetes, AWS, microservices
+
+### 5. CERTIFICATION INTELLIGENCE
+A certification proves knowledge that may not be in the skills section. 
+"AWS Certified Solutions Architect" proves cloud computing and AWS even without listing "AWS" in skills.
+
+### 6. HONEST GAPS
+If a skill is truly missing AND there is no reasonable implication path, list it as a gap.
+Do NOT fabricate skills. Be honest about genuine gaps but be intelligent about what can be inferred.
+
+---
+
+## OUTPUT FORMAT
 
 Respond with ONLY a valid JSON object (no markdown, no code fences).
 
@@ -215,34 +258,48 @@ Respond with ONLY a valid JSON object (no markdown, no code fences).
     "email": "string",
     "phone": "string",
     "yearsOfExperience": <number>,
-    "technicalSkills": ["skill"],
+    "technicalSkills": ["skill — include BOTH explicit and strongly implied skills"],
     "softSkills": ["skill"],
     "languages": ["lang"],
     "summary": "string",
     "additionalInformation": "string"
   },
   "overall_fit_percentage": <number 0-100>,
+  // HOW TO SCORE overall_fit_percentage:
+  // This is YOUR holistic assessment as an expert recruiter — NOT a formula.
+  // Consider the WHOLE picture: skills (implied + explicit), experience quality, project evidence, certifications.
+  // CALIBRATION:
+  //   90-100%: Near perfect match, candidate has virtually everything required
+  //   75-89%:  Strong fit, has most requirements with minor gaps
+  //   60-74%:  Good fit, solid foundation with some gaps
+  //   45-59%:  Moderate, meets basic needs but has notable gaps
+  //   30-44%:  Weak, missing several key requirements
+  //   0-29%:   Not suitable, significant misalignment
+  // DO NOT be artificially conservative. A candidate whose CV was built to match the job
+  // and demonstrates the required skills (even through implication/inference) should score 75%+.
+  // Only give a low score if there are GENUINE critical gaps.
+
   "fit_label": "Excellent Fit | Strong Fit | Good Fit | Moderate Fit | Weak Fit | Not Recommended",
   "confidence_level": "High | Medium | Low",
   "confidence_note": "Short reason for confidence level",
   "dimension_scores": {
-    "technical_skills": { "score": <number 0-100>, "summary": "string" },
+    "technical_skills": { "score": <number 0-100>, "summary": "string — explain what you inferred, not just what was listed" },
     "experience": { "score": <number 0-100>, "summary": "string" },
     "education_certifications": { "score": <number 0-100>, "summary": "string" },
     "soft_skills_culture": { "score": <number 0-100>, "summary": "string" },
     "language_location": { "score": <number 0-100>, "summary": "string" },
     "achievements_value": { "score": <number 0-100>, "summary": "string" }
   },
-  "strengths": ["Clear strength point 1"],
-  "gaps": [{ "gap": "Name of the gap", "severity": "Critical|High|Medium|Low", "suggestion": "What the candidate could do to close this gap" }],
-  "matched_skills": ["skill1"],
+  "strengths": ["Clear strength point — reference specific CV evidence"],
+  "gaps": [{ "gap": "Name of the gap", "severity": "Critical|High|Medium|Low", "suggestion": "Actionable suggestion" }],
+  "matched_skills": ["skills matched explicitly or through inference — note inference in parentheses e.g. 'JavaScript (inferred from TypeScript)'"],
   "missing_required_skills": ["skill1"],
-  "recruiter_summary": "A 3-4 sentence professional paragraph summarizing the candidate's fit for this role."
+  "recruiter_summary": "A 3-4 sentence professional paragraph summarizing the candidate's true fit, considering both explicit and inferred knowledge."
 }
 
 Target job: "${jobDescription}"
 
-Analyze the attached PDF CV and return the JSON analysis object. No extra text.`;
+Analyze the attached PDF CV using the intelligence rules above. Think deeply. Return only the JSON.`;
 
   const response = await getClient().responses.create({
     model: "gpt-4.1",

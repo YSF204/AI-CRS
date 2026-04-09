@@ -166,7 +166,7 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
 
   let parsed;
   try {
-    const match = await withTimeout(matchCVToJobs(cvText, jobsText), 5500);
+    const match = await withTimeout(matchCVToJobs(cvText, jobsText), 25000);
     const clean = match.replace(/```json|```/g, "").trim();
     parsed = JSON.parse(clean);
     
@@ -183,22 +183,23 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
     parsed = localRanked;
   }
   
-  // Filter out low scores (using 40 as threshold for related fields)
-  let filteredJobs = parsed.filter(job => job.matchScore >= 40);
+  // Filter out low scores (using 30 as threshold to ensure user sees potentials)
+  let filteredJobs = parsed.filter(job => job.matchScore >= 30);
 
-  // Add canonical percentage to each job using the same scorer as Analyze/Apply flows
-  // This ensures the same CV+job always yields the same percentage across all flows
+  // We assign semantic matching scores in the background but allow the AI's 
+  // custom contextual score to shine if it was an AI result.
   filteredJobs = filteredJobs.map((jobMatch) => {
     const job = jobs.find(j => j._id.toString() === jobMatch.jobId);
     if (!job) return jobMatch;
 
-    // Calculate canonical percentage using the same function as other flows
     const matchResult = calculateMatchPercentage(normalizedProfile, job);
 
     return {
       ...jobMatch,
       canonicalPercentage: matchResult.percentage,
-      matchScore: matchResult.percentage, // Use canonical score as the primary display value
+      // If it's the fallback local scorer, we replace it with our upgraded semantic formula.
+      // If it's the AI, we let the AI's holistic matchScore remain.
+      matchScore: jobMatch.reasoning?.includes("Candidate matches") ? matchResult.percentage : jobMatch.matchScore,
       breakdown: matchResult.breakdown,
     };
   });

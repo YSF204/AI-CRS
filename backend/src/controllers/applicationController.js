@@ -35,14 +35,24 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
     return next(new AppError("Please select a CV or upload a PDF file", 400));
   }
 
+  // Fetch job FIRST so we can pass the description to the AI for uploaded PDFs
+  const job = await Job.findById(jobId).populate("employerId");
+  if (!job) {
+    return next(new AppError("Job not found", 404));
+  }
+
+  if (job.status !== "OPEN") {
+    return next(new AppError("This job is no longer open", 400));
+  }
+
   let cv;
   let normalizedProfile;
   let parsedPdfAnalysis = null;
 
   // Handle uploaded PDF file - use OpenAI File API directly (no pdf-parse)
   if (req.file) {
-    // Use OpenAI File API to analyze PDF directly
-    const aiAnalysis = await analyzeApplicationCV(req.file.path, job?.description || "");
+    // Now job.description is available — pass it so the AI understands the target role
+    const aiAnalysis = await analyzeApplicationCV(req.file.path, job.description || "");
     try {
       parsedPdfAnalysis = JSON.parse(aiAnalysis);
     } catch (e) {
@@ -103,31 +113,25 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
     });
   }
 
-  // Check if job exists
-  const job = await Job.findById(jobId).populate("employerId");
-  if (!job) {
-    return next(new AppError("Job not found", 404));
-  }
-
-  if (job.status !== "OPEN") {
-    return next(new AppError("This job is no longer open", 400));
-  }
-
-  // CANONICAL SCORING: Always use calculateMatchPercentage with normalized profile
-  // AI is used for narrative/summary ONLY, not for the percentage score
+  // SCORING:
+  // - For PDF uploads: trust the AI's overall_fit_percentage directly — it understands context better
+  //   than our rigid keyword-based formula which can give 15% even for a perfect CV.
+  // - For existing CVs: use the canonical scorer (we have clean structured skill arrays).
   const matchResult = calculateMatchPercentage(normalizedProfile, job);
-  let percentageScore = matchResult.percentage;
+  let percentageScore;
   let strengths = [];
   let weaknesses = [];
   let matchAnalysisStr = "";
 
-  // Generate AI analysis for narrative content only (strengths, weaknesses, summary)
-  // The percentage score remains canonical regardless of AI output
   if (req.file) {
     if (parsedPdfAnalysis) {
+      // Use the AI's own fit score — it did a full semantic read of the PDF vs. job description
+      percentageScore = parsedPdfAnalysis.overall_fit_percentage ?? matchResult.percentage;
       strengths = parsedPdfAnalysis.strengths || [];
       weaknesses = (parsedPdfAnalysis.gaps || []).map(g => `${g.severity} Gap: ${g.gap} - ${g.suggestion}`);
       matchAnalysisStr = parsedPdfAnalysis.recruiter_summary || "";
+    } else {
+      percentageScore = matchResult.percentage;
     }
   } else {
     try {
@@ -140,6 +144,7 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
       );
 
       if (aiAnalysis && !aiAnalysis.error) {
+        percentageScore = aiAnalysis.overall_fit_percentage ?? matchResult.percentage;
         strengths = aiAnalysis.strengths || [];
         weaknesses = (aiAnalysis.gaps || []).map(g => `${g.severity} Gap: ${g.gap} - ${g.suggestion}`);
         matchAnalysisStr = aiAnalysis.recruiter_summary || "";
@@ -151,10 +156,7 @@ export const analyzeCv = catchAsync(async (req, res, next) => {
   }
 
   if (strengths.length === 0 && weaknesses.length === 0) {
-    const ext = extractStrengthsWeaknesses(
-      matchAnalysisStr,
-      matchResult.breakdown,
-    );
+    const ext = extractStrengthsWeaknesses(matchAnalysisStr, matchResult.breakdown);
     strengths = ext.strengths;
     weaknesses = ext.weaknesses;
   }
@@ -230,17 +232,20 @@ export const applyForJob = catchAsync(async (req, res, next) => {
     applicationMethod = req.file ? "uploadPdf" : "existingCv";
   } else if (req.file) {
     applicationMethod = "uploadPdf";
-    // Use OpenAI File API directly - no pdf-parse needed
-    rawCvText = null;
-    try {
-      const aiAnalysis = await analyzeApplicationCV(req.file.path, "");
+    // Only run the expensive AI parse when we actually need the CV data (not skipAnalysis).
+    // When skipAnalysis=true the background job will do the AI work after the response is sent.
+    if (skipAnalysis !== "true" && skipAnalysis !== true) {
+      rawCvText = null;
       try {
-        parsedPdfAnalysis = JSON.parse(aiAnalysis);
-      } catch (e) {
-        parsedPdfAnalysis = null;
+        const aiAnalysis = await analyzeApplicationCV(req.file.path, "");
+        try {
+          parsedPdfAnalysis = JSON.parse(aiAnalysis);
+        } catch (e) {
+          parsedPdfAnalysis = null;
+        }
+      } catch (err) {
+        console.error("PDF analysis failed", err);
       }
-    } catch (err) {
-      console.error("PDF analysis failed", err);
     }
   }
 
@@ -344,26 +349,29 @@ export const applyForJob = catchAsync(async (req, res, next) => {
     });
   }
 
-  // CANONICAL SCORING: Always use calculateMatchPercentage with normalized profile
-  // AI is used for narrative/summary ONLY, not for the percentage score
+  // SCORING:
+  // - PDF with skipAnalysis: don't show a fake score. Set null so UI shows pending.
+  //   The background job will calculate the real score from the AI analysis.
+  // - PDF without skipAnalysis: use AI's own fit percentage (already parsed above).
+  // - Existing CV / Manual: use canonical scorer.
   const matchResult = calculateMatchPercentage(normalizedProfile, job);
-  let percentageScore = matchResult.percentage;
+  let percentageScore;
   let matchAnalysisStr = "";
 
   if (skipAnalysis === "true" || skipAnalysis === true) {
-    // For skipAnalysis, return canonical score immediately with placeholder message
-    // Background job will update the text analysis only, not the percentage
-    percentageScore = matchResult.percentage;
-    matchAnalysisStr = "AI match score is currently pending background analysis. We will notify you once it's complete.";
-  } else if (req.file) {
-    // Uploaded PDF - use AI for narrative only, keep canonical score
-    if (parsedPdfAnalysis) {
-      matchAnalysisStr = parsedPdfAnalysis.recruiter_summary || "";
+    if (req.file) {
+      // Pending — background job will set the real score
+      percentageScore = null;
+      matchAnalysisStr = "Analysis pending...";
     } else {
-      matchAnalysisStr = "Analysis unavailable for uploaded PDF.";
+      percentageScore = matchResult.percentage;
+      matchAnalysisStr = "AI analysis is running in the background. Check back shortly.";
     }
+  } else if (req.file && parsedPdfAnalysis) {
+    // Trust the AI's own score for PDF uploads
+    percentageScore = parsedPdfAnalysis.overall_fit_percentage ?? matchResult.percentage;
+    matchAnalysisStr = parsedPdfAnalysis.recruiter_summary || "";
   } else if (!isManualApplication) {
-    // Existing CV - use AI for narrative only
     try {
       const aiAnalysis = await generateAIMatchAnalysis(
         normalizedProfile,
@@ -372,14 +380,19 @@ export const applyForJob = catchAsync(async (req, res, next) => {
         userId,
         "EXISTING_PROFILE"
       );
-
       if (aiAnalysis && !aiAnalysis.error) {
+        percentageScore = aiAnalysis.overall_fit_percentage ?? matchResult.percentage;
         matchAnalysisStr = aiAnalysis.recruiter_summary || "";
+      } else {
+        percentageScore = matchResult.percentage;
       }
     } catch (error) {
       console.error("AI analysis error:", error);
+      percentageScore = matchResult.percentage;
       matchAnalysisStr = "Analysis generation failed";
     }
+  } else {
+    percentageScore = matchResult.percentage;
   }
 
   // Create application with normalized profile data
@@ -424,157 +437,7 @@ export const applyForJob = catchAsync(async (req, res, next) => {
 
   const application = await Application.create(applicationData);
 
-  // Send HTML email to employer
-  const employer = await Employer.findById(job.employerId);
-
-  if (employer?.company?.contactEmail) {
-    try {
-      const htmlEmail = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; }
-            .header { background: linear-gradient(135deg, #4ecdc4, #1a1a2e); color: white; padding: 20px; text-align: center; }
-            .content { padding: 20px; background: #f8f9fa; }
-            .match-score { font-size: 24px; font-weight: bold; color: #4ecdc4; text-align: center; margin: 20px 0; }
-            .breakdown { margin: 20px 0; }
-            .breakdown-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ddd; }
-            .breakdown-label { font-weight: 500; }
-            .breakdown-value { color: #f7b731; font-weight: bold; }
-            .analysis { margin: 20px 0; padding: 15px; background: white; border-left: 4px solid #4ecdc4; }
-            .footer { text-align: center; padding: 20px; color: #999; font-size: 12px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>New Application Received</h1>
-            </div>
-            <div class="content">
-              <p>Hi ${employer?.company?.name || "Employer"},</p>
-              <p>You have received a new application for the position of <strong>${job.position}</strong>.</p>
-
-              <h3>Candidate Information</h3>
-              <p><strong>Name:</strong> ${normalizedProfile.fullName}</p>
-              <p><strong>Email:</strong> ${normalizedProfile.email}</p>
-              <p><strong>Phone:</strong> ${normalizedProfile.phone}</p>
-              ${normalizedProfile.linkedin ? `<p><strong>LinkedIn:</strong> ${normalizedProfile.linkedin}</p>` : ""}
-
-              <h3>Match Analysis</h3>
-              <div class="match-score">${percentageScore}% Match</div>
-
-              <div class="breakdown">
-                <div class="breakdown-row">
-                  <span class="breakdown-label">Technical Skills:</span>
-                  <span class="breakdown-value">${matchResult.breakdown.technicalSkillsMatch}%</span>
-                </div>
-                <div class="breakdown-row">
-                  <span class="breakdown-label">Experience:</span>
-                  <span class="breakdown-value">${matchResult.breakdown.experienceMatch}%</span>
-                </div>
-                <div class="breakdown-row">
-                  <span class="breakdown-label">Soft Skills:</span>
-                  <span class="breakdown-value">${matchResult.breakdown.softSkillsMatch}%</span>
-                </div>
-                <div class="breakdown-row">
-                  <span class="breakdown-label">Languages:</span>
-                  <span class="breakdown-value">${matchResult.breakdown.languagesMatch}%</span>
-                </div>
-              </div>
-
-              <div class="analysis">
-                <h4>AI Analysis</h4>
-                <p>${matchAnalysisStr}</p>
-              </div>
-
-              <p><strong>Summary:</strong> ${normalizedProfile.summary}</p>
-
-              <p>Log in to your dashboard to review this application and contact the candidate.</p>
-            </div>
-            <div class="footer">
-              <p>© 2024 CV Editor. All rights reserved.</p>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
-
-      await sendEmail({
-        email: employer.company.contactEmail,
-        subject: `New Application: ${normalizedProfile.fullName} for ${job.position}`,
-        html: htmlEmail,
-      });
-      application.isNotified = true;
-      await application.save();
-    } catch (error) {
-      console.error("Error sending email to employer:", error);
-    }
-  }
-
-  // Send HTML confirmation email to applicant
-  if (normalizedProfile.email) {
-    try {
-      const confirmationEmail = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <style>
-            body { font-family: Arial, sans-serif; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; }
-            .header { background: linear-gradient(135deg, #4ecdc4, #1a1a2e); color: white; padding: 20px; text-align: center; }
-            .content { padding: 20px; background: #f8f9fa; }
-            .success { color: #4ecdc4; font-weight: bold; }
-            .footer { text-align: center; padding: 20px; color: #999; font-size: 12px; }
-            .button { display: inline-block; padding: 10px 20px; background: #f7b731; color: #000; text-decoration: none; margin: 10px 0; border-radius: 4px; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>Application Submitted!</h1>
-            </div>
-            <div class="content">
-              <p>Hi ${normalizedProfile.fullName},</p>
-              <p>Congratulations! Your application for the position of <strong>${job.position}</strong> has been submitted successfully.</p>
-
-              <h3>Your Match Score</h3>
-              <p style="font-size: 28px; text-align: center; color: #f7b731; font-weight: bold;">${percentageScore}%</p>
-
-              <p>We believe you are a strong fit for this role. The employer will review your application and contact you within 1-2 weeks.</p>
-
-              <h3>Position Details</h3>
-              <p><strong>Title:</strong> ${job.position}</p>
-              <p><strong>Location:</strong> ${job.workSite}</p>
-              <p><strong>Duration:</strong> ${job.workDuration || "Not specified"}</p>
-
-              <p style="text-align: center;">
-                <a href="${process.env.FRONTEND_URL}/employee/applications" class="button">View My Applications</a>
-              </p>
-
-              <p>Best of luck with your application!</p>
-              <p>Best regards,<br>The CV Editor Team</p>
-            </div>
-            <div class="footer">
-              <p>© 2024 CV Editor. All rights reserved.</p>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
-
-      await sendEmail({
-        email: normalizedProfile.email,
-        subject: `Application Confirmation: ${normalizedProfile.fullName} - ${job.position}`,
-        html: confirmationEmail,
-      });
-    } catch (error) {
-      console.error("Error sending confirmation email:", error);
-    }
-  }
-
-  // Send response immediately
+  // Respond immediately — emails and background AI run after the response
   res.status(201).json({
     success: true,
     message: "Application submitted successfully",
@@ -584,56 +447,126 @@ export const applyForJob = catchAsync(async (req, res, next) => {
     matchPercentage: percentageScore,
   });
   
-  // Background AI generation for skipAnalysis
-  // NOTE: Background job updates text analysis ONLY, not the percentage score
-  if (skipAnalysis === "true" || skipAnalysis === true) {
-    setImmediate(async () => {
-      try {
+  // Fire-and-forget: emails + background AI run AFTER the response is already sent
+  setImmediate(async () => {
+    // ---- EMAILS ----
+    try {
+      const employer = await Employer.findById(job.employerId);
+      if (employer?.company?.contactEmail) {
+        const htmlEmail = `<!DOCTYPE html><html><head><style>
+          body{font-family:Arial,sans-serif;color:#333}
+          .container{max-width:600px;margin:0 auto}
+          .header{background:linear-gradient(135deg,#4ecdc4,#1a1a2e);color:white;padding:20px;text-align:center}
+          .content{padding:20px;background:#f8f9fa}
+          .match-score{font-size:24px;font-weight:bold;color:#4ecdc4;text-align:center;margin:20px 0}
+          .breakdown-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #ddd}
+          .breakdown-value{color:#f7b731;font-weight:bold}
+          .footer{text-align:center;padding:20px;color:#999;font-size:12px}
+        </style></head><body><div class="container">
+          <div class="header"><h1>New Application Received</h1></div>
+          <div class="content">
+            <p>Hi ${employer?.company?.name || "Employer"},</p>
+            <p>New application for <strong>${job.position}</strong>.</p>
+            <h3>Candidate</h3>
+            <p><strong>Name:</strong> ${normalizedProfile.fullName}</p>
+            <p><strong>Email:</strong> ${normalizedProfile.email}</p>
+            <p><strong>Phone:</strong> ${normalizedProfile.phone}</p>
+            ${normalizedProfile.linkedin ? `<p><strong>LinkedIn:</strong> ${normalizedProfile.linkedin}</p>` : ""}
+            <h3>Match</h3>
+            <div class="match-score">${percentageScore}% Match</div>
+            <div>
+              <div class="breakdown-row"><span>Technical Skills</span><span class="breakdown-value">${matchResult.breakdown.technicalSkillsMatch}%</span></div>
+              <div class="breakdown-row"><span>Experience</span><span class="breakdown-value">${matchResult.breakdown.experienceMatch}%</span></div>
+              <div class="breakdown-row"><span>Soft Skills</span><span class="breakdown-value">${matchResult.breakdown.softSkillsMatch}%</span></div>
+              <div class="breakdown-row"><span>Languages</span><span class="breakdown-value">${matchResult.breakdown.languagesMatch}%</span></div>
+            </div>
+            <p>Log in to your dashboard to review this application.</p>
+          </div>
+          <div class="footer"><p>© 2024 CV Editor. All rights reserved.</p></div>
+        </div></body></html>`;
+        try {
+          await sendEmail({
+            email: employer.company.contactEmail,
+            subject: `New Application: ${normalizedProfile.fullName} for ${job.position}`,
+            html: htmlEmail,
+          });
+          await Application.findByIdAndUpdate(application._id, { isNotified: true });
+        } catch (e) { console.error("Employer email error:", e); }
+      }
+
+      if (normalizedProfile.email) {
+        const confirmEmail = `<!DOCTYPE html><html><head><style>
+          body{font-family:Arial,sans-serif;color:#333}
+          .container{max-width:600px;margin:0 auto}
+          .header{background:linear-gradient(135deg,#4ecdc4,#1a1a2e);color:white;padding:20px;text-align:center}
+          .content{padding:20px;background:#f8f9fa}
+          .footer{text-align:center;padding:20px;color:#999;font-size:12px}
+          .button{display:inline-block;padding:10px 20px;background:#f7b731;color:#000;text-decoration:none;margin:10px 0;border-radius:4px}
+        </style></head><body><div class="container">
+          <div class="header"><h1>Application Submitted!</h1></div>
+          <div class="content">
+            <p>Hi ${normalizedProfile.fullName},</p>
+            <p>Your application for <strong>${job.position}</strong> was submitted successfully.</p>
+            <p style="font-size:28px;text-align:center;color:#f7b731;font-weight:bold">${percentageScore}%</p>
+            <p><strong>Title:</strong> ${job.position} | <strong>Location:</strong> ${job.workSite}</p>
+            <p style="text-align:center"><a href="${process.env.FRONTEND_URL}/employee/applications" class="button">View My Applications</a></p>
+            <p>Best regards,<br>The CV Editor Team</p>
+          </div>
+          <div class="footer"><p>© 2024 CV Editor. All rights reserved.</p></div>
+        </div></body></html>`;
+        try {
+          await sendEmail({
+            email: normalizedProfile.email,
+            subject: `Application Confirmation: ${normalizedProfile.fullName} - ${job.position}`,
+            html: confirmEmail,
+          });
+        } catch (e) { console.error("Applicant email error:", e); }
+      }
+    } catch (bgEmailErr) {
+      console.error("[Background emails] Error:", bgEmailErr);
+    }
+
+    // ---- BACKGROUND AI (runs for ALL applications, updates score + text) ----
+    try {
+      if (req.file || (skipAnalysis === "true" || skipAnalysis === true)) {
         console.log(`[Background AI] Starting analysis for app ${application._id}`);
         let aiAnalysis;
+        let parsedBgAnalysis = null;
 
         if (req.file) {
-          aiAnalysis = await analyzeApplicationCV(req.file.path, job.description || "");
+          // Parse the PDF with AI and get real score + summary
+          const raw = await analyzeApplicationCV(req.file.path, job.description || "");
+          try { parsedBgAnalysis = JSON.parse(raw); } catch (e) { /* ignore */ }
+          aiAnalysis = parsedBgAnalysis;
         } else if (!isManualApplication) {
-          aiAnalysis = await generateAIMatchAnalysis(
-            normalizedProfile,
-            job,
-            job._id,
-            userId,
-            "EXISTING_PROFILE"
-          );
+          aiAnalysis = await generateAIMatchAnalysis(normalizedProfile, job, job._id, userId, "EXISTING_PROFILE");
         } else {
-          aiAnalysis = await generateAIMatchAnalysis(
-            normalizedProfile,
-            job,
-            job._id,
-            userId,
-            "MANUAL_FORM"
-          );
+          aiAnalysis = await generateAIMatchAnalysis(normalizedProfile, job, job._id, userId, "MANUAL_FORM");
         }
 
-        let newAnalysisStr = "";
-
-        if (aiAnalysis && !aiAnalysis.error) {
-          // Keep canonical score, only update narrative text
-          newAnalysisStr = aiAnalysis.recruiter_summary || "";
+        const bgUpdate = {};
+        if (req.file && parsedBgAnalysis) {
+          // AI read the actual PDF — use its own score
+          bgUpdate.matchPercentage = parsedBgAnalysis.overall_fit_percentage ?? matchResult.percentage;
+          bgUpdate["matchDetails.matchAnalysis"] = parsedBgAnalysis.recruiter_summary || "Analysis complete.";
+        } else if (aiAnalysis && !aiAnalysis.error) {
+          bgUpdate["matchDetails.matchAnalysis"] = aiAnalysis.recruiter_summary || "";
         } else {
-          newAnalysisStr = "Background AI Analysis failed.";
+          bgUpdate["matchDetails.matchAnalysis"] = "Background AI analysis failed.";
         }
 
-        await Application.findByIdAndUpdate(application._id, {
-          "matchDetails.matchAnalysis": newAnalysisStr
-        });
+        await Application.findByIdAndUpdate(application._id, bgUpdate);
         console.log(`[Background AI] Completed for app ${application._id}`);
-      } catch (err) {
-        console.error(`[Background AI] Error for app ${application._id}:`, err);
-        await Application.findByIdAndUpdate(application._id, {
-          "matchDetails.matchAnalysis": "Failed to analyze during background check."
-        });
       }
-    });
-  }
+    } catch (err) {
+      console.error(`[Background AI] Error for app ${application._id}:`, err);
+      await Application.findByIdAndUpdate(application._id, {
+        "matchDetails.matchAnalysis": "Failed to analyze during background check.",
+      });
+    }
+  });
 });
+
 
 // ================================== //
 //   GET APPLICATIONS FOR LOGGED USER //

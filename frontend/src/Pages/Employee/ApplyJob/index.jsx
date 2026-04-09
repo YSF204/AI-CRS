@@ -9,13 +9,14 @@ import ManualForm from "./components/ManualForm";
 import CvSelector from "./components/CvSelector";
 import PdfUploader from "./components/PdfUploader";
 import AnalysisScreen from "./components/AnalysisScreen";
-import ResultScreen from "./components/ResultScreen";
 import ApplicationViewer from "../../../components/applications/ApplicationViewer";
 
 export default function ApplyJobModal({ jobId, appId, onClose }) {
   const { jobId: routeJobId } = useParams();
   const resolvedJobId = jobId || routeJobId;
-  const applyParams = useApplyJob(resolvedJobId, appId);
+  // handleAutoClose: fallback if no onClose prop (standalone page mode)
+  const handleAutoClose = () => navigate("/employee/jobs");
+  const applyParams = useApplyJob(resolvedJobId, appId, onClose ?? handleAutoClose);
   const location = useLocation();
   const {
     navigate,
@@ -142,26 +143,6 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
           >
             Close Window
           </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Result Screen
-  if (step === "result" && matchAnalysis) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-8 overflow-y-auto">
-        {toastPopup}
-        <div className="brutal-card bg-[var(--bg)] w-full max-w-4xl min-h-[50vh] relative flex flex-col border-[6px] border-black shadow-[16px_16px_0px_0px_#000] my-auto">
-          <button 
-            onClick={handleClose} 
-            className="absolute top-4 right-4 z-20 bg-black text-white hover:bg-[var(--coral)] hover:text-black border-2 border-black p-2 transition-colors cursor-pointer"
-          >
-            <X size={24} />
-          </button>
-          <div className="p-8">
-            <ResultScreen matchAnalysis={matchAnalysis} navigate={navigate} onClose={handleClose} />
-          </div>
         </div>
       </div>
     );

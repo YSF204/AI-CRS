@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import api from "../../../../services/api";
 import useFetch from "../../../../hooks/useFetch";
 
-export function useApplyJob(propsJobId, propsAppId) {
+export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
   const jobId = propsJobId;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -214,29 +214,10 @@ export function useApplyJob(propsJobId, propsAppId) {
       formData.append("jobId", jobId);
 
       if (applicationMethod === "uploadPdf" && cvFile) {
-        // Transform the uploaded PDF into a permanent CV object to prevent ObjectId failures later
-        const uploadForm = new FormData();
-        uploadForm.append("cvFile", cvFile);
-        
-        const uploadRes = await api.post("/cvs/upload/analyze", uploadForm, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        
-        const newCvId = uploadRes.data?.data?.cv?._id;
-        if (!newCvId) throw new Error("Failed to parse and save uploaded PDF as CV");
-        
-        // Quietly switch context to 'existingCv'
-        setSelectedCvId(newCvId);
-        setApplicationMethod("existingCv");
-        
-        // Refresh CV list in background so it appears in the dropdown seamlessly
-        api.get("/cvs").then(res => {
-          if (res.data?.data?.cvs) {
-            setCvs(res.data.data.cvs);
-          }
-        }).catch(err => console.error("Ignored cv reload err", err));
-
-        formData.append("cvId", newCvId);
+        // Send the PDF directly to the analyze endpoint — no intermediate CV creation.
+        // This is a single AI call instead of two, cutting latency significantly.
+        // The method stays as "uploadPdf" — we do NOT switch to "existingCv".
+        formData.append("cvFile", cvFile);
       } else if (applicationMethod === "existingCv" && selectedCvId) {
         formData.append("cvId", selectedCvId);
       }
@@ -290,12 +271,13 @@ export function useApplyJob(propsJobId, propsAppId) {
         return;
       }
 
-      setStep("result");
-      setMatchAnalysis({
-        matchPercentage: response.data?.matchPercentage ?? null,
-        applicationSuccess: true,
-        applicationMessage: isEdit ? "Application updated successfully!" : (response.data.message || "Application submitted successfully!"),
-      });
+      // Show a small fade-away toast instead of the full result screen
+      const msg = isEdit ? "✅ Application updated!" : "✅ Application submitted successfully!";
+      showToastNotice(msg);
+      setTimeout(() => {
+        if (onCloseFn) onCloseFn();
+        else navigate("/employee/applications");
+      }, 2000);
     } catch (error) {
       if (isAlreadyAppliedError(error)) {
         handleAlreadyApplied();
@@ -315,21 +297,35 @@ export function useApplyJob(propsJobId, propsAppId) {
 
     setSubmitting(true);
     try {
-      const payload = { jobId, cvId: matchAnalysis.cvId };
-      const response = isEdit
-        ? await api.patch(`/applications/${appId}`, payload)
-        : await api.post("/applications", payload);
+      let response;
+
+      if (applicationMethod === "uploadPdf" && cvFile) {
+        // PDF upload path: send the file directly — cvId is a temp ID and cannot be looked up in DB
+        const formData = new FormData();
+        formData.append("jobId", jobId);
+        formData.append("cvFile", cvFile);
+        response = isEdit
+          ? await api.patch(`/applications/${appId}`, formData, { headers: { "Content-Type": "multipart/form-data" } })
+          : await api.post("/applications", formData, { headers: { "Content-Type": "multipart/form-data" } });
+      } else {
+        // Existing CV path: send cvId as JSON
+        const payload = { jobId, cvId: matchAnalysis.cvId };
+        response = isEdit
+          ? await api.patch(`/applications/${appId}`, payload)
+          : await api.post("/applications", payload);
+      }
+
       if (isAlreadyAppliedPayload(response)) {
         handleAlreadyApplied();
         return;
       }
 
-      setStep("result");
-      setMatchAnalysis({
-        ...matchAnalysis,
-        applicationSuccess: true,
-        applicationMessage: isEdit ? "Application updated successfully" : response.data.message,
-      });
+      const msg = isEdit ? "✅ Application updated!" : "✅ Application submitted successfully!";
+      showToastNotice(msg);
+      setTimeout(() => {
+        if (onCloseFn) onCloseFn();
+        else navigate("/employee/applications");
+      }, 2000);
     } catch (error) {
       if (isAlreadyAppliedError(error)) {
         handleAlreadyApplied();
@@ -374,13 +370,12 @@ export function useApplyJob(propsJobId, propsAppId) {
         return;
       }
 
-      setStep("result");
-      setMatchAnalysis({
-        matchPercentage:
-          response.data.data?.application?.matchPercentage || response.data.data?.matchPercentage || 0,
-        applicationSuccess: true,
-        applicationMessage: isEdit ? "Application updated successfully" : response.data.message,
-      });
+      const msg = isEdit ? "✅ Application updated!" : "✅ Application submitted successfully!";
+      showToastNotice(msg);
+      setTimeout(() => {
+        if (onCloseFn) onCloseFn();
+        else navigate("/employee/applications");
+      }, 2000);
     } catch (error) {
       if (isAlreadyAppliedError(error)) {
         handleAlreadyApplied();
@@ -423,12 +418,12 @@ export function useApplyJob(propsJobId, propsAppId) {
         return;
       }
 
-      setStep("result");
-      setMatchAnalysis({
-        matchPercentage: response.data?.matchPercentage ?? null,
-        applicationSuccess: true,
-        applicationMessage: isEdit ? "Application updated successfully!" : (response.data.message || "Application submitted successfully!"),
-      });
+      const msg = isEdit ? "✅ Application updated!" : "✅ Application submitted successfully!";
+      showToastNotice(msg);
+      setTimeout(() => {
+        if (onCloseFn) onCloseFn();
+        else navigate("/employee/applications");
+      }, 2000);
     } catch (error) {
       if (isAlreadyAppliedError(error)) {
         handleAlreadyApplied();
