@@ -1,6 +1,11 @@
 import React from "react";
+import SuggestionBox from "../SuggestionBox";
 
-export default function SummarySection({ form, handlers }) {
+/**
+ * SummarySection - Handles full name and professional summary input
+ * Single Responsibility: Render summary form and integrate suggestion UI
+ */
+export default function SummarySection({ form, handlers, fetchSuggestions, handleSuggestionSelect, suggestions, isLoadingSuggestions }) {
   return (
     <div className="space-y-6">
       {/* Section Header */}
@@ -28,16 +33,31 @@ export default function SummarySection({ form, handlers }) {
         />
       </div>
 
-      {/* Summary Field */}
+      {/* Summary Field with Suggestions */}
       <div className="brutal-card bg-[var(--nav-bg)] border-2 border-[var(--border-color)] p-4">
         <label className="block font-mono text-xs font-bold mb-3 uppercase tracking-wider text-[var(--fg)]">
           Professional Summary *
         </label>
         <textarea
           value={form.summary || ""}
-          onChange={(e) => handlers.updateField("summary", e.target.value)}
+          onChange={(e) => {
+            handlers.updateField("summary", e.target.value);
+            // Trigger suggestions if user has typed something meaningful
+            if (e.target.value.length > 10) {
+              fetchSuggestions("summary", {
+                fullName: form.fullName,
+                jobTitle: form.jobTitle,
+                experience: form.experience,
+              });
+            }
+          }}
           className="brutal-input w-full h-32 resize-none"
           placeholder="Describe your professional background, key achievements, and career objectives..."
+        />
+        <SuggestionBox
+          suggestions={suggestions.summary || []}
+          onSelect={(suggestion) => handleSuggestionSelect("summary", suggestion)}
+          isLoading={isLoadingSuggestions.summary || false}
         />
       </div>
     </div>

@@ -25,6 +25,8 @@ import employerRouter from "./src/routes/employerRoutes.js";
 import adminRouter from "./src/routes/adminRoutes.js";
 import applicationRouter from "./src/routes/applicationRoutes.js";
 import chatRouter from "./src/routes/chatRoutes.js";
+import suggestionRouter from "./src/routes/suggestionRoutes.js";
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 app.use(
@@ -41,10 +43,9 @@ app.use(
         ],
       },
     },
-  }),
+  })
 );
 app.use(cors({ origin: true, credentials: true }));
-// Serve uploaded assets (e.g., CV PDFs) statically
 app.use("/uploads", express.static(path.join(process.cwd(), "src", "uploads")));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
@@ -65,6 +66,7 @@ app.use("/api/applications", applicationRouter);
 app.use("/api/admin", adminRouter);
 app.use(errorHandler);
 app.use("/api/chat", chatRouter);
+app.use("/api/suggestions", suggestionRouter);
 const startServer = async () => {
   await connectDB();
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
