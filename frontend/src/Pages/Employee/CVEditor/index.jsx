@@ -50,7 +50,60 @@ export default function CVEditor() {
     getFilteredFormData,
     handleImageUpload,
     removeProfileImage,
-  } = useCVForm(showToast);
+    isSaving,
+    lastSavedAt,
+    suggestions,
+    isLoadingSuggestions,
+    fetchSuggestions,
+    fetchSingleSummarySuggestion,
+    handleSuggestionSelect,
+  } = useCVForm(showToast, id !== "new" ? async (formData) => {
+    // Auto-save function
+    try {
+      const visibleSections = {};
+      activeSections.forEach((k) => {
+        visibleSections[k] = true;
+      });
+
+      const payload = {
+        ...formData,
+        experience: formData.experience.map((e) => ({ ...e })),
+        education: formData.education.map((e) => ({ ...e })),
+        customSections: formData.customSections
+          .filter(
+            (s) => s.title || s.items.some((it) => it.name || it.description),
+          )
+          .map((s) => ({
+            title: s.title,
+            sectionType: s.sectionType || "other",
+            items: s.items
+              .filter(
+                (it) =>
+                  it.name ||
+                  it.description ||
+                  it.durationFrom ||
+                  it.durationTo ||
+                  it.link,
+              )
+              .map((it) => ({
+                name: it.name || "",
+                description: it.description,
+                durationFrom: it.durationFrom || "",
+                durationTo: it.durationTo || "",
+                link: it.link,
+              })),
+          })),
+        profileImage: formData.profileImage,
+        templateId: cv?.templateId || 1,
+        layout: { sectionOrder: [...activeSections], visibleSections },
+      };
+
+      await api.patch(`/cvs/${id}`, payload);
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+      throw error;
+    }
+  } : null);
 
   const userName =
     form.fullName?.trim() ||
@@ -80,6 +133,9 @@ export default function CVEditor() {
 
   // ── Load CV ───────────────────────────────────────────────────────────────────
   useEffect(() => {
+    // Clear session storage specifically for this CV on reload or entry
+    sessionStorage.removeItem(`cv_analysis_${id}`);
+
     const load = async () => {
       const normalizeMonth = (value) => {
         if (!value) return "";
@@ -206,17 +262,38 @@ export default function CVEditor() {
 
   // ── Save ──────────────────────────────────────────────────────────────────────
   const handleAnalyze = async () => {
+    const cached = sessionStorage.getItem(`cv_analysis_${id}`);
+    if (cached) {
+      setAnalysisResult(JSON.parse(cached));
+      setShowAnalysis(true);
+      return;
+    }
+
     setAnalyzing(true);
     try {
       const filtered = filteredFormData();
+      const flat = {};
+      
+      if (filtered.summary) flat.summary = filtered.summary;
+      if (filtered.jobTitle) flat.jobTitle = filtered.jobTitle;
+      filtered.experience?.forEach((exp, i) => { if (exp.summary) flat[`experience_${i}_summary`] = exp.summary; });
+      filtered.education?.forEach((edu, i) => { if (edu.summary) flat[`education_${i}_summary`] = edu.summary; });
+      filtered.customSections?.forEach((sec, sIdx) => {
+        sec.items?.forEach((item, iIdx) => {
+          if (item.description) flat[`customSections_${sIdx}_items_${iIdx}_description`] = item.description;
+        });
+      });
+
       const response = await api.post("/cvs/analyze-section", {
         section: "fullCv",
-        data: filtered,
+        data: flat,
         fullName: userName,
       });
 
       if (response.data?.success && response.data?.data) {
-        setAnalysisResult(response.data.data);
+        const result = response.data.data;
+        setAnalysisResult(result);
+        sessionStorage.setItem(`cv_analysis_${id}`, JSON.stringify(result));
         setShowAnalysis(true);
       } else {
         showToast("error", "Unable to generate analysis. Please try again.");
@@ -231,54 +308,62 @@ export default function CVEditor() {
     }
   };
 
-  const handleApplyAnalysis = (analysis) => {
-    if (!analysis) return;
+  const handleApplyAnalysis = (updatesToApply) => {
+    if (!updatesToApply || Object.keys(updatesToApply).length === 0) {
+      showToast("info", "No changes were selected.");
+      setShowAnalysis(false);
+      return;
+    }
 
-    let applied = false;
     setForm((prev) => {
       const next = { ...prev };
+      
+      // Clone arrays so we can mutate safely
+      next.experience = next.experience ? [...next.experience] : [];
+      next.education = next.education ? [...next.education] : [];
+      next.customSections = next.customSections ? [...next.customSections] : [];
 
-      if (analysis.fieldUpdates) {
-        if (analysis.fieldUpdates.jobTitle) {
-          next.jobTitle = analysis.fieldUpdates.jobTitle;
-          applied = true;
+      Object.entries(updatesToApply).forEach(([key, value]) => {
+        if (key === 'summary') next.summary = value;
+        else if (key === 'jobTitle') next.jobTitle = value;
+        else if (key.startsWith('experience_')) {
+          const parts = key.split('_'); // [experience, 0, summary]
+          const idx = parseInt(parts[1], 10);
+          if (next.experience[idx]) {
+            next.experience[idx] = { ...next.experience[idx], [parts[2]]: value };
+          }
         }
-        if (analysis.fieldUpdates.summary) {
-          next.summary = analysis.fieldUpdates.summary;
-          applied = true;
+        else if (key.startsWith('education_')) {
+          const parts = key.split('_'); 
+          const idx = parseInt(parts[1], 10);
+          if (next.education[idx]) {
+            next.education[idx] = { ...next.education[idx], [parts[2]]: value };
+          }
         }
-        if (analysis.fieldUpdates.contact) {
-          next.contact = { ...next.contact, ...analysis.fieldUpdates.contact };
-          applied = true;
+        else if (key.startsWith('customSections_')) {
+          // customSections_0_items_0_description
+          const parts = key.split('_');
+          const sIdx = parseInt(parts[1], 10);
+          const iIdx = parseInt(parts[3], 10);
+          if (next.customSections[sIdx] && next.customSections[sIdx].items && next.customSections[sIdx].items[iIdx]) {
+            next.customSections[sIdx] = { ...next.customSections[sIdx] };
+            next.customSections[sIdx].items = [...next.customSections[sIdx].items];
+            next.customSections[sIdx].items[iIdx] = { 
+               ...next.customSections[sIdx].items[iIdx], 
+               description: value 
+            };
+          }
         }
-        if (analysis.fieldUpdates.language) {
-          next.language = analysis.fieldUpdates.language;
-          applied = true;
-        }
-        if (analysis.fieldUpdates.customSections) {
-          next.customSections = analysis.fieldUpdates.customSections;
-          applied = true;
-        }
-      }
-
-      if (!applied && analysis.rewrittenSummary) {
-        next.summary = analysis.rewrittenSummary;
-        applied = true;
-      }
+      });
 
       return next;
     });
 
-    if (applied) {
-      showToast("success", "Selected changes applied to your CV.");
-    } else {
-      showToast(
-        "info",
-        "No changes were selected. Review the suggestions and select changes to apply.",
-      );
-    }
-
+    showToast("success", "Selected changes applied to your CV.");
     setShowAnalysis(false);
+    
+    // Wipe local storage so new edits take precedence next time analysis is ran explicitly
+    sessionStorage.removeItem(`cv_analysis_${id}`);
   };
 
   const handleSave = async () => {
@@ -496,6 +581,8 @@ export default function CVEditor() {
       <ActionBar
         form={form}
         saving={saving}
+        isAutoSaving={isSaving}
+        lastSavedAt={lastSavedAt}
         analyzing={analyzing}
         downloadingPdf={downloadingPdf}
         onSave={handleSave}
@@ -545,6 +632,11 @@ export default function CVEditor() {
             onDragEnd={onDragEnd}
             handleImageUpload={handleImageUpload}
             removeProfileImage={removeProfileImage}
+            fetchSuggestions={fetchSuggestions}
+            fetchSingleSummarySuggestion={fetchSingleSummarySuggestion}
+            handleSuggestionSelect={handleSuggestionSelect}
+            suggestions={suggestions}
+            isLoadingSuggestions={isLoadingSuggestions}
           />
         </div>
 

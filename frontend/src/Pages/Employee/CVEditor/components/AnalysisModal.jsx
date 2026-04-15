@@ -10,41 +10,40 @@ export default function AnalysisModal({
 }) {
   const [selectedUpdates, setSelectedUpdates] = useState({});
 
-  // Initialize selectedUpdates when analysis changes
   useEffect(() => {
-    if (analysis?.fieldUpdates) {
-      const initialSelected = Object.keys(analysis.fieldUpdates).reduce(
-        (acc, key) => {
-          acc[key] = true; // Select all by default
-          return acc;
-        },
-        {},
-      );
+    if (analysis?.issues) {
+      const initialSelected = analysis.issues.reduce((acc, issue) => {
+        acc[issue.fieldId] = true;
+        return acc;
+      }, {});
       setSelectedUpdates(initialSelected);
     }
   }, [analysis]);
 
   if (!show || !analysis) return null;
 
-  const sectionLabel =
-    analysis.section === "fullCv"
-      ? "Full CV"
-      : analysis.section
-          .replace(/([A-Z])/g, " $1")
-          .replace(/^./, (str) => str.toUpperCase());
+  const sectionLabel = analysis.section === "fullCv" ? "Full CV" : analysis.section;
 
-  const handleCheckboxChange = (key, checked) => {
-    setSelectedUpdates((prev) => ({ ...prev, [key]: checked }));
+  const handleCheckboxChange = (fieldId, checked) => {
+    setSelectedUpdates((prev) => ({ ...prev, [fieldId]: checked }));
   };
 
   const handleApply = () => {
     const updatesToApply = {};
-    Object.keys(selectedUpdates).forEach((key) => {
-      if (selectedUpdates[key] && analysis.fieldUpdates[key]) {
-        updatesToApply[key] = analysis.fieldUpdates[key];
-      }
-    });
-    onApply({ ...analysis, fieldUpdates: updatesToApply });
+    if (analysis.issues) {
+      analysis.issues.forEach((issue) => {
+        if (selectedUpdates[issue.fieldId]) {
+          updatesToApply[issue.fieldId] = issue.improvedText;
+        }
+      });
+    }
+    onApply(updatesToApply);
+  };
+
+  const formatFieldId = (id) => {
+    return id.split('_').map(word => 
+      word === "0" || word === "1" || word === "2" ? `#${parseInt(word)+1}` : word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ').replace('Items', 'Item');
   };
 
   return (
@@ -100,7 +99,7 @@ export default function AnalysisModal({
                   CV Review
                 </h2>
                 <p style={{ margin: 0, color: "#4b4b4b", fontSize: "0.95rem" }}>
-                  Helpful recommendations for your {sectionLabel}.
+                  Actionable AI suggestions for your {sectionLabel}.
                 </p>
               </div>
             </div>
@@ -118,94 +117,20 @@ export default function AnalysisModal({
           </div>
 
           <div style={{ display: "grid", gap: "18px" }}>
-            <div
-              style={{
-                padding: "18px",
-                background: "#ffffff",
-                borderRadius: "16px",
-                border: "1px solid rgba(0,0,0,0.08)",
-              }}
-            >
-              <h3
-                style={{
-                  margin: 0,
-                  marginBottom: "10px",
-                  fontSize: "1rem",
-                  fontWeight: 700,
-                }}
-              >
-                Suggestions
-              </h3>
-              <p style={{ margin: 0, color: "#333", lineHeight: 1.8 }}>
-                {analysis.suggestions ||
-                  "Your CV looks well structured. Use these suggestions to refine your wording and impact."}
-              </p>
-            </div>
-
-            {analysis.improvements && (
-              <div
-                style={{
-                  padding: "18px",
-                  background: "#ffffff",
-                  borderRadius: "16px",
-                  border: "1px solid rgba(0,0,0,0.08)",
-                }}
-              >
-                <h3
+            {(!analysis.issues || analysis.issues.length === 0) ? (
+               <div
                   style={{
-                    margin: 0,
-                    marginBottom: "10px",
-                    fontSize: "1rem",
-                    fontWeight: 700,
+                    padding: "18px",
+                    background: "#ffffff",
+                    borderRadius: "16px",
+                    border: "1px solid rgba(0,0,0,0.08)",
                   }}
-                >
-                  Improvements
-                </h3>
-                <p style={{ margin: 0, color: "#333", lineHeight: 1.8 }}>
-                  {analysis.improvements}
-                </p>
-              </div>
-            )}
-
-            {analysis.spellingCorrections?.length > 0 && (
-              <div
-                style={{
-                  padding: "18px",
-                  background: "#fff6f1",
-                  borderRadius: "16px",
-                  border: "1px solid rgba(255,130,0,0.18)",
-                }}
-              >
-                <h3
-                  style={{
-                    margin: 0,
-                    marginBottom: "10px",
-                    fontSize: "1rem",
-                    fontWeight: 700,
-                  }}
-                >
-                  Spelling corrections
-                </h3>
-                <ul
-                  style={{
-                    margin: 0,
-                    paddingLeft: "20px",
-                    color: "#333",
-                    lineHeight: 1.7,
-                  }}
-                >
-                  {analysis.spellingCorrections.map((correction, index) => (
-                    <li key={index}>
-                      <strong>{correction.original}</strong> →{" "}
-                      {correction.corrected}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {analysis.fieldUpdates &&
-              Object.keys(analysis.fieldUpdates).length > 0 && (
+               >
+                  <p style={{ margin: 0, color: "#333", lineHeight: 1.8 }}>
+                    Great job! No specific issues were found. Your CV looks well-structured and professionally written.
+                  </p>
+               </div>
+            ) : (
                 <div
                   style={{
                     padding: "18px",
@@ -217,89 +142,65 @@ export default function AnalysisModal({
                   <h3
                     style={{
                       margin: 0,
-                      marginBottom: "10px",
-                      fontSize: "1rem",
+                      marginBottom: "16px",
+                      fontSize: "1.05rem",
                       fontWeight: 700,
                     }}
                   >
-                    Proposed Changes
+                    Actionable Improvements
                   </h3>
-                  <div style={{ display: "grid", gap: "12px" }}>
-                    {analysis.fieldUpdates.summary && (
+                  <div style={{ display: "grid", gap: "16px" }}>
+                    {analysis.issues.map((issue) => (
                       <div
+                        key={issue.fieldId}
                         style={{
                           border: "1px solid #ddd",
-                          padding: "10px",
-                          borderRadius: "8px",
+                          padding: "16px",
+                          borderRadius: "12px",
+                          background: "#fff"
                         }}
                       >
                         <label
                           style={{
                             display: "flex",
                             alignItems: "center",
-                            gap: "8px",
+                            gap: "10px",
+                            cursor: "pointer",
+                            marginBottom: "10px"
                           }}
                         >
                           <input
                             type="checkbox"
-                            checked={selectedUpdates.summary || false}
+                            checked={selectedUpdates[issue.fieldId] || false}
                             onChange={(e) =>
-                              handleCheckboxChange("summary", e.target.checked)
+                              handleCheckboxChange(issue.fieldId, e.target.checked)
                             }
+                            style={{ 
+                              width: "18px", 
+                              height: "18px", 
+                              cursor: "pointer",
+                              accentColor: "#ffe630"
+                            }}
                           />
-                          <strong>Summary</strong>
+                          <strong style={{ fontSize: "0.95rem" }}>{formatFieldId(issue.fieldId)}</strong>
                         </label>
-                        <div style={{ marginTop: "8px" }}>
-                          <p style={{ fontSize: "0.9rem", color: "#666" }}>
-                            <strong>Current:</strong>{" "}
-                            {currentData?.summary || "None"}
+                        
+                        <div style={{ display: "grid", gap: "12px", paddingLeft: "28px" }}>
+                          <p style={{ fontSize: "0.9rem", color: "#b91c1c", margin: 0, padding: "8px", background: "#fef2f2", borderRadius: "6px" }}>
+                            <strong>Needs Work:</strong> {issue.reason}
                           </p>
-                          <p style={{ fontSize: "0.9rem", color: "#333" }}>
-                            <strong>Proposed:</strong>{" "}
-                            {analysis.fieldUpdates.summary}
+                          <p style={{ fontSize: "0.9rem", color: "#666", margin: 0 }}>
+                            <del>{issue.originalText}</del>
+                          </p>
+                          <p style={{ fontSize: "0.95rem", color: "#166534", margin: 0, padding: "8px", background: "#f0fdf4", borderRadius: "6px" }}>
+                            <strong>Suggested:</strong> {issue.improvedText}
                           </p>
                         </div>
                       </div>
-                    )}
-                    {analysis.fieldUpdates.jobTitle && (
-                      <div
-                        style={{
-                          border: "1px solid #ddd",
-                          padding: "10px",
-                          borderRadius: "8px",
-                        }}
-                      >
-                        <label
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                          }}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedUpdates.jobTitle || false}
-                            onChange={(e) =>
-                              handleCheckboxChange("jobTitle", e.target.checked)
-                            }
-                          />
-                          <strong>Job Title</strong>
-                        </label>
-                        <div style={{ marginTop: "8px" }}>
-                          <p style={{ fontSize: "0.9rem", color: "#666" }}>
-                            <strong>Current:</strong>{" "}
-                            {currentData?.jobTitle || "None"}
-                          </p>
-                          <p style={{ fontSize: "0.9rem", color: "#333" }}>
-                            <strong>Proposed:</strong>{" "}
-                            {analysis.fieldUpdates.jobTitle}
-                          </p>
-                        </div>
-                      </div>
-                    )}
+                    ))}
                   </div>
                 </div>
-              )}
+            )}
 
             <div
               style={{
@@ -311,20 +212,22 @@ export default function AnalysisModal({
                 borderTop: "1px solid rgba(0,0,0,0.08)",
               }}
             >
-              <button
-                onClick={handleApply}
-                className="brutal-btn px-5 py-3"
-                style={{
-                  background: "#ffe630",
-                  color: "#0a0a0a",
-                  border: "2px solid #0a0a0a",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                <Check size={16} /> Apply Selected Changes
-              </button>
+              {analysis.issues && analysis.issues.length > 0 && (
+                <button
+                  onClick={handleApply}
+                  className="brutal-btn px-5 py-3"
+                  style={{
+                    background: "#ffe630",
+                    color: "#0a0a0a",
+                    border: "2px solid #0a0a0a",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <Check size={16} /> Apply Selected Changes
+                </button>
+              )}
               <button
                 onClick={onClose}
                 className="brutal-btn px-5 py-3"

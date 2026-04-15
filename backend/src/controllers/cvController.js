@@ -3,7 +3,7 @@ import CV from "../models/CV.js";
 import CVAnalysis from "../models/CVAnalysis.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
-import { analyzeCVFromFile, analyzeCVFromDatabase } from "../integrations/ai/openai.js";
+import { analyzeCVFromFile, analyzeCVFromDatabase, analyzeCVSection } from "../integrations/ai/openai.js";
 import htmlToPdf from "../utils/pdfGen.js";
 import { extractCertifications, calculateExperienceYears } from "../utils/profileNormalizer.js";
 import { generateAIMatchAnalysis } from "../services/matching/matchingService.js";
@@ -211,25 +211,28 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
         });
     }
 
-    const cv = await CV.create({
-        userId: req.user._id,
-        jobTitle: cvData.jobTitle || "Uploaded CV",
-        summary: cvData.summary || "Extracted from uploaded PDF",
-        contact: cvData.contact || {},
-        address: cvData.address || { city: "N/A", street: "N/A" },
-        experience: scrubbedExperience,
-        education: scrubbedEducation,
-        technicalSkills: cvData.technicalSkills || [],
-        softSkills: cvData.softSkills || [],
-        language: cvData.language || [],
-        customSections,
-        layout: {
-            sectionOrder: cvData.layout?.sectionOrder || [],
-            visibleSections: cvData.layout?.visibleSections || {},
-        },
-    });
+    // Run CV and Analysis creation in parallel for speed
+    const [cv, analysisData] = await Promise.all([
+        CV.create({
+            userId: req.user._id,
+            jobTitle: cvData.jobTitle || "Uploaded CV",
+            summary: cvData.summary || "Extracted from uploaded PDF",
+            contact: cvData.contact || {},
+            address: cvData.address || { city: "N/A", street: "N/A" },
+            experience: scrubbedExperience,
+            education: scrubbedEducation,
+            technicalSkills: cvData.technicalSkills || [],
+            softSkills: cvData.softSkills || [],
+            language: cvData.language || [],
+            customSections,
+            layout: {
+                sectionOrder: cvData.layout?.sectionOrder || [],
+                visibleSections: cvData.layout?.visibleSections || {},
+            },
+        }),
+        Promise.resolve(parsed.analysis || {})
+    ]);
 
-    const analysisData = parsed.analysis || {};
     const analysis = await CVAnalysis.create({
         userId: req.user._id,
         CVId: cv._id,
@@ -340,10 +343,6 @@ export const getCVAnalyses = catchAsync(async (req, res, next) => {
 export const downloadPDF = catchAsync(async (req, res, next) => {
     const { html } = req.body;
 
-    if (!html) {
-        return next(new AppError("Please provide HTML content", 400));
-    }
-
     const cv = await CV.findById(req.params.id);
 
     if (!cv) {
@@ -354,7 +353,19 @@ export const downloadPDF = catchAsync(async (req, res, next) => {
 
     await cv.populate('userId', 'firstName lastName');
 
-    const pdfResult = await htmlToPdf(html, cv._id);
+    // Use HTML generation only
+    if (!html) {
+        return next(new AppError("Please provide HTML content for PDF generation", 400));
+    }
+
+    let pdfResult;
+
+    try {
+        pdfResult = await htmlToPdf(html, cv._id);
+    } catch (error) {
+        console.error('PDF generation failed:', error.message);
+        return next(new AppError(`PDF generation failed: ${error.message}`, 500));
+    }
 
     const filename = `cv_${cv.userId.fullName.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
     res.download(pdfResult.absolutePath, filename, (err) => {
@@ -380,30 +391,9 @@ export const analyzeSection = catchAsync(async (req, res, next) => {
         return next(new AppError("Section and data are required", 400));
     }
 
-    // Build CV text for analysis based on section
-    let cvText = "";
-    const sectionName = section === "fullCv" ? "Full CV" : section.replace(/([A-Z])/g, " $1").replace(/^./, str => str.toUpperCase());
-
-    if (section === "fullCv") {
-        cvText = [
-            `Job Title: ${data.jobTitle || "N/A"}`,
-            `Summary: ${data.summary || "N/A"}`,
-            `Contact: ${data.contact?.email || "N/A"}, ${data.contact?.phone || "N/A"}`,
-            `Location: ${data.address?.city || ""}, ${data.address?.street || ""}`,
-            `Experience: ${data.experience?.map(e => `${e.position} at ${e.institutionName} (${e.durationFrom || ""} - ${e.durationTo || ""}) - ${e.summary || ""}`).join(" | ") || "None"}`,
-            `Education: ${data.education?.map(e => `${e.certification} at ${e.institutionName} (${e.durationFrom || ""} - ${e.durationTo || ""})`).join(" | ") || "None"}`,
-            `Technical Skills: ${data.technicalSkills?.join(", ") || "None"}`,
-            `Soft Skills: ${data.softSkills?.join(", ") || "None"}`,
-            `Languages: ${data.language?.join(", ") || "None"}`,
-            ...data.customSections?.map(s => `${s.title}: ${s.items?.map(i => `${i.name}${i.description ? " - " + i.description : ""}`).join(", ")}`) || [],
-        ].join("\n");
-    } else {
-        // Section-specific analysis
-        cvText = `${sectionName}:\n${JSON.stringify(data[section] || data, null, 2)}`;
-    }
-
-    // Generate AI analysis for the section
-    const aiAnalysis = await analyzeCVFromDatabase(cvText, "");
+    // Generate AI analysis for the section using the specific section prompt
+    // data is expected to be a flattened object where keys are the field ids
+    const aiAnalysis = await analyzeCVSection(section, data);
 
     let parsed;
     try {
@@ -413,47 +403,13 @@ export const analyzeSection = catchAsync(async (req, res, next) => {
         return next(new AppError("AI returned an invalid response, please try again", 500));
     }
 
-    const analysisData = parsed.analysis || {};
-
-    // Build field updates based on AI suggestions
-    const fieldUpdates = {};
-    const str = (v) => (Array.isArray(v) ? v.join("\n• ") : v || "");
-
-    // Extract suggested improvements for specific fields
-    const suggestions = str(analysisData.suggestions);
-    const improvements = str(analysisData.strengths);
-
-    // Generate rewritten summary if analyzing full CV
-    if (section === "fullCv" && data.summary) {
-        // Use AI to suggest a better summary
-        const summaryPrompt = `Improve this professional summary to be more impactful and concise:\n\n${data.summary}`;
-        try {
-            const summaryAnalysis = await analyzeCVFromDatabase(summaryPrompt, "");
-            const summaryParsed = JSON.parse(summaryAnalysis.replace(/```json|```/g, "").trim());
-            if (summaryParsed.analysis?.suggestions) {
-                fieldUpdates.summary = Array.isArray(summaryParsed.analysis.suggestions)
-                    ? summaryParsed.analysis.suggestions.join(" ")
-                    : summaryParsed.analysis.suggestions;
-            }
-        } catch {
-            // Fallback: keep original if AI fails
-        }
-    }
-
-    // Suggest job title improvement if present
-    if (section === "fullCv" && data.jobTitle) {
-        // AI might suggest a more specific or industry-standard title
-        // For now, we'll leave this as a potential future enhancement
-    }
+    const issues = parsed.issues || [];
 
     res.status(200).json({
         success: true,
         data: {
             section,
-            suggestions,
-            improvements,
-            spellingCorrections: [], // Could be added with spell-check AI call
-            fieldUpdates,
+            issues
         },
     });
 });
