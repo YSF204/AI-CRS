@@ -20,6 +20,11 @@ export default function EditorContent({
   onDragEnd,
   handleImageUpload,
   removeProfileImage,
+  fetchSuggestions,
+  fetchSingleSummarySuggestion,
+  handleSuggestionSelect,
+  suggestions,
+  isLoadingSuggestions,
 }) {
   if (activeSections.length === 0) {
     return (
@@ -149,6 +154,11 @@ export default function EditorContent({
             onRemove={() => toggleSection(key)}
             collapsed={!!collapsedSections[key]}
             onToggleCollapse={() => toggleCollapse(key)}
+            fetchSuggestions={fetchSuggestions}
+            fetchSingleSummarySuggestion={fetchSingleSummarySuggestion}
+            handleSuggestionSelect={handleSuggestionSelect}
+            suggestions={suggestions}
+            isLoadingSuggestions={isLoadingSuggestions}
           />
         </div>
       ))}
