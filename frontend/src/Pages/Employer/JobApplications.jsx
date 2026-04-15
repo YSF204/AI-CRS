@@ -85,15 +85,17 @@ export default function JobApplications() {
       </div>
 
       {selected && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4 overflow-y-auto">
-          <div className="brutal-card bg-[var(--bg)] w-full max-w-5xl relative border-[6px] border-black shadow-[16px_16px_0px_0px_#000] p-6">
-            <button
-              onClick={() => setSelected(null)}
-              className="absolute top-3 right-3 brutal-btn px-3 py-2 font-bold uppercase tracking-wider"
-              style={{ background: "var(--coral)", color: "#0a0a0a" }}
-            >
-              Close
-            </button>
+        <div className="fixed inset-0 z-[1005] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-hidden">
+          <div className="brutal-card bg-[var(--bg)] w-full max-w-5xl max-h-[90vh] overflow-y-auto relative border-[6px] border-black shadow-[16px_16px_0px_0px_#000] p-6">
+            <div className="sticky top-0 z-10 flex justify-end mb-4 bg-[var(--bg)] pb-2 border-b-2 border-black">
+              <button
+                onClick={() => setSelected(null)}
+                className="brutal-btn px-4 py-2 font-bold uppercase tracking-wider"
+                style={{ background: "var(--coral)", color: "#0a0a0a" }}
+              >
+                Close Header
+              </button>
+            </div>
             <ApplicationViewer application={selected} />
           </div>
         </div>
