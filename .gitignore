@@ -31,3 +31,8 @@ backend/src/uploads/
 
 .agent/
 .agents/
+
+# Ignore markdown files
+*.md
+
+.claude/*

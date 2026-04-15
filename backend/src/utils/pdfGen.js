@@ -6,7 +6,10 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const htmlToPdf = async (html,cvid) =>{
+/**
+ * Generate PDF from HTML using Puppeteer
+ */
+const htmlToPdf = async (html, cvid) => {
     let browser;
 
     try {
@@ -32,13 +35,21 @@ const htmlToPdf = async (html,cvid) =>{
         const fileName = `cv_${cvid}_${Date.now()}.pdf`;
         const pdfPath = path.join(pdfDir , fileName);
 
-        // gen pdf 
-
         await page.pdf({
             path : pdfPath,
             format : 'A4',
             printBackground : true,
-            margin : { top: 0, bottom: 0, left: 0, right: 0 }
+            margin : {
+                top: '0mm',
+                bottom: '0mm',
+                left: '0mm',
+                right: '0mm'
+            },
+            // Ensure consistent A4 dimensions (210mm x 297mm)
+            width: '210mm',
+            height: '297mm',
+            preferCSSPageSize: true,
+            displayHeaderFooter: false
         })
 
         await browser.close();
@@ -46,7 +57,8 @@ const htmlToPdf = async (html,cvid) =>{
         return {
             absolutePath : pdfPath,
             relativePath : path.join('uploads/cv/pdfs' , fileName),
-            filename : fileName
+            filename : fileName,
+            method: 'html'
         }
 
     }catch(err){
