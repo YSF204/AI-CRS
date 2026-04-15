@@ -585,6 +585,7 @@ export default function CVEditor() {
         lastSavedAt={lastSavedAt}
         analyzing={analyzing}
         downloadingPdf={downloadingPdf}
+        atsScore={analysisResult?.atsScore}
         onSave={handleSave}
         onAnalyze={handleAnalyze}
         onPreview={() => setShowPreview(true)}

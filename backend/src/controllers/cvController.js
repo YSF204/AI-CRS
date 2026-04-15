@@ -404,12 +404,16 @@ export const analyzeSection = catchAsync(async (req, res, next) => {
     }
 
     const issues = parsed.issues || [];
+    const atsScore = parsed.atsScore || null;
+    const atsFeedback = parsed.atsFeedback || "";
 
     res.status(200).json({
         success: true,
         data: {
             section,
-            issues
+            issues,
+            atsScore,
+            atsFeedback
         },
     });
 });

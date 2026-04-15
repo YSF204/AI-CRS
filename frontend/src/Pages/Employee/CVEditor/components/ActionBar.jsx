@@ -19,6 +19,7 @@ export default function ActionBar({
   onDownloadPdf,
   onChangeTemplate,
   onBack,
+  atsScore,
 }) {
   // Format last saved time
   const formatLastSaved = (date) => {
@@ -50,7 +51,12 @@ export default function ActionBar({
       </div>
 
       {/* Auto-save status */}
-      <div className="flex items-center gap-2 mr-4">
+      <div className="flex items-center gap-2 mr-4 flex-wrap">
+        {atsScore !== undefined && atsScore !== null && (
+          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-[var(--fg)] px-3 py-1 bg-[var(--yellow)] border-2 border-[#0a0a0a] mr-2">
+            ATS Score: {atsScore}/100
+          </div>
+        )}
         {isAutoSaving ? (
           <div className="flex items-center gap-2 font-mono text-[10px] text-[var(--fg-muted)]">
             <Clock size={12} className="animate-pulse" />

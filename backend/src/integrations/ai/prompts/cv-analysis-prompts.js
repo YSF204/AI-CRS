@@ -99,6 +99,8 @@ ${JSON.stringify(sectionData, null, 2)}
 
 Return ONLY a JSON object exactly matching this structure. Do NOT include markdown blocks:
 {
+  "atsScore": 0-100,
+  "atsFeedback": "1 sentence summarizing an overall ATS score review",
   "issues": [
     {
       "fieldId": "the exact key from the provided JSON",
