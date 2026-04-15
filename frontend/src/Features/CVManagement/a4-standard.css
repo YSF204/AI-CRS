@@ -1,0 +1,267 @@
+/* ==========================================
+   A4 STANDARD PAPER DIMENSIONS
+   ==========================================
+   Width: 210mm (794px at 96 DPI)
+   Height: 297mm (1123px at 96 DPI)
+   ========================================== */
+
+/* A4 Container - Base styling for all CV templates */
+.cv-a4-container {
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
+  background: #ffffff;
+  box-sizing: border-box;
+  position: relative;
+  overflow: visible;
+  page-break-after: always;
+}
+
+/* A4 Print Styles */
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  .cv-a4-container {
+    page-break-after: always;
+    page-break-inside: avoid;
+    width: 210mm;
+    height: 297mm;
+  }
+}
+
+/* A4 Screen Preview Styles */
+@media screen {
+  .cv-a4-container {
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+
+  /* Ensure content doesn't overflow A4 dimensions */
+  .cv-a4-container * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* Professional A4 spacing standards */
+.cv-a4-padding {
+  padding: 15mm; /* Standard professional margins */
+}
+
+.cv-a4-padding-print {
+  padding: 20mm; /* Printer-friendly margins */
+}
+
+/* A4 section spacing */
+.cv-section-spacing {
+  margin-bottom: 6mm;
+  page-break-inside: avoid;
+}
+
+/* A4 text sizing */
+.cv-base-text {
+  font-size: 11pt;
+  line-height: 1.4;
+}
+
+.cv-heading-text {
+  font-size: 14pt;
+  line-height: 1.3;
+}
+
+.cv-title-text {
+  font-size: 18pt;
+  line-height: 1.2;
+}
+
+/* A4 grid system */
+.cv-grid-a4 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4mm;
+}
+
+/* A4 two-column layout */
+.cv-a4-two-columns {
+  display: grid;
+  grid-template-columns: 65mm 145mm; /* Professional column ratio */
+  gap: 5mm;
+  height: 100%;
+}
+
+/* A4 three-column layout */
+.cv-a4-three-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4mm;
+}
+
+/* A4 timeline styling */
+.cv-timeline-a4 {
+  position: relative;
+  padding-left: 4mm;
+}
+
+.cv-timeline-a4::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #e0e0e0;
+}
+
+/* A4 footer positioning */
+.cv-a4-footer {
+  position: absolute;
+  bottom: 5mm;
+  left: 15mm;
+  right: 15mm;
+  text-align: center;
+  font-size: 9pt;
+  color: #666;
+}
+
+/* A4 header positioning */
+.cv-a4-header {
+  padding: 10mm 15mm 5mm 15mm;
+  border-bottom: 2px solid #333;
+}
+
+/* Ensure no page breaks within sections */
+.cv-no-break {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* Force page break when needed */
+.cv-page-break {
+  page-break-after: always;
+  break-after: always;
+}
+
+/* A4 content overflow handling */
+.cv-overflow-hidden {
+  overflow: hidden;
+}
+
+.cv-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A4 standard colors */
+.cv-a4-text-primary {
+  color: #000000;
+}
+
+.cv-a4-text-secondary {
+  color: #333333;
+}
+
+.cv-a4-text-tertiary {
+  color: #666666;
+}
+
+.cv-a4-border {
+  border-color: #cccccc;
+}
+
+.cv-a4-accent {
+  color: #2c3e50;
+}
+
+/* A4 standard fonts */
+.cv-a4-font-serif {
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.cv-a4-font-sans {
+  font-family: 'Arial', 'Helvetica', sans-serif;
+}
+
+.cv-a4-font-mono {
+  font-family: 'Courier New', monospace;
+}
+
+/* A4 bullet points */
+.cv-a4-bullet {
+  margin-left: 2mm;
+  padding-left: 2mm;
+}
+
+.cv-a4-bullet li {
+  margin-bottom: 2mm;
+}
+
+/* A4 horizontal dividers */
+.cv-a4-divider {
+  border-bottom: 1px solid #e0e0e0;
+  margin: 4mm 0;
+}
+
+.cv-a4-divider-thick {
+  border-bottom: 2px solid #333;
+  margin: 5mm 0;
+}
+
+/* A4 contact info spacing */
+.cv-a4-contact-spacing {
+  gap: 3mm;
+}
+
+/* A4 skill tags */
+.cv-a4-skill-tag {
+  display: inline-block;
+  padding: 1mm 2mm;
+  margin: 1mm;
+  background: #f5f5f5;
+  border-radius: 2px;
+  font-size: 9pt;
+}
+
+/* A4 image sizing */
+.cv-a4-profile-image {
+  width: 40mm;
+  height: 40mm;
+  object-fit: cover;
+  border-radius: 2mm;
+}
+
+.cv-a4-logo {
+  width: 30mm;
+  height: auto;
+}
+
+/* A4 tables */
+.cv-a4-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10pt;
+}
+
+.cv-a4-table th,
+.cv-a4-table td {
+  padding: 2mm;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+/* A4 responsive adjustments */
+@media (max-width: 210mm) {
+  .cv-a4-container {
+    transform: scale(0.8);
+    transform-origin: top center;
+  }
+}

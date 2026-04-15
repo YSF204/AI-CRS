@@ -25,18 +25,28 @@ const BlueAccentResumeTemplate = ({
   if (cvData.contact?.github) contactItems.push(cvData.contact.github);
 
   const SectionHeader = ({ title }) => (
-    <div className="border-y-[2px] border-blue-400/60 py-1 mb-3 mt-6">
-      <h2 className="text-[15px] font-bold uppercase text-blue-600 tracking-wider">{title}</h2>
+    <div className="border-y-2 border-blue-400/60 py-1 mb-2.5 mt-5">
+      <h2 className="text-[13px] font-bold uppercase text-blue-600 tracking-wider">{title}</h2>
     </div>
   );
 
   return (
-    <div className="bg-white p-10 md:p-14 text-gray-800 font-sans" style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
-      <header className="flex justify-between items-start mb-2">
+    <div className="bg-white text-gray-800 font-sans"
+         style={{
+           overflowWrap: 'anywhere',
+           wordBreak: 'break-word',
+           width: '210mm',
+           minHeight: '297mm',
+           margin: '0 auto',
+           boxSizing: 'border-box',
+           position: 'relative',
+           padding: '15mm' // Standard A4 professional margins
+         }}>
+      <header className="flex justify-between items-start mb-3">
         <div className="flex-1 pr-4">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-blue-600 uppercase mb-2">{userName}</h1>
-          <h2 className="text-xl font-bold text-gray-900 uppercase mb-2 tracking-wide">{cvData.jobTitle}</h2>
-          <div className="flex flex-wrap items-center gap-1.5 text-sm text-gray-700">
+          <h1 className="text-[26px] md:text-[30px] lg:text-[34px] font-extrabold text-blue-600 uppercase mb-1.5">{userName}</h1>
+          <h2 className="text-base md:text-lg font-bold text-gray-900 uppercase mb-1.5 tracking-wide">{cvData.jobTitle}</h2>
+          <div className="flex flex-wrap items-center gap-1.5 text-xs md:text-sm text-gray-700">
             {contactItems.map((item, index) => (
               <React.Fragment key={index}>
                 <span>{item}</span>
@@ -46,7 +56,7 @@ const BlueAccentResumeTemplate = ({
           </div>
         </div>
         {profileImage && (
-          <div className="w-28 h-32 flex-shrink-0">
+          <div className="w-24 h-28 flex-shrink-0">
             <img src={profileImage} alt={userName} className="w-full h-full object-cover object-top" />
           </div>
         )}
@@ -57,24 +67,24 @@ const BlueAccentResumeTemplate = ({
           summary: cvData.summary ? (
             <section key="summary" className="break-inside-avoid">
               <SectionHeader title="Summary" />
-              <p className="text-sm text-gray-800 leading-relaxed text-justify whitespace-pre-wrap break-words">{cvData.summary}</p>
+              <p className="text-xs md:text-sm text-gray-800 leading-relaxed text-justify whitespace-pre-wrap break-words">{cvData.summary}</p>
             </section>
           ) : null,
           experience: cvData.experience && cvData.experience.length > 0 ? (
             <section key="experience" className="break-inside-avoid">
               <SectionHeader title="Professional Experience" />
-              <div className="space-y-4 block">
+              <div className="space-y-3.5 block">
                 {cvData.experience.map((exp, index) => {
                   const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                   return (
                     <div key={index} className="break-inside-avoid">
-                      <div className="flex flex-col sm:flex-row justify-between items-baseline mb-1">
-                        <h3 className="text-[15px] font-bold text-gray-900">
+                      <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
+                        <h3 className="text-[13px] font-bold text-gray-900">
                           {exp.position}{exp.institutionName ? `, ${exp.institutionName}` : ''}
                         </h3>
-                        {dur && <div className="text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">{dur}</div>}
+                        {dur && <div className="text-xs md:text-sm text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">{dur}</div>}
                       </div>
-                      {exp.summary && <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-4 mt-1">{exp.summary}</div>}
+                      {exp.summary && <div className="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1">{exp.summary}</div>}
                     </div>
                   );
                 })}
@@ -84,17 +94,17 @@ const BlueAccentResumeTemplate = ({
           education: cvData.education && cvData.education.length > 0 ? (
             <section key="education" className="break-inside-avoid">
               <SectionHeader title="Education" />
-              <div className="space-y-4 block">
+              <div className="space-y-3.5 block">
                 {cvData.education.map((edu, index) => {
                   const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                   return (
                     <div key={index} className="break-inside-avoid">
                       <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
-                        <h3 className="text-[15px] font-bold text-gray-900">{edu.certification}</h3>
-                        {dur && <div className="text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">{dur}</div>}
+                        <h3 className="text-[13px] font-bold text-gray-900">{edu.certification}</h3>
+                        {dur && <div className="text-xs md:text-sm text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">{dur}</div>}
                       </div>
-                      {edu.institutionName && <p className="text-sm text-gray-800 mb-1">{edu.institutionName}</p>}
-                      {edu.summary && <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-4">{edu.summary}</div>}
+                      {edu.institutionName && <p className="text-xs md:text-sm text-gray-800 mb-1">{edu.institutionName}</p>}
+                      {edu.summary && <div className="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3">{edu.summary}</div>}
                     </div>
                   );
                 })}
@@ -104,7 +114,7 @@ const BlueAccentResumeTemplate = ({
           technicalSkills: cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
             <section key="technicalSkills" className="break-inside-avoid">
               <SectionHeader title="Technical Skills" />
-              <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-4 text-sm text-gray-700">
+              <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-xs md:text-sm text-gray-700">
                 {cvData.technicalSkills.map((skill, index) => <li key={index}>{skill}</li>)}
               </ul>
             </section>
@@ -112,7 +122,7 @@ const BlueAccentResumeTemplate = ({
           softSkills: cvData.softSkills && cvData.softSkills.length > 0 ? (
             <section key="softSkills" className="break-inside-avoid">
               <SectionHeader title="Soft Skills" />
-              <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-4 text-sm text-gray-700">
+              <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-xs md:text-sm text-gray-700">
                 {cvData.softSkills.map((skill, index) => <li key={index}>{skill}</li>)}
               </ul>
             </section>
@@ -120,7 +130,7 @@ const BlueAccentResumeTemplate = ({
           language: cvData.language && cvData.language.length > 0 ? (
             <section key="language" className="break-inside-avoid">
               <SectionHeader title="Languages" />
-              <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-4 text-sm text-gray-700">
+              <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-xs md:text-sm text-gray-700">
                 {cvData.language.map((skill, index) => <li key={index}>{skill}</li>)}
               </ul>
             </section>
@@ -138,7 +148,7 @@ const BlueAccentResumeTemplate = ({
                   {section.items.map((item, itemIndex) => {
                     const dur = fmtDuration(item.durationFrom, item.durationTo);
                     return (
-                      <div key={itemIndex} className="text-sm text-gray-800 break-inside-avoid">
+                      <div key={itemIndex} className="text-xs md:text-sm text-gray-800 break-inside-avoid">
                         <span className="font-bold text-gray-900 mr-2">• {item.link ? (
                           <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{item.name}</a>
                         ) : item.name}{dur ? ` | ${dur}` : ''}:</span>
