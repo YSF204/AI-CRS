@@ -1,6 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Download, X } from "lucide-react";
 import { getTemplateById } from "../../../../Features/CVManagement/index.js";
+
+// ── A4 page constants (must match LivePreview) ──
+const A4_WIDTH = 794;
+const A4_HEIGHT = 1123;
+const FOOTER_ZONE = 60;
+const HEADER_ZONE = 60;
+const PUSH_BUFFER = 8;
 
 export default function PreviewModal({
   show,
@@ -13,27 +20,102 @@ export default function PreviewModal({
 }) {
   const contentRef = useRef(null);
   const [pages, setPages] = useState(1);
-  const A4_HEIGHT = 1123;
+
+  const paginate = useCallback(() => {
+    const container = contentRef.current;
+    if (!container) return;
+
+    // Leaf break-inside-avoid blocks (most granular)
+    const allBreakAvoid = container.querySelectorAll('.break-inside-avoid');
+    const leafBlocks = Array.from(allBreakAvoid).filter(el =>
+      !el.querySelector('.break-inside-avoid')
+    );
+
+    const standaloneSections = Array.from(container.querySelectorAll('section')).filter(s =>
+      !s.classList.contains('break-inside-avoid') && !s.querySelector('.break-inside-avoid')
+    );
+
+    const blocks = [...leafBlocks, ...standaloneSections];
+
+    if (!blocks.length) {
+      setPages(Math.max(1, Math.ceil(container.scrollHeight / A4_HEIGHT)));
+      return;
+    }
+
+    blocks.sort((a, b) => {
+      const pos = a.compareDocumentPosition(b);
+      return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+    });
+
+    // Reset
+    blocks.forEach((b) => { b.style.marginTop = ''; });
+    void container.offsetHeight;
+
+    // Measure (no scale in modal)
+    const containerRect = container.getBoundingClientRect();
+    const measurements = blocks.map((block) => {
+      const rect = block.getBoundingClientRect();
+      return {
+        element: block,
+        top: rect.top - containerRect.top,
+        height: block.offsetHeight,
+      };
+    });
+
+    // Compute
+    let cumulativeShift = 0;
+    const margins = [];
+
+    for (const m of measurements) {
+      const adjustedTop = m.top + cumulativeShift;
+      const adjustedBottom = adjustedTop + m.height;
+
+      const page = Math.floor(adjustedTop / A4_HEIGHT);
+      const pageUsableEnd = (page + 1) * A4_HEIGHT - FOOTER_ZONE;
+
+      if (adjustedBottom > pageUsableEnd) {
+        const maxUsable = A4_HEIGHT - FOOTER_ZONE - HEADER_ZONE;
+        if (m.height <= maxUsable) {
+          const nextPageStart = (page + 1) * A4_HEIGHT + HEADER_ZONE + PUSH_BUFFER;
+          const pushAmount = nextPageStart - adjustedTop;
+
+          if (pushAmount > 0) {
+            margins.push({ element: m.element, margin: pushAmount });
+            cumulativeShift += pushAmount;
+          }
+        }
+      }
+    }
+
+    // Apply
+    for (const { element, margin } of margins) {
+      element.style.marginTop = `${margin}px`;
+    }
+
+    void container.offsetHeight;
+    setPages(Math.max(1, Math.ceil(container.scrollHeight / A4_HEIGHT)));
+  }, []);
 
   useEffect(() => {
     if (!show || !contentRef.current) return;
 
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const h = entry.target.scrollHeight;
-        const requiredPages = Math.max(1, Math.ceil(h / A4_HEIGHT));
-        if (requiredPages !== pages) setPages(requiredPages);
-      }
-    });
+    const run = () => requestAnimationFrame(paginate);
 
-    observer.observe(contentRef.current);
-    return () => observer.disconnect();
-  }, [show, pages]);
+    const ro = new ResizeObserver(run);
+    ro.observe(contentRef.current);
+
+    const mo = new MutationObserver(run);
+    mo.observe(contentRef.current, { childList: true, subtree: true, characterData: true });
+
+    setTimeout(run, 100);
+    return () => { ro.disconnect(); mo.disconnect(); };
+  }, [show, paginate]);
 
   if (!show) return null;
 
   const template = getTemplateById(templateId);
   const TemplateComponent = template?.component;
+  const totalHeight = pages * A4_HEIGHT;
 
   return (
     <div
@@ -52,7 +134,6 @@ export default function PreviewModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      {/* Modal popup */}
       <div
         style={{
           display: "flex",
@@ -119,70 +200,63 @@ export default function PreviewModal({
             scrollbarColor: "rgba(0,0,0,0.15) transparent",
           }}
         >
-          <div style={{ position: "relative" }}>
-            {/* Visual Page Separators */}
-            {pages > 1 &&
-              Array.from({ length: pages - 1 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="print:hidden"
-                  style={{
-                    position: "absolute",
-                    top: `${(i + 1) * A4_HEIGHT - 20}px`, // Center the 40px line on the cut
-                    left: "-16px",
-                    right: "-16px",
-                    height: "40px",
-                    background: "#fafafa",
-                    borderTop: "2px dashed #bbb",
-                    borderBottom: "2px dashed #bbb",
-                    zIndex: 50,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    opacity: 0.95,
-                    pointerEvents: "none",
-                  }}
-                >
-                  <span
-                    style={{
-                      color: "#888",
-                      fontSize: "11px",
-                      fontWeight: "bold",
-                      letterSpacing: "0.2em",
-                    }}
-                  >
-                    PAGE {i + 2}
+          <div style={{ position: "relative", width: `${A4_WIDTH}px`, minHeight: `${totalHeight}px` }}>
+
+            {/* White page backgrounds */}
+            {Array.from({ length: pages }).map((_, i) => (
+              <div key={`bg-${i}`} style={{
+                position: 'absolute',
+                top: `${i * A4_HEIGHT}px`,
+                left: 0, width: '100%', height: `${A4_HEIGHT}px`,
+                background: '#fff',
+                boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
+                zIndex: 0, pointerEvents: 'none',
+              }} />
+            ))}
+
+            {/* Page break separator */}
+            {pages > 1 && Array.from({ length: pages - 1 }).map((_, i) => {
+              const breakY = (i + 1) * A4_HEIGHT - FOOTER_ZONE;
+              const breakHeight = FOOTER_ZONE + HEADER_ZONE;
+              return (
+                <div key={`sep-${i}`} className="print:hidden" style={{
+                  position: 'absolute',
+                  top: `${breakY}px`,
+                  left: '-20px', right: '-20px',
+                  height: `${breakHeight}px`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  zIndex: 60, pointerEvents: 'none',
+                }}>
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    background: '#fafafa',
+                    borderTop: '2px dashed #bbb',
+                    borderBottom: '2px dashed #bbb',
+                  }} />
+                  <span style={{ position: 'relative', color: '#888', fontSize: '10px', fontWeight: 'bold', letterSpacing: '0.15em' }}>
+                    — PAGE {i + 2} —
                   </span>
                 </div>
-              ))}
+              );
+            })}
 
-            <style>{`
-              .break-inside-avoid { break-inside: avoid !important; page-break-inside: avoid !important; -webkit-column-break-inside: avoid !important; }
-              .break-inside-avoid * { break-inside: avoid !important; page-break-inside: avoid !important; -webkit-column-break-inside: avoid !important; }
-              .page-separator { break-inside: avoid; page-break-inside: avoid; -webkit-column-break-inside: avoid; }
-            `}</style>
-            {/* Actual White Document Background Container */}
+            {/* Content layer */}
             <div
               data-cv-content
-              className="break-inside-avoid"
+              ref={contentRef}
               style={{
-                width: "794px",
-                minHeight: `${pages * A4_HEIGHT}px`,
-                background: "#fff",
-                boxShadow: "0 2px 16px rgba(0,0,0,0.08)",
-                alignSelf: "flex-start",
+                width: "100%",
                 position: "relative",
+                zIndex: 5,
+                minHeight: `${totalHeight}px`,
               }}
             >
-              {/* Inner Content Measure Container */}
-              <div ref={contentRef} style={{ width: "100%" }}>
-                {TemplateComponent ? (
-                  <TemplateComponent
-                    userName={userName}
-                    cvData={getFilteredFormData()}
-                  />
-                ) : null}
-              </div>
+              {TemplateComponent ? (
+                <TemplateComponent
+                  userName={userName}
+                  cvData={getFilteredFormData()}
+                />
+              ) : null}
             </div>
           </div>
         </div>

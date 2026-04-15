@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { X, Plus } from "lucide-react";
+import SuggestionBox from "../SuggestionBox";
 
-export default function SkillsSection({ type, form, handlers }) {
+/**
+ * SkillsSection - Handles technical and soft skills input
+ * Single Responsibility: Render skills form and integrate suggestion UI
+ */
+export default function SkillsSection({ type, form, handlers, fetchSuggestions, handleSuggestionSelect, suggestions, isLoadingSuggestions }) {
   const [input, setInput] = useState("");
   const field = type === "technical" ? "technicalSkills" : "softSkills";
   const skills = form[field] || [];
@@ -10,6 +15,7 @@ export default function SkillsSection({ type, form, handlers }) {
     type === "technical"
       ? "e.g., JavaScript, React, Node.js"
       : "e.g., Communication, Leadership, Problem Solving";
+  const suggestionField = type === "technical" ? "skills" : "soft-skills";
 
   const addSkill = () => {
     if (input.trim() && !skills.includes(input.trim())) {
@@ -32,6 +38,19 @@ export default function SkillsSection({ type, form, handlers }) {
     }
   };
 
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setInput(value);
+
+    // Trigger suggestions if user has typed something meaningful
+    if (value.length > 2) {
+      fetchSuggestions(suggestionField, {
+        currentSkills: skills,
+        skillType: type,
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -49,7 +68,7 @@ export default function SkillsSection({ type, form, handlers }) {
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={handleInputChange}
             onKeyPress={handleKeyPress}
             className="brutal-input flex-1"
             placeholder={placeholder}
@@ -63,6 +82,13 @@ export default function SkillsSection({ type, form, handlers }) {
             Add
           </button>
         </div>
+
+        {/* Suggestions for skills */}
+        <SuggestionBox
+          suggestions={suggestions[suggestionField] || []}
+          onSelect={(suggestion) => setInput(suggestion)}
+          isLoading={isLoadingSuggestions[suggestionField] || false}
+        />
 
         <div className="flex flex-wrap gap-2">
           {skills.map((skill, index) => (

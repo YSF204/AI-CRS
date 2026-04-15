@@ -1,10 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Save, Eye, Download, Layers, Sparkles } from "lucide-react";
+import { ArrowLeft, Save, Eye, Download, Layers, Sparkles, Clock } from "lucide-react";
 
+/**
+ * ActionBar - Displays action buttons and auto-save status
+ * Single Responsibility: Render action bar with save status
+ */
 export default function ActionBar({
   form,
   saving,
+  isAutoSaving,
+  lastSavedAt,
   analyzing,
   downloadingPdf,
   onSave,
@@ -14,6 +20,18 @@ export default function ActionBar({
   onChangeTemplate,
   onBack,
 }) {
+  // Format last saved time
+  const formatLastSaved = (date) => {
+    if (!date) return null;
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000); // seconds
+
+    if (diff < 60) return "Just now";
+    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+    return date.toLocaleDateString();
+  };
+
   return (
     <div className="flex-shrink-0 flex items-center gap-3 px-5 py-2.5 border-t-2 border-b-[3px] border-[var(--border-color)] bg-[var(--bg)]">
       <button
@@ -30,6 +48,22 @@ export default function ActionBar({
           {form.jobTitle || "Untitled CV"}
         </div>
       </div>
+
+      {/* Auto-save status */}
+      <div className="flex items-center gap-2 mr-4">
+        {isAutoSaving ? (
+          <div className="flex items-center gap-2 font-mono text-[10px] text-[var(--fg-muted)]">
+            <Clock size={12} className="animate-pulse" />
+            Auto-saving...
+          </div>
+        ) : lastSavedAt ? (
+          <div className="flex items-center gap-2 font-mono text-[10px] text-[var(--fg-muted)]">
+            <Clock size={12} />
+            Auto-saved {formatLastSaved(lastSavedAt)}
+          </div>
+        ) : null}
+      </div>
+
       <div className="flex items-center gap-2">
         {/* Analyze button */}
         <button

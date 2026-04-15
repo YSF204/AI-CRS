@@ -13,6 +13,7 @@ import TagInput from "./TagInput";
 import Field from "./Field";
 import RepeatableItem from "./RepeatableItem";
 import AddBtn from "./AddBtn";
+import SummarySection from "./SectionCardSummary.jsx";
 
 export default function SectionCard({
   sectionKey,
@@ -21,6 +22,11 @@ export default function SectionCard({
   onRemove,
   collapsed,
   onToggleCollapse,
+  fetchSuggestions,
+  fetchSingleSummarySuggestion,
+  handleSuggestionSelect,
+  suggestions,
+  isLoadingSuggestions,
 }) {
   const meta = getSectionMeta(sectionKey);
   const Icon = meta.icon;
@@ -43,31 +49,14 @@ export default function SectionCard({
     switch (sectionKey) {
       case "summary":
         return (
-          <div className="flex flex-col gap-3">
-            <Field label="Job Title">
-              <input
-                className={inpCls}
-                value={form.jobTitle}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, jobTitle: e.target.value }))
-                }
-                placeholder="e.g. Frontend Engineer"
-              />
-            </Field>
-            <Field
-              label="Professional Summary"
-              hint="2–4 sentences about yourself"
-            >
-              <textarea
-                className={txtCls}
-                value={form.summary}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, summary: e.target.value }))
-                }
-                placeholder="Results-driven engineer with 3+ years..."
-              />
-            </Field>
-          </div>
+          <SummarySection
+            form={form}
+            handlers={handlers}
+            fetchSingleSummarySuggestion={fetchSingleSummarySuggestion}
+            isLoadingSuggestions={isLoadingSuggestions}
+            suggestions={suggestions}
+            handleSuggestionSelect={handleSuggestionSelect}
+          />
         );
 
       case "contact":
@@ -79,7 +68,11 @@ export default function SectionCard({
                 key: "phone",
                 placeholder: "+1 (555) 000-0000",
               },
-              { label: "Email", key: "email", placeholder: "you@example.com" },
+              {
+                label: "Email",
+                key: "email",
+                placeholder: "you@example.com",
+              },
               {
                 label: "LinkedIn",
                 key: "linkedin",
@@ -95,7 +88,7 @@ export default function SectionCard({
                 <input
                   className={inpCls}
                   value={form.contact[key]}
-                  onChange={setContact(key)}
+                  onChange={handlers.setContact(key)}
                   placeholder={placeholder}
                 />
               </Field>
@@ -110,7 +103,7 @@ export default function SectionCard({
               <input
                 className={inpCls}
                 value={form.address.city}
-                onChange={setAddress("city")}
+                onChange={handlers.setAddress("city")}
                 placeholder="San Francisco"
               />
             </Field>
@@ -118,7 +111,7 @@ export default function SectionCard({
               <input
                 className={inpCls}
                 value={form.address.street}
-                onChange={setAddress("street")}
+                onChange={handlers.setAddress("street")}
                 placeholder="42 Market St"
               />
             </Field>
@@ -135,7 +128,7 @@ export default function SectionCard({
             )}
             {form.experience.map((item, i) => (
               <RepeatableItem
-                key={i}
+                key={`experience-${i}`}
                 onDelete={() => exp.remove(i)}
                 onMoveUp={() => exp.moveUp(i)}
                 onMoveDown={() => exp.moveDown(i)}
@@ -163,39 +156,39 @@ export default function SectionCard({
                       placeholder="Senior Engineer"
                     />
                   </Field>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <Field label="Start">
-                    <input
-                      type="month"
-                      className={`${inpCls}`}
-                      value={item.durationFrom}
-                      onChange={(e) =>
-                        exp.update(i, "durationFrom", e.target.value)
-                      }
-                      placeholder="2021-01"
+                  <div className="grid grid-cols-2 gap-2">
+                    <Field label="Start">
+                      <input
+                        type="month"
+                        className={`${inpCls}`}
+                        value={item.durationFrom}
+                        onChange={(e) =>
+                          exp.update(i, "durationFrom", e.target.value)
+                        }
+                        placeholder="2021-01"
+                      />
+                    </Field>
+                    <Field label="End">
+                      <input
+                        type="month"
+                        className={`${inpCls}`}
+                        value={item.durationTo}
+                        onChange={(e) =>
+                          exp.update(i, "durationTo", e.target.value)
+                        }
+                        placeholder="2024-12"
+                      />
+                    </Field>
+                  </div>
+                  <Field label="Description">
+                    <textarea
+                      className={txtCls}
+                      value={item.summary}
+                      onChange={(e) => exp.update(i, "summary", e.target.value)}
+                      placeholder="Key achievements..."
                     />
                   </Field>
-                  <Field label="End">
-                    <input
-                      type="month"
-                      className={`${inpCls}`}
-                      value={item.durationTo}
-                      onChange={(e) =>
-                        exp.update(i, "durationTo", e.target.value)
-                      }
-                      placeholder="2024-12"
-                    />
-                  </Field>
                 </div>
-                <Field label="Description">
-                  <textarea
-                    className={txtCls}
-                    value={item.summary}
-                    onChange={(e) => exp.update(i, "summary", e.target.value)}
-                    placeholder="Key achievements..."
-                  />
-                </Field>
               </RepeatableItem>
             ))}
             <AddBtn
@@ -215,7 +208,7 @@ export default function SectionCard({
             )}
             {form.education.map((item, i) => (
               <RepeatableItem
-                key={i}
+                key={`education-${i}`}
                 onDelete={() => edu.remove(i)}
                 onMoveUp={() => edu.moveUp(i)}
                 onMoveDown={() => edu.moveDown(i)}
@@ -243,39 +236,39 @@ export default function SectionCard({
                       placeholder="B.Sc. Computer Science"
                     />
                   </Field>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <Field label="Start">
-                    <input
-                      type="month"
-                      className={`${inpCls}`}
-                      value={item.durationFrom}
-                      onChange={(e) =>
-                        edu.update(i, "durationFrom", e.target.value)
-                      }
-                      placeholder="2018-08"
+                  <div className="grid grid-cols-2 gap-2">
+                    <Field label="Start">
+                      <input
+                        type="month"
+                        className={`${inpCls}`}
+                        value={item.durationFrom}
+                        onChange={(e) =>
+                          edu.update(i, "durationFrom", e.target.value)
+                        }
+                        placeholder="2018-08"
+                      />
+                    </Field>
+                    <Field label="End">
+                      <input
+                        type="month"
+                        className={`${inpCls}`}
+                        value={item.durationTo}
+                        onChange={(e) =>
+                          edu.update(i, "durationTo", e.target.value)
+                        }
+                        placeholder="2022-06"
+                      />
+                    </Field>
+                  </div>
+                  <Field label="Notes / Honors">
+                    <textarea
+                      className={txtCls}
+                      value={item.summary}
+                      onChange={(e) => edu.update(i, "summary", e.target.value)}
+                      placeholder="Graduated with honors..."
                     />
                   </Field>
-                  <Field label="End">
-                    <input
-                      type="month"
-                      className={`${inpCls}`}
-                      value={item.durationTo}
-                      onChange={(e) =>
-                        edu.update(i, "durationTo", e.target.value)
-                      }
-                      placeholder="2022-06"
-                    />
-                  </Field>
                 </div>
-                <Field label="Notes / Honors">
-                  <textarea
-                    className={txtCls}
-                    value={item.summary}
-                    onChange={(e) => edu.update(i, "summary", e.target.value)}
-                    placeholder="Graduated with honors..."
-                  />
-                </Field>
               </RepeatableItem>
             ))}
             <AddBtn
@@ -287,27 +280,34 @@ export default function SectionCard({
 
       case "technicalSkills":
         return (
-          <Field
-            label="Technical Skills"
-            hint="press Enter or comma to add a tag"
-          >
-            <TagInput
-              value={form.technicalSkills}
-              onChange={set("technicalSkills")}
-              placeholder="React, Node.js, Python..."
-            />
-          </Field>
+          <div>
+            <Field
+              label="Technical Skills"
+              hint="press Enter or comma to add a tag"
+            >
+              <TagInput
+                value={form.technicalSkills}
+                onChange={set("technicalSkills")}
+                placeholder="React, Node.js, Python..."
+              />
+            </Field>
+          </div>
         );
 
       case "softSkills":
         return (
-          <Field label="Soft Skills" hint="press Enter or comma to add">
-            <TagInput
-              value={form.softSkills}
-              onChange={set("softSkills")}
-              placeholder="Leadership, Communication..."
-            />
-          </Field>
+          <div>
+            <Field
+              label="Soft Skills"
+              hint="press Enter or comma to add"
+            >
+              <TagInput
+                value={form.softSkills}
+                onChange={set("softSkills")}
+                placeholder="Leadership, Communication..."
+              />
+            </Field>
+          </div>
         );
 
       case "language":
@@ -344,10 +344,10 @@ export default function SectionCard({
 
               return (
                 <div
-                  key={si}
+                  key={`custom-section-wrapper-${si}`}
                   className="border-2 border-[var(--border-color)] bg-[var(--bg)]"
                 >
-                  <div className="flex items-center gap-2 px-3 py-2 border-b-2 border-[var(--border-color)] bg-[var(--card-bg)]">
+                  <div className="flex items-center gap-2.5 px-3 py-2 border-b-2 border-[var(--border-color)] bg-[var(--card-bg)]">
                     {/* Section Type Selector */}
                     <select
                       className="bg-[var(--bg)] border border-[var(--border-color)] text-[var(--fg)] px-2 py-1 font-mono text-xs outline-none focus:border-[var(--yellow)] rounded"
@@ -356,16 +356,22 @@ export default function SectionCard({
                         const newSections = [...form.customSections];
                         const selectedType = CUSTOM_SECTION_TYPES.find(
                           (t) => t.value === e.target.value,
-                        );
+                        ) || CUSTOM_SECTION_TYPES[2];
                         newSections[si].sectionType = e.target.value;
                         // Auto-set title to defaultTitle for projects and hobbies
                         if (selectedType?.defaultTitle) {
                           newSections[si].title = selectedType.defaultTitle;
-                        } else {
+                        } else if (section.sectionType === "other") {
                           newSections[si].title = "";
                         }
                         setForm((f) => ({ ...f, customSections: newSections }));
                       }}
+                      placeholder={
+                        section.sectionType === "other"
+                          ? "Section title (e.g. Certifications)"
+                          : ""
+                      }
+                      disabled={section.sectionType === "other"}
                     >
                       {CUSTOM_SECTION_TYPES.map((type) => (
                         <option key={type.value} value={type.value}>
@@ -402,7 +408,7 @@ export default function SectionCard({
                   <div className="p-3 flex flex-col gap-2">
                     {section.items.map((item, ii) => (
                       <div
-                        key={ii}
+                        key={`custom-section-${si}-item-${ii}`}
                         className="border border-[var(--border-color)] p-2.5 bg-[var(--card-bg)] flex flex-col gap-2"
                       >
                         <div className="grid grid-cols-2 gap-2">
@@ -422,18 +428,12 @@ export default function SectionCard({
                                 className={inpCls}
                                 value={item.name}
                                 onChange={(e) =>
-                                  updateCustomItem(
-                                    si,
-                                    ii,
-                                    "name",
-                                    e.target.value,
-                                  )
+                                  updateCustomItem(si, ii, "name", e.target.value)
                                 }
                                 placeholder={
                                   sectionTypeConfig.value === "projects"
                                     ? "Project name"
-                                    : sectionTypeConfig.value ===
-                                        "certifications"
+                                    : sectionTypeConfig.value === "certifications"
                                       ? "Certification name"
                                       : sectionTypeConfig.value === "hobbies"
                                         ? "Hobby name"
@@ -442,6 +442,44 @@ export default function SectionCard({
                               />
                             </Field>
                           )}
+
+                          {hasDurationFields && (
+                            <div className="grid grid-cols-2 gap-2">
+                              <Field label="Start">
+                                <input
+                                  type="month"
+                                  className={`${inpCls}`}
+                                  value={item.durationFrom}
+                                  onChange={(e) =>
+                                    updateCustomItem(
+                                      si,
+                                      ii,
+                                      "durationFrom",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="2022-01"
+                                />
+                              </Field>
+                              <Field label="End">
+                                <input
+                                  type="month"
+                                  className={`${inpCls}`}
+                                  value={item.durationTo}
+                                  onChange={(e) =>
+                                    updateCustomItem(
+                                      si,
+                                      ii,
+                                      "durationTo",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="2024-12"
+                                />
+                              </Field>
+                            </div>
+                          )}
+
                           {hasLinkField && (
                             <Field
                               label={
@@ -456,65 +494,22 @@ export default function SectionCard({
                                 className={inpCls}
                                 value={item.link}
                                 onChange={(e) =>
-                                  updateCustomItem(
-                                    si,
-                                    ii,
-                                    "link",
-                                    e.target.value,
-                                  )
+                                  updateCustomItem(si, ii, "link", e.target.value)
                                 }
                                 placeholder="https://..."
                               />
                             </Field>
                           )}
-                        </div>
 
-                        {hasDurationFields && (
-                          <div className="grid grid-cols-2 gap-2">
-                            <Field label="Start">
-                              <input
-                                type="month"
-                                className={inpCls}
-                                value={item.durationFrom}
-                                onChange={(e) =>
-                                  updateCustomItem(
-                                    si,
-                                    ii,
-                                    "durationFrom",
-                                    e.target.value,
-                                  )
-                                }
-                                placeholder="2022-01"
-                              />
-                            </Field>
-                            <Field label="End">
-                              <input
-                                type="month"
-                                className={inpCls}
-                                value={item.durationTo}
-                                onChange={(e) =>
-                                  updateCustomItem(
-                                    si,
-                                    ii,
-                                    "durationTo",
-                                    e.target.value,
-                                  )
-                                }
-                                placeholder="2024-12"
-                              />
-                            </Field>
-                          </div>
-                        )}
-
-                        {hasDescriptionField && (
-                          <Field
-                            label={
-                              sectionTypeConfig.value === "hobbies"
-                                ? "Details"
-                                : "Description"
-                            }
-                          >
-                            <textarea
+                          {hasDescriptionField && (
+                            <Field
+                              label={
+                                sectionTypeConfig.value === "hobbies"
+                                  ? "Details"
+                                  : "Description"
+                              }
+                            >
+                              <textarea
                               className={`${txtCls} min-h-[56px]`}
                               value={item.description}
                               onChange={(e) =>
@@ -522,22 +517,23 @@ export default function SectionCard({
                                   si,
                                   ii,
                                   "description",
-                                  e.target.value,
+                                  e.target.value
                                 )
                               }
                               placeholder="Brief description..."
                             />
-                          </Field>
-                        )}
+                            </Field>
+                          )}
 
-                        <div className="flex justify-end">
-                          <button
-                            type="button"
-                            onClick={() => removeCustomItem(si, ii)}
-                            className="flex items-center gap-1 border border-red-400 text-red-400 font-mono text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 hover:bg-red-400 hover:text-white transition-colors"
-                          >
-                            <X size={9} /> Remove
-                          </button>
+                          <div className="flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => removeCustomItem(si, ii)}
+                              className="flex items-center gap-1 border border-red-400 text-red-400 font-mono text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 hover:bg-red-50 transition-colors"
+                            >
+                              <X size={9} /> Remove
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -545,10 +541,12 @@ export default function SectionCard({
                     <button
                       type="button"
                       onClick={() => addCustomItem(si)}
-                      className="flex items-center justify-center gap-1.5 w-full py-2 border border-dashed border-[var(--border-color)] text-[var(--fg-muted)] font-mono text-[10px] font-bold uppercase tracking-wider hover:border-[var(--fg)] hover:text-[var(--fg)] transition-colors"
+                      className="flex items-center justify-center gap-1.5 w-full py-2 border-2 border-dashed border-[var(--border-color)] text-[var(--fg-muted)] font-mono text-[10px] font-bold uppercase tracking-wider hover:border-[var(--fg)] hover:text-[var(--fg)] transition-colors"
                     >
                       <Plus size={11} /> Add{" "}
-                      {sectionTypeConfig.label === "Hobbies" ? "Hobby" : "Item"}
+                      {sectionTypeConfig.label === "Hobbies"
+                        ? "Hobby"
+                        : "Item"}
                     </button>
                   </div>
                 </div>
@@ -566,7 +564,7 @@ export default function SectionCard({
 
       default:
         return null;
-    }
+    };
   };
 
   return (
@@ -636,6 +634,7 @@ export default function SectionCard({
           <X size={9} /> Remove
         </button>
       </div>
+
       {/* Collapsible body */}
       <div
         style={{

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 
-export default function TagInput({ value = [], onChange, placeholder }) {
+export default function TagInput({ value = [], onChange, placeholder, onTyping }) {
   const [draft, setDraft] = useState('');
 
   const add = (v) => {
@@ -13,6 +13,14 @@ export default function TagInput({ value = [], onChange, placeholder }) {
   const handleKey = (e) => {
     if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(draft); }
     else if (e.key === 'Backspace' && !draft && value.length) onChange(value.slice(0, -1));
+  };
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    setDraft(value);
+    if (onTyping && value.length > 2) {
+      onTyping(value);
+    }
   };
 
   return (
@@ -30,7 +38,7 @@ export default function TagInput({ value = [], onChange, placeholder }) {
       ))}
       <input
         value={draft}
-        onChange={(e) => setDraft(e.target.value)}
+        onChange={handleChange}
         onKeyDown={handleKey}
         onBlur={() => draft.trim() && add(draft)}
         placeholder={value.length === 0 ? placeholder : ''}
