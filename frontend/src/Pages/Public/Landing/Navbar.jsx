@@ -20,23 +20,29 @@ export default function Navbar() {
   }, []);
 
   const logoNode = (
-    <div style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+    <div style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+      {/* Ink-stamp style logo */}
       <span
         style={{
-          fontFamily: "'Space Grotesk', sans-serif",
-          fontSize: 'clamp(1rem, 1.5vw, 1.3rem)',
-          padding: '0.15em 0.4em',
-          letterSpacing: '-0.03em',
-          lineHeight: 1.2,
+          fontFamily: "'Libre Bodoni', serif",
+          fontSize: 'clamp(1rem, 1.5vw, 1.2rem)',
           fontWeight: 700,
-          backgroundColor: '#FFE630',
-          color: '#0a0a0a',
-          border: '2px solid #0a0a0a',
-          boxShadow: '2px 2px 0 #0a0a0a'
+          letterSpacing: '-0.02em',
+          lineHeight: 1,
+          color: 'var(--fg)',
         }}
       >
         AI-CRS
       </span>
+      <span
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: '50%',
+          backgroundColor: 'var(--accent)',
+          display: 'inline-block',
+        }}
+      />
     </div>
   );
 
@@ -44,39 +50,34 @@ export default function Navbar() {
     <>
       <button
         onClick={toggleTheme}
+        aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
         style={{
-          width: '32px',
-          height: '32px',
-          border: '2px solid #0a0a0a',
-          boxShadow: '2px 2px 0 #0a0a0a',
-          background: theme === 'dark' ? '#FFE630' : '#fff',
-          color: '#0a0a0a',
+          width: '36px',
+          height: '36px',
+          border: '1.5px solid var(--border-color)',
+          borderRadius: '8px',
+          background: 'var(--card-bg)',
+          color: 'var(--fg)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
+          transition: 'all 0.2s ease',
         }}
       >
-        {theme === 'light' ? <Moon size={14} /> : <Sun size={14} />}
+        {theme === 'light' ? <Moon size={15} strokeWidth={2} /> : <Sun size={15} strokeWidth={2} />}
       </button>
 
       <Link
         to="/auth?mode=login"
+        className="paper-btn"
         style={{
-          textDecoration: 'none',
-          padding: '0.4rem 1rem',
-          fontSize: '0.8rem',
-          fontWeight: 700,
-          fontFamily: "'Space Grotesk', sans-serif",
-          backgroundColor: '#FFE630',
-          color: '#0a0a0a',
-          border: '2px solid #0a0a0a',
-          boxShadow: '2px 2px 0 #0a0a0a',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em'
+          padding: '0.45rem 1.1rem',
+          fontSize: '0.82rem',
+          borderRadius: '8px',
         }}
       >
-        Login
+        Sign In
       </Link>
     </>
   );
@@ -89,9 +90,9 @@ export default function Navbar() {
         left: 0,
         width: '100%',
         zIndex: 50,
-        transition: 'transform 0.3s ease',
+        transition: 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
         transform: visible ? 'translateY(0)' : 'translateY(-100%)',
-        padding: '1.5rem 1rem 0 1rem', // Spaced from top to float
+        padding: '1rem 1rem 0 1rem',
         pointerEvents: 'none',
       }}
     >
@@ -105,10 +106,6 @@ export default function Navbar() {
           ]}
           activeHref="#features"
           ease="power2.easeOut"
-          baseColor={theme === 'dark' ? '#1a1a1a' : '#ffffff'}
-          pillColor="#FFE630"
-          hoveredPillTextColor="#0a0a0a"
-          pillTextColor={theme === 'dark' ? '#ffffff' : '#0a0a0a'}
           theme={theme}
           initialLoadAnimation={true}
           rightActions={rightActionsNode}

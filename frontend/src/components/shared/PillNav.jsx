@@ -7,13 +7,13 @@ export default function PillNav({
   items,
   activeHref,
   ease = 'power2.easeOut',
-  baseColor = '#000000',
-  pillColor = '#ffffff',
-  hoveredPillTextColor = '#000000',
-  pillTextColor = '#ffffff',
+  baseColor,
+  pillColor,
+  hoveredPillTextColor,
+  pillTextColor,
   theme = 'light',
   initialLoadAnimation = false,
-  rightActions, // Custom addition to easily put buttons on the right
+  rightActions,
 }) {
   const containerRef = useRef(null);
   const navItemsContainerRef = useRef(null);
@@ -21,7 +21,6 @@ export default function PillNav({
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const itemRefs = useRef([]);
 
-  // Active item index
   const activeIndex = items.findIndex((item) => item.href === activeHref);
 
   useEffect(() => {
@@ -42,7 +41,7 @@ export default function PillNav({
         width,
         duration: 0.35,
         ease: ease,
-        autoAlpha: 1, // Opacity 1 + visibility visible
+        autoAlpha: 1,
       });
     } else {
       gsap.to(pillRef.current, {
@@ -57,15 +56,18 @@ export default function PillNav({
     if (initialLoadAnimation && containerRef.current) {
       gsap.fromTo(
         containerRef.current,
-        { y: -100, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }
+        { y: -60, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }
       );
     }
   }, [initialLoadAnimation]);
 
-  const navBorderColor = theme === 'dark' ? '#333' : '#0a0a0a';
-  const shadowColor = theme === 'dark' ? '#0a0a0a' : '#0a0a0a';
-  const pillBorderColor = theme === 'dark' ? '#0a0a0a' : '#0a0a0a';
+  /* Paper design: use CSS variables for theming */
+  const navBg = baseColor || (theme === 'dark' ? 'rgba(28, 25, 23, 0.92)' : 'rgba(255, 255, 255, 0.92)');
+  const navBorder = theme === 'dark' ? 'rgba(61, 53, 48, 0.6)' : 'rgba(214, 207, 196, 0.8)';
+  const pillBg = pillColor || 'var(--accent-light)';
+  const pillText = hoveredPillTextColor || 'var(--accent)';
+  const defaultText = pillTextColor || 'var(--fg-muted)';
 
   return (
     <div
@@ -74,11 +76,13 @@ export default function PillNav({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0.6rem 1rem',
+        padding: '0.6rem 1.25rem',
         borderRadius: '999px',
-        backgroundColor: baseColor,
-        border: `3px solid ${navBorderColor}`,
-        boxShadow: `4px 4px 0 ${shadowColor}`,
+        backgroundColor: navBg,
+        border: `1px solid ${navBorder}`,
+        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.06)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         maxWidth: '100%',
         margin: '0 auto',
         width: '100%',
@@ -92,7 +96,7 @@ export default function PillNav({
       {/* Middle Nav Items */}
       <div
         ref={navItemsContainerRef}
-        style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
+        style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.15rem' }}
         onMouseLeave={() => setHoveredIndex(null)}
         className="hidden md:flex"
       >
@@ -105,13 +109,12 @@ export default function PillNav({
             top: 0,
             bottom: 0,
             height: '100%',
-            backgroundColor: pillColor,
+            backgroundColor: pillBg,
             borderRadius: '999px',
-            border: `2px solid ${pillBorderColor}`,
-            boxShadow: `2px 2px 0 ${pillBorderColor}`,
             zIndex: 0,
             opacity: 0,
             pointerEvents: 'none',
+            transition: 'background-color 0.2s ease',
           }}
         />
 
@@ -124,17 +127,15 @@ export default function PillNav({
             position: 'relative',
             zIndex: 1,
             textDecoration: 'none',
-            padding: '0.45rem 1.25rem',
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontWeight: 700,
-            fontSize: '0.85rem',
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color: isHighlight ? hoveredPillTextColor : pillTextColor,
+            padding: '0.4rem 1.1rem',
+            fontFamily: "'Public Sans', sans-serif",
+            fontWeight: 600,
+            fontSize: '0.82rem',
+            letterSpacing: '0.02em',
+            color: isHighlight ? pillText : defaultText,
             transition: 'color 0.2s ease',
           };
 
-          // Use native anchor for hash links to enable browser scroll-to-section
           if (typeof item.href === 'string' && item.href.startsWith('#')) {
             return (
               <a

@@ -1,22 +1,24 @@
 import React from 'react';
 
 const stats = [
-  { value: '500+', label: 'CVs Built', color: 'bg-brutal-yellow' },
-  { value: '98%', label: 'ATS Pass Rate', color: 'bg-brutal-coral' },
-  { value: '4', label: 'Developers', color: 'bg-brutal-teal' },
-  { value: '3', label: 'AI Models', color: 'bg-brutal-mint' },
+  { value: '500+', label: 'CVs Built', icon: '◆' },
+  { value: '98%', label: 'ATS Pass Rate', icon: '◆' },
+  { value: '4', label: 'Developers', icon: '◆' },
+  { value: '3', label: 'AI Models', icon: '◆' },
 ];
 
 export default function StatsSection() {
   return (
-    <section
-      className="w-full overflow-hidden"
-      style={{ borderTop: '3px solid var(--border-color)', borderBottom: '3px solid var(--border-color)' }}
-    >
-      {/* Scrolling marquee strip */}
+    <section className="w-full">
+      {/* Scrolling marquee strip — editorial ticker */}
       <div
-        className="w-full bg-brutal-yellow text-black overflow-hidden whitespace-nowrap"
-        style={{ padding: 'clamp(0.4rem, 0.8%, 0.6rem) 0' }}
+        className="w-full overflow-hidden whitespace-nowrap"
+        style={{
+          borderTop: '1px solid var(--border-color)',
+          borderBottom: '1px solid var(--border-color)',
+          background: 'var(--bg-alt)',
+          padding: 'clamp(0.5rem, 1%, 0.7rem) 0',
+        }}
       >
         <div className="marquee-track inline-flex" style={{ gap: 'clamp(2rem, 4%, 3rem)' }}>
           {[...Array(3)].map((_, rep) => (
@@ -24,15 +26,17 @@ export default function StatsSection() {
               {stats.map((s, i) => (
                 <span
                   key={`${rep}-${i}`}
-                  className="uppercase font-bold"
                   style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    fontSize: 'clamp(0.7rem, 1vw, 0.9rem)',
-                    letterSpacing: '0.08em',
+                    fontFamily: "'Public Sans', sans-serif",
+                    fontSize: 'clamp(0.7rem, 1vw, 0.85rem)',
+                    fontWeight: 600,
+                    letterSpacing: '0.06em',
+                    color: 'var(--fg-muted)',
                     paddingRight: 'clamp(2rem, 4%, 3rem)',
                   }}
                 >
-                  ★ {s.value} {s.label}
+                  <span style={{ color: 'var(--accent)', marginRight: '0.4rem' }}>{s.icon}</span>
+                  {s.value} {s.label}
                 </span>
               ))}
             </React.Fragment>
@@ -50,28 +54,35 @@ export default function StatsSection() {
         {stats.map((stat, i) => (
           <div
             key={i}
-            className={`${stat.color} text-black flex flex-col items-center justify-center text-center`}
+            className="flex flex-col items-center justify-center text-center"
             style={{
-              padding: 'clamp(1.5rem, 3%, 2.5rem) clamp(1rem, 2%, 1.5rem)',
-              borderRight: i < stats.length - 1 ? '3px solid #0a0a0a' : 'none',
+              padding: 'clamp(2rem, 4%, 3.5rem) clamp(1rem, 2%, 1.5rem)',
+              borderRight: i < stats.length - 1 ? '1px solid var(--border-color)' : 'none',
+              background: `var(--stat-${i + 1})`,
+              transition: 'background-color 0.3s ease',
             }}
           >
             <div
-              className="font-bold"
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: 'clamp(2rem, 4vw, 3.5rem)',
+                fontFamily: "'Libre Bodoni', serif",
+                fontSize: 'clamp(2.2rem, 4.5vw, 3.5rem)',
+                fontWeight: 700,
                 lineHeight: 1,
-                marginBottom: '0.25rem',
+                marginBottom: '0.35rem',
+                color: 'var(--fg)',
+                letterSpacing: '-0.02em',
               }}
             >
               {stat.value}
             </div>
             <div
-              className="uppercase tracking-widest font-medium opacity-70"
               style={{
-                fontSize: 'clamp(0.55rem, 0.8vw, 0.7rem)',
-                letterSpacing: '0.15em',
+                fontFamily: "'Public Sans', sans-serif",
+                fontSize: 'clamp(0.6rem, 0.85vw, 0.75rem)',
+                fontWeight: 600,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: 'var(--fg-muted)',
               }}
             >
               {stat.label}

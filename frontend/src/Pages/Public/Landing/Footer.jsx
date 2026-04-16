@@ -6,43 +6,58 @@ export default function Footer() {
       id="contact"
       className="w-full"
       style={{
-        borderTop: '3px solid var(--border-color)',
+        borderTop: '1px solid var(--border-color)',
         backgroundColor: 'var(--bg)',
       }}
     >
       <div
         className="flex flex-col md:flex-row items-center justify-between w-full"
         style={{
-          padding: 'clamp(1.25rem, 3%, 2rem) clamp(1.5rem, 4%, 3rem)',
+          padding: 'clamp(1.5rem, 3%, 2.5rem) clamp(1.5rem, 5%, 4rem)',
           gap: 'clamp(1rem, 2%, 1.5rem)',
         }}
       >
         {/* Logo */}
-        <span
-          className="bg-brutal-yellow text-black font-bold inline-block shrink-0"
-          style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontSize: 'clamp(0.9rem, 1.5vw, 1.2rem)',
-            padding: '0.15em 0.4em',
-            letterSpacing: '-0.03em',
-          }}
-        >
-          AI-CRS
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          <span
+            style={{
+              fontFamily: "'Libre Bodoni', serif",
+              fontSize: 'clamp(1rem, 1.5vw, 1.2rem)',
+              fontWeight: 700,
+              letterSpacing: '-0.02em',
+              color: 'var(--fg)',
+            }}
+          >
+            AI-CRS
+          </span>
+          <span
+            style={{
+              width: 5,
+              height: 5,
+              borderRadius: '50%',
+              backgroundColor: 'var(--accent)',
+              display: 'inline-block',
+            }}
+          />
+        </div>
 
         {/* Links */}
-        <div className="flex items-center" style={{ gap: 'clamp(1rem, 2%, 2rem)' }}>
+        <div className="flex items-center" style={{ gap: 'clamp(1.5rem, 3%, 2.5rem)' }}>
           {['Features', 'About', 'Contact'].map((link) => (
             <a
               key={link}
               href={`#${link.toLowerCase()}`}
-              className="no-underline uppercase font-bold transition-colors duration-200 hover:text-brutal-yellow"
               style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: 'clamp(0.6rem, 0.85vw, 0.75rem)',
-                letterSpacing: '0.1em',
+                fontFamily: "'Public Sans', sans-serif",
+                fontSize: 'clamp(0.72rem, 0.9vw, 0.82rem)',
+                fontWeight: 600,
+                letterSpacing: '0.04em',
                 color: 'var(--fg-muted)',
+                textDecoration: 'none',
+                transition: 'color 0.2s ease',
               }}
+              onMouseEnter={(e) => (e.target.style.color = 'var(--accent)')}
+              onMouseLeave={(e) => (e.target.style.color = 'var(--fg-muted)')}
             >
               {link}
             </a>
@@ -53,10 +68,10 @@ export default function Footer() {
         <p
           className="text-center md:text-right"
           style={{
-            fontSize: 'clamp(0.55rem, 0.8vw, 0.7rem)',
-            letterSpacing: '0.05em',
-            color: 'var(--fg-muted)',
-            opacity: 0.6,
+            fontFamily: "'Public Sans', sans-serif",
+            fontSize: 'clamp(0.6rem, 0.8vw, 0.72rem)',
+            letterSpacing: '0.03em',
+            color: 'var(--fg-subtle)',
           }}
         >
           Palestine Polytechnic University · Hebron · 2025–2026
