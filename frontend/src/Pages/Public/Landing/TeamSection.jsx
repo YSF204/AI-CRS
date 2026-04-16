@@ -8,6 +8,7 @@ const team = [
     name: 'Yousef AL Bakri',
     role: 'Full Stack Developer',
     initials: 'YA',
+    image: '/src/assets/Yousef.png',
     bio: 'Passionate full stack developer with experience in modern web technologies. Designed the platform architecture and AI integration pipeline.',
     skills: ['React', 'Node.js', 'MongoDB', 'OpenAI API'],
     Icon: Code2,
@@ -138,26 +139,35 @@ export default function TeamSection() {
                   >
                     {/* Header row: Avatar + Info */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-                      <div
-                        style={{
-                          width: '64px',
-                          height: '64px',
-                          borderRadius: '16px',
-                          background: `linear-gradient(135deg, ${member.accent}15, ${member.accent}05)`,
-                          border: `1.5px solid ${member.accent}30`,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontFamily: "'Libre Bodoni', serif",
-                          fontSize: '1.4rem',
-                          fontWeight: 700,
-                          color: member.accent,
-                          flexShrink: 0,
-                          boxShadow: `0 8px 24px ${member.accent}10`,
-                        }}
-                      >
-                        {member.initials}
-                      </div>
+                    <div
+                      style={{
+                        width: '64px',
+                        height: '64px',
+                        borderRadius: '16px',
+                        background: member.image ? 'transparent' : `linear-gradient(135deg, ${member.accent}15, ${member.accent}05)`,
+                        border: `1.5px solid ${member.accent}30`,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontFamily: "'Libre Bodoni', serif",
+                        fontSize: '1.4rem',
+                        fontWeight: 700,
+                        color: member.accent,
+                        flexShrink: 0,
+                        boxShadow: `0 8px 24px ${member.accent}10`,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {member.image ? (
+                        <img 
+                          src={member.image} 
+                          alt={member.name} 
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        member.initials
+                      )}
+                    </div>
 
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <h3
