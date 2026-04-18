@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Sun, Moon, Briefcase, FileText, User, Search } from 'lucide-react';
@@ -12,6 +13,16 @@ import { useTheme } from '../../context/ThemeContext';
  * @param {string} role - 'employee' | 'employer' | 'admin'
  */
 export default function DashboardNav({ role = 'employee' }) {
+=======
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Sun, Moon } from "lucide-react";
+import PillNav from "./PillNav";
+import UserMenu from "./UserMenu";
+import { useTheme } from "../../context/ThemeContext";
+
+export default function DashboardNav({ role = "employee" }) {
+>>>>>>> 1e56cd7 (fixing Employee page bugs)
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
 
@@ -39,6 +50,7 @@ export default function DashboardNav({ role = 'employee' }) {
 
   const rightActions = (
     <>
+<<<<<<< HEAD
       {themeToggleButton}
       {userMenuNode}
     </>
@@ -50,33 +62,88 @@ export default function DashboardNav({ role = 'employee' }) {
       baseLink: '/employer',
       color: 'var(--color-danger)',
       label: 'Employer',
+=======
+      {/* Theme toggle */}
+      <button
+        onClick={toggleTheme}
+        className="flex items-center justify-center w-[36px] h-[36px] border-[3px] border-black shadow-[3px_3px_0_black]"
+        style={{
+          background: theme === "dark" ? "#FFE630" : "var(--bg)",
+          color: theme === "dark" ? "#0a0a0a" : "var(--fg)",
+          transition: "transform 0.1s ease",
+        }}
+      >
+        {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
+      </button>
+
+      {/* User avatar dropdown (profile + logout) */}
+      <UserMenu
+        profileHref={
+          role === "employer"
+            ? "/employer/profile"
+            : role === "admin"
+              ? "/admin/profile"
+              : "/employee/profile"
+        }
+      />
+    </>
+  );
+
+  let config = {};
+
+  if (role === "employer") {
+    config = {
+      baseLink: "/employer",
+      color: "var(--coral)",
+      label: "Employer",
+>>>>>>> 1e56cd7 (fixing Employee page bugs)
       items: [
-        { label: 'Dashboard', href: '/employer' },
-        { label: 'Post Job', href: '/employer/post-job' },
-        { label: 'Manage Jobs', href: '/employer/jobs' },
-        { label: 'Find Talent', href: '/employer/search' },
+        { label: "Dashboard", href: "/employer" },
+        { label: "Post Job", href: "/employer/post-job" },
+        { label: "Manage Jobs", href: "/employer/jobs" },
+        { label: "Find Talent", href: "/employer/search" },
       ],
+<<<<<<< HEAD
     },
     admin: {
       baseLink: '/admin',
       color: 'var(--color-warning)',
       label: 'Admin',
+=======
+    };
+  } else if (role === "admin") {
+    config = {
+      baseLink: "/admin",
+      color: "var(--yellow)",
+      label: "Admin",
+>>>>>>> 1e56cd7 (fixing Employee page bugs)
       items: [
-        { label: 'Dashboard', href: '/admin' },
-        { label: 'Manage Users', href: '/admin/users' },
-        { label: 'Settings', href: '/admin/settings' },
+        { label: "Dashboard", href: "/admin" },
+        { label: "Manage Users", href: "/admin/users" },
+        { label: "Settings", href: "/admin/settings" },
       ],
+<<<<<<< HEAD
     },
     employee: {
       baseLink: '/employee',
       color: 'var(--color-primary)',
       label: 'Employee',
+=======
+    };
+  } else {
+    // Employee (default)
+    config = {
+      baseLink: "/employee",
+      color: "var(--teal)",
+      label: "Employee",
+>>>>>>> 1e56cd7 (fixing Employee page bugs)
       items: [
-        { label: 'Dashboard', href: '/employee' },
-        { label: 'Find Jobs', href: '/employee/jobs' },
-        { label: 'Applications', href: '/employee/applications' },
-        { label: 'My CVs', href: '/employee/cvs' },
-        { label: 'CV Templates', href: '/employee/cv-templates' },
+        { label: "Dashboard", href: "/employee" },
+        { label: "Find Jobs", href: "/employee/jobs" },
+        { label: "Applications", href: "/employee/applications" },
+        { label: "ATS Score", href: "/employee/ats-score" },
+        { label: "My CVs", href: "/employee/cvs" },
+        { label: "CV Templates", href: "/employee/cv-templates" },
       ],
       // Quick actions for employee dashboard
       quickActions: [
@@ -94,25 +161,40 @@ export default function DashboardNav({ role = 'employee' }) {
     <Link
       to={config.baseLink}
       style={{
-        display: 'flex',
-        alignItems: 'center',
+        display: "flex",
+        alignItems: "center",
         gap: 8,
+<<<<<<< HEAD
         textDecoration: 'none',
         color: 'var(--color-text-primary)',
         fontFamily: "'Montserrat', sans-serif",
+=======
+        textDecoration: "none",
+        color: "var(--fg)",
+        fontFamily: "'Space Grotesk', sans-serif",
+>>>>>>> 1e56cd7 (fixing Employee page bugs)
         fontWeight: 700,
         fontSize: 16,
       }}
     >
       <span
+<<<<<<< HEAD
         className="text-[var(--color-text-primary)] font-bold px-3 py-1 tracking-tighter"
         style={{ borderRadius: '4px', background: config.color }}
+=======
+        className="text-black font-bold px-3 py-1 tracking-tighter"
+        style={{ borderRadius: "4px", background: config.color }}
+>>>>>>> 1e56cd7 (fixing Employee page bugs)
       >
         AI-CRS
       </span>
       <span
         className="hidden sm:inline-block tracking-widest text-xs uppercase"
+<<<<<<< HEAD
         style={{ color: 'var(--color-text-secondary)' }}
+=======
+        style={{ color: "var(--fg-muted)" }}
+>>>>>>> 1e56cd7 (fixing Employee page bugs)
       >
         {config.label}
       </span>

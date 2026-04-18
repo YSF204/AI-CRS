@@ -3,8 +3,9 @@ import fs from "fs";
 import {
   SYSTEM_PROMPTS,
   CV_ANALYSIS_PROMPTS,
-  JOB_MATCHING_PROMPTS
-} from './prompts/index.js';
+  JOB_MATCHING_PROMPTS,
+  ATS_SCORE_PROMPTS,
+} from "./prompts/index.js";
 
 let client;
 export const getClient = () => {
@@ -24,24 +25,24 @@ export const getClient = () => {
  * @param {string} jobDescription - Target job description
  * @returns {Promise<string>} Analysis result
  */
-export const analyzeCVFromFile = async (filePath, jobDescription = '') => {
+export const analyzeCVFromFile = async (filePath, jobDescription = "") => {
   const file = await getClient().files.create({
     file: fs.createReadStream(filePath),
-    purpose: 'assistants',
+    purpose: "assistants",
   });
 
   const response = await getClient().responses.create({
-    model: 'gpt-4o-mini',
+    model: "gpt-4o-mini",
     input: [
       {
-        role: 'user',
+        role: "user",
         content: [
           {
-            type: 'input_text',
+            type: "input_text",
             text: CV_ANALYSIS_PROMPTS.ANALYZE_UPLOADED_CV(jobDescription),
           },
           {
-            type: 'input_file',
+            type: "input_file",
             file_id: file.id,
           },
         ],
@@ -58,19 +59,19 @@ export const analyzeCVFromFile = async (filePath, jobDescription = '') => {
  * @param {string} jobDescription - Target job description
  * @returns {Promise<string>} Analysis result
  */
-export const analyzeCVFromDatabase = async (cvText, jobDescription = '') => {
+export const analyzeCVFromDatabase = async (cvText, jobDescription = "") => {
   const response = await getClient().responses.create({
-    model: 'gpt-4o-mini',
+    model: "gpt-4o-mini",
     input: [
       {
-        role: 'user',
+        role: "user",
         content: [
           {
-            type: 'input_text',
+            type: "input_text",
             text: CV_ANALYSIS_PROMPTS.ANALYZE_DATABASE_CV(jobDescription),
           },
           {
-            type: 'input_text',
+            type: "input_text",
             text: cvText,
           },
         ],
@@ -89,11 +90,30 @@ export const analyzeCVFromDatabase = async (cvText, jobDescription = '') => {
  */
 export const analyzeCVSection = async (section, sectionData) => {
   const response = await getClient().responses.create({
-    model: 'gpt-4o-mini',
+    model: "gpt-4o-mini",
     input: [
       {
-        role: 'user',
+        role: "user",
         content: CV_ANALYSIS_PROMPTS.ANALYZE_SECTION(section, sectionData),
+      },
+    ],
+  });
+
+  return response.output_text;
+};
+
+/**
+ * Analyze CV for ATS score and optimization recommendations
+ * @param {object} cvData - Structured CV data
+ * @returns {Promise<string>} ATS analysis result
+ */
+export const analyzeATSScore = async (cvData) => {
+  const response = await getClient().responses.create({
+    model: "gpt-4o-mini",
+    input: [
+      {
+        role: "user",
+        content: ATS_SCORE_PROMPTS.ANALYZE_ATS_SCORE(cvData),
       },
     ],
   });
@@ -113,11 +133,14 @@ export const analyzeCVSection = async (section, sectionData) => {
  */
 export const matchCandidatesToJob = async (jobPosting, candidates) => {
   const response = await getClient().responses.create({
-    model: 'gpt-4o-mini',
+    model: "gpt-4o-mini",
     input: [
       {
-        role: 'user',
-        content: JOB_MATCHING_PROMPTS.MATCH_CANDIDATES_TO_JOB(jobPosting, candidates),
+        role: "user",
+        content: JOB_MATCHING_PROMPTS.MATCH_CANDIDATES_TO_JOB(
+          jobPosting,
+          candidates,
+        ),
       },
     ],
   });
@@ -133,11 +156,14 @@ export const matchCandidatesToJob = async (jobPosting, candidates) => {
  */
 export const matchCVToJobs = async (candidateCV, jobs) => {
   const response = await getClient().responses.create({
-    model: 'gpt-4o-mini',
+    model: "gpt-4o-mini",
     input: [
       {
-        role: 'user',
-        content: JOB_MATCHING_PROMPTS.MATCH_JOBS_TO_CANDIDATE(candidateCV, jobs),
+        role: "user",
+        content: JOB_MATCHING_PROMPTS.MATCH_JOBS_TO_CANDIDATE(
+          candidateCV,
+          jobs,
+        ),
       },
     ],
   });
@@ -154,21 +180,21 @@ export const matchCVToJobs = async (candidateCV, jobs) => {
 export const analyzeApplicationCV = async (filePath, jobDescription) => {
   const file = await getClient().files.create({
     file: fs.createReadStream(filePath),
-    purpose: 'assistants',
+    purpose: "assistants",
   });
 
   const response = await getClient().responses.create({
-    model: 'gpt-4o-mini',
+    model: "gpt-4o-mini",
     input: [
       {
-        role: 'user',
+        role: "user",
         content: [
           {
-            type: 'input_text',
+            type: "input_text",
             text: CV_ANALYSIS_PROMPTS.ANALYZE_UPLOADED_CV(jobDescription),
           },
           {
-            type: 'input_file',
+            type: "input_file",
             file_id: file.id,
           },
         ],
@@ -186,12 +212,16 @@ export const analyzeApplicationCV = async (filePath, jobDescription) => {
  * @param {array} candidates - Candidate CVs
  * @returns {Promise<string>} Ranking result
  */
-export const rankCandidates = async (jobPosting, requirementsText, candidates) => {
+export const rankCandidates = async (
+  jobPosting,
+  requirementsText,
+  candidates,
+) => {
   const response = await getClient().responses.create({
-    model: 'gpt-4o-mini',
+    model: "gpt-4o-mini",
     input: [
       {
-        role: 'user',
+        role: "user",
         content: `You are a Senior Technical Recruiter and ATS expert.
 
 You will receive multiple candidate CVs, each delimited by "=== CANDIDATEID [cvId] ===".
@@ -257,6 +287,7 @@ export default {
   analyzeCVFromDatabase,
   analyzeCVSection,
   analyzeApplicationCV,
+  analyzeATSScore,
 
   // Job Matching
   matchCandidatesToJob,

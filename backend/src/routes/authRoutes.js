@@ -7,6 +7,8 @@ import {
   forgotPassword,
   resetPassword,
   updatePassword,
+  verifyEmail,
+  resendVerificationEmail,
 } from "../controllers/authController.js";
 import { googleAuth, googleRegister } from "../controllers/OauthController.js";
 import { authenticate } from "../middleware/Auth.js";
@@ -20,6 +22,10 @@ router.post("/logout", authenticate, logout);
 router.post("/forgotPassword", forgotPassword);
 router.patch("/resetPassword/:token", resetPassword);
 router.patch("/updatePassword", authenticate, updatePassword);
+
+// FIX #1: Email verification routes
+router.get("/verify-email/:token", verifyEmail);
+router.post("/resend-verification-email", resendVerificationEmail);
 
 // Google OAuth routes
 router.post("/google", googleAuth);

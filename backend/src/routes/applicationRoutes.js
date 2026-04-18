@@ -1,6 +1,7 @@
 import express from "express";
 import {
   analyzeCv,
+  analyzeAtsScore,
   applyForJob,
   getMyApplications,
   getEmployerApplications,
@@ -22,6 +23,7 @@ applicationRouter.use(authenticate);
 
 // Employee routes
 applicationRouter.post("/analyze-cv", isEmployee, uploadCV, analyzeCv);
+applicationRouter.post("/analyze-ats", isEmployee, analyzeAtsScore);
 applicationRouter.post("/", isEmployee, uploadCV, applyForJob);
 applicationRouter.get("/my-applications", getMyApplications);
 

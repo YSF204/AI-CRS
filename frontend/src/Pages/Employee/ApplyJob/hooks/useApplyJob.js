@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import api from "../../../../services/api";
 import useFetch from "../../../../hooks/useFetch";
@@ -12,46 +12,25 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
   const forceFresh = searchParams.get("fresh") === "true";
   const isEdit = !!appId;
 
-  const [step, setStep] = useState("upload"); // upload, analyzing, analysis, result
+  const [step, setStep] = useState("upload"); // upload, result
   const [cvFile, setCvFile] = useState(null);
   const [selectedCvId, setSelectedCvId] = useState("");
   const [cvs, setCvs] = useState([]);
-  const [analyzing, setAnalyzing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [matchAnalysis, setMatchAnalysis] = useState(null);
-  const [applicationMethod, setApplicationMethod] = useState(null); // null, existingCv, uploadPdf, manual
+  const [applicationMethod, setApplicationMethod] = useState(null); // null, existingCv, uploadPdf
   const [validationErrors, setValidationErrors] = useState({});
   const [loadedApplication, setLoadedApplication] = useState(null);
-  const [manualFormData, setManualFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    linkedin: "",
-    portfolioUrl: "",
-    yearsOfExperience: "",
-    technicalSkills: [],
-    softSkills: [],
-    languages: [],
-    summary: "",
-    additionalInformation: "",
-    certifications: [],
-    education: [],
-    certificationInput: "",
-    educationDraft: {
-      institutionName: "",
-      certification: "",
-      durationFrom: "",
-      durationTo: "",
-      summary: "",
-    },
-  });
-
-  const [technicalSkillInput, setTechnicalSkillInput] = useState("");
-  const [softSkillInput, setSoftSkillInput] = useState("");
-  const [languageInput, setLanguageInput] = useState("");
   const [toastNotice, setToastNotice] = useState(null);
+  const [duplicateCheckDone, setDuplicateCheckDone] = useState(false);
+  const [hasDuplicateApplication, setHasDuplicateApplication] = useState(false);
   const toastTimerRef = useRef(null);
+
+  // Track initial state to detect form changes (FIX #6)
+  const [initialFormData, setInitialFormData] = useState(null);
+  const [initialSelectedCvId, setInitialSelectedCvId] = useState("");
+  const [initialApplicationMethod, setInitialApplicationMethod] =
+    useState(null);
 
   const showToastNotice = (message) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -70,13 +49,6 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
     );
   };
 
-  const handleAlreadyApplied = () => {
-    setValidationErrors({});
-    showToastNotice("You already applied for this job. You can't apply again.");
-    if (matchAnalysis) {
-      setStep("analysis");
-    }
-  };
   const isAlreadyAppliedPayload = (response) =>
     response?.data?.data?.alreadyApplied === true;
 
@@ -85,6 +57,49 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
     const res = await api.get(`/jobs/${jobId}`);
     return res.data?.data?.job;
   });
+
+  // FIX #6: Helper function to deep compare form data
+  const deepEqual = (obj1, obj2) => {
+    if (obj1 === obj2) return true;
+    if (!obj1 || !obj2) return false;
+
+    const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
+    for (const key of keys) {
+      const val1 = obj1[key];
+      const val2 = obj2[key];
+
+      if (Array.isArray(val1) && Array.isArray(val2)) {
+        if (val1.length !== val2.length) return false;
+        if (!val1.every((v, i) => v === val2[i])) return false;
+      } else if (
+        typeof val1 === "object" &&
+        typeof val2 === "object" &&
+        val1 !== null &&
+        val2 !== null
+      ) {
+        if (!deepEqual(val1, val2)) return false;
+      } else if (val1 !== val2) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  // FIX #6: Compute whether form has changed (removed manual form logic per Bug 3)
+  const formHasChanged = useMemo(() => {
+    if (!isEdit || !initialFormData) return false;
+
+    const cvChanged = selectedCvId !== initialSelectedCvId;
+    const methodChanged = applicationMethod !== initialApplicationMethod;
+
+    return cvChanged || methodChanged;
+  }, [
+    selectedCvId,
+    applicationMethod,
+    initialSelectedCvId,
+    initialApplicationMethod,
+    isEdit,
+  ]);
 
   useEffect(() => {
     const loadCVs = async () => {
@@ -101,6 +116,34 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
     loadCVs();
   }, []);
 
+  // FIX #4: Check for duplicate application on load
+  useEffect(() => {
+    const checkDuplicateApplication = async () => {
+      if (!jobId || isEdit) {
+        setDuplicateCheckDone(true);
+        return;
+      }
+
+      try {
+        const res = await api.get("/applications/my-applications");
+        const userApplications = res.data?.data?.applications || [];
+        const alreadyApplied = userApplications.some(
+          (app) => app.jobId === jobId || app.jobId?._id === jobId,
+        );
+
+        if (alreadyApplied) {
+          setHasDuplicateApplication(true);
+        }
+      } catch (error) {
+        console.debug("Duplicate check failed (non-critical):", error.message);
+      } finally {
+        setDuplicateCheckDone(true);
+      }
+    };
+
+    checkDuplicateApplication();
+  }, [jobId, isEdit]);
+
   useEffect(() => {
     const loadApplication = async () => {
       if (!isEdit || !appId) return;
@@ -109,51 +152,27 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
         const application = res.data?.data?.application;
         if (application) {
           setLoadedApplication(application);
-          const requestedMethod = editMethod || (forceFresh ? null : application.applicationMethod);
+          const requestedMethod =
+            editMethod || (forceFresh ? null : application.applicationMethod);
 
           if (requestedMethod === "existingCv") {
             setApplicationMethod("existingCv");
             setSelectedCvId(application.cvId?._id || "");
           } else if (requestedMethod === "uploadPdf") {
             setApplicationMethod("uploadPdf");
-          } else if (requestedMethod === "manual") {
-            setApplicationMethod("manual");
           } else if (!forceFresh) {
             if (application.applicationMethod === "uploadPdf") {
               setApplicationMethod("uploadPdf");
             } else if (application.cvId) {
               setApplicationMethod("existingCv");
               setSelectedCvId(application.cvId._id || "");
-            } else {
-              setApplicationMethod("manual");
             }
           }
 
-          setManualFormData({
-            firstName: application.applicantInfo?.fullName?.split(" ")[0] || "",
-            lastName: application.applicantInfo?.fullName?.split(" ").slice(1).join(" ") || "",
-            email: application.applicantInfo?.email || "",
-            phone: application.applicantInfo?.phone || "",
-            linkedin: application.applicantInfo?.linkedin || "",
-            portfolioUrl: application.applicantInfo?.portfolioUrl || "",
-            yearsOfExperience: application.applicantInfo?.yearsOfExperience || "",
-            technicalSkills: application.applicantInfo?.technicalSkills || [],
-            softSkills: application.applicantInfo?.softSkills || [],
-            languages: application.applicantInfo?.languages || [],
-            summary: application.applicantInfo?.summary || "",
-            additionalInformation: application.applicantInfo?.additionalInformation || "",
-            certifications: application.applicantInfo?.certifications || [],
-            education: application.applicantInfo?.education || [],
-            certificationInput: "",
-            educationDraft: {
-              institutionName: "",
-              certification: "",
-              durationFrom: "",
-              durationTo: "",
-              summary: "",
-            },
-          });
-          
+          // FIX #6: Capture initial state for form change detection (removed manual form)
+          setInitialSelectedCvId(application.cvId?._id || "");
+          setInitialApplicationMethod(application.applicationMethod || null);
+
           if (application.matchDetails) {
             setMatchAnalysis(application.matchDetails);
           }
@@ -181,347 +200,85 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
     }
   };
 
-  const resetAnalysis = () => {
+  const handleSwitchMethod = (method) => {
+    if (isEdit) return; // lock method during edit
+    setApplicationMethod(method);
     setMatchAnalysis(null);
     setValidationErrors({});
     setCvFile(null);
   };
 
-  const handleSwitchMethod = (method) => {
-    if (isEdit) return; // lock method during edit
-    setApplicationMethod(method);
-    resetAnalysis();
-  };
-
-  const handleAnalyzeCv = async () => {
-    const errors = {};
-    if (applicationMethod === "existingCv" && !selectedCvId) {
-      errors.cvSelection = "Please select a CV";
-    } else if (applicationMethod === "uploadPdf" && !cvFile) {
-      errors.cvUpload = "Please upload a PDF file";
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
-    
-    setMatchAnalysis(null);
-    setValidationErrors({});
-    setAnalyzing(true);
-    try {
-      const formData = new FormData();
-      formData.append("jobId", jobId);
-
-      if (applicationMethod === "uploadPdf" && cvFile) {
-        // Send the PDF directly to the analyze endpoint — no intermediate CV creation.
-        // This is a single AI call instead of two, cutting latency significantly.
-        // The method stays as "uploadPdf" — we do NOT switch to "existingCv".
-        formData.append("cvFile", cvFile);
-      } else if (applicationMethod === "existingCv" && selectedCvId) {
-        formData.append("cvId", selectedCvId);
-      }
-
-      const response = await api.post("/applications/analyze-cv", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      setMatchAnalysis(response.data.data);
-      setStep("analysis");
-    } catch (error) {
-      setValidationErrors({
-        cvAnalysis: error.response?.data?.message || "Failed to analyze CV",
-      });
-    } finally {
-      setAnalyzing(false);
-    }
-  };
-
-  const handleApplyDirectly = async () => {
-    const errors = {};
-    if (applicationMethod === "existingCv" && !selectedCvId) {
-      errors.cvSelection = "Please select a CV";
-    } else if (applicationMethod === "uploadPdf" && !cvFile) {
-      errors.cvUpload = "Please upload a PDF file";
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
-
-    setValidationErrors({});
-    setSubmitting(true);
-    try {
-      const formData = new FormData();
-      formData.append("jobId", jobId);
-      formData.append("skipAnalysis", "true");
-
-      if (applicationMethod === "uploadPdf" && cvFile) {
-        formData.append("cvFile", cvFile);
-      } else if (applicationMethod === "existingCv" && selectedCvId) {
-        formData.append("cvId", selectedCvId);
-      }
-
-      const response = isEdit 
-        ? await api.patch(`/applications/${appId}`, formData, { headers: { "Content-Type": "multipart/form-data" } })
-        : await api.post("/applications", formData, { headers: { "Content-Type": "multipart/form-data" } });
-      if (isAlreadyAppliedPayload(response)) {
-        handleAlreadyApplied();
-        return;
-      }
-
-      // Show a small fade-away toast instead of the full result screen
-      const msg = isEdit ? "✅ Application updated!" : "✅ Application submitted successfully!";
-      showToastNotice(msg);
-      setTimeout(() => {
-        if (onCloseFn) onCloseFn();
-        else navigate("/employee/applications");
-      }, 2000);
-    } catch (error) {
-      if (isAlreadyAppliedError(error)) {
-        handleAlreadyApplied();
-        return;
-      }
-      setValidationErrors({
-        cvAnalysis: error.response?.data?.message || "Failed to submit application",
-      });
-      alert(error.response?.data?.message || "Application submission failed");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   const handleSubmitApplication = async () => {
-    if (!matchAnalysis) return;
+    // FIX #5: Validate CV selection and submit immediately
+    // AI analysis now runs silently in background
+    const errors = {};
+    if (applicationMethod === "existingCv" && !selectedCvId) {
+      errors.cvSelection = "Please select a CV";
+    } else if (applicationMethod === "uploadPdf" && !cvFile) {
+      errors.cvUpload = "Please upload a PDF file";
+    }
 
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    setValidationErrors({});
     setSubmitting(true);
     try {
       let response;
 
       if (applicationMethod === "uploadPdf" && cvFile) {
-        // PDF upload path: send the file directly — cvId is a temp ID and cannot be looked up in DB
         const formData = new FormData();
         formData.append("jobId", jobId);
         formData.append("cvFile", cvFile);
         response = isEdit
-          ? await api.patch(`/applications/${appId}`, formData, { headers: { "Content-Type": "multipart/form-data" } })
-          : await api.post("/applications", formData, { headers: { "Content-Type": "multipart/form-data" } });
+          ? await api.patch(`/applications/${appId}`, formData, {
+              headers: { "Content-Type": "multipart/form-data" },
+            })
+          : await api.post("/applications", formData, {
+              headers: { "Content-Type": "multipart/form-data" },
+            });
       } else {
-        // Existing CV path: send cvId as JSON
-        const payload = { jobId, cvId: matchAnalysis.cvId };
+        const payload = { jobId, cvId: selectedCvId };
         response = isEdit
           ? await api.patch(`/applications/${appId}`, payload)
           : await api.post("/applications", payload);
       }
 
-      if (isAlreadyAppliedPayload(response)) {
-        handleAlreadyApplied();
+      if (response?.data?.data?.alreadyApplied === true) {
+        // Should not happen due to upfront check
         return;
       }
 
-      const msg = isEdit ? "✅ Application updated!" : "✅ Application submitted successfully!";
+      const msg = isEdit
+        ? "✅ Application updated!"
+        : "✅ Application submitted successfully!";
       showToastNotice(msg);
       setTimeout(() => {
         if (onCloseFn) onCloseFn();
         else navigate("/employee/applications");
       }, 2000);
     } catch (error) {
-      if (isAlreadyAppliedError(error)) {
-        handleAlreadyApplied();
-      } else {
-        alert(error.response?.data?.message || "Application submission failed");
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleSubmitManualApplication = async () => {
-    const errors = {};
-    if (!manualFormData.firstName?.trim()) errors.firstName = "First name is required";
-    if (!manualFormData.lastName?.trim()) errors.lastName = "Last name is required";
-    if (!manualFormData.email?.trim()) errors.email = "Email is required";
-    if (manualFormData.technicalSkills.length === 0) errors.technicalSkills = "Add at least one technical skill";
-
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
-
-    setValidationErrors({});
-    setSubmitting(true);
-    try {
-      const payload = {
-        jobId,
-        cvId: "manual",
-        fullName: `${manualFormData.firstName} ${manualFormData.lastName}`,
-        ...manualFormData,
-        yearsOfExperience: parseInt(manualFormData.yearsOfExperience) || 0,
-        // Skip AI re-analysis on update - only recalculate lightweight local score
-        skipAnalysis: isEdit,
-      };
-
-      const response = isEdit
-        ? await api.patch(`/applications/${appId}`, payload)
-        : await api.post("/applications", payload);
-      if (isAlreadyAppliedPayload(response)) {
-        handleAlreadyApplied();
+      const status = error?.response?.status;
+      const message = String(
+        error?.response?.data?.message || "",
+      ).toLowerCase();
+      if (
+        (status === 409 && error?.response?.data?.data?.alreadyApplied) ||
+        message.includes("already applied")
+      ) {
+        // Should not happen due to upfront check
         return;
       }
-
-      const msg = isEdit ? "✅ Application updated!" : "✅ Application submitted successfully!";
-      showToastNotice(msg);
-      setTimeout(() => {
-        if (onCloseFn) onCloseFn();
-        else navigate("/employee/applications");
-      }, 2000);
-    } catch (error) {
-      if (isAlreadyAppliedError(error)) {
-        handleAlreadyApplied();
-      } else {
-        alert(error.response?.data?.message || "Application submission failed");
-      }
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleSubmitManualDirectly = async () => {
-    const errors = {};
-    if (!manualFormData.firstName?.trim()) errors.firstName = "First name is required";
-    if (!manualFormData.lastName?.trim()) errors.lastName = "Last name is required";
-    if (!manualFormData.email?.trim()) errors.email = "Email is required";
-
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(errors);
-      return;
-    }
-
-    setValidationErrors({});
-    setSubmitting(true);
-    try {
-      const payload = {
-        jobId,
-        cvId: "manual",
-        fullName: `${manualFormData.firstName} ${manualFormData.lastName}`,
-        ...manualFormData,
-        yearsOfExperience: parseInt(manualFormData.yearsOfExperience) || 0,
-        skipAnalysis: true,
-      };
-      
-      const response = isEdit
-        ? await api.patch(`/applications/${appId}`, payload)
-        : await api.post("/applications", payload);
-      if (isAlreadyAppliedPayload(response)) {
-        handleAlreadyApplied();
-        return;
-      }
-
-      const msg = isEdit ? "✅ Application updated!" : "✅ Application submitted successfully!";
-      showToastNotice(msg);
-      setTimeout(() => {
-        if (onCloseFn) onCloseFn();
-        else navigate("/employee/applications");
-      }, 2000);
-    } catch (error) {
-      if (isAlreadyAppliedError(error)) {
-        handleAlreadyApplied();
-        return;
-      }
+      setValidationErrors({
+        cvAnalysis:
+          error.response?.data?.message || "Failed to submit application",
+      });
       alert(error.response?.data?.message || "Application submission failed");
     } finally {
       setSubmitting(false);
     }
-  };
-
-  // Skill management helpers
-  const handleAddSkill = (type) => {
-    if (type === "technical" && technicalSkillInput.trim()) {
-      setManualFormData({ ...manualFormData, technicalSkills: [...manualFormData.technicalSkills, technicalSkillInput.trim()] });
-      setTechnicalSkillInput("");
-    } else if (type === "soft" && softSkillInput.trim()) {
-      setManualFormData({ ...manualFormData, softSkills: [...manualFormData.softSkills, softSkillInput.trim()] });
-      setSoftSkillInput("");
-    }
-  };
-
-  const handleRemoveSkill = (type, index) => {
-    if (type === "technical") {
-      setManualFormData({ ...manualFormData, technicalSkills: manualFormData.technicalSkills.filter((_, i) => i !== index) });
-    } else if (type === "soft") {
-      setManualFormData({ ...manualFormData, softSkills: manualFormData.softSkills.filter((_, i) => i !== index) });
-    }
-  };
-
-  const handleAddLanguage = () => {
-    if (languageInput.trim()) {
-      setManualFormData({ ...manualFormData, languages: [...manualFormData.languages, languageInput.trim()] });
-      setLanguageInput("");
-    }
-  };
-
-  const handleRemoveLanguage = (index) => {
-    setManualFormData({ ...manualFormData, languages: manualFormData.languages.filter((_, i) => i !== index) });
-  };
-
-  const handleAddCertification = () => {
-    const value = manualFormData.certificationInput.trim();
-    if (!value) return;
-    setManualFormData({
-      ...manualFormData,
-      certifications: [...manualFormData.certifications, value],
-      certificationInput: "",
-    });
-  };
-
-  const handleRemoveCertification = (index) => {
-    setManualFormData({
-      ...manualFormData,
-      certifications: manualFormData.certifications.filter((_, i) => i !== index),
-    });
-  };
-
-  const handleEducationDraftChange = (key, value) => {
-    setManualFormData({
-      ...manualFormData,
-      educationDraft: {
-        ...manualFormData.educationDraft,
-        [key]: value,
-      },
-    });
-  };
-
-  const handleAddEducation = () => {
-    const draft = manualFormData.educationDraft || {};
-    if (!draft.institutionName?.trim() || !draft.certification?.trim()) return;
-    setManualFormData({
-      ...manualFormData,
-      education: [
-        ...manualFormData.education,
-        {
-          institutionName: draft.institutionName.trim(),
-          certification: draft.certification.trim(),
-          durationFrom: (draft.durationFrom || "").trim(),
-          durationTo: (draft.durationTo || "").trim(),
-          summary: (draft.summary || "").trim(),
-        },
-      ],
-      educationDraft: {
-        institutionName: "",
-        certification: "",
-        durationFrom: "",
-        durationTo: "",
-        summary: "",
-      },
-    });
-  };
-
-  const handleRemoveEducation = (index) => {
-    setManualFormData({
-      ...manualFormData,
-      education: manualFormData.education.filter((_, i) => i !== index),
-    });
   };
 
   return {
@@ -535,7 +292,6 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
     setSelectedCvId,
     cvFile,
     setCvFile,
-    analyzing,
     submitting,
     matchAnalysis,
     setMatchAnalysis,
@@ -544,30 +300,14 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
     toastNotice,
     handleSwitchMethod,
     handleFileUpload,
-    handleAnalyzeCv,
-    handleApplyDirectly,
     handleSubmitApplication,
-    handleSubmitManualApplication,
-    handleSubmitManualDirectly,
-    manualFormData,
-      setManualFormData,
     loadedApplication,
     setLoadedApplication,
-    technicalSkillInput,
-    setTechnicalSkillInput,
-    softSkillInput,
-    setSoftSkillInput,
-    languageInput,
-    setLanguageInput,
-    handleAddSkill,
-    handleRemoveSkill,
-    handleAddLanguage,
-    handleRemoveLanguage,
-    handleAddCertification,
-    handleRemoveCertification,
-    handleEducationDraftChange,
-    handleAddEducation,
-    handleRemoveEducation,
-    isEdit
+    isEdit,
+    hasDuplicateApplication,
+    duplicateCheckDone,
+    formHasChanged,
   };
 }
+
+export default useApplyJob;

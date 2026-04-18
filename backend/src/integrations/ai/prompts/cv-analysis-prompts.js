@@ -8,10 +8,15 @@ export const CV_ANALYSIS_PROMPTS = {
   /**
    * Analyze uploaded CV file
    */
-  ANALYZE_UPLOADED_CV: (jobDescription = '') => `
-Please analyze this CV content and provide a comprehensive assessment${jobDescription ? ` for a ${jobDescription} position` : ''}.
+  ANALYZE_UPLOADED_CV: (jobDescription = "") => `
+You are an expert ATS (Applicant Tracking System) and recruitment analyst.
 
-Return a JSON object with this exact structure:
+Analyze this CV content and provide a comprehensive assessment${jobDescription ? ` for a ${jobDescription} position` : ""}.
+
+CRITICAL: Return ONLY valid JSON. NO markdown, NO code fences, NO preamble, NO explanation.
+Start immediately with { and end with }
+
+Return exactly this JSON structure:
 {
   "cvData": {
     "jobTitle": "extracted or inferred job title",
@@ -61,16 +66,20 @@ Focus on:
 - Understanding education details
 - Recognizing technical and soft skills
 - Noticing certifications and achievements
-${jobDescription ? `- Comparing with job requirements for: ${jobDescription}` : ''}
+${jobDescription ? `- Comparing with job requirements for: ${jobDescription}` : ""}
 `,
 
   /**
    * Analyze CV from database
    */
-  ANALYZE_DATABASE_CV: (jobDescription = '') => `
-Please analyze this CV and provide ATS score and improvement suggestions${jobDescription ? ` for a ${jobDescription} position` : ''}.
+  ANALYZE_DATABASE_CV: (jobDescription = "") => `
+You are an expert ATS analyst.
 
-Return a JSON object:
+Analyze this CV and provide ATS score and improvement suggestions${jobDescription ? ` for a ${jobDescription} position` : ""}.
+
+CRITICAL: Return ONLY valid JSON. NO markdown, NO code fences, NO preamble.
+
+Return exactly this JSON structure:
 {
   "analysis": {
     "score": 0-100,
@@ -97,7 +106,9 @@ Please analyze this CV data and identify any poorly written parts.
 Data provided as a flattened dictionary (Key = Field ID, Value = Text Content):
 ${JSON.stringify(sectionData, null, 2)}
 
-Return ONLY a JSON object exactly matching this structure. Do NOT include markdown blocks:
+CRITICAL: Return ONLY valid JSON. NO markdown, NO code fences, NO preamble.
+
+Return exactly this JSON structure:
 {
   "atsScore": 0-100,
   "atsFeedback": "1 sentence summarizing an overall ATS score review",
@@ -112,8 +123,8 @@ Return ONLY a JSON object exactly matching this structure. Do NOT include markdo
 }
 
 Focus strictly on:
-- Rewriting informal language into professional terminology.
-- Enhancing impact and achievements.
-- Correcting spelling and grammar.
-- Only return issues for fields that actually need improvement. If the text is good, do not return an issue for it.`
+- Rewriting informal language into professional terminology
+- Enhancing impact and achievements
+- Correcting spelling and grammar
+- Only return issues for fields that actually need improvement. If the text is good, do not return an issue for it.`,
 };

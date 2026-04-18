@@ -71,14 +71,14 @@ const userSchema = new mongoose.Schema(
         message: "Telephone number must be a valid 10-digit number",
       },
     },
-    authProvider : {
-      type : String,
-      enum : ["LOCAL", "GOOGLE"],
-      default : "LOCAL",
+    authProvider: {
+      type: String,
+      enum: ["LOCAL", "GOOGLE"],
+      default: "LOCAL",
     },
-    profilePic : {
-      type : String,
-      default : "",
+    profilePic: {
+      type: String,
+      default: "",
     },
     accountStatus: {
       type: String,
@@ -99,6 +99,14 @@ const userSchema = new mongoose.Schema(
     },
     deleteToken: String,
     deleteTokenExpires: Date,
+    // EMAIL VERIFICATION FIELDS
+    isEmailVerified: {
+      type: Boolean,
+      default: false,
+      required: true,
+    },
+    emailVerificationToken: String,
+    emailVerificationExpires: Date,
   },
   {
     timestamps: true,
@@ -113,6 +121,17 @@ const userSchema = new mongoose.Schema(
 userSchema.virtual("fullName").get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
+
+// Method to create email verification token
+userSchema.methods.createEmailVerificationToken = function () {
+  const verificationToken = crypto.randomBytes(32).toString("hex");
+  this.emailVerificationToken = crypto
+    .createHash("sha256")
+    .update(verificationToken)
+    .digest("hex");
+  this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  return verificationToken;
+};
 
 // hash the password before saving the user model
 userSchema.pre("save", async function (next) {

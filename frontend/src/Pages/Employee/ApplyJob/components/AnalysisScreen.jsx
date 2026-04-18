@@ -1,15 +1,47 @@
 import React from "react";
-import { ChevronLeft, CheckCircle2, XCircle, Zap, AlertTriangle, ArrowRight } from "lucide-react";
+import {
+  ChevronLeft,
+  CheckCircle2,
+  XCircle,
+  Zap,
+  AlertTriangle,
+  ArrowRight,
+  RotateCcw,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-export default function AnalysisScreen({ job, matchAnalysis, setStep, setMatchAnalysis, setCvFile, handleSubmitApplication, submitting, isEdit }) {
-  const matchPercentage = matchAnalysis?.matchPercentage || (matchAnalysis?.overall_fit_percentage || 0);
+export default function AnalysisScreen({
+  job,
+  matchAnalysis,
+  setStep,
+  setMatchAnalysis,
+  setCvFile,
+  setSelectedCvId,
+  handleSubmitApplication,
+  submitting,
+  isEdit,
+}) {
+  const navigate = useNavigate();
+  const matchPercentage =
+    matchAnalysis?.matchPercentage ||
+    matchAnalysis?.overall_fit_percentage ||
+    0;
   const isQualified = matchPercentage >= 50;
-  
+
   // Extract details handles both the new AI schema and the old schema
   const matchDetails = matchAnalysis.matchDetails || {};
-  const aiSummary = matchAnalysis.recruiter_summary || matchDetails.matchAnalysis || "";
+  const aiSummary =
+    matchAnalysis.recruiter_summary || matchDetails.matchAnalysis || "";
   const strengthsList = matchAnalysis.strengths || [];
   const weaknessesList = matchAnalysis.weaknesses || [];
+
+  // FIX #4: Handler to reset CV selection and go back to upload step
+  const handleTryDifferentCV = () => {
+    setMatchAnalysis(null);
+    setCvFile(null);
+    setSelectedCvId("");
+    setStep("upload");
+  };
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-8 pb-10 bg-[var(--bg)] p-4 sm:p-8 border-[6px] border-black shadow-[12px_12px_0px_#000]">
@@ -42,13 +74,14 @@ export default function AnalysisScreen({ job, matchAnalysis, setStep, setMatchAn
           <div className="absolute top-4 right-4 bg-white text-black p-2 border-4 border-black shadow-[4px_4px_0px_#000]">
             {isQualified ? <CheckCircle2 size={32} /> : <XCircle size={32} />}
           </div>
-          
+
           <span className="font-mono font-black text-sm uppercase tracking-[0.2em] text-black mb-2 px-4 py-1 border-2 border-black">
             Overall AI Score
           </span>
-          
+
           <h2 className="text-8xl md:text-[9rem] font-black leading-none text-black">
-            {matchPercentage}<span className="text-4xl">%</span>
+            {matchPercentage}
+            <span className="text-4xl">%</span>
           </h2>
         </div>
 
@@ -59,9 +92,21 @@ export default function AnalysisScreen({ job, matchAnalysis, setStep, setMatchAn
           </h3>
           <div className="flex-1 flex flex-col justify-around gap-4">
             {[
-              { label: "Technical Capabilities", score: matchDetails?.technicalSkillsMatch || 0, color: "var(--teal)" },
-              { label: "Experience Match", score: matchDetails?.experienceMatch || 0, color: "var(--yellow)" },
-              { label: "Interpersonal Skills", score: matchDetails?.softSkillsMatch || 0, color: "var(--coral)" },
+              {
+                label: "Technical Capabilities",
+                score: matchDetails?.technicalSkillsMatch || 0,
+                color: "var(--teal)",
+              },
+              {
+                label: "Experience Match",
+                score: matchDetails?.experienceMatch || 0,
+                color: "var(--yellow)",
+              },
+              {
+                label: "Interpersonal Skills",
+                score: matchDetails?.softSkillsMatch || 0,
+                color: "var(--coral)",
+              },
             ].map((item, i) => (
               <div key={i} className="flex flex-col gap-1">
                 <div className="flex justify-between items-end">
@@ -76,9 +121,9 @@ export default function AnalysisScreen({ job, matchAnalysis, setStep, setMatchAn
                 <div className="w-full h-8 border-[3px] border-black bg-[#eee] relative">
                   <div
                     className="h-full absolute top-0 left-0 border-r-[3px] border-black"
-                    style={{ 
-                      width: `${item.score}%`, 
-                      backgroundColor: item.color
+                    style={{
+                      width: `${item.score}%`,
+                      backgroundColor: item.color,
                     }}
                   />
                 </div>
@@ -109,14 +154,21 @@ export default function AnalysisScreen({ job, matchAnalysis, setStep, setMatchAn
           {strengthsList.length > 0 ? (
             <ul className="space-y-3">
               {strengthsList.map((strength, i) => (
-                <li key={i} className="flex gap-3 font-mono text-sm font-bold text-black items-start">
-                  <span className="font-black text-xl leading-none mt-1 text-[var(--teal)]">+</span>
+                <li
+                  key={i}
+                  className="flex gap-3 font-mono text-sm font-bold text-black items-start"
+                >
+                  <span className="font-black text-xl leading-none mt-1 text-[var(--teal)]">
+                    +
+                  </span>
                   {strength}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="font-mono text-sm text-[var(--fg-muted)] italic">No strengths listed.</p>
+            <p className="font-mono text-sm text-[var(--fg-muted)] italic">
+              No strengths listed.
+            </p>
           )}
         </div>
 
@@ -127,14 +179,21 @@ export default function AnalysisScreen({ job, matchAnalysis, setStep, setMatchAn
           {weaknessesList.length > 0 ? (
             <ul className="space-y-3">
               {weaknessesList.map((weakness, i) => (
-                <li key={i} className="flex gap-3 font-mono text-sm font-bold text-black items-start">
-                  <span className="font-black text-xl leading-none mt-1 text-[var(--coral)]">-</span>
+                <li
+                  key={i}
+                  className="flex gap-3 font-mono text-sm font-bold text-black items-start"
+                >
+                  <span className="font-black text-xl leading-none mt-1 text-[var(--coral)]">
+                    -
+                  </span>
                   {weakness}
                 </li>
               ))}
             </ul>
           ) : (
-            <p className="font-mono text-sm text-[var(--fg-muted)] italic">No elements missing.</p>
+            <p className="font-mono text-sm text-[var(--fg-muted)] italic">
+              No elements missing.
+            </p>
           )}
         </div>
       </div>
@@ -142,26 +201,55 @@ export default function AnalysisScreen({ job, matchAnalysis, setStep, setMatchAn
       {/* Application Actions */}
       <div className="mt-4 pt-6 border-t-[6px] border-black">
         {!isQualified && (
-           <div className="flex items-center gap-4 bg-[var(--yellow)] border-4 border-black p-4 mb-6 shadow-[4px_4px_0px_#000]">
-              <AlertTriangle className="text-black shrink-0" size={32} />
-              <p className="font-mono text-sm text-black font-bold">
-                WARNING: Your score is below 50%. Proceed with application at your own discretion.
-              </p>
-           </div>
+          <div className="flex items-start gap-4 bg-[var(--coral)] border-4 border-black p-4 mb-6 shadow-[4px_4px_0px_#000]">
+            <AlertTriangle className="text-black shrink-0 mt-1" size={28} />
+            <p className="font-mono text-sm text-black font-bold">
+              Your profile does not meet the minimum match threshold for this
+              position (match score: {matchPercentage}%). Please try a different
+              CV or explore other opportunities.
+            </p>
+          </div>
         )}
 
-        <button
-          onClick={handleSubmitApplication}
-          disabled={submitting}
-          className="w-full flex items-center justify-center gap-4 bg-[var(--teal)] hover:bg-[#fff] text-black border-[6px] border-black py-6 px-10 shadow-[8px_8px_0px_#000] hover:translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_#000] transition-all disabled:opacity-50"
-        >
-          <span className="font-black font-['Space_Grotesk'] text-3xl uppercase tracking-widest">
-            {submitting ? "Processing..." : (isEdit ? "Update Submission" : "Submit Application")}
-          </span>
-          {!submitting && <ArrowRight size={32} />}
-        </button>
+        {/* FIX #4: Show different buttons based on match percentage */}
+        {isQualified ? (
+          <button
+            onClick={handleSubmitApplication}
+            disabled={submitting}
+            className="w-full flex items-center justify-center gap-4 bg-[var(--teal)] hover:bg-[#fff] text-black border-[6px] border-black py-6 px-10 shadow-[8px_8px_0px_#000] hover:translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_#000] transition-all disabled:opacity-50"
+          >
+            <span className="font-black font-['Space_Grotesk'] text-3xl uppercase tracking-widest">
+              {submitting
+                ? "Processing..."
+                : isEdit
+                  ? "Update Submission"
+                  : "Submit Application"}
+            </span>
+            {!submitting && <ArrowRight size={32} />}
+          </button>
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-4">
+            <button
+              onClick={handleTryDifferentCV}
+              className="flex-1 flex items-center justify-center gap-3 bg-[var(--yellow)] hover:bg-[#FFC107] text-black border-[6px] border-black py-4 px-6 shadow-[8px_8px_0px_#000] hover:translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_#000] transition-all"
+            >
+              <RotateCcw size={24} />
+              <span className="font-black font-['Space_Grotesk'] text-lg uppercase tracking-widest">
+                Try a Different CV
+              </span>
+            </button>
+            <button
+              onClick={() => navigate("/employee/jobs")}
+              className="flex-1 flex items-center justify-center gap-3 bg-white text-black border-[6px] border-black py-4 px-6 shadow-[8px_8px_0px_#000] hover:translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_#000] transition-all"
+            >
+              <span className="font-black font-['Space_Grotesk'] text-lg uppercase tracking-widest">
+                Find Another Job
+              </span>
+              <ArrowRight size={24} />
+            </button>
+          </div>
+        )}
       </div>
-
     </div>
   );
 }

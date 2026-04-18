@@ -5,10 +5,8 @@ import { useApplyJob } from "./hooks/useApplyJob";
 
 // Subcomponents
 import MethodSelector from "./components/MethodSelector";
-import ManualForm from "./components/ManualForm";
 import CvSelector from "./components/CvSelector";
 import PdfUploader from "./components/PdfUploader";
-import AnalysisScreen from "./components/AnalysisScreen";
 import ApplicationViewer from "../../../components/applications/ApplicationViewer";
 
 export default function ApplyJobModal({ jobId, appId, onClose }) {
@@ -16,7 +14,11 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
   const resolvedJobId = jobId || routeJobId;
   // handleAutoClose: fallback if no onClose prop (standalone page mode)
   const handleAutoClose = () => navigate("/employee/jobs");
-  const applyParams = useApplyJob(resolvedJobId, appId, onClose ?? handleAutoClose);
+  const applyParams = useApplyJob(
+    resolvedJobId,
+    appId,
+    onClose ?? handleAutoClose,
+  );
   const location = useLocation();
   const {
     navigate,
@@ -29,7 +31,6 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
     setSelectedCvId,
     cvFile,
     setCvFile,
-    analyzing,
     submitting,
     matchAnalysis,
     setMatchAnalysis,
@@ -38,34 +39,67 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
     toastNotice,
     handleSwitchMethod,
     handleFileUpload,
-    handleAnalyzeCv,
-    handleApplyDirectly,
     handleSubmitApplication,
-    handleSubmitManualApplication,
-    handleSubmitManualDirectly,
-    manualFormData,
-    setManualFormData,
-    technicalSkillInput,
-    setTechnicalSkillInput,
-    softSkillInput,
-    setSoftSkillInput,
-    languageInput,
-    setLanguageInput,
-    handleAddSkill,
-    handleRemoveSkill,
-    handleAddLanguage,
-    handleRemoveLanguage,
-    handleAddCertification,
-    handleRemoveCertification,
-    handleEducationDraftChange,
-    handleAddEducation,
-    handleRemoveEducation,
     loadedApplication,
     isEdit,
+    hasDuplicateApplication,
+    duplicateCheckDone,
+    formHasChanged,
   } = applyParams;
 
   const [tab, setTab] = useState("update"); // update | view
   const methodLocked = isEdit;
+
+  // FIX #2: Show duplicate check screen FIRST (before job loading or anything else)
+  if (!duplicateCheckDone) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div className="brutal-card bg-[var(--bg)] p-12 flex flex-col items-center border-[6px] border-black shadow-[12px_12px_0px_0px_#000]">
+          <Loader className="animate-spin mb-6" size={40} color="var(--teal)" />
+          <p className="font-mono font-bold uppercase tracking-widest text-[var(--fg)]">
+            Checking application status...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // FIX #2: If already applied, show ONLY the duplicate screen with two buttons - nothing else
+  if (hasDuplicateApplication && !isEdit) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div className="brutal-card bg-[var(--bg)] p-10 max-w-md w-full text-center border-[6px] border-black shadow-[12px_12px_0px_0px_var(--coral)] relative">
+          <div className="absolute top-0 left-0 w-full h-3 bg-[var(--coral)]"></div>
+          <p className="font-['Space_Grotesk'] font-black text-2xl uppercase text-[var(--coral)] mt-4 mb-3 tracking-wider">
+            Already Applied
+          </p>
+          <p className="font-mono text-sm text-[var(--fg-muted)] mb-6">
+            You have already applied for this position.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <button
+              onClick={() => navigate("/employee/applications")}
+              className="w-full brutal-btn px-6 py-4 font-black uppercase tracking-widest border-4 border-black"
+              style={{ background: "var(--teal)", color: "#0a0a0a" }}
+            >
+              View My Applications
+            </button>
+            <button
+              onClick={() => navigate("/employee/jobs")}
+              className="w-full brutal-btn px-6 py-4 font-black uppercase tracking-widest border-4 border-black"
+              style={{
+                background: "var(--card-bg)",
+                color: "var(--fg)",
+                borderColor: "var(--border-color)",
+              }}
+            >
+              Browse Other Jobs
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const toastPopup = toastNotice ? (
     <>
@@ -119,7 +153,9 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
         {toastPopup}
         <div className="brutal-card bg-[var(--bg)] p-12 flex flex-col items-center border-[6px] border-black shadow-[12px_12px_0px_0px_#000]">
           <Loader className="animate-spin mb-6" size={40} color="var(--teal)" />
-          <p className="font-mono font-bold uppercase tracking-widest text-[var(--fg)]">Loading job details...</p>
+          <p className="font-mono font-bold uppercase tracking-widest text-[var(--fg)]">
+            Loading job details...
+          </p>
         </div>
       </div>
     );
@@ -132,9 +168,12 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
         {toastPopup}
         <div className="brutal-card bg-[var(--bg)] p-10 max-w-md w-full text-center border-[6px] border-black shadow-[12px_12px_0px_0px_var(--coral)] relative">
           <div className="absolute top-0 left-0 w-full h-3 bg-[var(--coral)]"></div>
-          <p className="font-['Space_Grotesk'] font-black text-2xl uppercase text-[var(--coral)] mt-4 mb-3 tracking-wider">Job not found</p>
+          <p className="font-['Space_Grotesk'] font-black text-2xl uppercase text-[var(--coral)] mt-4 mb-3 tracking-wider">
+            Job not found
+          </p>
           <p className="font-mono text-sm text-[var(--fg-muted)] mb-6">
-            This job may have been removed or the link is invalid. Please try another job.
+            This job may have been removed or the link is invalid. Please try
+            another job.
           </p>
           <button
             onClick={handleClose}
@@ -148,55 +187,25 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
     );
   }
 
-  // Analysis Screen
-  if (step === "analysis" && matchAnalysis) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-8 overflow-y-auto">
-        {toastPopup}
-        <div className="brutal-card bg-[var(--bg)] w-full max-w-4xl min-h-[80vh] relative flex flex-col border-[6px] border-black shadow-[16px_16px_0px_0px_#000] my-auto overflow-hidden">
-          {submitting && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-              <div className="bg-[var(--card-bg)] p-8 border-4 border-[var(--teal)] shadow-[8px_8px_0px_0px_#000] flex flex-col items-center text-center max-w-sm">
-                <Loader className="animate-spin mb-6" size={48} color="var(--teal)" />
-                <p className="font-['Space_Grotesk'] font-black uppercase text-xl text-[var(--fg)] tracking-widest">Processing Data</p>
-                <p className="font-mono text-sm text-[var(--fg-muted)] mt-2">Submitting your application...</p>
-              </div>
-            </div>
-          )}
-          <button 
-            onClick={handleClose} 
-            className="absolute top-4 right-4 z-20 bg-white text-black hover:bg-[var(--coral)] border-2 border-black p-2 transition-colors cursor-pointer shadow-[2px_2px_0px_0px_#000]"
-          >
-            <X size={24} />
-          </button>
-          <div className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#1a1a1a]">
-            <AnalysisScreen
-              job={job}
-              matchAnalysis={matchAnalysis}
-              setStep={setStep}
-              setMatchAnalysis={setMatchAnalysis}
-              setCvFile={setCvFile}
-              handleSubmitApplication={handleSubmitApplication}
-              submitting={submitting}
-              isEdit={isEdit}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Upload Screen
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-8 overflow-y-auto">
       {toastPopup}
       <div className="brutal-card bg-[var(--bg)] w-full max-w-3xl relative flex flex-col border-[6px] border-black shadow-[16px_16px_0px_0px_#000] my-auto overflow-hidden">
-        {(analyzing || submitting) && (
+        {submitting && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md">
             <div className="bg-[var(--card-bg)] p-8 border-4 border-[var(--yellow)] shadow-[8px_8px_0px_0px_#000] flex flex-col items-center text-center max-w-sm">
-              <Loader className="animate-spin mb-6" size={48} color="var(--yellow)" />
-              <p className="font-['Space_Grotesk'] font-black uppercase text-xl text-[var(--fg)] tracking-widest">{analyzing ? "AI Analysis" : "Processing"}</p>
-              <p className="font-mono text-sm text-[var(--fg-muted)] mt-2">{analyzing ? "Evaluating your alignment with the role..." : "Submitting your application..."}</p>
+              <Loader
+                className="animate-spin mb-6"
+                size={48}
+                color="var(--yellow)"
+              />
+              <p className="font-['Space_Grotesk'] font-black uppercase text-xl text-[var(--fg)] tracking-widest">
+                Processing
+              </p>
+              <p className="font-mono text-sm text-[var(--fg-muted)] mt-2">
+                Submitting your application...
+              </p>
             </div>
           </div>
         )}
@@ -210,7 +219,10 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
                 {job.employerId?.company?.name} • {job.workSite}
               </p>
             </div>
-            <button onClick={handleClose} className="p-2 border-2 border-transparent hover:border-[var(--coral)] hover:text-[var(--coral)] transition-colors">
+            <button
+              onClick={handleClose}
+              className="p-2 border-2 border-transparent hover:border-[var(--coral)] hover:text-[var(--coral)] transition-colors"
+            >
               <X size={24} />
             </button>
           </div>
@@ -237,96 +249,76 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
             loadedApplication ? (
               <ApplicationViewer application={loadedApplication} />
             ) : (
-              <p className="font-mono text-sm text-[var(--fg-muted)]">Loading submission...</p>
+              <p className="font-mono text-sm text-[var(--fg-muted)]">
+                Loading submission...
+              </p>
             )
           ) : (
-          <div className="space-y-8">
-            {!methodLocked && (
-              <MethodSelector
-                applicationMethod={applicationMethod}
-                handleSwitchMethod={handleSwitchMethod}
-                setSelectedCvId={setSelectedCvId}
-              />
-            )}
-            {methodLocked && (
-              <div className="brutal-card bg-[var(--card-bg)] border-4 border-[var(--border-color)] p-4 font-mono text-sm flex items-center justify-between">
-                <span className="font-bold uppercase tracking-wider text-[var(--fg-muted)]">Application Method</span>
-                <span className="font-black text-lg text-[var(--fg)]">
-                  {applicationMethod === "uploadPdf"
-                    ? "Uploaded PDF"
-                    : applicationMethod === "existingCv"
-                      ? "Existing CV"
-                      : "Manual Form"}
-                </span>
-              </div>
-            )}
+            <div className="space-y-8">
+              {!methodLocked && (
+                <MethodSelector
+                  applicationMethod={applicationMethod}
+                  handleSwitchMethod={handleSwitchMethod}
+                  setSelectedCvId={setSelectedCvId}
+                />
+              )}
+              {methodLocked && (
+                <div className="brutal-card bg-[var(--card-bg)] border-4 border-[var(--border-color)] p-4 font-mono text-sm flex items-center justify-between">
+                  <span className="font-bold uppercase tracking-wider text-[var(--fg-muted)]">
+                    Application Method
+                  </span>
+                  <span className="font-black text-lg text-[var(--fg)]">
+                    {applicationMethod === "uploadPdf"
+                      ? "Uploaded PDF"
+                      : applicationMethod === "existingCv"
+                        ? "Existing CV"
+                        : "Unknown"}
+                  </span>
+                </div>
+              )}
 
-            {/* Display validation errors */}
-            {Object.keys(validationErrors).length > 0 && (
-              <div className="brutal-card bg-[rgba(255,107,107,0.1)] border-4 border-[var(--coral)] p-4">
-                <p className="font-['Space_Grotesk'] font-bold text-sm uppercase text-[var(--coral)] mb-2">
-                  ⚠️ Validation Errors:
-                </p>
-                {Object.entries(validationErrors).map(([key, message]) => (
-                  <p key={key} className="font-mono text-sm text-[var(--coral)] mb-1">
-                    • {message}
+              {/* Display validation errors */}
+              {Object.keys(validationErrors).length > 0 && (
+                <div className="brutal-card bg-[rgba(255,107,107,0.1)] border-4 border-[var(--coral)] p-4">
+                  <p className="font-['Space_Grotesk'] font-bold text-sm uppercase text-[var(--coral)] mb-2">
+                    ⚠️ Validation Errors:
                   </p>
-                ))}
-              </div>
-            )}
+                  {Object.entries(validationErrors).map(([key, message]) => (
+                    <p
+                      key={key}
+                      className="font-mono text-sm text-[var(--coral)] mb-1"
+                    >
+                      • {message}
+                    </p>
+                  ))}
+                </div>
+              )}
 
-            {/* Render conditional form based on selection */}
-            {applicationMethod === "existingCv" && (
-              <CvSelector
-                cvs={cvs}
-                selectedCvId={selectedCvId}
-                setSelectedCvId={setSelectedCvId}
-                setMatchAnalysis={setMatchAnalysis}
-                handleAnalyzeCv={handleAnalyzeCv}
-                handleApplyDirectly={handleApplyDirectly}
-                analyzing={analyzing}
-                isEdit={isEdit}
-              />
-            )}
+              {/* Render conditional form based on selection */}
+              {applicationMethod === "existingCv" && (
+                <CvSelector
+                  cvs={cvs}
+                  selectedCvId={selectedCvId}
+                  setSelectedCvId={setSelectedCvId}
+                  setMatchAnalysis={setMatchAnalysis}
+                  handleSubmitApplication={handleSubmitApplication}
+                  submitting={submitting}
+                  isEdit={isEdit}
+                  formHasChanged={formHasChanged}
+                />
+              )}
 
-            {applicationMethod === "uploadPdf" && (
-              <PdfUploader
-                cvFile={cvFile}
-                handleFileUpload={handleFileUpload}
-                handleAnalyzeCv={handleAnalyzeCv}
-                handleApplyDirectly={handleApplyDirectly}
-                analyzing={analyzing}
-                isEdit={isEdit}
-              />
-            )}
-
-            {applicationMethod === "manual" && (
-              <ManualForm
-                manualFormData={manualFormData}
-                setManualFormData={setManualFormData}
-                validationErrors={validationErrors}
-                technicalSkillInput={technicalSkillInput}
-                setTechnicalSkillInput={setTechnicalSkillInput}
-                softSkillInput={softSkillInput}
-                setSoftSkillInput={setSoftSkillInput}
-                languageInput={languageInput}
-                setLanguageInput={setLanguageInput}
-                handleAddSkill={handleAddSkill}
-                handleRemoveSkill={handleRemoveSkill}
-                handleAddLanguage={handleAddLanguage}
-                handleRemoveLanguage={handleRemoveLanguage}
-                handleAddCertification={handleAddCertification}
-                handleRemoveCertification={handleRemoveCertification}
-                handleEducationDraftChange={handleEducationDraftChange}
-                handleAddEducation={handleAddEducation}
-                handleRemoveEducation={handleRemoveEducation}
-                handleSubmitManualApplication={handleSubmitManualApplication}
-                handleSubmitManualDirectly={handleSubmitManualDirectly}
-                submitting={submitting}
-                isEdit={isEdit}
-              />
-            )}
-          </div>
+              {applicationMethod === "uploadPdf" && (
+                <PdfUploader
+                  cvFile={cvFile}
+                  handleFileUpload={handleFileUpload}
+                  handleSubmitApplication={handleSubmitApplication}
+                  submitting={submitting}
+                  isEdit={isEdit}
+                  formHasChanged={formHasChanged}
+                />
+              )}
+            </div>
           )}
         </div>
       </div>

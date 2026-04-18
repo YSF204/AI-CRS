@@ -18,6 +18,7 @@ import Jobs from "./Pages/Employee/jobs";
 import JobDetails from "./Pages/Employee/JobDetails";
 import ApplyJob from "./Pages/Employee/ApplyJob";
 import FindJobByCV from "./Pages/Employee/FindJobByCV";
+import ATSScore from "./Pages/Employee/ATSScore";
 import Profile from "./Pages/Employee/Profile";
 import CompanyProfile from "./Pages/Employer/CompanyProfile";
 import EditJob from "./Pages/Employer/EditJob";
@@ -28,6 +29,9 @@ import JobApplications from "./Pages/Employer/JobApplications";
 import PendingActivation from "./Pages/Employer/PendingActivation";
 import PostJob from "./Pages/Employer/PostJob";
 import AuthPage from "./Pages/Public/Auth/AuthPage";
+import VerifyEmailPage from "./Pages/Public/Auth/VerifyEmailPage";
+import ForgotPasswordPage from "./Pages/Public/Auth/ForgotPasswordPage";
+import ResetPasswordPage from "./Pages/Public/Auth/ResetPasswordPage";
 
 function NotFound() {
   return (
@@ -56,6 +60,30 @@ export const router = createBrowserRouter([
         element: (
           <PageTransition>
             <AuthPage />
+          </PageTransition>
+        ),
+      },
+      {
+        path: "/verify-email/:token",
+        element: (
+          <PageTransition>
+            <VerifyEmailPage />
+          </PageTransition>
+        ),
+      },
+      {
+        path: "/forgot-password",
+        element: (
+          <PageTransition>
+            <ForgotPasswordPage />
+          </PageTransition>
+        ),
+      },
+      {
+        path: "/reset-password",
+        element: (
+          <PageTransition>
+            <ResetPasswordPage />
           </PageTransition>
         ),
       },
@@ -175,6 +203,16 @@ export const router = createBrowserRouter([
           <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
             <PageTransition>
               <FindJobByCV />
+            </PageTransition>
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/employee/ats-score",
+        element: (
+          <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+            <PageTransition>
+              <ATSScore />
             </PageTransition>
           </ProtectedRoute>
         ),

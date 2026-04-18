@@ -1,7 +1,16 @@
 import React from "react";
 import { Loader } from "lucide-react";
 
-export default function CvSelector({ cvs, selectedCvId, setSelectedCvId, setMatchAnalysis, handleAnalyzeCv, handleApplyDirectly, analyzing, isEdit }) {
+export default function CvSelector({
+  cvs,
+  selectedCvId,
+  setSelectedCvId,
+  setMatchAnalysis,
+  handleSubmitApplication,
+  submitting,
+  isEdit,
+  formHasChanged, // FIX #6: Added form change detection
+}) {
   return (
     <>
       <div className="brutal-card bg-[var(--card-bg)] p-6">
@@ -33,34 +42,32 @@ export default function CvSelector({ cvs, selectedCvId, setSelectedCvId, setMatc
 
       <div className="brutal-card bg-[rgba(78, 205, 196, 0.1)] border-4 border-[var(--teal)] p-6">
         <p className="font-mono text-sm text-[var(--fg-muted)]">
-          Our AI will analyze your CV and compare it with the job requirements. You'll see your match score, strengths, and areas to improve before applying.
+          Apply instantly! Our AI will analyze your CV against job requirements
+          and provide your match score, strengths, and areas to improve within
+          moments.
         </p>
       </div>
 
       <div className="flex gap-4 mt-6">
         <button
-          onClick={handleAnalyzeCv}
-          disabled={!selectedCvId || analyzing}
+          onClick={handleSubmitApplication}
+          disabled={!selectedCvId || submitting || (isEdit && !formHasChanged)}
           className="flex-1 brutal-btn px-4 py-3 font-bold uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
-          style={{ background: "var(--yellow)", color: "#0a0a0a" }}
+          style={{ background: "var(--teal)", color: "#0a0a0a" }}
+          title={
+            isEdit && !formHasChanged
+              ? "No changes to submit"
+              : "Apply now - match score coming soon!"
+          }
         >
-          {analyzing ? (
+          {submitting ? (
             <>
               <Loader className="animate-spin" size={18} />
-              Analyzing Match...
+              Applying...
             </>
           ) : (
-            "Analyze & Continue"
+            "Apply Now"
           )}
-        </button>
-        <button
-          onClick={handleApplyDirectly}
-          disabled={!selectedCvId || analyzing}
-          className="flex-1 brutal-btn px-4 py-3 font-bold uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2 border-2 border-black"
-          style={{ background: "var(--teal)", color: "#0a0a0a" }}
-          title={isEdit ? "Update your application instantly without running AI tests" : "Submit the application immediately without AI analysis"}
-        >
-          {isEdit ? "Update Directly" : "Apply Directly"}
         </button>
       </div>
     </>

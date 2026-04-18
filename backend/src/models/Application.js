@@ -150,6 +150,18 @@ const applicationSchema = new mongoose.Schema(
         default: "",
       },
     },
+    strengths: {
+      type: [String],
+      default: [],
+    },
+    weaknesses: {
+      type: [String],
+      default: [],
+    },
+    aiAnalysisPending: {
+      type: Boolean,
+      default: false,
+    },
     status: {
       type: String,
       enum: ["pending", "accepted", "rejected"],
