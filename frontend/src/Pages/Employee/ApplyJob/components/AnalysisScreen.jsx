@@ -1,0 +1,167 @@
+import React from "react";
+import { ChevronLeft, CheckCircle2, XCircle, Zap, AlertTriangle, ArrowRight } from "lucide-react";
+
+export default function AnalysisScreen({ job, matchAnalysis, setStep, setMatchAnalysis, setCvFile, handleSubmitApplication, submitting, isEdit }) {
+  const matchPercentage = matchAnalysis?.matchPercentage || (matchAnalysis?.overall_fit_percentage || 0);
+  const isQualified = matchPercentage >= 50;
+  
+  // Extract details handles both the new AI schema and the old schema
+  const matchDetails = matchAnalysis.matchDetails || {};
+  const aiSummary = matchAnalysis.recruiter_summary || matchDetails.matchAnalysis || "";
+  const strengthsList = matchAnalysis.strengths || [];
+  const weaknessesList = matchAnalysis.weaknesses || [];
+
+  return (
+    <div className="max-w-4xl mx-auto flex flex-col gap-8 pb-10 bg-[var(--bg)] p-4 sm:p-8 border-[6px] border-black shadow-[12px_12px_0px_#000]">
+      {/* Header Area */}
+      <div className="flex items-center justify-between border-b-[6px] border-black pb-6">
+        <div>
+          <button
+            onClick={() => {
+              setStep("upload");
+              setMatchAnalysis(null);
+              setCvFile(null);
+            }}
+            className="flex items-center gap-2 mb-4 text-black hover:bg-black hover:text-white transition-colors font-mono font-bold uppercase tracking-widest text-xs border-4 border-black px-4 py-2"
+          >
+            <ChevronLeft size={16} /> Retour
+          </button>
+          <h1 className="text-4xl md:text-5xl font-black font-['Space_Grotesk'] uppercase tracking-tight text-black">
+            Action Analysis
+          </h1>
+          <p className="font-mono text-base text-black font-bold uppercase tracking-widest mt-2 border-2 border-black inline-block px-3 py-1 bg-[var(--yellow)]">
+            POSITION: {job.position}
+          </p>
+        </div>
+      </div>
+
+      {/* Main Score Area */}
+      <div className="flex flex-col md:flex-row gap-6">
+        {/* Massive Score Block */}
+        <div className="flex-1 border-[6px] border-black p-8 flex flex-col items-center justify-center bg-white shadow-[8px_8px_0px_#000] relative">
+          <div className="absolute top-4 right-4 bg-white text-black p-2 border-4 border-black shadow-[4px_4px_0px_#000]">
+            {isQualified ? <CheckCircle2 size={32} /> : <XCircle size={32} />}
+          </div>
+          
+          <span className="font-mono font-black text-sm uppercase tracking-[0.2em] text-black mb-2 px-4 py-1 border-2 border-black">
+            Overall AI Score
+          </span>
+          
+          <h2 className="text-8xl md:text-[9rem] font-black leading-none text-black">
+            {matchPercentage}<span className="text-4xl">%</span>
+          </h2>
+        </div>
+
+        {/* Breakdown Panel */}
+        <div className="flex-[1.5] border-[6px] border-black p-6 bg-white shadow-[8px_8px_0px_#000] flex flex-col">
+          <h3 className="font-black font-['Space_Grotesk'] text-2xl uppercase border-b-4 border-black pb-4 mb-6 flex items-center gap-3 text-black">
+            <Zap size={24} /> Matrix Map
+          </h3>
+          <div className="flex-1 flex flex-col justify-around gap-4">
+            {[
+              { label: "Technical Capabilities", score: matchDetails?.technicalSkillsMatch || 0, color: "var(--teal)" },
+              { label: "Experience Match", score: matchDetails?.experienceMatch || 0, color: "var(--yellow)" },
+              { label: "Interpersonal Skills", score: matchDetails?.softSkillsMatch || 0, color: "var(--coral)" },
+            ].map((item, i) => (
+              <div key={i} className="flex flex-col gap-1">
+                <div className="flex justify-between items-end">
+                  <span className="font-mono text-sm font-bold uppercase text-black">
+                    {item.label}
+                  </span>
+                  <span className="font-mono text-2xl font-black text-black">
+                    {item.score}%
+                  </span>
+                </div>
+                {/* Clean progress bar */}
+                <div className="w-full h-8 border-[3px] border-black bg-[#eee] relative">
+                  <div
+                    className="h-full absolute top-0 left-0 border-r-[3px] border-black"
+                    style={{ 
+                      width: `${item.score}%`, 
+                      backgroundColor: item.color
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Summary Notes */}
+      {aiSummary && (
+        <div className="border-[6px] border-black p-6 bg-white shadow-[8px_8px_0px_#000]">
+          <h3 className="font-black font-['Space_Grotesk'] text-2xl uppercase mb-4 text-black border-b-4 border-black inline-block pb-1">
+            Recruiter Summary
+          </h3>
+          <p className="font-mono text-base font-bold text-black leading-relaxed">
+            {aiSummary}
+          </p>
+        </div>
+      )}
+
+      {/* Grid for Strengths and Weaknesses */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="border-[6px] border-black p-6 bg-white shadow-[8px_8px_0px_#000]">
+          <h3 className="font-black font-['Space_Grotesk'] text-xl uppercase mb-4 text-black bg-[var(--teal)] px-3 py-1 inline-block border-2 border-black">
+            Detected Strengths
+          </h3>
+          {strengthsList.length > 0 ? (
+            <ul className="space-y-3">
+              {strengthsList.map((strength, i) => (
+                <li key={i} className="flex gap-3 font-mono text-sm font-bold text-black items-start">
+                  <span className="font-black text-xl leading-none mt-1 text-[var(--teal)]">+</span>
+                  {strength}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="font-mono text-sm text-[var(--fg-muted)] italic">No strengths listed.</p>
+          )}
+        </div>
+
+        <div className="border-[6px] border-black p-6 bg-white shadow-[8px_8px_0px_#000]">
+          <h3 className="font-black font-['Space_Grotesk'] text-xl uppercase mb-4 text-black bg-[var(--coral)] px-3 py-1 inline-block border-2 border-black">
+            Missing Elements
+          </h3>
+          {weaknessesList.length > 0 ? (
+            <ul className="space-y-3">
+              {weaknessesList.map((weakness, i) => (
+                <li key={i} className="flex gap-3 font-mono text-sm font-bold text-black items-start">
+                  <span className="font-black text-xl leading-none mt-1 text-[var(--coral)]">-</span>
+                  {weakness}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="font-mono text-sm text-[var(--fg-muted)] italic">No elements missing.</p>
+          )}
+        </div>
+      </div>
+
+      {/* Application Actions */}
+      <div className="mt-4 pt-6 border-t-[6px] border-black">
+        {!isQualified && (
+           <div className="flex items-center gap-4 bg-[var(--yellow)] border-4 border-black p-4 mb-6 shadow-[4px_4px_0px_#000]">
+              <AlertTriangle className="text-black shrink-0" size={32} />
+              <p className="font-mono text-sm text-black font-bold">
+                WARNING: Your score is below 50%. Proceed with application at your own discretion.
+              </p>
+           </div>
+        )}
+
+        <button
+          onClick={handleSubmitApplication}
+          disabled={submitting}
+          className="w-full flex items-center justify-center gap-4 bg-[var(--teal)] hover:bg-[#fff] text-black border-[6px] border-black py-6 px-10 shadow-[8px_8px_0px_#000] hover:translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_#000] transition-all disabled:opacity-50"
+        >
+          <span className="font-black font-['Space_Grotesk'] text-3xl uppercase tracking-widest">
+            {submitting ? "Processing..." : (isEdit ? "Update Submission" : "Submit Application")}
+          </span>
+          {!submitting && <ArrowRight size={32} />}
+        </button>
+      </div>
+
+    </div>
+  );
+}

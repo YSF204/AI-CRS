@@ -8,6 +8,11 @@ const cvSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    fullName: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     jobTitle: {
       type: String,
       required: true,
@@ -60,10 +65,15 @@ const cvSchema = new mongoose.Schema(
           required: true,
           trim: true,
         },
-        duration: {
-          type: Number,
-          required: true,
-          min: 0,
+        durationFrom: {
+          type: String,
+          trim: true,
+          default: "",
+        },
+        durationTo: {
+          type: String,
+          trim: true,
+          default: "",
         },
         position: {
           type: String,
@@ -83,10 +93,15 @@ const cvSchema = new mongoose.Schema(
           required: true,
           trim: true,
         },
-        duration: {
-          type: Number,
-          required: true,
-          min: 0,
+        durationFrom: {
+          type: String,
+          trim: true,
+          default: "",
+        },
+        durationTo: {
+          type: String,
+          trim: true,
+          default: "",
         },
         certification: {
           type: String,
@@ -115,23 +130,34 @@ const cvSchema = new mongoose.Schema(
       {
         title: {
           type: String,
-          required: true,
           trim: true,
+          default: "",
+        },
+        sectionType: {
+          type: String,
+          enum: ["projects", "hobbies", "other", "certifications"],
+          default: "other",
         },
         items: [
           {
             name: {
               type: String,
-              required: true,
               trim: true,
+              default: "",
             },
             description: {
               type: String,
               trim: true,
             },
-            duration: {
-              type: Number,
-              min: 0,
+            durationFrom: {
+              type: String,
+              trim: true,
+              default: "",
+            },
+            durationTo: {
+              type: String,
+              trim: true,
+              default: "",
             },
             link: {
               type: String,
@@ -141,16 +167,26 @@ const cvSchema = new mongoose.Schema(
         ],
       },
     ],
+    templateId: {
+      type: Number,
+      min: 1,
+      max: 7,
+      default: 1,
+    },
+    profileImage: {
+      type: String,
+      default: "",
+    },
     layout: {
       sectionOrder: {
         type: [String],
-        default: []
+        default: [],
       },
       visibleSections: {
         type: Map,
         of: Boolean,
-        default: {}
-      }
+        default: {},
+      },
     },
   },
   {

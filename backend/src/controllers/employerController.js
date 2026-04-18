@@ -1,21 +1,18 @@
-import Employer from "../models/Employer.js";
 import catchAsync from "../utils/catchAsync.js";
-import AppError from "../utils/appError.js";
+import { createEmployerProfile } from "../services/employers/profile/createEmployerProfile.js";
+import { updateEmployerProfile } from "../services/employers/profile/updateEmployerProfile.js";
+import { deleteEmployerProfile } from "../services/employers/profile/deleteEmployerProfile.js";
+import { getEmployerProfile } from "../services/employers/profile/getEmployerProfile.js";
 
 // ================================== //
 //        CREATE EMPLOYER PROFILE     //
 // ================================== //
 
 export const createEmployer = catchAsync(async (req, res, next) => {
-    const { company } = req.body;
-
-    if (!company) return next(new AppError("Please provide company details", 400));
-
-    const existing = await Employer.findOne({ userId: req.user._id });
-    
-    if (existing) return next(new AppError("Employer profile already exists", 400));
-
-    const employer = await Employer.create({ userId: req.user._id, company });
+    const employer = await createEmployerProfile({
+        userId: req.user._id,
+        company: req.body.company,
+    });
 
     res.status(201).json({ success: true, data: { employer } });
 });
@@ -25,17 +22,12 @@ export const createEmployer = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const updateEmployer = catchAsync(async (req, res, next) => {
-    const employer = await Employer.findOne({ userId: req.user._id });
+    const employer = await updateEmployerProfile({
+        userId: req.user._id,
+        body: req.body,
+    });
 
-    if (!employer) return next(new AppError("Employer profile not found", 404));
-
-    const updated = await Employer.findByIdAndUpdate(
-        employer._id,
-        req.body,
-        { new: true, runValidators: true }
-    );
-
-    res.status(200).json({ success: true, data: { employer: updated } });
+    res.status(200).json({ success: true, data: { employer } });
 });
 
 // ================================== //
@@ -43,11 +35,7 @@ export const updateEmployer = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const deleteEmployer = catchAsync(async (req, res, next) => {
-    const employer = await Employer.findOne({ userId: req.user._id });
-
-    if (!employer) return next(new AppError("Employer profile not found", 404));
-
-    await Employer.findByIdAndDelete(employer._id);
+    await deleteEmployerProfile({ userId: req.user._id });
 
     res.status(200).json({ success: true, message: "Employer profile deleted" });
 });
@@ -57,9 +45,7 @@ export const deleteEmployer = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const getMyEmployerProfile = catchAsync(async (req, res, next) => {
-    const employer = await Employer.findOne({ userId: req.user._id });
-
-    if (!employer) return next(new AppError("Employer profile not found", 404));
+    const employer = await getEmployerProfile({ userId: req.user._id });
 
     res.status(200).json({ success: true, data: { employer } });
 });

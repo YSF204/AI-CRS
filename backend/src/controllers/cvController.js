@@ -1,53 +1,23 @@
-import fs from "fs";
-import CV from "../models/CV.js";
-import CVAnalysis from "../models/CVAnalysis.js";
 import catchAsync from "../utils/catchAsync.js";
-import AppError from "../utils/appError.js";
-import { analyzeCVFromFile, analyzeCVFromDatabase } from "../integrations/ai/openai.js";
-import htmlToPdf from "../utils/pdfGen.js";
-
-
-const verifyOwnership = (cv, userId) => {
-    if (cv.userId.toString() !== userId.toString()) {
-        throw new AppError("Not authorized to access this CV", 403);
-    }
-};
+import { createCv } from "../services/cvs/commands/createCv.js";
+import { getMyCvs } from "../services/cvs/queries/getMyCvs.js";
+import { getCvById } from "../services/cvs/queries/getCvById.js";
+import { updateCv } from "../services/cvs/commands/updateCv.js";
+import { deleteCv } from "../services/cvs/commands/deleteCv.js";
+import { analyzeUploadedCvFile } from "../services/cvs/analysis/analyzeUploadedCvFile.js";
+import { analyzeSavedCv } from "../services/cvs/analysis/analyzeSavedCv.js";
+import { getCvAnalyses } from "../services/cvs/queries/getCvAnalyses.js";
+import { generateCvPdfDownload } from "../services/cvs/pdf/downloadCvPdf.js";
+import { analyzeCvSection } from "../services/cvs/analysis/analyzeCvSection.js";
 
 // ================================== //
 //          CREATE NEW CV             //
 // ================================== //
 
 export const createCV = catchAsync(async (req, res, next) => {
-    const {
-        jobTitle,
-        summary,
-        contact,
-        address,
-        experience,
-        education,
-        language,
-        softSkills,
-        technicalSkills,
-        customSections,
-        layout,
-    } = req.body;
-
-    const cv = await CV.create({
+    const cv = await createCv({
         userId: req.user._id,
-        jobTitle,
-        summary: summary || "",
-        contact: contact || {},
-        address: address || {},
-        experience: experience || [],
-        education: education || [],
-        language: language || [],
-        softSkills: softSkills || [],
-        technicalSkills: technicalSkills || [],
-        customSections: customSections || [],
-        layout: {
-            sectionOrder: layout?.sectionOrder || [],
-            visibleSections: layout?.visibleSections || {},
-        },
+        payload: req.body,
     });
 
     res.status(201).json({
@@ -62,7 +32,7 @@ export const createCV = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const getMyCVs = catchAsync(async (req, res) => {
-    const cvs = await CV.find({ userId: req.user._id }).sort({ createdAt: -1 });
+    const cvs = await getMyCvs({ userId: req.user._id });
 
     res.status(200).json({
         success: true,
@@ -76,13 +46,10 @@ export const getMyCVs = catchAsync(async (req, res) => {
 // ================================== //
 
 export const getCVById = catchAsync(async (req, res, next) => {
-    const cv = await CV.findById(req.params.id);
-
-    if (!cv) {
-        return next(new AppError("CV not found", 404));
-    }
-
-    verifyOwnership(cv, req.user._id);
+    const cv = await getCvById({
+        cvId: req.params.id,
+        userId: req.user._id,
+    });
 
     res.status(200).json({
         success: true,
@@ -95,32 +62,11 @@ export const getCVById = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const updateCV = catchAsync(async (req, res, next) => {
-    const cv = await CV.findById(req.params.id);
-
-    if (!cv) {
-        return next(new AppError("CV not found", 404));
-    }
-
-    verifyOwnership(cv, req.user._id);
-
-    const { layout, ...rest } = req.body;
-
-    // Build update object
-    const updateData = { ...rest, userId: req.user._id };
-
-    // Merge layout fields individually to avoid overwriting the whole layout object
-    if (layout?.sectionOrder !== undefined) {
-        updateData["layout.sectionOrder"] = layout.sectionOrder;
-    }
-    if (layout?.visibleSections !== undefined) {
-        updateData["layout.visibleSections"] = layout.visibleSections;
-    }
-
-    const updatedCV = await CV.findByIdAndUpdate(
-        req.params.id,
-        updateData,
-        { new: true, runValidators: true },
-    );
+    const updatedCV = await updateCv({
+        cvId: req.params.id,
+        userId: req.user._id,
+        payload: req.body,
+    });
 
     res.status(200).json({
         success: true,
@@ -134,16 +80,10 @@ export const updateCV = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const deleteCV = catchAsync(async (req, res, next) => {
-    const cv = await CV.findById(req.params.id);
-
-    if (!cv) {
-        return next(new AppError("CV not found", 404));
-    }
-
-    verifyOwnership(cv, req.user._id);
-
-    await CVAnalysis.deleteMany({ CVId: cv._id });
-    await CV.findByIdAndDelete(req.params.id);
+    await deleteCv({
+        cvId: req.params.id,
+        userId: req.user._id,
+    });
 
     res.status(200).json({
         success: true,
@@ -157,57 +97,20 @@ export const deleteCV = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const analyzeCVFile = catchAsync(async (req, res, next) => {
-    if (!req.file) return next(new AppError("Please upload a PDF file", 400));
-
-    const { jobDescription } = req.body;
-
-    const aiResult = await analyzeCVFromFile(req.file.path, jobDescription);
-
-    let parsed;
-    try {
-        const clean = aiResult.replace(/```json|```/g, "").trim();
-        parsed = JSON.parse(clean);
-    } catch {
-        fs.unlinkSync(req.file.path);
-        return next(new AppError("AI returned an invalid response, please try again", 500));
+    if (!req.file) {
+        return next(new AppError("Please upload a PDF file", 400));
     }
 
-    const str = (v) => (Array.isArray(v) ? v.join("\n• ") : v || "N/A");
-
-    const cvData = parsed.cvData || {};
-    const cv = await CV.create({
+    const result = await analyzeUploadedCvFile({
+        filePath: req.file.path,
         userId: req.user._id,
-        jobTitle: cvData.jobTitle || "Uploaded CV",
-        summary: cvData.summary || "Extracted from uploaded PDF",
-        contact: cvData.contact || {},
-        address: cvData.address || { city: "N/A", street: "N/A" },
-        experience: cvData.experience || [],
-        education: cvData.education || [],
-        technicalSkills: cvData.technicalSkills || [],
-        softSkills: cvData.softSkills || [],
-        language: cvData.language || [],
-        layout: {
-            sectionOrder: cvData.layout?.sectionOrder || [],
-            visibleSections: cvData.layout?.visibleSections || {},
-        },
+        jobDescription: req.body.jobDescription,
     });
-
-    const analysisData = parsed.analysis || {};
-    const analysis = await CVAnalysis.create({
-        userId: req.user._id,
-        CVId: cv._id,
-        atsScore: analysisData.score || 0,
-        strength: str(analysisData.strengths),
-        weakness: str(analysisData.weaknesses),
-        suggestion: str(analysisData.suggestions),
-    });
-
-    fs.unlinkSync(req.file.path);
 
     res.status(201).json({
         success: true,
         message: "CV extracted and analyzed successfully",
-        data: { cv, analysis },
+        data: { cv: result.cv, analysis: result.analysis },
     });
 });
 
@@ -216,53 +119,10 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
 //  ANALYSIS FOR CVs IN APP           //
 // ================================== //
 export const analyzeCV = catchAsync(async (req, res, next) => {
-    const { jobDescription } = req.body;
-
-    const cv = await CV.findById(req.params.id);
-
-    if (!cv) {
-        return next(new AppError("CV not found", 404));
-    }
-
-    verifyOwnership(cv, req.user._id);
-
-    // convert the CV data into plain text for the AI
-    const cvText = [
-        `Job Title: ${cv.jobTitle}`,
-        `Summary: ${cv.summary}`,
-        `Email: ${cv.contact?.email || "N/A"}`,
-        `Phone: ${cv.contact?.phone || "N/A"}`,
-        `Location: ${cv.address?.city || ""}, ${cv.address?.street || ""}`,
-        `Experience: ${cv.experience?.map(e => `${e.position} at ${e.institutionName} (${e.duration}y) - ${e.summary || ""}`).join(" | ") || "None"}`,
-        `Education: ${cv.education?.map(e => `${e.certification} at ${e.institutionName} (${e.duration}y)`).join(" | ") || "None"}`,
-        `Technical Skills: ${cv.technicalSkills?.join(", ") || "None"}`,
-        `Soft Skills: ${cv.softSkills?.join(", ") || "None"}`,
-        `Languages: ${cv.language?.join(", ") || "None"}`,
-        ...cv.customSections?.map(s => `${s.title}: ${s.items?.map(i => `${i.name}${i.description ? " - " + i.description : ""}`).join(", ")}`) || [],
-        `Layout: ${JSON.stringify(cv.layout)}`,
-    ].join("\n");
-
-    const aiResult = await analyzeCVFromDatabase(cvText, jobDescription);
-
-    let parsed;
-    try {
-        const clean = aiResult.replace(/```json|```/g, "").trim();
-        parsed = JSON.parse(clean);
-    } catch {
-        return next(new AppError("AI returned an invalid response, please try again", 500));
-    }
-
-    const str = (v) => (Array.isArray(v) ? v.join("\n• ") : v || "N/A");
-
-    // save the analysis linked to the CV
-    const analysisData = parsed.analysis || {};
-    const analysis = await CVAnalysis.create({
+    const analysis = await analyzeSavedCv({
+        cvId: req.params.id,
         userId: req.user._id,
-        CVId: cv._id,
-        atsScore: analysisData.score || 0,
-        strength: str(analysisData.strengths),
-        weakness: str(analysisData.weaknesses),
-        suggestion: str(analysisData.suggestions),
+        jobDescription: req.body.jobDescription,
     });
 
     res.status(201).json({
@@ -277,16 +137,9 @@ export const analyzeCV = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const getCVAnalyses = catchAsync(async (req, res, next) => {
-    const cv = await CV.findById(req.params.id);
-
-    if (!cv) {
-        return next(new AppError("CV not found", 404));
-    }
-
-    verifyOwnership(cv, req.user._id);
-
-    const analyses = await CVAnalysis.find({ CVId: cv._id }).sort({
-        createdAt: -1,
+    const analyses = await getCvAnalyses({
+        cvId: req.params.id,
+        userId: req.user._id,
     });
 
     res.status(200).json({
@@ -301,34 +154,33 @@ export const getCVAnalyses = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const downloadPDF = catchAsync(async (req, res, next) => {
-    const { html } = req.body;
+    const result = await generateCvPdfDownload({
+        cvId: req.params.id,
+        userId: req.user._id,
+        html: req.body.html,
+    });
 
-    if (!html) {
-        return next(new AppError("Please provide HTML content", 400));
-    }
-
-    const cv = await CV.findById(req.params.id);
-
-    if (!cv) {
-        return next(new AppError("CV not found", 404));
-    }
-
-    verifyOwnership(cv, req.user._id);
-
-    await cv.populate('userId', 'firstName lastName');
-
-    const pdfResult = await htmlToPdf(html, cv._id);
-
-    const filename = `cv_${cv.userId.fullName.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
-    res.download(pdfResult.absolutePath, filename, (err) => {
-        
-        if (fs.existsSync(pdfResult.absolutePath)) {
-            fs.unlinkSync(pdfResult.absolutePath);
-        }
-        
+    res.download(result.filePath, result.filename, (err) => {
+        result.cleanup();
         if (err) {
             return next(new AppError("Error downloading PDF", 500));
         }
+    });
+});
+
+// ================================== //
+//    ANALYZE CV SECTION              //
+// ================================== //
+
+export const analyzeSection = catchAsync(async (req, res, next) => {
+    const result = await analyzeCvSection({
+        section: req.body.section,
+        data: req.body.data,
+    });
+
+    res.status(200).json({
+        success: true,
+        data: result,
     });
 });
 

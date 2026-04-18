@@ -1,0 +1,210 @@
+/* ==========================================
+   PRINT STYLES FOR A4 PAPER STANDARD
+   ========================================== */
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+    background: #ffffff;
+  }
+
+  /* Ensure all CV containers follow A4 standard */
+  .cv-a4-container,
+  [class*="CV_template_"] > div {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    max-height: 297mm !important;
+    margin: 0 !important;
+    padding: 15mm !important;
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Prevent overflow */
+  * {
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Ensure text doesn't overflow */
+  [class*="CV_template_"] * {
+    max-width: 100% !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+
+  /* Hide screen-only elements */
+  .screen-only {
+    display: none !important;
+  }
+
+  /* Ensure proper print colors */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* Force page breaks between sections */
+  .break-inside-avoid {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Remove shadows for print */
+  * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+}
+
+/* ==========================================
+   SCREEN PREVIEW STYLES
+   ========================================== */
+
+@media screen {
+  /* Scale down A4 for screen viewing */
+  .cv-a4-container,
+  [class*="CV_template_"] > div {
+    max-width: 210mm;
+    min-height: 297mm;
+    margin: 20px auto;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Responsive scaling for smaller screens */
+  @media (max-width: 768px) {
+    .cv-a4-container,
+    [class*="CV_template_"] > div {
+      transform: scale(0.8);
+      transform-origin: top center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .cv-a4-container,
+    [class*="CV_template_"] > div {
+      transform: scale(0.6);
+      transform-origin: top center;
+    }
+  }
+}
+
+/* ==========================================
+   A4 DIMENSION CONSTANTS
+   ========================================== */
+
+:root {
+  --a4-width: 210mm;
+  --a4-height: 297mm;
+  --a4-padding: 15mm;
+  --a4-margin-top: 15mm;
+  --a4-margin-bottom: 15mm;
+  --a4-margin-left: 15mm;
+  --a4-margin-right: 15mm;
+}
+
+/* ==========================================
+   PRINT-FRIENDLY UTILITIES
+   ========================================== */
+
+.print-only {
+  display: none;
+}
+
+@media print {
+  .print-only {
+    display: block !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* ==========================================
+   A4 TYPOGRAPHY STANDARDS
+   ========================================== */
+
+.a4-text-base {
+  font-size: 11pt;
+  line-height: 1.4;
+}
+
+.a4-text-small {
+  font-size: 9pt;
+  line-height: 1.3;
+}
+
+.a4-text-heading {
+  font-size: 14pt;
+  line-height: 1.3;
+}
+
+.a4-text-title {
+  font-size: 18pt;
+  line-height: 1.2;
+  font-weight: bold;
+}
+
+/* ==========================================
+   A4 SPACING STANDARDS
+   ========================================== */
+
+.a4-spacing-xs {
+  margin-bottom: 2mm;
+}
+
+.a4-spacing-sm {
+  margin-bottom: 4mm;
+}
+
+.a4-spacing-md {
+  margin-bottom: 6mm;
+}
+
+.a4-spacing-lg {
+  margin-bottom: 8mm;
+}
+
+.a4-spacing-xl {
+  margin-bottom: 10mm;
+}
+
+/* ==========================================
+   A4 LAYOUT UTILITIES
+   ========================================== */
+
+.a4-full-width {
+  width: 100%;
+  max-width: 100%;
+}
+
+.a4-half-width {
+  width: calc(50% - 2mm);
+}
+
+.a4-third-width {
+  width: calc(33.333% - 2mm);
+}
+
+.a4-two-thirds-width {
+  width: calc(66.666% - 2mm);
+}
+
+/* ==========================================
+   BROWSER PRINT BUTTON
+   ========================================== */
+
+@media print {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
