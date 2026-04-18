@@ -9,9 +9,14 @@ export default function RootLayout() {
   const showChatbot = user?.role === 'EMPLOYEE';
 
   return (
-    <>
-      <Outlet />
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
+      {/* Editorial Dashboard Shell */}
+      <div className="dashboard-shell">
+        <Outlet />
+      </div>
+
+      {/* Chatbot Widget - Employee Only */}
       {showChatbot && <ChatbotWidget key={location.pathname} />}
-    </>
+    </div>
   );
 }

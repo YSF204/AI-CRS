@@ -19,24 +19,20 @@ export default function ChatbotWidget() {
   const bottomRef = useRef(null);
 
   const colors = {
-    bg:          theme === "dark" ? "#1a1a1a" : "#ffffff",
-    border:      theme === "dark" ? "#2a2a3a" : "#e2e2e8",
-    headerBg:    theme === "dark" ? "#1a1a1a" : "#f8f8fc",
-    titleColor:  theme === "dark" ? "#e8e8ec" : "#111118",
-    mutedColor:  theme === "dark" ? "#6b6b7b" : "#888896",
-    aiBubble:    theme === "dark" ? "#252535" : "#f0f0f8",
-    aiText:      theme === "dark" ? "#e8e8ec" : "#111118",
-    userBubble:  "#ffe630",
-    userText:    "#0f0f0f",
-    inputBg:     theme === "dark" ? "#0f0f0f" : "#f4f4f8",
-    inputText:   theme === "dark" ? "#e8e8ec" : "#111118",
-    cardBg:      theme === "dark" ? "#1e1e2e" : "#f4f4fc",
-    shadow:      theme === "dark"
-      ? "0 24px 64px rgba(0,0,0,0.5)"
-      : "0 24px 64px rgba(0,0,0,0.12)",
-    floatShadow: theme === "dark"
-      ? "0 4px 20px rgba(255,230,48,0.3)"
-      : "0 4px 20px rgba(180,160,0,0.25)",
+    bg:          'var(--card-bg)',
+    border:      'var(--border-strong)',
+    headerBg:    'var(--bg-alt)',
+    titleColor:  'var(--color-text-primary)',
+    mutedColor:  'var(--color-text-secondary)',
+    aiBubble:    'var(--bg-alt)',
+    aiText:      'var(--color-text-primary)',
+    userBubble:  'var(--color-warning)',
+    userText:    'var(--color-text-primary)',
+    inputBg:     'var(--bg-alt)',
+    inputText:   'var(--color-text-primary)',
+    cardBg:      'var(--card-bg)',
+    shadow:      'var(--shadow-lg)',
+    floatShadow: '0 4px 20px rgba(200, 169, 126, 0.3)',
   };
 
   const isArabic = (text) => /[\u0600-\u06FF]/.test(text);

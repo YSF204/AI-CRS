@@ -39,7 +39,7 @@ export default function AnimatedList({
       setSelectedIndex((prev) => {
         let next = prev ?? -1;
         if (e.key === 'ArrowDown') next = Math.min(next + 1, items.length - 1);
-        if (e.key === 'ArrowUp')   next = Math.max(next - 1, 0);
+        if (e.key === 'ArrowUp') next = Math.max(next - 1, 0);
         if (e.key === 'Enter' && next >= 0) onItemSelect?.(items[next], next);
 
         // scroll selected item into view
@@ -67,7 +67,7 @@ export default function AnimatedList({
   const defaultRender = (item, _index, isSelected) => (
     <span
       className="block px-4 py-3 font-mono text-sm font-bold uppercase tracking-wider transition-colors"
-      style={{ color: isSelected ? '#0a0a0a' : 'var(--fg)' }}
+      style={{ color: isSelected ? 'var(--accent-text)' : 'var(--fg)' }}
     >
       {String(item)}
     </span>
@@ -108,7 +108,7 @@ export default function AnimatedList({
         <AnimatePresence initial={false}>
           {items.map((item, index) => {
             const isSelected = selectedIndex === index;
-            const isHovered  = hovered === index;
+            const isHovered = hovered === index;
 
             return (
               <motion.div
@@ -129,14 +129,14 @@ export default function AnimatedList({
                   background: isSelected
                     ? 'var(--teal)'
                     : isHovered
-                    ? 'var(--card-bg-hover, var(--card-bg))'
-                    : 'var(--card-bg)',
+                      ? 'var(--card-bg-hover, var(--card-bg))'
+                      : 'var(--card-bg)',
                   transform: isHovered && !isSelected ? 'translate(-2px, -2px)' : 'translate(0,0)',
                   boxShadow: isSelected
                     ? '4px 4px 0 #0a0a0a'
                     : isHovered
-                    ? '6px 6px 0 #0a0a0a'
-                    : '3px 3px 0 #0a0a0a',
+                      ? '6px 6px 0 #0a0a0a'
+                      : '3px 3px 0 #0a0a0a',
                   transition: 'background 0.15s ease, transform 0.12s ease, box-shadow 0.12s ease',
                 }}
               >

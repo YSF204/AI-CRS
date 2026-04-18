@@ -5,9 +5,10 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { useAuth } from '../../context/AuthContext';
 
 /**
- * UserMenu — avatar/burger button that opens a dropdown with
- * profile info, a link to /employee/profile, and logout.
- * Fully self-contained: reads auth itself, no props needed.
+ * UserMenu — User dropdown with Paper design system.
+ * Matches new navbar visual language with semantic tokens.
+ *
+ * @param {string} profileHref - Link to user profile page
  */
 export default function UserMenu({ profileHref = '/employee/profile' }) {
   const { user, logout } = useAuth();
@@ -24,14 +25,14 @@ export default function UserMenu({ profileHref = '/employee/profile' }) {
       {({ open }) => (
         <>
           <MenuButton
-            className="inline-flex items-center gap-2 px-4 py-2.5 border-[3px] border-black shadow-[4px_4px_0_black] bg-(--yellow) font-['Space_Grotesk'] font-bold text-sm uppercase tracking-[0.05em]"
+            className="nav-user-button focus-ring"
+            aria-label="User menu"
           >
-            <span className="max-w-[180px] truncate text-black">
+            <span className="max-w-[180px] truncate">
               {fullName || 'My Account'}
             </span>
             <ChevronDown
               size={16}
-              color="#0a0a0a"
               style={{
                 transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
                 transition: 'transform 0.2s ease',
@@ -42,13 +43,16 @@ export default function UserMenu({ profileHref = '/employee/profile' }) {
           <MenuItems
             anchor="bottom end"
             transition
-            className="z-[200] mt-2 min-w-[280px] border-[3px] border-black shadow-[6px_6px_0_black] bg-(--card-bg) p-0 focus:outline-none origin-top-right transition duration-200 ease-out data-[closed]:opacity-0 data-[closed]:scale-95 data-[closed]:-translate-y-1"
+            className="user-menu-dropdown z-[200] mt-2 min-w-[280px] border border-[var(--border-strong)] shadow-[var(--shadow-md)] bg-[var(--card-bg)] rounded-xl overflow-hidden p-0 focus:outline-none origin-top-right transition duration-200 ease-out data-[closed]:opacity-0 data-[closed]:scale-95 data-[closed]:-translate-y-1"
           >
-            <div className="px-4 py-4 border-b-2 border-black bg-(--yellow)">
-              <p className="font-['Space_Grotesk'] font-extrabold text-sm uppercase tracking-[0.04em] text-black m-0">
+            <div
+              className="px-4 py-4 border-b border-[var(--border-strong)]"
+              style={{ background: 'var(--surface-3)' }}
+            >
+              <p className="font-['Montserrat'] font-bold text-sm m-0" style={{ color: 'var(--text-primary)' }}>
                 {fullName || 'My Account'}
               </p>
-              <p className="font-mono text-xs text-black/70 mt-1 break-all m-0">
+              <p className="font-mono text-xs mt-1 break-all m-0" style={{ color: 'var(--text-secondary)' }}>
                 {user?.email || ''}
               </p>
             </div>
@@ -57,7 +61,8 @@ export default function UserMenu({ profileHref = '/employee/profile' }) {
               <MenuItem>
                 <Link
                   to={profileHref}
-                  className="flex items-center gap-3 px-4 py-3 rounded-md font-['Space_Grotesk'] font-bold text-sm uppercase tracking-[0.06em] text-(--fg) data-[focus]:bg-(--bg)"
+                  className="flex items-center gap-3 px-4 py-3 rounded-md font-['Montserrat'] font-medium text-sm transition-colors duration-200 hover:bg-[var(--surface-4)] focus-ring"
+                  style={{ color: 'var(--text-primary)' }}
                 >
                   <User size={16} />
                   My Profile
@@ -68,7 +73,8 @@ export default function UserMenu({ profileHref = '/employee/profile' }) {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-md font-['Space_Grotesk'] font-bold text-sm uppercase tracking-[0.06em] text-(--coral) data-[focus]:bg-(--bg)"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-md font-['Montserrat'] font-medium text-sm transition-colors duration-200 hover:bg-[var(--color-danger-light)] focus-ring"
+                  style={{ color: 'var(--color-danger)' }}
                 >
                   <LogOut size={16} />
                   Log Out

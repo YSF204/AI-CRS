@@ -8,11 +8,11 @@ import api from "../../services/api";
 import useFetch from "../../hooks/useFetch";
 
 const COLORS = [
-  "var(--teal)",
-  "var(--coral)",
-  "var(--yellow)",
-  "var(--mint)",
-  "var(--blue)",
+  "var(--color-primary)",      // teal → primary
+  "var(--color-danger)",       // coral → danger
+  "var(--color-warning)",      // yellow → warning
+  "var(--color-success)",      // mint → success
+  "var(--color-primary)",      // blue → primary
 ];
 
 export default function CVs() {
@@ -98,13 +98,13 @@ export default function CVs() {
     );
 
     return [
-      { label: "Total", value: safeCvs.length, color: "var(--coral)" },
+      { label: "Total", value: safeCvs.length, color: "var(--color-danger)" },
       {
         label: "With Summary",
         value: safeCvs.filter((cv) => cv.summary).length,
-        color: "var(--teal)",
+        color: "var(--color-primary)",
       },
-      { label: "Skills", value: skillsCount, color: "var(--yellow)" },
+      { label: "Skills", value: skillsCount, color: "var(--color-warning)" },
     ];
   }, [cvs]);
 
@@ -117,7 +117,7 @@ export default function CVs() {
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold font-['Space_Grotesk'] uppercase tracking-tight flex items-center gap-3">
-              <FileText size={28} className="text-[var(--coral)]" />
+              <FileText size={28} className="text-[var(--color-danger)]" />
               My CVs
             </h1>
             <p className="font-mono text-sm text-[var(--fg-muted)] mt-1">
@@ -137,7 +137,7 @@ export default function CVs() {
             />
             <button
               className="brutal-btn px-5 py-3 font-bold flex items-center gap-2"
-              style={{ background: "var(--teal)", color: "#0a0a0a" }}
+              style={{ background: "var(--color-primary)", color: "var(--color-text-primary)" }}
               onClick={triggerFileUpload}
               disabled={uploadingPdf}
               title="Upload a PDF resume to auto-extract and create a CV"
@@ -147,7 +147,7 @@ export default function CVs() {
             </button>
             <button
               className="brutal-btn px-5 py-3 font-bold flex items-center gap-2"
-              style={{ background: "var(--yellow)", color: "#0a0a0a" }}
+              style={{ background: "var(--color-warning)", color: "var(--color-text-primary)" }}
               onClick={goToTemplates}
               id="new-cv-btn"
             >
@@ -160,7 +160,7 @@ export default function CVs() {
         <StatsBar stats={stats} />
 
         {(error || fetchError) && (
-          <div className="mb-6 brutal-card p-4 bg-(--coral) text-black font-mono text-sm">
+          <div className="mb-6 brutal-card p-4 bg-[var(--color-danger)] text-black font-mono text-sm">
             {error ||
               fetchError?.response?.data?.message ||
               "Unable to load CVs."}
