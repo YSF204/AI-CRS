@@ -1,29 +1,9 @@
 import AppError from "./../utils/appError.js";
-
-const handleCastErrorDB = (err) => {
-  const message = `Invalid ${err.path}: ${err.value}.`;
-  return new AppError(message, 400);
-};
-
-const handleDuplicateFieldsDB = (err) => {
-  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
-  console.log(value);
-
-  const message = `Duplicate field value: ${value}. Please use another value!`;
-  return new AppError(message, 400);
-};
-const handleValidationErrorDB = (err) => {
-  const errors = Object.values(err.errors).map((el) => el.message);
-
-  const message = `Invalid input data. ${errors.join(". ")}`;
-  return new AppError(message, 400);
-};
-
-const handleJWTError = () =>
-  new AppError("Invalid token please log in again", 401);
-
-const handleJWTExpiredError = () =>
-  new AppError("Your token has expired pealse log in again", 401);
+import { handleCastError } from "../services/errors/transformers/handleCastError.js";
+import { handleDuplicateFieldError } from "../services/errors/transformers/handleDuplicateFieldError.js";
+import { handleValidationError } from "../services/errors/transformers/handleValidationError.js";
+import { handleInvalidJwtError } from "../services/errors/transformers/handleInvalidJwtError.js";
+import { handleExpiredJwtError } from "../services/errors/transformers/handleExpiredJwtError.js";
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -48,6 +28,16 @@ const sendErrorProd = (err, res) => {
   }
 };
 
+const normalizeProductionError = (error) => {
+  if (error.name === "CastError") return handleCastError(error);
+  if (error.code === 11000) return handleDuplicateFieldError(error);
+  if (error.name === "ValidationError") return handleValidationError(error);
+  if (error.name === "JsonWebTokenError") return handleInvalidJwtError();
+  if (error.name === "TokenExpiredError") return handleExpiredJwtError();
+
+  return error;
+};
+
 const errorHandler = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || "error";
@@ -55,16 +45,7 @@ const errorHandler = (err, req, res, next) => {
   if (process.env.NODE_ENV === "development") {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === "production") {
-    let error = { ...err };
-
-    if (error.name === "CastError") error = handleCastErrorDB(error);
-    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
-    if (error.name === "ValidationError")
-      error = handleValidationErrorDB(error);
-    if (error.name === "JsonWebTokenError") error = handleJWTError();
-
-    if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
-
+    const error = normalizeProductionError({ ...err });
     sendErrorProd(error, res);
   }
 };

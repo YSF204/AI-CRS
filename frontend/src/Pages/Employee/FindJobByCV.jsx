@@ -79,16 +79,16 @@ export default function FindJobByCV() {
   const stats = useMemo(() => {
     const safeCvs = Array.isArray(cvs) ? cvs : [];
     return [
-      { label: "Saved CVs", value: safeCvs.length, color: "var(--blue)" },
+      { label: "Saved CVs", value: safeCvs.length, color: "var(--color-primary)" },
       {
         label: "Found Jobs",
         value: normalizedJobs.length,
-        color: "var(--mint)",
+        color: "var(--color-success)",
       },
       {
         label: "Results",
         value: jobs ? `${normalizedJobs.length} jobs` : "-",
-        color: "var(--yellow)",
+        color: "var(--color-warning)",
       },
     ];
   }, [cvs, normalizedJobs.length, jobs]);
@@ -208,7 +208,7 @@ export default function FindJobByCV() {
                 <button
                   type="button"
                   className="brutal-btn px-4 py-2 font-bold"
-                  style={{ background: "var(--teal)", color: "#0a0a0a" }}
+                  style={{ background: "var(--color-primary)", color: "var(--color-text-primary)" }}
                   onClick={() => fileInputRef.current?.click()}
                 >
                   Upload another PDF
@@ -216,7 +216,7 @@ export default function FindJobByCV() {
                 <button
                   type="button"
                   className="brutal-btn px-4 py-2 font-bold"
-                  style={{ background: "var(--yellow)", color: "#0a0a0a" }}
+                  style={{ background: "var(--color-warning)", color: "var(--color-text-primary)" }}
                   onClick={() => navigate("/employee/jobs")}
                 >
                   Browse all jobs
@@ -250,11 +250,11 @@ export default function FindJobByCV() {
                   style={{
                     background:
                       item.match >= 80
-                        ? "var(--mint)"
+                        ? "var(--color-success)"
                         : item.match >= 60
-                          ? "var(--yellow)"
-                          : "var(--coral)",
-                    color: "#0a0a0a",
+                          ? "var(--color-warning)"
+                          : "var(--color-danger)",
+                    color: "var(--color-text-primary)",
                   }}
                 >
                   {item.match}% Match
@@ -289,7 +289,7 @@ export default function FindJobByCV() {
             <button
               type="button"
               className="brutal-btn px-4 py-2 font-bold inline-flex items-center gap-2"
-              style={{ background: "var(--teal)", color: "#0a0a0a" }}
+              style={{ background: "var(--color-primary)", color: "var(--color-text-primary)" }}
               onClick={() => goToJob(item.id)}
             >
               View & Apply
@@ -321,7 +321,7 @@ export default function FindJobByCV() {
             <button
               type="button"
               className="brutal-btn px-6 py-3 font-bold flex items-center gap-2"
-              style={{ background: "var(--yellow)", color: "#0a0a0a" }}
+              style={{ background: "var(--color-warning)", color: "var(--color-text-primary)" }}
               onClick={() => navigate("/employee/jobs")}
             >
               Back to all jobs
@@ -376,7 +376,7 @@ export default function FindJobByCV() {
                     onClick={handleFindWithExisting}
                     disabled={!selectedCvId || loading || uploading}
                     className="mt-3 brutal-btn px-5 py-3 font-bold w-full inline-flex items-center justify-center gap-2"
-                    style={{ background: "var(--yellow)", color: "#0a0a0a" }}
+                    style={{ background: "var(--color-warning)", color: "var(--color-text-primary)" }}
                   >
                     {loading ? (
                       <>
@@ -409,7 +409,7 @@ export default function FindJobByCV() {
                   <button
                     type="button"
                     className="brutal-btn px-5 py-5 font-bold w-full border-dashed border-4 inline-flex items-center justify-center gap-2"
-                    style={{ background: "var(--teal)", color: "#0a0a0a" }}
+                    style={{ background: "var(--color-primary)", color: "var(--color-text-primary)" }}
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading || loading}
                   >

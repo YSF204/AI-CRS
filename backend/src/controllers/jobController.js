@@ -1,28 +1,10 @@
-import Job from "../models/Job.js";
-import Employer from "../models/Employer.js";
 import catchAsync from "../utils/catchAsync.js";
-import AppError from "./../utils/appError.js";
-
-
-const verifyOwnership = async (req , res , next) =>{
-  const {id} = req.params;
-  const job = await Job.findById(id);
-  const employer = await Employer.findOne({userId: req.user._id});
-
-  if(!job){
-    return next(new AppError("Job not found", 404));
-  }
-
-  if(!employer){
-    return next(new AppError("Employer not found", 404));
-  }
-
-  if(job.employerId.toString() !== employer._id.toString()){
-    return next(new AppError("Not authorized to update this job", 403));
-  }
-
-  next();
-}
+import { createJob as createJobService } from "../services/jobs/commands/createJob.js";
+import { updateJob as updateJobService } from "../services/jobs/commands/updateJob.js";
+import { deleteJob as deleteJobService } from "../services/jobs/commands/deleteJob.js";
+import { getAllJobs as getAllJobsService } from "../services/jobs/queries/getAllJobs.js";
+import { getJobById as getJobByIdService } from "../services/jobs/queries/getJobById.js";
+import { getEmployerJobs as getEmployerJobsService } from "../services/jobs/queries/getEmployerJobs.js";
 
 
 // ================================== //
@@ -30,50 +12,9 @@ const verifyOwnership = async (req , res , next) =>{
 // ================================== //
 
 export const createJob = catchAsync(async (req, res, next) => {
-  const {
-    position,
-    description,
-    salary,
-    workSite,
-    workDuration,
-    yearsOfExperience,
-    language,
-    certification,
-    softSkills,
-    technicalSkills,
-  } = req.body;
-
-  // make sure that all the fields are provided
-  if (
-    !position ||
-    !description ||
-    !salary ||
-    !workSite ||
-    !workDuration ||
-    !yearsOfExperience
-  ) {
-    return next(new AppError("Please provide all required fields", 400));
-  }
-
-  // check if the employer exists and is active
-  const employer = await Employer.findOne({ userId: req.user._id });
-  if (!employer) {
-    return next(new AppError("Employer not found", 404));
-  }
-
-  const job = await Job.create({
-    employerId: employer._id,
-    position,
-    description,
-    salary,
-    workSite,
-    workDuration,
-    yearsOfExperience,
-    language: language || [],
-    certification: certification || [],
-    softSkills: softSkills || [],
-    technicalSkills: technicalSkills || [],
-    status: "OPEN",
+  const job = await createJobService({
+    userId: req.user._id,
+    body: req.body,
   });
 
   res.status(201).json({
@@ -88,9 +29,7 @@ export const createJob = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const getAllJobs = catchAsync(async (req, res) => {
-  const jobs = await Job.find({ status: "OPEN" })
-    .populate("employerId", "company")
-    .sort({ createdAt: -1 });
+  const jobs = await getAllJobsService();
 
   res.status(200).json({
     success: true,
@@ -105,11 +44,7 @@ export const getAllJobs = catchAsync(async (req, res) => {
 
 export const getJobById = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const job = await Job.findById(id).populate("employerId", "company");
-
-  if (!job) {
-    return next(new AppError("Job not found", 404));
-  }
+  const job = await getJobByIdService(id);
 
   res.status(200).json({
     success: true,
@@ -122,15 +57,7 @@ export const getJobById = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const getEmployerJobs = catchAsync(async (req, res, next) => {
-  const employer = await Employer.findOne({ userId: req.user._id });
-  
-  if (!employer) {
-    return next(new AppError("Employer profile not found", 404));
-  }
-
-  // Returns ALL jobs for this employer (both OPEN and CLOSED)
-  const jobs = await Job.find({ employerId: employer._id })
-    .sort({ createdAt: -1 });
+  const jobs = await getEmployerJobsService({ userId: req.user._id });
 
   res.status(200).json({
     success: true,
@@ -145,20 +72,11 @@ export const getEmployerJobs = catchAsync(async (req, res, next) => {
 
 export const updateJob = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-
-  const job = await Job.findById(id);
-  if (!job) {
-    return next(new AppError("Job not found", 404));
-  }
-
-  // Verify ownership
-  verifyOwnership(req , res , next);
-
-  const updatedJob = await Job.findByIdAndUpdate(
-    id,
-    { ...req.body },
-    { new: true, runValidators: true },
-  );
+  const updatedJob = await updateJobService({
+    jobId: id,
+    userId: req.user._id,
+    body: req.body,
+  });
 
   res.status(200).json({
     success: true,
@@ -174,16 +92,10 @@ export const updateJob = catchAsync(async (req, res, next) => {
 export const deleteJob = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
-  // Find the job
-  const job = await Job.findById(id);
-  if (!job) {
-    return next(new AppError("Job not found", 404));
-  }
-
-  // Verify ownership
-  verifyOwnership(req , res , next);
-
-  await Job.findByIdAndDelete(id);
+  await deleteJobService({
+    jobId: id,
+    userId: req.user._id,
+  });
 
   res.status(200).json({
     success: true,

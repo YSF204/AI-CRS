@@ -21,15 +21,14 @@ export default function Navbar() {
 
   const logoNode = (
     <div style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-      {/* Ink-stamp style logo */}
       <span
         style={{
-          fontFamily: "'Libre Bodoni', serif",
-          fontSize: 'clamp(1rem, 1.5vw, 1.2rem)',
-          fontWeight: 700,
+          fontFamily: "'Montserrat', sans-serif",
+          fontSize: '1.25rem',
+          fontWeight: 800,
           letterSpacing: '-0.02em',
           lineHeight: 1,
-          color: 'var(--fg)',
+          color: 'var(--text-primary)',
         }}
       >
         AI-CRS
@@ -39,7 +38,7 @@ export default function Navbar() {
           width: 6,
           height: 6,
           borderRadius: '50%',
-          backgroundColor: 'var(--accent)',
+          backgroundColor: 'var(--color-primary)',
           display: 'inline-block',
         }}
       />
@@ -51,31 +50,15 @@ export default function Navbar() {
       <button
         onClick={toggleTheme}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        style={{
-          width: '36px',
-          height: '36px',
-          border: '1.5px solid var(--border-color)',
-          borderRadius: '8px',
-          background: 'var(--card-bg)',
-          color: 'var(--fg)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-        }}
+        className="nav-action-button"
       >
-        {theme === 'light' ? <Moon size={15} strokeWidth={2} /> : <Sun size={15} strokeWidth={2} />}
+        {theme === 'light' ? <Moon size={16} strokeWidth={2} /> : <Sun size={16} strokeWidth={2} />}
       </button>
 
       <Link
         to="/auth?mode=login"
-        className="paper-btn"
-        style={{
-          padding: '0.45rem 1.1rem',
-          fontSize: '0.82rem',
-          borderRadius: '8px',
-        }}
+        className="nav-user-button focus-ring"
+        style={{ background: 'var(--color-primary)', color: 'white', borderColor: 'var(--color-primary)' }}
       >
         Sign In
       </Link>

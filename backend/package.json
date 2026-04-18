@@ -41,6 +41,7 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
-        "nodemon": "^3.1.11"
+        "nodemon": "^3.1.11",
+        "vitest": "^4.1.4"
     }
 }

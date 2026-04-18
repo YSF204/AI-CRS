@@ -60,9 +60,9 @@ export default function Jobs() {
       return Number.isFinite(timestamp) && timestamp >= recentCutoff;
     }).length;
     return [
-      { label: "Open", value: jobs.length, color: "var(--teal)" },
-      { label: "New (7d)", value: recent, color: "var(--yellow)" },
-      { label: "Visible", value: filtered.length, color: "var(--coral)" },
+      { label: "Open", value: jobs.length, color: "var(--color-primary)" },
+      { label: "New (7d)", value: recent, color: "var(--color-warning)" },
+      { label: "Visible", value: filtered.length, color: "var(--color-danger)" },
     ];
   }, [jobs, filtered.length]);
 
@@ -78,11 +78,11 @@ export default function Jobs() {
         {/* Header */}
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold font-['Space_Grotesk'] uppercase tracking-tight flex items-center gap-3">
-              <Briefcase size={28} className="text-[var(--teal)]" />
+            <h1 className="text-3xl font-bold font-['Montserrat'] uppercase tracking-tight flex items-center gap-3">
+              <Briefcase size={28} className="text-[var(--color-primary)]" />
               Find Jobs
             </h1>
-            <p className="font-mono text-sm text-[var(--fg-muted)] mt-1">
+            <p className="font-mono text-sm text-[var(--color-text-secondary)] mt-1">
               {filtered.length} positions available
             </p>
           </div>
@@ -90,27 +90,58 @@ export default function Jobs() {
           <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => navigate("/employee/find-job-by-cv")}
-              className="brutal-btn px-4 py-2 font-bold font-mono text-sm whitespace-nowrap flex items-center gap-2 min-h-[42px] border-2 border-black"
-              style={{ background: "var(--yellow)", color: "#0a0a0a" }}
+              className="paper-btn px-5 py-3 font-bold font-mono text-sm whitespace-nowrap flex items-center gap-2 min-h-[44px]"
+              style={{ background: "var(--color-warning)", color: "var(--color-text-primary)" }}
               title="Match jobs to your CV instantly"
             >
-              <FileText size={16} />
+              <FileText size={18} />
               FIND BY CV
+              <span className="text-xs font-normal opacity-80">(Recommended)</span>
             </button>
-            <div className="flex items-center gap-2 brutal-card px-4 py-2 bg-[var(--card-bg)] w-full sm:w-64 min-h-[42px] border-2 border-black">
-              <Search size={15} className="text-[var(--fg-muted)] shrink-0" />
+            <div className="flex items-center gap-2 kpi-card px-4 py-2 bg-[var(--card-bg)] w-full sm:w-64 min-h-[44px]">
+              <Search size={15} className="text-[var(--color-text-secondary)] shrink-0" />
               <input
                 type="text"
                 placeholder="Search jobs..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="bg-transparent outline-none font-mono text-sm w-full placeholder:text-[var(--fg-muted)]"
+                className="bg-transparent outline-none font-mono text-sm w-full placeholder:text-[var(--color-text-tertiary)] text-[var(--color-text-primary)]"
               />
             </div>
           </div>
         </div>
 
         <StatsBar stats={stats} />
+
+        {/* ===== PROMOTED: Find Job by CV Section ===== */}
+        <div className="workflow-card p-6 bg-[var(--card-bg)] border-2 border-[var(--color-warning)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-warning)] opacity-5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <FileText size={20} className="text-[var(--color-warning)]" />
+                <h3 className="text-body-lg font-semibold text-[var(--color-text-primary)]">
+                  Find Jobs Matched to Your CV
+                </h3>
+                <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white rounded" style={{ background: 'var(--color-warning)' }}>
+                  Recommended
+                </span>
+              </div>
+              <p className="text-body text-[var(--color-text-secondary)] max-w-xl">
+                Upload your CV or select from your saved resumes to get instant job matches based on your skills and experience.
+              </p>
+            </div>
+            <button
+              onClick={() => navigate("/employee/find-job-by-cv")}
+              className="paper-btn px-6 py-3 font-bold flex items-center gap-2 whitespace-nowrap"
+              style={{ background: "var(--color-warning)", color: "var(--color-text-primary)" }}
+            >
+              <Search size={18} />
+              Find Matching Jobs
+              <ChevronRight size={18} />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Main Content - Split Screen */}
@@ -120,17 +151,17 @@ export default function Jobs() {
           className={`${selectedJobId ? "flex-shrink-0 w-full md:w-96" : "w-full"} overflow-y-auto transition-all duration-500`}
         >
           {error && (
-            <div className="mb-4 brutal-card p-4 bg-[var(--coral)] text-black font-mono text-sm">
+            <div className="mb-4 kpi-card p-4 bg-[var(--color-danger)] text-[var(--color-text-primary)] font-mono text-sm">
               {error.response?.data?.message || "Unable to load jobs."}
             </div>
           )}
 
           {loading ? (
-            <div className="brutal-card p-8 bg-[var(--card-bg)] text-center font-mono text-[var(--fg-muted)]">
+            <div className="kpi-card p-8 bg-[var(--card-bg)] text-center font-mono text-[var(--color-text-secondary)]">
               Loading jobs...
             </div>
           ) : filtered.length === 0 ? (
-            <div className="brutal-card p-8 bg-[var(--card-bg)] text-center font-mono text-[var(--fg-muted)]">
+            <div className="kpi-card p-8 bg-[var(--card-bg)] text-center font-mono text-[var(--color-text-secondary)]">
               No jobs matched your search.
             </div>
           ) : (
@@ -146,36 +177,32 @@ export default function Jobs() {
                       setSelectedJobId(job.id);
                     }
                   }}
-                  className={`brutal-card p-4 cursor-pointer transition-all ${
-                    selectedJobId === job.id
+                  className={`brutal-card p-4 cursor-pointer transition-all ${selectedJobId === job.id
                       ? "bg-[var(--yellow)] text-black border-4 border-black"
                       : "bg-[var(--card-bg)] hover:border-[var(--yellow)]"
-                  }`}
+                    }`}
                 >
                   <p
-                    className={`font-bold font-['Space_Grotesk'] text-sm uppercase tracking-tight mb-1 ${
-                      selectedJobId === job.id
+                    className={`font-bold font-['Space_Grotesk'] text-sm uppercase tracking-tight mb-1 ${selectedJobId === job.id
                         ? "text-black"
                         : "text-[var(--fg)]"
-                    }`}
+                      }`}
                   >
                     {job.title}
                   </p>
                   <p
-                    className={`font-mono text-xs ${
-                      selectedJobId === job.id
+                    className={`font-mono text-xs ${selectedJobId === job.id
                         ? "text-black opacity-75"
                         : "text-[var(--fg-muted)]"
-                    }`}
+                      }`}
                   >
                     {job.company}
                   </p>
                   <p
-                    className={`font-mono text-xs mt-2 ${
-                      selectedJobId === job.id
+                    className={`font-mono text-xs mt-2 ${selectedJobId === job.id
                         ? "text-black opacity-60"
                         : "text-[var(--fg-muted)]"
-                    }`}
+                      }`}
                   >
                     {job.posted}
                   </p>
@@ -337,7 +364,7 @@ export default function Jobs() {
           )}
         </div>
       </div>
-      
+
       {applyJobId && (
         <ApplyJobModal jobId={applyJobId} onClose={() => setApplyJobId(null)} />
       )}

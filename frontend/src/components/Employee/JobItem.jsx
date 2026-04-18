@@ -4,7 +4,7 @@ import { MapPin, Clock } from 'lucide-react';
 const TYPE_COLORS = {
   'Full-time': 'var(--mint)',
   'Part-time': 'var(--yellow)',
-  'Contract':  'var(--coral)',
+  'Contract': 'var(--coral)',
 };
 
 /**
@@ -18,16 +18,16 @@ export default function JobItem({ job, isSelected, onApply }) {
       <div>
         <p
           className="font-bold font-['Space_Grotesk'] text-base uppercase tracking-tight"
-          style={{ color: isSelected ? '#0a0a0a' : 'var(--fg)' }}
+          style={{ color: isSelected ? 'var(--accent-text)' : 'var(--fg)' }}
         >
           {job.title}
         </p>
-        <p className="font-mono text-xs mt-0.5" style={{ color: isSelected ? '#0a0a0a99' : 'var(--fg-muted)' }}>
+        <p className="font-mono text-xs mt-0.5" style={{ color: isSelected ? 'var(--accent-text)' : 'var(--fg-muted)' }}>
           {job.company}
         </p>
         <div
           className="flex items-center gap-4 mt-1.5 font-mono text-xs"
-          style={{ color: isSelected ? '#0a0a0a99' : 'var(--fg-muted)' }}
+          style={{ color: isSelected ? 'var(--accent-text)' : 'var(--fg-muted)' }}
         >
           <span className="flex items-center gap-1"><MapPin size={11} />{job.location}</span>
           <span className="flex items-center gap-1"><Clock size={11} />{job.posted}</span>
@@ -40,7 +40,7 @@ export default function JobItem({ job, isSelected, onApply }) {
           className="px-3 py-1 text-xs font-bold font-mono border-2 border-black"
           style={{
             background: isSelected ? 'rgba(255,255,255,0.35)' : TYPE_COLORS[job.type],
-            color: '#0a0a0a',
+            color: 'var(--accent-text)',
           }}
         >
           {job.type}
@@ -48,7 +48,7 @@ export default function JobItem({ job, isSelected, onApply }) {
         <button
           onClick={(e) => { e.stopPropagation(); onApply?.(job); }}
           className="brutal-btn px-3 py-1.5 text-xs font-bold"
-          style={{ background: isSelected ? '#ffe630' : 'var(--teal)', color: '#0a0a0a' }}
+          style={{ background: isSelected ? 'var(--yellow)' : 'var(--teal)', color: 'var(--accent-text)' }}
         >
           APPLY
         </button>

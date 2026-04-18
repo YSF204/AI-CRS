@@ -2,15 +2,23 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
 
+/**
+ * PillNav — Canonical navbar component with Paper design system.
+ * Explicit anatomy: logo slot, primary links rail, secondary actions rail, theme-safe active indicator.
+ *
+ * @param {Object} logo - Logo component/slot
+ * @param {Array} items - Navigation items [{ label, href }]
+ * @param {string} activeHref - Currently active route
+ * @param {Function} ease - GSAP easing function
+ * @param {string} theme - 'light' | 'dark'
+ * @param {boolean} initialLoadAnimation - Enable entrance animation
+ * @param {React.ReactNode} rightActions - Secondary actions (theme toggle, user menu, etc.)
+ */
 export default function PillNav({
   logo,
-  items,
+  items = [],
   activeHref,
   ease = 'power2.easeOut',
-  baseColor,
-  pillColor,
-  hoveredPillTextColor,
-  pillTextColor,
   theme = 'light',
   initialLoadAnimation = false,
   rightActions,
@@ -23,6 +31,7 @@ export default function PillNav({
 
   const activeIndex = items.findIndex((item) => item.href === activeHref);
 
+  // Sliding pill animation with Paper motion constraints
   useEffect(() => {
     if (!pillRef.current || !navItemsContainerRef.current) return;
 
@@ -36,136 +45,103 @@ export default function PillNav({
       const x = bounds.left - parentBounds.left;
       const width = bounds.width;
 
+      // Use Paper motion tokens: short duration, clean easing
+      const durationRaw = getComputedStyle(document.documentElement).getPropertyValue('--nav-pill-animation-duration');
+      const duration = durationRaw ? parseFloat(durationRaw) : 0.25;
+      
       gsap.to(pillRef.current, {
         x,
         width,
-        duration: 0.35,
-        ease: ease,
+        duration: duration,
+        ease: getComputedStyle(document.documentElement).getPropertyValue('--nav-pill-animation-easing') || 'power2.easeOut',
         autoAlpha: 1,
       });
     } else {
+      const durationRaw = getComputedStyle(document.documentElement).getPropertyValue('--nav-pill-animation-duration');
+      const duration = durationRaw ? parseFloat(durationRaw) : 0.25;
       gsap.to(pillRef.current, {
         autoAlpha: 0,
-        duration: 0.35,
+        duration: duration,
         ease: ease,
       });
     }
   }, [hoveredIndex, activeIndex, ease, items]);
 
+  // Entrance animation with reduced motion support
   useEffect(() => {
     if (initialLoadAnimation && containerRef.current) {
-      gsap.fromTo(
-        containerRef.current,
-        { y: -60, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }
-      );
+      // Check for reduced motion preference
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (prefersReducedMotion) {
+        gsap.set(containerRef.current, { y: 0, opacity: 1 });
+      } else {
+        gsap.fromTo(
+          containerRef.current,
+          { y: -60, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' }
+        );
+      }
     }
   }, [initialLoadAnimation]);
 
-  /* Paper design: use CSS variables for theming */
-  const navBg = baseColor || (theme === 'dark' ? 'rgba(28, 25, 23, 0.92)' : 'rgba(255, 255, 255, 0.92)');
-  const navBorder = theme === 'dark' ? 'rgba(61, 53, 48, 0.6)' : 'rgba(214, 207, 196, 0.8)';
-  const pillBg = pillColor || 'var(--accent-light)';
-  const pillText = hoveredPillTextColor || 'var(--accent)';
-  const defaultText = pillTextColor || 'var(--fg-muted)';
+  // Render nav item with Paper design system
+  const renderNavItem = (item, index) => {
+    const isHovered = index === hoveredIndex;
+    const isActive = index === activeIndex && hoveredIndex === null;
+    const isHighlight = isHovered || isActive;
+
+    const commonProps = {
+      ref: (el) => (itemRefs.current[index] = el),
+      onMouseEnter: () => setHoveredIndex(index),
+      className: `nav-item ${isHighlight ? 'active' : ''}`,
+    };
+
+    if (typeof item.href === 'string' && item.href.startsWith('#')) {
+      return (
+        <a key={item.href} href={item.href} {...commonProps}>
+          {item.label}
+        </a>
+      );
+    }
+
+    return (
+      <Link key={item.href} to={item.href} {...commonProps}>
+        {item.label}
+      </Link>
+    );
+  };
 
   return (
     <div
       ref={containerRef}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0.6rem 1.25rem',
-        borderRadius: '999px',
-        backgroundColor: navBg,
-        border: `1px solid ${navBorder}`,
-        boxShadow: '0 4px 24px rgba(0, 0, 0, 0.06)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        maxWidth: '100%',
-        margin: '0 auto',
-        width: '100%',
-        position: 'relative',
-        zIndex: 50,
-      }}
+      className="pill-nav-container"
     >
-      {/* Left side (Logo) */}
-      <div style={{ display: 'flex', alignItems: 'center' }}>{logo}</div>
-
-      {/* Middle Nav Items */}
-      <div
-        ref={navItemsContainerRef}
-        style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '0.15rem' }}
-        onMouseLeave={() => setHoveredIndex(null)}
-        className="hidden md:flex"
-      >
-        {/* Animated Pill Background */}
-        <div
-          ref={pillRef}
-          style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            bottom: 0,
-            height: '100%',
-            backgroundColor: pillBg,
-            borderRadius: '999px',
-            zIndex: 0,
-            opacity: 0,
-            pointerEvents: 'none',
-            transition: 'background-color 0.2s ease',
-          }}
-        />
-
-        {items.map((item, i) => {
-          const isHovered = i === hoveredIndex;
-          const isActive = i === activeIndex && hoveredIndex === null;
-          const isHighlight = isHovered || isActive;
-
-          const commonStyle = {
-            position: 'relative',
-            zIndex: 1,
-            textDecoration: 'none',
-            padding: '0.4rem 1.1rem',
-            fontFamily: "'Public Sans', sans-serif",
-            fontWeight: 600,
-            fontSize: '0.82rem',
-            letterSpacing: '0.02em',
-            color: isHighlight ? pillText : defaultText,
-            transition: 'color 0.2s ease',
-          };
-
-          if (typeof item.href === 'string' && item.href.startsWith('#')) {
-            return (
-              <a
-                key={item.href}
-                href={item.href}
-                ref={(el) => (itemRefs.current[i] = el)}
-                onMouseEnter={() => setHoveredIndex(i)}
-                style={commonStyle}
-              >
-                {item.label}
-              </a>
-            );
-          }
-
-          return (
-            <Link
-              key={item.href}
-              to={item.href}
-              ref={(el) => (itemRefs.current[i] = el)}
-              onMouseEnter={() => setHoveredIndex(i)}
-              style={commonStyle}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
+      {/* Left side: Logo slot */}
+      <div className="nav-logo">
+        {logo}
       </div>
 
-      {/* Right side Actions */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+      {/* Middle: Primary links rail */}
+      <nav
+        ref={navItemsContainerRef}
+        className="nav-items-rail hidden md:flex"
+        onMouseLeave={() => setHoveredIndex(null)}
+        role="navigation"
+        aria-label="Main navigation"
+      >
+        {/* Animated pill background - theme-safe active indicator */}
+        <div
+          ref={pillRef}
+          className="nav-pill-background"
+          aria-hidden="true"
+        />
+
+        {items.map((item, index) => renderNavItem(item, index))}
+      </nav>
+
+      {/* Right side: Secondary actions rail */}
+      <div className="nav-actions-rail">
         {rightActions}
       </div>
     </div>
