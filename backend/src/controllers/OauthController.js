@@ -2,8 +2,9 @@ import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import { generateToken } from "../utils/generateToken.js";
 import crypto from "crypto";
+import { OAuth2Client } from "google-auth-library";
+import User from "../models/User.js";
 
-// Google client id
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Google auth

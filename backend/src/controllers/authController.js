@@ -467,7 +467,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
     message: "Token has been sent to email",
   });
 });
-export const resetPassword = catchAsync(async (req, res, next) => {
+export const resetPasswordToken = catchAsync(async (req, res, next) => {
   const resultData = await resetUserPassword({
     rawToken: req.params.token,
     password: req.body.password,
@@ -565,9 +565,8 @@ export const resendVerificationEmail = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   // Send verification email
-  const verificationURL = `${
-    process.env.FRONTEND_URL || "http://localhost:5173"
-  }/verify-email/${verificationToken}`;
+  const verificationURL = `${process.env.FRONTEND_URL || "http://localhost:5173"
+    }/verify-email/${verificationToken}`;
 
   const htmlMessage = `
 <!DOCTYPE html>
