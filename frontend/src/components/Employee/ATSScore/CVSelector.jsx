@@ -1,112 +1,98 @@
 import React, { useState, useMemo } from "react";
-import { Zap, Calendar } from "lucide-react";
+import { Plus, Search, Filter } from "lucide-react";
+import CVPreviewCard from "./CVPreviewCard";
 
-export default function CVSelector({ cvs, loading, onAnalyze }) {
-  const [selectedId, setSelectedId] = useState(null);
+export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
+  const [query, setQuery] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
 
   const cvList = useMemo(() => {
     return Array.isArray(cvs) ? cvs : [];
   }, [cvs]);
 
-  const handleAnalyzeClick = () => {
-    if (selectedId) {
-      onAnalyze(selectedId);
+  const filteredCvs = useMemo(() => {
+    let list = [...cvList];
+    if (query) {
+      const lowerQ = query.toLowerCase();
+      list = list.filter((cv) =>
+        (cv.jobTitle || "").toLowerCase().includes(lowerQ) ||
+        (cv.fullName || "").toLowerCase().includes(lowerQ)
+      );
     }
-  };
+
+    if (sortBy === "newest") {
+      list.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+    } else if (sortBy === "oldest") {
+      list.sort((a, b) => new Date(a.updatedAt || a.createdAt) - new Date(b.updatedAt || b.createdAt));
+    }
+
+    return list;
+  }, [cvList, query, sortBy]);
 
   const isEmpty = cvList.length === 0;
 
+  if (isEmpty) {
+    return (
+      <div className="jd-surface-stack p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
+        <p className="font-mono text-[var(--jd-text-tertiary)] mb-6">
+          No CVs found. Create your first CV to unlock ATS optimization insights.
+        </p>
+        <a
+          href="/employee/cv-templates"
+          className="jd-btn jd-btn-primary inline-flex items-center gap-2"
+        >
+          <Plus size={18} />
+          Create New CV
+        </a>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      {isEmpty ? (
-        <div className="brutal-card p-12 text-center bg-[var(--card-bg)]">
-          <p className="font-mono text-[var(--fg-muted)] mb-4">
-            No CVs found. Create your first CV to get started.
-          </p>
-          <a
-            href="/employee/cv-templates"
-            className="brutal-btn inline-block px-5 py-3 font-bold"
-            style={{ background: "var(--teal)", color: "#0a0a0a" }}
-          >
-            Create CV
-          </a>
+    <div className="ats-gallery-root space-y-6">
+      {/* ATS Gallery Toolbar */}
+      <div className="jd-surface-stack ats-toolbar flex flex-col sm:flex-row items-center justify-between gap-4 p-4">
+        <h2 className="jd-section-title mb-0 w-full sm:w-auto">Select a CV to Analyze</h2>
+        <div className="flex w-full sm:w-auto gap-3 flex-wrap sm:flex-nowrap">
+          <div className="input-with-icon-wrapper flex-grow max-w-sm relative flex items-center">
+            <Search size={16} className="absolute left-3 text-[var(--jd-text-tertiary)]" />
+            <input
+              type="text"
+              placeholder="Search CV names..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="jd-input pl-10 h-10 w-full"
+            />
+          </div>
+          <div className="flex-shrink-0 relative">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="jd-select h-10 w-full min-w-[140px]"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Grid of CVs */}
+      {filteredCvs.length > 0 ? (
+        <div className="ats-gallery-grid">
+          {filteredCvs.map(cv => (
+            <CVPreviewCard
+              key={cv._id}
+              cv={cv}
+              loading={analyzingId === cv._id || (loading && analyzingId == null)}
+              onAnalyze={onAnalyze}
+            />
+          ))}
         </div>
       ) : (
-        <>
-          {/* FIX #3: CV List in card style matching applications list */}
-          <div className="flex flex-col gap-4">
-            {cvList.map((cv) => {
-              const isSelected = cv._id === selectedId;
-              const createdDate = new Date(cv.updatedAt).toLocaleDateString();
-
-              return (
-                <div
-                  key={cv._id}
-                  onClick={() => setSelectedId(cv._id)}
-                  className={`bg-white border-[4px] border-black p-6 cursor-pointer transition-all hover:translate-x-1 hover:-translate-y-1 ${
-                    isSelected
-                      ? "shadow-[12px_12px_0px_0px_var(--teal)]"
-                      : "shadow-[8px_8px_0px_0px_#000] hover:shadow-[12px_12px_0px_0px_var(--teal)]"
-                  }`}
-                  style={{
-                    background: isSelected ? "var(--teal)" : "#fff",
-                    color: isSelected ? "#0a0a0a" : "var(--fg)",
-                  }}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className="font-black font-['Space_Grotesk'] text-lg uppercase tracking-wider mb-2">
-                        {cv.jobTitle || "Untitled CV"}
-                      </h3>
-                      <div
-                        className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest text-[var(--fg-muted)]"
-                        style={{
-                          color: isSelected ? "#0a0a0a" : "var(--fg-muted)",
-                        }}
-                      >
-                        <Calendar size={14} />
-                        <span>Created: {createdDate}</span>
-                      </div>
-                    </div>
-                    <div
-                      className="flex items-center justify-center w-8 h-8 border-2 border-current rounded"
-                      style={{
-                        borderColor: isSelected
-                          ? "#0a0a0a"
-                          : "var(--border-color)",
-                        background: isSelected ? "#0a0a0a" : "transparent",
-                      }}
-                    >
-                      {isSelected && (
-                        <div
-                          className="w-2 h-2 rounded-full"
-                          style={{ background: "var(--teal)" }}
-                        ></div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Analyze Button */}
-          <div className="flex justify-center pt-4">
-            <button
-              onClick={handleAnalyzeClick}
-              disabled={!selectedId || loading}
-              className="brutal-btn px-8 py-4 font-bold text-lg flex items-center gap-3"
-              style={{
-                background: selectedId && !loading ? "var(--teal)" : "#ccc",
-                color: "#0a0a0a",
-                opacity: selectedId && !loading ? 1 : 0.5,
-              }}
-            >
-              <Zap size={18} />
-              {loading ? "ANALYZING..." : "ANALYZE ATS SCORE"}
-            </button>
-          </div>
-        </>
+        <div className="jd-surface-stack p-8 text-center text-[var(--jd-text-tertiary)]">
+          No CVs match your search criteria.
+        </div>
       )}
     </div>
   );

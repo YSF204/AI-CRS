@@ -47,64 +47,62 @@ export default function SecuritySettings() {
     <div className="flex flex-col gap-1.5">
       <label
         htmlFor={id}
-        className="text-xs font-bold font-mono uppercase tracking-wider text-(--fg-muted) flex items-center gap-1.5"
+        className="form-label mb-1"
       >
-        <Key size={11} />
+        <Key size={12} className="inline mr-1.5 mb-0.5" />
         {label}
       </label>
-      <div className="brutal-card flex items-center gap-2 px-3 py-2.5 bg-(--card-bg) focus-within:shadow-[4px_4px_0_var(--coral)] transition-shadow">
+      <div className="relative">
         <input
           id={id}
           type={show[field] ? 'text' : 'password'}
           value={form[field]}
           onChange={set(field)}
           placeholder="••••••••"
-          className="flex-1 bg-transparent outline-none font-mono text-sm"
-          style={{ color: 'var(--fg)' }}
+          className="nm-input font-mono text-sm pr-12"
         />
         <button
           type="button"
           onClick={toggle(field)}
-          className="text-(--fg-muted) hover:text-(--fg) transition-colors shrink-0"
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors shrink-0"
         >
-          {show[field] ? <EyeOff size={14} /> : <Eye size={14} />}
+          {show[field] ? <EyeOff size={16} /> : <Eye size={16} />}
         </button>
       </div>
     </div>
   );
 
   return (
-    <div className="brutal-card bg-(--card-bg) p-6">
-      <h3 className="font-bold font-['Space_Grotesk'] text-lg uppercase tracking-tight mb-5 flex items-center gap-2">
-        <Shield size={18} className="text-(--coral)" />
-        Security &amp; Password
+    <div className="nm-card security-settings-card">
+      <h3 className="jd-section-title flex items-center gap-2">
+        <Shield size={18} className="text-[var(--nm-warning)]" />
+        Account Security
       </h3>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <PasswordField id="current" label="Current Password" field="current" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-6">
           <PasswordField id="next"    label="New Password"     field="next"    />
           <PasswordField id="confirm" label="Confirm Password" field="confirm" />
         </div>
 
         {error && (
-          <p className="font-mono text-xs border-2 border-black px-3 py-2" style={{ background: 'var(--coral)', color: '#0a0a0a' }}>
-            ⚠ {error}
-          </p>
+          <div className="nm-chip bg-[var(--nm-error-surface)] border-[var(--nm-error)] text-[var(--nm-error)] py-3 px-4 w-full justify-start lowercase">
+             {error}
+          </div>
         )}
         {success && (
-          <p className="font-mono text-xs border-2 border-black px-3 py-2" style={{ background: 'var(--mint)', color: '#0a0a0a' }}>
-            ✓ Password updated successfully.
-          </p>
+          <div className="nm-chip bg-[var(--nm-success-surface)] border-[var(--nm-success)] text-[var(--nm-success)] py-3 px-4 w-full justify-start lowercase">
+             Password updated successfully.
+          </div>
         )}
 
         <div className="flex justify-end pt-2">
           <button
             type="submit"
-            className="brutal-btn px-6 py-2.5 font-bold flex items-center gap-2 text-sm"
-            style={{ background: 'var(--yellow)', color: '#0a0a0a' }}
+            className="nm-btn nm-btn-primary w-full"
           >
-            <Shield size={14} />
+            <Shield size={16} />
             UPDATE PASSWORD
           </button>
         </div>

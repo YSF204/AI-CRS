@@ -1,8 +1,7 @@
-import { createBrowserRouter, Link } from "react-router-dom";
+import { createBrowserRouter, Link, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
 import RootLayout from "./components/layout/RootLayout";
 import RouteError from "./components/layout/RouteError";
-import { PageTransition } from "./components/layout/PageTransition";
 import AdminDash from "./Pages/Admin/AdminDash";
 import AdminProfile from "./Pages/Admin/AdminProfile";
 import UserDelete from "./Pages/Admin/UserDelete";
@@ -50,50 +49,38 @@ export const router = createBrowserRouter([
       {
         path: "/",
         element: (
-          <PageTransition>
-            <DynamicRoot />
-          </PageTransition>
+          <DynamicRoot />
         ),
       },
       {
         path: "/auth",
         element: (
-          <PageTransition>
-            <AuthPage />
-          </PageTransition>
+          <AuthPage />
         ),
       },
       {
         path: "/verify-email/:token",
         element: (
-          <PageTransition>
-            <VerifyEmailPage />
-          </PageTransition>
+          <VerifyEmailPage />
         ),
       },
       {
         path: "/forgot-password",
         element: (
-          <PageTransition>
-            <ForgotPasswordPage />
-          </PageTransition>
+          <ForgotPasswordPage />
         ),
       },
       {
         path: "/reset-password",
         element: (
-          <PageTransition>
-            <ResetPasswordPage />
-          </PageTransition>
+          <ResetPasswordPage />
         ),
       },
       {
         path: "/admin",
         element: (
           <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <PageTransition>
-              <AdminDash />
-            </PageTransition>
+            <AdminDash />
           </ProtectedRoute>
         ),
       },
@@ -101,9 +88,7 @@ export const router = createBrowserRouter([
         path: "/admin/profile",
         element: (
           <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <PageTransition>
-              <AdminProfile />
-            </PageTransition>
+            <AdminProfile />
           </ProtectedRoute>
         ),
       },
@@ -111,9 +96,7 @@ export const router = createBrowserRouter([
         path: "/admin/users",
         element: (
           <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <PageTransition>
-              <UserManagement />
-            </PageTransition>
+            <UserManagement />
           </ProtectedRoute>
         ),
       },
@@ -121,9 +104,7 @@ export const router = createBrowserRouter([
         path: "/admin/users/new",
         element: (
           <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <PageTransition>
-              <UserProfile />
-            </PageTransition>
+            <UserProfile />
           </ProtectedRoute>
         ),
       },
@@ -131,9 +112,7 @@ export const router = createBrowserRouter([
         path: "/admin/users/:id",
         element: (
           <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <PageTransition>
-              <UserProfile />
-            </PageTransition>
+            <UserProfile />
           </ProtectedRoute>
         ),
       },
@@ -141,9 +120,7 @@ export const router = createBrowserRouter([
         path: "/admin/users/:id/edit",
         element: (
           <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <PageTransition>
-              <UserProfile />
-            </PageTransition>
+            <UserProfile />
           </ProtectedRoute>
         ),
       },
@@ -151,9 +128,7 @@ export const router = createBrowserRouter([
         path: "/admin/users/:id/delete",
         element: (
           <ProtectedRoute allowedRoles={["ADMIN"]}>
-            <PageTransition>
-              <UserDelete />
-            </PageTransition>
+            <UserDelete />
           </ProtectedRoute>
         ),
       },
@@ -161,9 +136,7 @@ export const router = createBrowserRouter([
         path: "/employee",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-            <PageTransition>
-              <EmployeeDash />
-            </PageTransition>
+            <Navigate to="/employee/cvs" replace />
           </ProtectedRoute>
         ),
       },
@@ -171,9 +144,7 @@ export const router = createBrowserRouter([
         path: "/employee/jobs",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-            <PageTransition>
-              <Jobs />
-            </PageTransition>
+            <Jobs />
           </ProtectedRoute>
         ),
       },
@@ -181,9 +152,7 @@ export const router = createBrowserRouter([
         path: "/employee/jobs/:jobId",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-            <PageTransition>
-              <JobDetails />
-            </PageTransition>
+            <JobDetails />
           </ProtectedRoute>
         ),
       },
@@ -191,9 +160,7 @@ export const router = createBrowserRouter([
         path: "/employee/applications",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-            <PageTransition>
-              <Applications />
-            </PageTransition>
+            <Applications />
           </ProtectedRoute>
         ),
       },
@@ -201,9 +168,7 @@ export const router = createBrowserRouter([
         path: "/employee/find-job-by-cv",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-            <PageTransition>
-              <FindJobByCV />
-            </PageTransition>
+            <FindJobByCV />
           </ProtectedRoute>
         ),
       },
@@ -211,9 +176,7 @@ export const router = createBrowserRouter([
         path: "/employee/ats-score",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-            <PageTransition>
-              <ATSScore />
-            </PageTransition>
+            <ATSScore />
           </ProtectedRoute>
         ),
       },
@@ -221,9 +184,7 @@ export const router = createBrowserRouter([
         path: "/employee/apply-job/:jobId",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-            <PageTransition>
-              <ApplyJob />
-            </PageTransition>
+            <ApplyJob />
           </ProtectedRoute>
         ),
       },
@@ -239,9 +200,7 @@ export const router = createBrowserRouter([
         path: "/employee/cv-templates",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-            <PageTransition>
-              <CVTemplates />
-            </PageTransition>
+            <CVTemplates />
           </ProtectedRoute>
         ),
       },
@@ -249,9 +208,7 @@ export const router = createBrowserRouter([
         path: "/employee/cv-editor/:id",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-            <PageTransition>
-              <CVEditor />
-            </PageTransition>
+            <CVEditor />
           </ProtectedRoute>
         ),
       },
@@ -259,9 +216,7 @@ export const router = createBrowserRouter([
         path: "/employee/profile",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
-            <PageTransition>
-              <Profile />
-            </PageTransition>
+            <Profile />
           </ProtectedRoute>
         ),
       },
@@ -269,9 +224,7 @@ export const router = createBrowserRouter([
         path: "/employer",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYER"]}>
-            <PageTransition>
-              <EmployerDash />
-            </PageTransition>
+            <EmployerDash />
           </ProtectedRoute>
         ),
       },
@@ -279,9 +232,7 @@ export const router = createBrowserRouter([
         path: "/employer/post-job",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYER"]}>
-            <PageTransition>
-              <PostJob />
-            </PageTransition>
+            <PostJob />
           </ProtectedRoute>
         ),
       },
@@ -289,9 +240,7 @@ export const router = createBrowserRouter([
         path: "/employer/edit-job/:id",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYER"]}>
-            <PageTransition>
-              <EditJob />
-            </PageTransition>
+            <EditJob />
           </ProtectedRoute>
         ),
       },
@@ -299,9 +248,7 @@ export const router = createBrowserRouter([
         path: "/employer/jobs",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYER"]}>
-            <PageTransition>
-              <ManageJobs />
-            </PageTransition>
+            <ManageJobs />
           </ProtectedRoute>
         ),
       },
@@ -309,9 +256,7 @@ export const router = createBrowserRouter([
         path: "/employer/jobs/:jobId/applications",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYER"]}>
-            <PageTransition>
-              <JobApplications />
-            </PageTransition>
+            <JobApplications />
           </ProtectedRoute>
         ),
       },
@@ -319,9 +264,7 @@ export const router = createBrowserRouter([
         path: "/employer/search",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYER"]}>
-            <PageTransition>
-              <FindTalent />
-            </PageTransition>
+            <FindTalent />
           </ProtectedRoute>
         ),
       },
@@ -329,26 +272,20 @@ export const router = createBrowserRouter([
         path: "/employer/profile",
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYER"]}>
-            <PageTransition>
-              <CompanyProfile />
-            </PageTransition>
+            <CompanyProfile />
           </ProtectedRoute>
         ),
       },
       {
         path: "/pending",
         element: (
-          <PageTransition>
-            <PendingActivation />
-          </PageTransition>
+          <PendingActivation />
         ),
       },
       {
         path: "*",
         element: (
-          <PageTransition>
-            <NotFound />
-          </PageTransition>
+          <NotFound />
         ),
       },
     ],

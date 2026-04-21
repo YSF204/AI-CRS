@@ -15,45 +15,43 @@ export default function ProfileHeader({ user }) {
     .toUpperCase();
 
   return (
-    <div className="brutal-card bg-(--card-bg) overflow-hidden mb-6">
+    <div className="nm-card profile-header-card overflow-hidden">
       {/* Accent bar */}
-      <div className="h-3 w-full" style={{ background: 'var(--teal)' }} />
+      <div className="h-3 w-full bg-[var(--nm-primary)]" />
 
       <div className="p-6 flex flex-col sm:flex-row items-start sm:items-center gap-6">
         {/* Avatar */}
         <div className="relative shrink-0">
           <div
-            className="w-20 h-20 border-4 border-black flex items-center justify-center font-bold text-2xl font-['Space_Grotesk']"
-            style={{ background: 'var(--yellow)', color: '#0a0a0a' }}
+            className="w-20 h-20 border-4 border-[var(--nm-ink)] flex items-center justify-center font-bold text-2xl font-display bg-[var(--nm-warning)] text-[var(--nm-ink)]"
           >
             {initials}
           </div>
           <button
-            className="absolute -bottom-2 -right-2 w-7 h-7 flex items-center justify-center border-2 border-black"
-            style={{ background: 'var(--teal)', color: '#0a0a0a' }}
+            className="absolute -bottom-2 -right-2 w-8 h-8 flex items-center justify-center border-4 border-[var(--nm-ink)] bg-[var(--nm-primary)] text-white hover:translate-x-[2px] hover:translate-y-[2px] transition-transform"
             title="Change avatar"
           >
-            <Camera size={13} />
+            <Camera size={14} />
           </button>
         </div>
 
         {/* Info */}
         <div className="flex-1 min-w-0">
-          <h2 className="text-2xl font-bold font-['Space_Grotesk'] uppercase tracking-tight truncate">
+          <h2 className="text-2xl font-bold font-display uppercase tracking-tight truncate text-[var(--fg)]">
             {fullName || 'Your Name'}
           </h2>
 
-          <div className="flex flex-wrap gap-x-5 gap-y-1 mt-2">
-            <span className="flex items-center gap-1.5 font-mono text-sm text-(--fg-muted)">
-              <Mail size={13} />
+          <div className="flex flex-wrap gap-x-6 gap-y-2 mt-3">
+            <span className="flex items-center gap-2 font-mono text-sm text-[var(--fg-muted)]">
+              <Mail size={14} className="text-[var(--nm-primary)]" />
               {user?.email ?? '—'}
             </span>
-            <span className="flex items-center gap-1.5 font-mono text-sm text-(--fg-muted)">
-              <Briefcase size={13} />
+            <span className="flex items-center gap-2 font-mono text-sm text-[var(--fg-muted)]">
+              <Briefcase size={14} className="text-[var(--nm-primary)]" />
               {user?.role ?? 'EMPLOYEE'}
             </span>
-            <span className="flex items-center gap-1.5 font-mono text-sm text-(--fg-muted)">
-              <MapPin size={13} />
+            <span className="flex items-center gap-2 font-mono text-sm text-[var(--fg-muted)]">
+              <MapPin size={14} className="text-[var(--nm-primary)]" />
               {user?.telephone?.[0] || 'No phone set'}
             </span>
           </div>
@@ -61,8 +59,7 @@ export default function ProfileHeader({ user }) {
 
         {/* Status badge */}
         <span
-          className="px-3 py-1 text-xs font-bold font-mono border-2 border-black shrink-0 self-start"
-          style={{ background: 'var(--mint)', color: '#0a0a0a' }}
+          className="nm-status-pill active shrink-0 self-start sm:self-center"
         >
           ACTIVE
         </span>

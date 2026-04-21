@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { ArrowLeft, Save, UserPlus, Edit3 } from "lucide-react";
+import { ArrowLeft, UserPlus, Edit3, Power, PowerOff } from "lucide-react";
 import DashboardNav from "../../components/shared/DashboardNav";
 import api from "../../services/api";
 import useFetch from "../../hooks/useFetch";
@@ -11,13 +11,13 @@ const statuses = ["ACTIVE", "INACTIVE", "PENDING"];
 const statusClass = (status) => {
   switch (status) {
     case "ACTIVE":
-      return "status-pill status-pill-active";
+      return "admin-status-chip active-blue";
     case "PENDING":
-      return "status-pill status-pill-pending";
+      return "admin-status-chip pending-blue";
     case "INACTIVE":
-      return "status-pill status-pill-inactive";
+      return "admin-status-chip inactive-blue";
     default:
-      return "status-pill";
+      return "admin-status-chip";
   }
 };
 
@@ -199,6 +199,26 @@ export default function UserProfile() {
     }
   };
 
+  const handleQuickStatusChange = async (newStatus) => {
+    setSubmitting(true);
+    setError("");
+    setMessage("");
+
+    try {
+      await api.patch(`/admin/users/${userId}/status`, {
+        accountStatus: newStatus,
+      });
+
+      setAccountStatus(newStatus);
+      setMessage(`Account status updated to ${newStatus}`);
+      setTimeout(() => setMessage(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update account status.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const renderViewRow = (label, value) => (
     <div className="rounded-xl border-2 border-(--border) bg-(--bg) p-5 min-h-[88px] flex items-center">
       <div className="w-full flex flex-col gap-2">
@@ -211,11 +231,13 @@ export default function UserProfile() {
   );
 
   return (
-    <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-      <div className="dashboard-shell">
+    <div className="min-h-screen bg-(--bg) text-(--fg)">
+      <div className="dashboard-nav-area">
         <DashboardNav role="admin" />
+      </div>
 
-        <div className="brutal-card p-6 bg-(--card-bg) mt-8">
+      <div className="dashboard-shell py-6">
+        <div className="brutal-card p-6 bg-(--card-bg)">
           <div className="brutal-card p-5 bg-(--bg) mb-6">
             <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
               <div className="min-w-0">
@@ -259,7 +281,7 @@ export default function UserProfile() {
                   <button
                     type="button"
                     onClick={() => navigate(`/admin/users/${userId}/edit`)}
-                    className="brutal-btn inline-flex items-center gap-2 px-4 py-2.5 bg-(--yellow) text-black"
+                    className="brutal-btn inline-flex items-center gap-2 px-4 py-2.5 bg-[#1e51f6] text-white"
                   >
                     <Edit3 size={16} />
                     Edit Profile
@@ -270,12 +292,12 @@ export default function UserProfile() {
           </div>
 
           {message && (
-            <div className="p-4 mb-4 text-sm text-green-800 bg-green-100 border border-green-200 rounded-md">
+            <div className="p-4 mb-4 text-sm text-blue-900 bg-blue-100 border-4 border-blue-500" style={{ borderRadius: '0' }}>
               {message}
             </div>
           )}
           {error && (
-            <div className="p-4 mb-4 text-sm text-red-800 bg-red-100 border border-red-200 rounded-md">
+            <div className="p-4 mb-4 text-sm text-red-900 bg-red-100 border-4 border-red-500" style={{ borderRadius: '0' }}>
               {error}
             </div>
           )}
@@ -315,6 +337,37 @@ export default function UserProfile() {
                   </div>
                 </div>
               )}
+
+              {/* Quick Status Actions */}
+              <div className="form-section w-full">
+                <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
+                <div className="flex flex-wrap gap-3">
+                  {formData.role !== 'ADMIN' && accountStatus !== 'ACTIVE' && (
+                    <button
+                      type="button"
+                      onClick={() => handleQuickStatusChange('ACTIVE')}
+                      disabled={submitting}
+                      className="admin-action-btn status-active"
+                      style={{ padding: 'var(--spacing-3) var(--spacing-5)', fontSize: 'var(--text-sm)' }}
+                    >
+                      <Power size={18} strokeWidth={2.5} />
+                      Activate Account
+                    </button>
+                  )}
+                  {formData.role !== 'ADMIN' && accountStatus !== 'INACTIVE' && (
+                    <button
+                      type="button"
+                      onClick={() => handleQuickStatusChange('INACTIVE')}
+                      disabled={submitting}
+                      className="admin-action-btn status-inactive"
+                      style={{ padding: 'var(--spacing-3) var(--spacing-5)', fontSize: 'var(--text-sm)' }}
+                    >
+                      <PowerOff size={18} strokeWidth={2.5} />
+                      Deactivate Account
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="grid gap-6">
@@ -553,9 +606,9 @@ export default function UserProfile() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="brutal-btn inline-flex items-center gap-2 px-5 py-3 bg-(--teal) text-black"
+                  className="brutal-btn inline-flex items-center gap-2 px-5 py-3 bg-[#1e51f6] text-white"
                 >
-                  {isCreate ? <UserPlus size={18} /> : <Save size={18} />}
+                  {isCreate ? <UserPlus size={18} /> : null}
                   {submitting
                     ? isCreate
                       ? "Creating..."
@@ -568,7 +621,7 @@ export default function UserProfile() {
                   <button
                     type="button"
                     onClick={() => navigate(`/admin/users/${userId}`)}
-                    className="brutal-btn px-5 py-3 bg-(--yellow) text-black"
+                    className="brutal-btn px-5 py-3 bg-[#3949ab] text-white"
                   >
                     View Profile
                   </button>

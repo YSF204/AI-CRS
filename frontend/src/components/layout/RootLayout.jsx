@@ -10,10 +10,8 @@ export default function RootLayout() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
-      {/* Editorial Dashboard Shell */}
-      <div className="dashboard-shell">
-        <Outlet />
-      </div>
+      {/* Outlet renders child routes - they handle their own padding via dashboard-shell */}
+      <Outlet />
 
       {/* Chatbot Widget - Employee Only */}
       {showChatbot && <ChatbotWidget key={location.pathname} />}

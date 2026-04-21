@@ -55,10 +55,12 @@ export default function UserDelete() {
   };
 
   return (
-    <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-      <div className="dashboard-shell">
+    <div className="min-h-screen bg-(--bg) text-(--fg)">
+      <div className="dashboard-nav-area">
         <DashboardNav role="admin" />
+      </div>
 
+      <div className="dashboard-shell py-6">
         <div className="brutal-card p-6 bg-(--card-bg)">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
             <div>

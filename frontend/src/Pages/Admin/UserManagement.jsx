@@ -5,8 +5,11 @@ import {
   Search,
   RefreshCcw,
   Edit3,
-  Eye,
   Trash2,
+  CheckCircle,
+  XCircle,
+  Power,
+  PowerOff,
 } from "lucide-react";
 import { useDebounce } from "@uidotdev/usehooks";
 import DashboardNav from "../../components/shared/DashboardNav";
@@ -19,13 +22,13 @@ const statuses = ["", "ACTIVE", "INACTIVE", "PENDING"];
 const statusClass = (status) => {
   switch (status) {
     case "ACTIVE":
-      return "status-pill status-pill-active";
+      return "admin-status-chip active-blue";
     case "PENDING":
-      return "status-pill status-pill-pending";
+      return "admin-status-chip pending-blue";
     case "INACTIVE":
-      return "status-pill status-pill-inactive";
+      return "admin-status-chip inactive-blue";
     default:
-      return "status-pill";
+      return "admin-status-chip";
   }
 };
 
@@ -42,6 +45,7 @@ export default function UserManagement() {
   const [error, setError] = useState("");
   const [pendingDeleteUser, setPendingDeleteUser] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(null);
   const debouncedSearch = useDebounce(search, 400);
   const debouncedRoleFilter = useDebounce(roleFilter, 250);
   const debouncedStatusFilter = useDebounce(statusFilter, 250);
@@ -114,236 +118,398 @@ export default function UserManagement() {
     }
   };
 
-  return (
-    <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-      <div className="dashboard-shell">
-        <DashboardNav role="admin" />
+  // Fast status action
+  const handleStatusUpdate = async (userId, newStatus) => {
+    if (updatingStatus) return;
 
-        <div className="grid gap-6">
-          <div className="brutal-card p-6 bg-(--card-bg)">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-              <div>
-                <h1 className="text-3xl font-bold">User Management</h1>
-                <p className="text-(--fg-muted) mt-2">
-                  List users, update account status, create new users, and
-                  remove inactive accounts.
-                </p>
+    setUpdatingStatus(userId);
+    setError("");
+
+    try {
+      const res = await api.patch(`/admin/users/${userId}/status`, {
+        accountStatus: newStatus,
+      });
+
+      setUsers((prev) =>
+        prev.map((user) => {
+          const id = user._id || user.id;
+          if (id === userId) {
+            return res.data.data.user || { ...user, accountStatus: newStatus };
+          }
+          return user;
+        })
+      );
+
+      setMessage(`User status updated to ${newStatus}`);
+      setTimeout(() => setMessage(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to update user status.");
+      // Rollback UI on error
+      setUsers((prev) =>
+        prev.map((user) => {
+          const id = user._id || user.id;
+          if (id === userId) {
+            return { ...user }; // Keep original status
+          }
+          return user;
+        })
+      );
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
+  return (
+    <div className="admin-page">
+      <div className="dashboard-nav-area">
+        <DashboardNav role="admin" />
+      </div>
+
+      <div className="dashboard-shell">
+        {/* Header */}
+        <div className="admin-header">
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--spacing-4)',
+            alignItems: 'flex-start',
+            justifyContent: 'space-between',
+          }}>
+            <div>
+              <div style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '11px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.18em',
+                color: 'var(--nm-text-secondary)',
+                marginBottom: 'var(--spacing-2)'
+              }}>
+                User Management
               </div>
+              <h1 style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(2rem, 4vw, 3rem)',
+                fontWeight: 700,
+                letterSpacing: '-0.04em',
+                lineHeight: 1,
+                textTransform: 'uppercase',
+                margin: 0,
+                color: 'var(--nm-text-primary)'
+              }}>
+                Manage Platform Users
+              </h1>
+              <p style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--text-sm)',
+                color: 'var(--nm-text-secondary)',
+                margin: 'var(--spacing-2) 0 0 0',
+                maxWidth: '60ch'
+              }}>
+                List users, update account status, create new users, and remove inactive accounts.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => navigate("/admin/users/new")}
+              className="nm-btn nm-btn-primary"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 'var(--spacing-2)',
+                background: 'var(--nm-primary)',
+                color: 'var(--nm-text-inverse)'
+              }}
+            >
+              <PlusCircle size={18} strokeWidth={2.5} />
+              Add User
+            </button>
+          </div>
+        </div>
+
+        {/* Filter Bar */}
+        <div className="admin-filter-bar">
+          <div className="admin-filter-group">
+            <label className="admin-filter-label">Search</label>
+            <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
+              <input
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="Search name or email"
+                className="admin-filter-input"
+                style={{ flex: 1 }}
+              />
               <button
                 type="button"
-                onClick={() => navigate("/admin/users/new")}
-                className="brutal-btn inline-flex items-center gap-2 px-4 py-3 bg-(--yellow) text-black"
+                onClick={() => setPage(1)}
+                className="nm-btn"
+                style={{ padding: 'var(--spacing-3)', minWidth: '44px' }}
               >
-                <PlusCircle size={18} />
-                Add User
+                <Search size={16} strokeWidth={2.5} />
               </button>
             </div>
+          </div>
 
-            <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.8fr] mb-6">
-              <div className="grid gap-3">
-                <label className="font-semibold">Search</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    value={search}
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                      setPage(1);
-                    }}
-                    placeholder="Search name or email"
-                    className="flex-1 rounded-sm border border-black bg-(--bg) px-4 py-3 text-(--fg)"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setPage(1)}
-                    className="brutal-btn px-4 py-3 bg-(--yellow) text-black"
-                  >
-                    <Search size={16} />
-                  </button>
-                </div>
-              </div>
+          <div className="admin-filter-group">
+            <label className="admin-filter-label">Role</label>
+            <select
+              value={roleFilter}
+              onChange={(e) => {
+                setRoleFilter(e.target.value);
+                setPage(1);
+              }}
+              className="admin-filter-select"
+            >
+              {roles.map((role) => (
+                <option key={role} value={role}>
+                  {role || "All Roles"}
+                </option>
+              ))}
+            </select>
+          </div>
 
-              <div className="grid gap-3">
-                <label className="font-semibold">Role</label>
-                <select
-                  value={roleFilter}
-                  onChange={(e) => {
-                    setRoleFilter(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full rounded-sm border border-black bg-(--bg) px-4 py-3 text-(--fg)"
-                >
-                  {roles.map((role) => (
-                    <option key={role} value={role}>
-                      {role || "All Roles"}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <div className="admin-filter-group">
+            <label className="admin-filter-label">Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(1);
+              }}
+              className="admin-filter-select"
+            >
+              {statuses.map((status) => (
+                <option key={status} value={status}>
+                  {status || "All Statuses"}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-              <div className="grid gap-3">
-                <label className="font-semibold">Status</label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => {
-                    setStatusFilter(e.target.value);
-                    setPage(1);
-                  }}
-                  className="w-full rounded-sm border border-black bg-(--bg) px-4 py-3 text-(--fg)"
-                >
-                  {statuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status || "All Statuses"}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+        {/* Messages */}
+        {message && (
+          <div className="admin-alert success">
+            {message}
+          </div>
+        )}
+        {error && (
+          <div className="admin-alert error">
+            {error}
+          </div>
+        )}
 
-            {message && (
-              <div className="p-4 mb-4 text-sm text-green-800 bg-green-100 border border-green-200 rounded-md">
-                {message}
-              </div>
-            )}
-            {error && (
-              <div className="p-4 mb-4 text-sm text-red-800 bg-red-100 border border-red-200 rounded-md">
-                {error}
-              </div>
-            )}
+        {/* Users Table */}
+        {loading ? (
+          <div style={{
+            padding: 'var(--spacing-12)',
+            textAlign: 'center',
+            color: 'var(--nm-text-secondary)'
+          }}>
+            Loading users...
+          </div>
+        ) : users.length === 0 ? (
+          <div className="nm-card" style={{
+            padding: 'var(--spacing-12)',
+            textAlign: 'center',
+            color: 'var(--nm-text-secondary)'
+          }}>
+            <Search size={48} style={{ marginBottom: 'var(--spacing-4)', opacity: 0.5 }} />
+            <p style={{ margin: 0, fontSize: 'var(--text-lg)', fontWeight: 600 }}>
+              No users found
+            </p>
+            <p style={{ margin: 0, fontSize: 'var(--text-sm)' }}>
+              Try adjusting your search or filter criteria
+            </p>
+          </div>
+        ) : (
+          <>
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => {
+                  const userId = user._id || user.id;
+                  const isUpdating = updatingStatus === userId;
+                  const canUpdateStatus = user.role !== 'ADMIN' && user.accountStatus !== 'PENDING';
 
-            {loading ? (
-              <div className="p-8 text-center text-(--fg-muted)">
-                Loading users...
-              </div>
-            ) : users.length === 0 ? (
-              <div className="p-8 text-center text-(--fg-muted)">
-                No users found.
-              </div>
-            ) : (
-              <div className="brutal-card bg-(--card-bg) divide-y-2 divide-black">
-                {users.map((user) => (
-                  <div
-                    key={user._id || user.id}
-                    className="p-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center"
-                  >
-                    <div className="min-w-0">
-                      <div className="text-base font-bold truncate">
-                        {user.firstName} {user.lastName}
-                      </div>
-                      <div className="text-sm font-medium text-(--fg-muted) truncate">
-                        {user.email}
-                      </div>
-                      <div className="text-xs font-medium text-(--fg-muted) mt-1 truncate">
-                        {user._id || user.id}
-                      </div>
-                      <div className="mt-2 grid gap-2">
-                        <span className="text-sm font-semibold text-(--fg-muted)">
-                          {user.gender || "—"} | {user.telephone?.[0] || "—"}
-                        </span>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="stat-pill user-list-pill">{user.role}</span>
-                          <span className={`${statusClass(user.accountStatus)} user-list-pill`}>
-                            {user.accountStatus}
-                          </span>
+                  return (
+                    <tr key={userId}>
+                      <td>
+                        <div style={{
+                          fontFamily: 'var(--font-display)',
+                          fontSize: 'var(--text-sm)',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                          letterSpacing: '-0.02em',
+                          color: 'var(--nm-text-primary)',
+                          marginBottom: 'var(--spacing-1)'
+                        }}>
+                          {user.firstName} {user.lastName}
                         </div>
-                      </div>
-                    </div>
+                        <div style={{
+                          fontFamily: 'var(--font-body)',
+                          fontSize: 'var(--text-sm)',
+                          color: 'var(--nm-text-secondary)',
+                          marginBottom: 'var(--spacing-1)'
+                        }}>
+                          {user.email}
+                        </div>
+                        <div style={{
+                          fontFamily: 'var(--font-body)',
+                          fontSize: 'var(--text-xs)',
+                          color: 'var(--nm-text-tertiary)',
+                          fontFamily: 'var(--font-body)',
+                        }}>
+                          {userId}
+                        </div>
+                      </td>
+                      <td>
+                        <span className="admin-status-chip">{user.role}</span>
+                      </td>
+                      <td>
+                        <span className={statusClass(user.accountStatus)}>
+                          {user.accountStatus}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{
+                          fontFamily: 'var(--font-body)',
+                          fontSize: 'var(--text-sm)',
+                          color: 'var(--nm-text-primary)'
+                        }}>
+                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 'var(--spacing-2)', flexWrap: 'wrap' }}>
+                          {/* Edit */}
+                          <button
+                            onClick={() => navigate(`/admin/users/${userId}/edit`)}
+                            className="admin-action-btn"
+                            title="Edit"
+                          >
+                            <Edit3 size={14} strokeWidth={2.5} />
+                          </button>
 
-                    <div className="grid grid-cols-3 gap-2 lg:w-[180px]">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigate(`/admin/users/${user._id || user.id}`);
-                        }}
-                        className="brutal-btn px-2 py-2 bg-(--mint) text-black text-[10px]"
-                        title="View"
-                      >
-                        <Eye size={14} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          navigate(`/admin/users/${user._id || user.id}/edit`);
-                        }}
-                        className="brutal-btn px-2 py-2 bg-(--yellow) text-black text-[10px]"
-                        title="Edit"
-                      >
-                        <Edit3 size={14} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          openDeleteDialog(user);
-                        }}
-                        className="brutal-btn px-2 py-2 bg-[#FF6B6B] text-black text-[10px]"
-                        title="Delete"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                          {/* Fast Status Actions */}
+                          {canUpdateStatus && user.accountStatus !== 'ACTIVE' && (
+                            <button
+                              onClick={() => handleStatusUpdate(userId, 'ACTIVE')}
+                              className="admin-action-btn status-active"
+                              disabled={isUpdating}
+                              title="Activate"
+                            >
+                              <Power size={14} strokeWidth={2.5} />
+                            </button>
+                          )}
+                          {canUpdateStatus && user.accountStatus !== 'INACTIVE' && (
+                            <button
+                              onClick={() => handleStatusUpdate(userId, 'INACTIVE')}
+                              className="admin-action-btn status-inactive"
+                              disabled={isUpdating}
+                              title="Deactivate"
+                            >
+                              <PowerOff size={14} strokeWidth={2.5} />
+                            </button>
+                          )}
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm">
-              <div className="text-(--fg-muted)">
-                Total users: {pagination.total ?? users.length}
+                          {/* Delete */}
+                          <button
+                            onClick={() => openDeleteDialog(user)}
+                            className="admin-action-btn status-delete"
+                            title="Delete"
+                          >
+                            <Trash2 size={14} strokeWidth={2.5} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+
+            {/* Pagination */}
+            <div className="admin-pagination">
+              <div className="admin-pagination-info">
+                Total users: {pagination.total ?? users.length} | Page {page} of {pagination.pages || 1}
               </div>
-              <div className="flex gap-2">
+              <div className="admin-pagination-controls">
                 <button
-                  type="button"
                   onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                  disabled={page <= 1}
-                  className="brutal-btn px-4 py-2 bg-(--card-bg)"
+                  disabled={page <= 1 || loading}
+                  className="nm-btn"
+                  style={{ padding: 'var(--spacing-2) var(--spacing-4)', minWidth: '100px' }}
                 >
-                  Prev
+                  Previous
                 </button>
                 <button
-                  type="button"
                   onClick={() => setPage((prev) => prev + 1)}
-                  disabled={page >= (pagination.pages || 1)}
-                  className="brutal-btn px-4 py-2 bg-(--card-bg)"
+                  disabled={page >= (pagination.pages || 1) || loading}
+                  className="nm-btn"
+                  style={{ padding: 'var(--spacing-2) var(--spacing-4)', minWidth: '100px' }}
                 >
                   Next
                 </button>
                 <button
-                  type="button"
                   onClick={() => refetchUsers().catch(() => {})}
-                  className="brutal-btn px-4 py-2 bg-(--mint)"
+                  disabled={loading}
+                  className="nm-btn"
+                  style={{ padding: 'var(--spacing-2) var(--spacing-4)' }}
                 >
-                  <RefreshCcw size={16} />
+                  <RefreshCcw size={16} strokeWidth={2.5} />
                 </button>
               </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
+      {/* Delete Confirmation Modal */}
       {pendingDeleteUser && (
-        <div className="fixed inset-0 z-[100] bg-black/55 flex items-center justify-center p-4">
-          <div className="brutal-card bg-(--card-bg) p-6 w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-2">Confirm Delete</h2>
-            <p className="text-(--fg-muted) mb-5">
+        <div className="admin-modal">
+          <div className="admin-modal-content">
+            <h2 className="admin-modal-title">Confirm Delete</h2>
+            <p className="admin-modal-description">
               Delete user{" "}
-              <span className="font-semibold text-(--fg)">
+              <span style={{ fontWeight: 700, color: 'var(--nm-text-primary)' }}>
                 {pendingDeleteUser.firstName} {pendingDeleteUser.lastName}
               </span>
               ? This action will deactivate the account.
             </p>
 
-            <div className="flex gap-3 justify-end">
+            <div className="admin-modal-actions">
               <button
-                type="button"
                 onClick={closeDeleteDialog}
-                className="brutal-btn px-4 py-2 bg-(--card-bg)"
+                className="nm-btn"
                 disabled={deleting}
+                style={{
+                  padding: 'var(--spacing-3) var(--spacing-5)',
+                  background: '#3949ab',
+                  color: 'white'
+                }}
               >
                 Cancel
               </button>
               <button
-                type="button"
                 onClick={confirmDelete}
-                className="brutal-btn px-4 py-2 bg-[#FF6B6B] text-black"
+                className="nm-btn"
+                style={{
+                  background: '#ba1a1a',
+                  color: 'white',
+                  padding: 'var(--spacing-3) var(--spacing-5)'
+                }}
                 disabled={deleting}
               >
                 {deleting ? "Deleting..." : "Delete"}

@@ -35,8 +35,7 @@ export default function ATSResults({ result, onBack }) {
       {/* Back Button */}
       <button
         onClick={onBack}
-        className="brutal-btn px-4 py-2 font-bold flex items-center gap-2 mb-4"
-        style={{ background: "var(--card-bg)", color: "var(--fg)" }}
+        className="jd-btn jd-btn-secondary mb-4 inline-flex items-center gap-2"
       >
         <ArrowLeft size={16} />
         Back to CV Selection
@@ -231,8 +230,7 @@ export default function ATSResults({ result, onBack }) {
       <div className="flex justify-center pt-4">
         <button
           onClick={onBack}
-          className="brutal-btn px-6 py-3 font-bold"
-          style={{ background: "var(--teal)", color: "#0a0a0a" }}
+          className="jd-btn jd-btn-primary"
         >
           Analyze Another CV
         </button>

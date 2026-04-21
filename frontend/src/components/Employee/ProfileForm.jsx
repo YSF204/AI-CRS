@@ -15,21 +15,19 @@ function FormField({ label, id, icon: Icon, type = 'text', value, onChange, plac
     <div className="flex flex-col gap-1.5">
       <label
         htmlFor={id}
-        className="flex items-center gap-1.5 text-xs font-bold font-mono uppercase tracking-wider text-(--fg-muted)"
+        className="form-label mb-1"
       >
-        <Icon size={11} />
+        <Icon size={12} className="inline mr-1.5 mb-0.5" />
         {label}
       </label>
-      <div className="brutal-card flex items-center gap-2 px-3 py-2.5 bg-(--card-bg) focus-within:shadow-[4px_4px_0_var(--teal)] transition-shadow">
-        <input
-          id={id}
-          type={type}
-          value={value}
-          onChange={onChange}
-          placeholder={placeholder}
-          style={FIELD_STYLE}
-        />
-      </div>
+      <input
+        id={id}
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="nm-input text-sm font-mono"
+      />
     </div>
   );
 }
@@ -66,14 +64,14 @@ export default function ProfileForm({ user, onSave }) {
   };
 
   return (
-    <div className="brutal-card bg-(--card-bg) p-6">
-      <h3 className="font-bold font-['Space_Grotesk'] text-lg uppercase tracking-tight mb-5 flex items-center gap-2">
-        <User size={18} className="text-(--teal)" />
+    <div className="nm-card profile-form-card">
+      <h3 className="jd-section-title flex items-center gap-2">
+        <User size={18} className="text-[var(--nm-primary)]" />
         Personal Information
       </h3>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <FormField
             label="First Name"
             id="firstName"
@@ -91,7 +89,7 @@ export default function ProfileForm({ user, onSave }) {
             placeholder="Doe"
           />
           <FormField
-            label="Email"
+            label="Email Address"
             id="email"
             icon={Globe}
             type="email"
@@ -100,7 +98,7 @@ export default function ProfileForm({ user, onSave }) {
             placeholder="you@example.com"
           />
           <FormField
-            label="Phone"
+            label="Phone Number"
             id="phone"
             icon={Phone}
             type="tel"
@@ -117,32 +115,33 @@ export default function ProfileForm({ user, onSave }) {
             onChange={set('age')}
             placeholder="30"
           />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="gender"
-            className="flex items-center gap-1.5 text-xs font-bold font-mono uppercase tracking-wider text-(--fg-muted)"
-          >
-            <FileText size={11} />
-            Gender
-          </label>
-          <div className="brutal-card px-3 py-2.5 bg-(--card-bg) focus-within:shadow-[4px_4px_0_var(--teal)] transition-shadow">
-            <select id="gender" value={form.gender} onChange={set('gender')} style={FIELD_STYLE}>
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="gender"
+              className="form-label mb-1"
+            >
+              <FileText size={12} className="inline mr-1.5 mb-0.5" />
+              Gender
+            </label>
+            <select 
+              id="gender" 
+              value={form.gender} 
+              onChange={set('gender')} 
+              className="nm-select text-sm font-mono"
+            >
               <option value="MALE">Male</option>
               <option value="FEMALE">Female</option>
             </select>
           </div>
         </div>
 
-        <div className="flex justify-end pt-2">
+        <div className="flex justify-end pt-4">
           <button
             type="submit"
-            className="brutal-btn px-6 py-2.5 font-bold flex items-center gap-2 text-sm transition-transform active:translate-x-[2px] active:translate-y-[2px]"
-            style={{ background: saved ? 'var(--mint)' : 'var(--blue)', color: '#ffffff' }}
+            className={`nm-btn px-8 min-w-[180px] ${saved ? 'bg-[var(--nm-success)] text-white' : 'nm-btn-primary'}`}
           >
-            <Save size={14} />
-            {saved ? 'SAVED ✓' : 'SAVE CHANGES'}
+            <Save size={16} />
+            {saved ? 'PROFILE SAVED' : 'SAVE CHANGES'}
           </button>
         </div>
       </form>

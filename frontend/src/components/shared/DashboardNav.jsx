@@ -1,250 +1,221 @@
-<<<<<<< HEAD
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Sun, Moon, Briefcase, FileText, User, Search } from 'lucide-react';
-import PillNav from './PillNav';
-import UserMenu from './UserMenu';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Sun, Moon, Briefcase, FileText, User, Search,
+  ChevronRight, ChevronLeft, LayoutDashboard, PlusSquare,
+  Users, Settings, CheckCircle, LayoutTemplate, LogOut, Menu, X
+} from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import './DashboardNav.css';
 
-/**
- * DashboardNav — Role-aware dashboard wrapper with quick actions.
- * Consumes the new PillNav API with Paper design system tokens.
- *
- * @param {string} role - 'employee' | 'employer' | 'admin'
- */
 export default function DashboardNav({ role = 'employee' }) {
-=======
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Sun, Moon } from "lucide-react";
-import PillNav from "./PillNav";
-import UserMenu from "./UserMenu";
-import { useTheme } from "../../context/ThemeContext";
-
-export default function DashboardNav({ role = "employee" }) {
->>>>>>> 1e56cd7 (fixing Employee page bugs)
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(() => {
+    // On mobile, sidebar is closed by default
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      return false;
+    }
+    return localStorage.getItem('sidebarOpen') === 'true';
+  });
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Theme toggle button with Paper design system
-  const themeToggleButton = (
-    <button
-      onClick={toggleTheme}
-      className="nav-action-button"
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-    >
-      {theme === 'light' ? <Moon size={16} strokeWidth={2} /> : <Sun size={16} strokeWidth={2} />}
-    </button>
-  );
+  const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'My Account';
 
-  // User menu dropdown
-  const userMenuNode = (
-    <UserMenu
-      profileHref={
-        role === 'employer' ? '/employer/profile'
-          : role === 'admin' ? '/admin/profile'
-            : '/employee/profile'
+  // Check if we're on mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) {
+        setIsMobileOpen(false);
       }
-    />
-  );
+    };
 
-  const rightActions = (
-    <>
-<<<<<<< HEAD
-      {themeToggleButton}
-      {userMenuNode}
-    </>
-  );
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
-  // Role-based navigation configuration
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('sidebar-open');
+      // Force CSS variable update for immediate effect
+      document.documentElement.style.setProperty('--sidebar-width', '16rem');
+    } else {
+      document.body.classList.remove('sidebar-open');
+      // Force CSS variable update for immediate effect
+      document.documentElement.style.setProperty('--sidebar-width', '5rem');
+    }
+
+    return () => {
+      document.body.classList.remove('sidebar-open');
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isMobileOpen) {
+      document.body.classList.add('mobile-sidebar-open');
+    } else {
+      document.body.classList.remove('mobile-sidebar-open');
+    }
+
+    return () => {
+      document.body.classList.remove('mobile-sidebar-open');
+    };
+  }, [isMobileOpen]);
+
+  const handleToggle = () => {
+    const nextState = !isOpen;
+    setIsOpen(nextState);
+    localStorage.setItem('sidebarOpen', nextState.toString());
+  };
+
+  const handleMobileToggle = () => {
+    setIsMobileOpen(!isMobileOpen);
+  };
+
+  // Close mobile sidebar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (isMobile && isMobileOpen) {
+        const sidebar = e.target.closest('.jd-sidebar');
+        const menuBtn = e.target.closest('.mobile-menu-btn');
+        if (!sidebar && !menuBtn) {
+          setIsMobileOpen(false);
+        }
+      }
+    };
+
+    if (isMobile && isMobileOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isMobile, isMobileOpen]);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   const roleConfig = {
     employer: {
       baseLink: '/employer',
-      color: 'var(--color-danger)',
-      label: 'Employer',
-=======
-      {/* Theme toggle */}
-      <button
-        onClick={toggleTheme}
-        className="flex items-center justify-center w-[36px] h-[36px] border-[3px] border-black shadow-[3px_3px_0_black]"
-        style={{
-          background: theme === "dark" ? "#FFE630" : "var(--bg)",
-          color: theme === "dark" ? "#0a0a0a" : "var(--fg)",
-          transition: "transform 0.1s ease",
-        }}
-      >
-        {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
-      </button>
-
-      {/* User avatar dropdown (profile + logout) */}
-      <UserMenu
-        profileHref={
-          role === "employer"
-            ? "/employer/profile"
-            : role === "admin"
-              ? "/admin/profile"
-              : "/employee/profile"
-        }
-      />
-    </>
-  );
-
-  let config = {};
-
-  if (role === "employer") {
-    config = {
-      baseLink: "/employer",
-      color: "var(--coral)",
-      label: "Employer",
->>>>>>> 1e56cd7 (fixing Employee page bugs)
       items: [
-        { label: "Dashboard", href: "/employer" },
-        { label: "Post Job", href: "/employer/post-job" },
-        { label: "Manage Jobs", href: "/employer/jobs" },
-        { label: "Find Talent", href: "/employer/search" },
+        { label: "Dashboard", href: "/employer", icon: LayoutDashboard },
+        { label: "Post Job", href: "/employer/post-job", icon: PlusSquare },
+        { label: "Manage Jobs", href: "/employer/jobs", icon: Briefcase },
+        { label: "Find Talent", href: "/employer/search", icon: Users },
       ],
-<<<<<<< HEAD
     },
     admin: {
       baseLink: '/admin',
-      color: 'var(--color-warning)',
-      label: 'Admin',
-=======
-    };
-  } else if (role === "admin") {
-    config = {
-      baseLink: "/admin",
-      color: "var(--yellow)",
-      label: "Admin",
->>>>>>> 1e56cd7 (fixing Employee page bugs)
       items: [
-        { label: "Dashboard", href: "/admin" },
-        { label: "Manage Users", href: "/admin/users" },
-        { label: "Settings", href: "/admin/settings" },
+        { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+        { label: "Manage Users", href: "/admin/users", icon: Users },
       ],
-<<<<<<< HEAD
     },
     employee: {
       baseLink: '/employee',
-      color: 'var(--color-primary)',
-      label: 'Employee',
-=======
-    };
-  } else {
-    // Employee (default)
-    config = {
-      baseLink: "/employee",
-      color: "var(--teal)",
-      label: "Employee",
->>>>>>> 1e56cd7 (fixing Employee page bugs)
       items: [
-        { label: "Dashboard", href: "/employee" },
-        { label: "Find Jobs", href: "/employee/jobs" },
-        { label: "Applications", href: "/employee/applications" },
-        { label: "ATS Score", href: "/employee/ats-score" },
-        { label: "My CVs", href: "/employee/cvs" },
-        { label: "CV Templates", href: "/employee/cv-templates" },
-      ],
-      // Quick actions for employee dashboard
-      quickActions: [
-        { icon: Search, label: 'Find Jobs', href: '/employee/jobs', colorType: 'warning' },
-        { icon: FileText, label: 'My CVs', href: '/employee/cvs', colorType: 'success' },
-        { icon: Briefcase, label: 'Applications', href: '/employee/applications', colorType: 'primary' },
+        { label: "Find Jobs", href: "/employee/jobs", icon: Search },
+        { label: "Applications", href: "/employee/applications", icon: Briefcase },
+        { label: "ATS Score", href: "/employee/ats-score", icon: CheckCircle },
+        { label: "My CVs", href: "/employee/cvs", icon: FileText },
+        { label: "CV Templates", href: "/employee/cv-templates", icon: LayoutTemplate },
       ],
     },
   };
 
   const config = roleConfig[role] || roleConfig.employee;
 
-  // Logo component with Paper design system
-  const logoNode = (
-    <Link
-      to={config.baseLink}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-<<<<<<< HEAD
-        textDecoration: 'none',
-        color: 'var(--color-text-primary)',
-        fontFamily: "'Montserrat', sans-serif",
-=======
-        textDecoration: "none",
-        color: "var(--fg)",
-        fontFamily: "'Space Grotesk', sans-serif",
->>>>>>> 1e56cd7 (fixing Employee page bugs)
-        fontWeight: 700,
-        fontSize: 16,
-      }}
-    >
-      <span
-<<<<<<< HEAD
-        className="text-[var(--color-text-primary)] font-bold px-3 py-1 tracking-tighter"
-        style={{ borderRadius: '4px', background: config.color }}
-=======
-        className="text-black font-bold px-3 py-1 tracking-tighter"
-        style={{ borderRadius: "4px", background: config.color }}
->>>>>>> 1e56cd7 (fixing Employee page bugs)
-      >
-        AI-CRS
-      </span>
-      <span
-        className="hidden sm:inline-block tracking-widest text-xs uppercase"
-<<<<<<< HEAD
-        style={{ color: 'var(--color-text-secondary)' }}
-=======
-        style={{ color: "var(--fg-muted)" }}
->>>>>>> 1e56cd7 (fixing Employee page bugs)
-      >
-        {config.label}
-      </span>
-    </Link>
-  );
+  // Close mobile sidebar when clicking a link
+  const handleMobileLinkClick = () => {
+    if (isMobile) {
+      setIsMobileOpen(false);
+    }
+  };
 
   return (
-    <div className="dashboard-nav-wrapper sticky top-0 z-50 mb-12 backdrop-blur-lg bg-opacity-90">
-      <PillNav
-        logo={logoNode}
-        items={config.items}
-        activeHref={location.pathname}
-        rightActions={rightActions}
-        theme={theme}
-        initialLoadAnimation={false}
-      />
+    <>
+      {/* Mobile menu button */}
+      <button
+        className="mobile-menu-btn"
+        onClick={handleMobileToggle}
+        aria-label="Open menu"
+        aria-expanded={isMobileOpen}
+      >
+        {isMobileOpen ? <X size={20} strokeWidth={3} /> : <Menu size={20} strokeWidth={3} />}
+      </button>
 
-      {/* Quick Actions Bar - Employee Only with fixed height to prevent layout shift */}
-      {role === 'employee' && config.quickActions && (
-        <div
-          className="quick-actions-bar"
-          style={{
-            maxWidth: '1500px',
-            margin: '0 auto',
-            padding: '0.75rem 1rem',
-            minHeight: '48px',
-          }}
-        >
-          <div className="flex items-center gap-3 overflow-x-auto">
-            <span className="text-xs font-mono uppercase tracking-widest text-[var(--color-text-secondary)] whitespace-nowrap">
-              Quick Actions
-            </span>
-            {config.quickActions.map((action, index) => {
-              const Icon = action.icon;
-              const isActive = location.pathname === action.href;
-              const activeClass = isActive && action.colorType ? ` active-${action.colorType}` : '';
-              return (
-                <Link
-                  key={index}
-                  to={action.href}
-                  className={`quick-action-link${activeClass}`}
-                >
-                  <Icon size={16} />
-                  <span className="hidden sm:inline">{action.label}</span>
-                </Link>
-              );
-            })}
-          </div>
+      <aside className="jd-sidebar">
+        <div className="jd-sidebar-header">
+          <Link to={config.baseLink} className="jd-sidebar-brand" style={{ textDecoration: 'none' }}>
+            <span className="jd-sidebar-brand-text">AI-CRS</span>
+          </Link>
         </div>
-      )}
-    </div>
+        <button
+          className="jd-sidebar-toggle"
+          onClick={handleToggle}
+          aria-label="Toggle Sidebar"
+          aria-expanded={isOpen}
+          style={{ display: isMobile ? 'none' : 'flex' }}
+        >
+          {isOpen ? <ChevronLeft size={16} strokeWidth={3} /> : <ChevronRight size={16} strokeWidth={3} />}
+        </button>
+
+        <nav className="jd-sidebar-nav">
+          {config.items.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname.startsWith(item.href) && (item.href !== '/employer' && item.href !== '/employee' && item.href !== '/admin' || location.pathname === item.href);
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className="jd-sidebar-link"
+                data-active={location.pathname === item.href || isActive}
+                onClick={handleMobileLinkClick}
+              >
+                <div className="jd-sidebar-link-icon">
+                  <Icon size={20} strokeWidth={2.5} />
+                </div>
+                <span className="jd-sidebar-link-text">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="jd-sidebar-footer">
+          <Link
+            to={role === 'employer' ? '/employer/profile' : role === 'admin' ? '/admin/profile' : '/employee/profile'}
+            className="jd-sidebar-action"
+            onClick={handleMobileLinkClick}
+          >
+            <div className="jd-sidebar-link-icon">
+              <User size={20} strokeWidth={3} />
+            </div>
+            <span className="jd-sidebar-action-text truncate">{fullName}</span>
+          </Link>
+
+          <button onClick={toggleTheme} className="jd-sidebar-action">
+            <div className="jd-sidebar-link-icon">
+              {theme === 'light' ? <Moon size={20} strokeWidth={2.5} /> : <Sun size={20} strokeWidth={2.5} />}
+            </div>
+            <span className="jd-sidebar-action-text">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+          </button>
+
+          <button onClick={handleLogout} className="jd-sidebar-action" style={{ color: 'var(--nm-error)' }}>
+            <div className="jd-sidebar-link-icon">
+              <LogOut size={20} strokeWidth={2.5} />
+            </div>
+            <span className="jd-sidebar-action-text">Log Out</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LandingPage from './Public/Landing/LandingPage';
 import AdminDash from './Admin/AdminDash';
@@ -23,7 +24,7 @@ export default function DynamicRoot() {
   if (user) {
     if (user.role === 'ADMIN') return <AdminDash />;
     if (user.role === 'EMPLOYER') return <EmployerDash />;
-    if (user.role === 'EMPLOYEE') return <EmployeeDash />;
+    if (user.role === 'EMPLOYEE') return <Navigate to="/employee/cvs" replace />;
   }
 
   // If not logged in, just show the Landing Page
