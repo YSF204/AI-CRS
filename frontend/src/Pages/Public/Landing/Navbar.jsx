@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../../context/ThemeContext';
-import PillNav from '../../../components/shared/PillNav';
 
 export default function Navbar() {
   const [visible, setVisible] = useState(true);
@@ -65,6 +64,12 @@ export default function Navbar() {
     </>
   );
 
+  const navItems = [
+    { label: 'Features', href: '#features' },
+    { label: 'About', href: '#about' },
+    { label: 'Contact', href: '#contact' },
+  ];
+
   return (
     <nav
       style={{
@@ -80,19 +85,56 @@ export default function Navbar() {
       }}
     >
       <div style={{ pointerEvents: 'auto', maxWidth: 920, margin: '0 auto' }}>
-        <PillNav
-          logo={logoNode}
-          items={[
-            { label: 'Features', href: '#features' },
-            { label: 'About', href: '#about' },
-            { label: 'Contact', href: '#contact' }
-          ]}
-          activeHref="#features"
-          ease="power2.easeOut"
-          theme={theme}
-          initialLoadAnimation={true}
-          rightActions={rightActionsNode}
-        />
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '1rem',
+            padding: '0.85rem 1rem',
+            border: '4px solid var(--border-color)',
+            background: 'var(--nav-bg)',
+            boxShadow: '4px 4px 0 var(--nm-ink)',
+            backdropFilter: 'blur(10px)',
+          }}
+        >
+          {logoNode}
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}
+          >
+            {navItems.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className="focus-ring"
+                style={{
+                  textDecoration: 'none',
+                  color: 'var(--nav-text-default)',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  padding: '0.7rem 0.9rem',
+                  border: '2px solid transparent',
+                }}
+              >
+                {item.label}
+              </a>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            {rightActionsNode}
+          </div>
+        </div>
       </div>
     </nav>
   );
