@@ -33,10 +33,12 @@ export default function ManageJobs() {
   const goViewCandidates = (jobId) => navigate(`/employer/jobs/${jobId}/applications`);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', padding: 'clamp(1.5rem, 4%, 2.5rem)', overflowX: 'hidden' }}>
-      <div className="dashboard-shell">
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', overflowX: 'hidden' }}>
+      <div className="dashboard-nav-area">
         <DashboardNav role="employer" />
+      </div>
 
+      <div className="dashboard-shell py-6">
         <div style={{ marginBottom: 'clamp(1.5rem, 3%, 2.5rem)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>

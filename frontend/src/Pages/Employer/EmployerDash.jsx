@@ -43,32 +43,71 @@ export default function EmployerDash() {
 
   // ── Layout ───────────────────────────────────────────────────── //
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', padding: 'clamp(1.5rem, 4%, 2.5rem)', overflowX: 'hidden' }}>
-      <div className="dashboard-shell">
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: 'var(--nm-bg)',
+      color: 'var(--nm-text-primary)',
+      fontFamily: 'var(--font-body)',
+      overflowX: 'hidden'
+    }}>
+      <div className="dashboard-nav-area">
         <DashboardNav role="employer" />
+      </div>
 
+      <div className="dashboard-shell" style={{ padding: 'var(--spacing-6)' }}>
         {/* Greeting + Post button */}
-        <div style={{ marginBottom: 'clamp(1.5rem, 3%, 2.5rem)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
+        <div style={{
+          marginBottom: 'clamp(1.5rem, 3%, 2.5rem)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-end',
+          flexWrap: 'wrap',
+          gap: 'var(--spacing-4)'
+        }}>
           <div>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
+            <div style={{
+              fontFamily: 'var(--font-body)',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: 'var(--nm-text-secondary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginBottom: '6px'
+            }}>
               {profileLoading ? 'Loading Profile...' : company?.name ?? 'Your Company'}
             </div>
-            <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--fg)', letterSpacing: '-0.04em', lineHeight: 1 }}>
+            <h1 style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
+              fontSize: 'clamp(2rem, 5vw, 3.2rem)',
+              color: 'var(--nm-text-primary)',
+              letterSpacing: '-0.04em',
+              lineHeight: 1,
+              textTransform: 'uppercase',
+              margin: 0
+            }}>
               Employer Dashboard
             </h1>
           </div>
           <button
             onClick={goPostJob}
+            className="nm-btn nm-btn-primary"
             style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              padding: '14px 26px', background: '#FFE630', color: '#0a0a0a',
-              border: '4px solid #0a0a0a', boxShadow: '6px 6px 0 #0a0a0a',
-              fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 14,
-              textTransform: 'uppercase', letterSpacing: '0.08em', cursor: 'pointer',
-              transition: 'transform 0.1s ease, box-shadow 0.1s ease',
+              background: '#FFE630',
+              color: '#0a0a0a',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--spacing-2)',
+              padding: '14px 26px'
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translate(3px,3px)'; e.currentTarget.style.boxShadow = '3px 3px 0 #0a0a0a'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '6px 6px 0 #0a0a0a'; }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = 'translate(2px, 2px)';
+              e.currentTarget.style.boxShadow = '-2px -2px 0 var(--nm-ink)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = '';
+              e.currentTarget.style.boxShadow = '';
+            }}
           >
             <PlusCircle size={18} strokeWidth={2.5} />
             Post New Listing
@@ -76,7 +115,12 @@ export default function EmployerDash() {
         </div>
 
         {/* Stat row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 'clamp(1rem, 2vw, 1.5rem)', marginBottom: 'clamp(1.5rem, 3%, 2.5rem)' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: 'clamp(1rem, 2vw, 1.5rem)',
+          marginBottom: 'clamp(1.5rem, 3%, 2.5rem)'
+        }}>
           <StatWidget label="Open Positions"  value={jobsLoading ? '…' : openJobs}                              accent="#FFE630" icon={Briefcase}     />
           <StatWidget label="Total Posted"    value={jobsLoading ? '…' : jobs.length}                           accent="#4ECDC4" icon={CheckCircle2}  />
           <StatWidget label="Branches"        value={profileLoading ? '…' : (company?.branches?.length ?? '0')} accent="#FF6B6B" icon={MapPin}        />
@@ -84,14 +128,22 @@ export default function EmployerDash() {
         </div>
 
         {/* Main Bento Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 'clamp(1rem, 2vw, 1.5rem)', alignItems: 'stretch' }}>
-          
-          {/* Chart spans 8, Profile spans 4 */}
-          <ChartWidget jobs={jobs} />
-          <CompanyProfileCard company={company} loading={profileLoading} error={profileError} />
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
+          gap: 'clamp(1rem, 2vw, 1.5rem)',
+          alignItems: 'stretch'
+        }}>
+          <style>{`@media (min-width: 1024px) { .bento-grid { grid-template-columns: repeat(12, 1fr); } }`}</style>
+          <div className="bento-grid" style={{ display: 'grid', gap: 'clamp(1rem, 2vw, 1.5rem)', alignItems: 'stretch' }}>
 
-          {/* Pipeline spans 12 */}
-          <HiringPipelineCard totalJobs={jobs.length} openJobs={openJobs} loading={jobsLoading} />
+            {/* Chart spans 8, Profile spans 4 */}
+            <ChartWidget jobs={jobs} />
+            <CompanyProfileCard company={company} loading={profileLoading} error={profileError} />
+
+            {/* Pipeline spans 12 */}
+            <HiringPipelineCard totalJobs={jobs.length} openJobs={openJobs} loading={jobsLoading} />
+          </div>
         </div>
 
       </div>

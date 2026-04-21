@@ -106,11 +106,12 @@ export default function EditJob() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', padding: 'clamp(1.5rem, 4%, 2.5rem)', overflowX: 'hidden' }}>
-      <div className="dashboard-shell" style={{ marginBottom: '1rem' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', overflowX: 'hidden' }}>
+      <div className="dashboard-nav-area">
         <DashboardNav role="employer" />
       </div>
-      <div className="dashboard-shell">
+
+      <div className="dashboard-shell py-6">
 
         <button 
           onClick={() => navigate(-1)}

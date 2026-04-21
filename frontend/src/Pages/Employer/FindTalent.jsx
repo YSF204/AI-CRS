@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Sparkles, ArrowLeft, CheckCircle2, XCircle, AlertCircle, Clock, ChevronRight } from 'lucide-react';
 import DashboardNav from '../../components/shared/DashboardNav';
+import ActionButton from '../../components/shared/ActionButton';
 import api from '../../services/api';
 
 const INPUT = {
@@ -144,19 +145,11 @@ export default function FindTalent() {
           </div>
         </div>
 
-        <button
-          type="submit" disabled={loading}
-          style={{
-            marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 12,
-            padding: '18px', background: '#A78BFA', color: '#0a0a0a',
-            border: '4px solid #0a0a0a', boxShadow: '6px 6px 0 #0a0a0a',
-            fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 18,
-            textTransform: 'uppercase', letterSpacing: '0.1em',
-            cursor: loading ? 'wait' : 'pointer', opacity: loading ? 0.7 : 1,
-            transition: 'transform 0.1s ease, box-shadow 0.1s ease'
-          }}
-          onMouseEnter={e => { if(!loading) { e.currentTarget.style.transform = 'translate(2px,2px)'; e.currentTarget.style.boxShadow = '4px 4px 0 #0a0a0a'; } }}
-          onMouseLeave={e => { if(!loading) { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '6px 6px 0 #0a0a0a'; } }}
+        <ActionButton
+          type="submit"
+          variant="ai-gold"
+          disabled={loading}
+          className="mt-4 flex justify-center items-center gap-3 p-4 w-full font-bold text-lg"
         >
           {loading ? (
             <>
@@ -169,7 +162,7 @@ export default function FindTalent() {
               RUN AI MATCH ENGINE →
             </>
           )}
-        </button>
+        </ActionButton>
       </form>
     </div>
   );
@@ -344,12 +337,13 @@ export default function FindTalent() {
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', padding: 'clamp(1.5rem, 4%, 2.5rem)', overflowX: 'hidden' }}>
-      <div className="dashboard-shell" style={{ marginBottom: '1rem' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', overflowX: 'hidden' }}>
+      <div className="dashboard-nav-area">
         <DashboardNav role="employer" />
       </div>
-      <div className="dashboard-shell">
-        
+
+      <div className="dashboard-shell py-6">
+
         {/* Toggle Tabs */}
         <div style={{ display: 'flex', gap: 12, marginBottom: '2rem', borderBottom: '3px solid var(--border-color)', paddingBottom: 16 }}>
            <button onClick={() => setActiveTab('search')} style={{ background: activeTab === 'search' ? '#A78BFA' : 'transparent', color: activeTab === 'search' ? '#0a0a0a' : 'var(--fg)', border: activeTab === 'search' ? '3px solid #0a0a0a' : '3px solid transparent', padding: '10px 24px', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 16, cursor: 'pointer', borderRadius: 4, transition: 'all 0.1s ease', display: 'flex', alignItems: 'center', gap: 8 }}>

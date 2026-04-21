@@ -32,10 +32,12 @@ export default function JobApplications() {
   }, [jobId]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--fg)", padding: "clamp(1.5rem, 4%, 2.5rem)" }}>
-      <div className="dashboard-shell">
+    <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--fg)" }}>
+      <div className="dashboard-nav-area">
         <DashboardNav role="employer" />
+      </div>
 
+      <div className="dashboard-shell py-6">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
           <div>
             <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
