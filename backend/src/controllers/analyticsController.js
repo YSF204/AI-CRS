@@ -1,7 +1,9 @@
 import catchAsync from "../utils/catchAsync.js";
 import { getPlatformStats } from "../services/admin/stats/getPlatformStats.js";
+import { getTrendData } from "../services/admin/stats/getTrendData.js";
 import { updateUserAccountStatus } from "../services/admin/users/updateUserAccountStatus.js";
 import { getAdminUsersPage } from "../services/admin/users/getAdminUsersPage.js";
+import { getPendingEmployers } from "../services/admin/users/getPendingEmployers.js";
 import { createAdminManagedUser } from "../services/admin/users/createAdminManagedUser.js";
 import { getAdminUserById } from "../services/admin/users/getAdminUserById.js";
 import { updateAdminManagedUser } from "../services/admin/users/updateAdminManagedUser.js";
@@ -21,14 +23,42 @@ export const getStats = catchAsync(async (req, res, next) => {
 });
 
 // ================================== //
+//        GET TREND DATA              //
+// ================================== //
+
+export const getTrends = catchAsync(async (req, res, next) => {
+  const trends = await getTrendData();
+
+  res.status(200).json({
+    success: true,
+    data: trends,
+  });
+});
+
+// ================================== //
+//     GET PENDING EMPLOYERS         //
+// ================================== //
+
+export const getPendingEmployersList = catchAsync(async (req, res, next) => {
+  const { limit = 5 } = req.query;
+  const result = await getPendingEmployers({ limit: parseInt(limit) });
+
+  res.status(200).json({
+    success: true,
+    data: result,
+  });
+});
+
+// ================================== //
 //    UPDATE USER ACCOUNT STATUS      //
 // ================================== //
 
 export const updateUserStatus = catchAsync(async (req, res, next) => {
   const { id } = req.params;
+  const { accountStatus } = req.body;
   const updated = await updateUserAccountStatus({
     userId: id,
-    accountStatus: req.body.accountStatus,
+    accountStatus,
   });
 
   res.status(200).json({
