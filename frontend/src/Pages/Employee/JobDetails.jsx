@@ -21,6 +21,11 @@ const toRoleType = (value) => {
   return value || "Open";
 };
 
+const openExternalSource = (url) => {
+  if (!url) return;
+  window.open(url, "_blank", "noopener,noreferrer");
+};
+
 export default function JobDetails() {
   const { jobId } = useParams();
   const navigate = useNavigate();
@@ -40,9 +45,11 @@ export default function JobDetails() {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-        <div className="dashboard-shell">
+      <div className="min-h-screen bg-(--bg) text-(--fg)">
+        <div className="dashboard-nav-area">
           <DashboardNav role="employee" />
+        </div>
+        <div className="dashboard-shell py-6">
           <div className="brutal-card p-8 bg-(--card-bg) text-center">
             <p className="font-mono text-sm text-(--fg-muted)">
               Loading job details...
@@ -55,9 +62,11 @@ export default function JobDetails() {
 
   if (error || !job) {
     return (
-      <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-        <div className="dashboard-shell">
+      <div className="min-h-screen bg-(--bg) text-(--fg)">
+        <div className="dashboard-nav-area">
           <DashboardNav role="employee" />
+        </div>
+        <div className="dashboard-shell py-6">
           <div className="brutal-card p-8 bg-(--card-bg) text-center">
             <p className="font-mono text-sm text-(--coral)">
               {error?.response?.data?.message || "Job not found"}
@@ -75,10 +84,12 @@ export default function JobDetails() {
   }
 
   return (
-    <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-      <div className="dashboard-shell">
+    <div className="min-h-screen bg-(--bg) text-(--fg)">
+      <div className="dashboard-nav-area">
         <DashboardNav role="employee" />
+      </div>
 
+      <div className="dashboard-shell py-6">
         <div className="mb-6">
           <button
             onClick={() => navigate(-1)}
@@ -156,11 +167,11 @@ export default function JobDetails() {
                   <p className="font-mono text-sm font-bold text-(--fg-muted) mb-2">
                     Technical Skills
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-x-3 gap-y-1">
                     {job.technicalSkills.map((skill, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1 text-xs font-mono bg-(--teal) text-black rounded"
+                        className="text-sm font-medium font-['Space_Grotesk'] text-(--fg)"
                       >
                         {skill}
                       </span>
@@ -174,11 +185,11 @@ export default function JobDetails() {
                   <p className="font-mono text-sm font-bold text-(--fg-muted) mb-2">
                     Soft Skills
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-x-3 gap-y-1">
                     {job.softSkills.map((skill, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1 text-xs font-mono bg-(--mint) text-black rounded"
+                        className="text-sm font-medium font-['Space_Grotesk'] text-(--fg)"
                       >
                         {skill}
                       </span>
@@ -192,11 +203,11 @@ export default function JobDetails() {
                   <p className="font-mono text-sm font-bold text-(--fg-muted) mb-2">
                     Languages
                   </p>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-x-3 gap-y-1">
                     {job.language.map((lang, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1 text-xs font-mono bg-(--yellow) text-black rounded"
+                        className="text-sm font-medium font-['Space_Grotesk'] text-(--fg)"
                       >
                         {lang}
                       </span>
@@ -210,18 +221,24 @@ export default function JobDetails() {
           {/* Apply Button */}
           <div className="flex gap-4">
             <button
-              onClick={() => setApplyJobId(job._id)}
+              onClick={() => {
+                if (job.externalUrl) {
+                  openExternalSource(job.externalUrl);
+                  return;
+                }
+                setApplyJobId(job._id);
+              }}
               className="flex-1 brutal-btn px-6 py-4 font-bold uppercase tracking-wider flex items-center justify-center gap-2 text-lg"
               style={{ background: "var(--yellow)", color: "#0a0a0a" }}
             >
               <Briefcase size={20} />
-              Apply Now
+              {job.externalUrl ? "Open Source" : "Apply Now"}
             </button>
           </div>
         </div>
       </div>
-      
-      {applyJobId && (
+
+      {!job.externalUrl && applyJobId && (
         <ApplyJobModal jobId={applyJobId} onClose={() => setApplyJobId(null)} />
       )}
     </div>

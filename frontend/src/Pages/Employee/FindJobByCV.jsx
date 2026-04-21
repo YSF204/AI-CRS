@@ -6,12 +6,10 @@ import {
   Briefcase,
   ChevronRight,
   FileText,
-  RefreshCw,
   Sparkles,
-  Upload,
 } from "lucide-react";
 import DashboardNav from "../../components/shared/DashboardNav";
-import StatsBar from "../../components/shared/StatsBar";
+import ActionButton from "../../components/shared/ActionButton";
 import api from "../../services/api";
 import useFetch from "../../hooks/useFetch";
 
@@ -210,28 +208,22 @@ export default function FindJobByCV() {
                 browse all open jobs.
               </p>
               <div className="flex flex-wrap gap-3 mt-4">
-                <button
+                <ActionButton
                   type="button"
-                  className="brutal-btn px-4 py-2 font-bold"
-                  style={{
-                    background: "var(--color-primary)",
-                    color: "var(--color-text-primary)",
-                  }}
+                  variant="prism"
+                  className="px-4 py-2 font-bold"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   Upload another PDF
-                </button>
-                <button
+                </ActionButton>
+                <ActionButton
                   type="button"
-                  className="brutal-btn px-4 py-2 font-bold"
-                  style={{
-                    background: "var(--color-warning)",
-                    color: "var(--color-text-primary)",
-                  }}
+                  variant="prism"
+                  className="px-4 py-2 font-bold"
                   onClick={() => navigate("/employee/jobs")}
                 >
                   Browse all jobs
-                </button>
+                </ActionButton>
               </div>
             </div>
           </div>
@@ -301,18 +293,15 @@ export default function FindJobByCV() {
               </div>
             )}
 
-            <button
+            <ActionButton
               type="button"
-              className="brutal-btn px-4 py-2 font-bold inline-flex items-center gap-2"
-              style={{
-                background: "var(--color-primary)",
-                color: "var(--color-text-primary)",
-              }}
+              variant="prism"
+              className="px-4 py-2 font-bold inline-flex items-center gap-2"
               onClick={() => goToJob(item.id)}
             >
               View & Apply
               <ChevronRight size={16} />
-            </button>
+            </ActionButton>
           </div>
         ))}
       </div>
@@ -320,10 +309,12 @@ export default function FindJobByCV() {
   };
 
   return (
-    <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-      <div className="dashboard-shell">
+    <div className="min-h-screen bg-(--bg) text-(--fg)">
+      <div className="dashboard-nav-area">
         <DashboardNav role="employee" />
+      </div>
 
+      <div className="dashboard-shell py-6">
         <div className="mb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -336,22 +327,16 @@ export default function FindJobByCV() {
                 matched jobs instantly.
               </p>
             </div>
-            <button
+            <ActionButton
               type="button"
-              className="brutal-btn px-6 py-3 font-bold flex items-center gap-2"
-              style={{
-                background: "var(--color-warning)",
-                color: "var(--color-text-primary)",
-              }}
+              variant="prism"
+              className="px-6 py-3 font-bold flex items-center gap-2"
               onClick={() => navigate("/employee/jobs")}
             >
               Back to all jobs
-              <ArrowRight size={18} />
-            </button>
+            </ActionButton>
           </div>
         </div>
-
-        <StatsBar stats={stats} />
 
         {(error || cvsError) && (
           <div className="mb-6 brutal-card p-4 bg-(--coral) text-black font-mono text-sm">
@@ -405,22 +390,17 @@ export default function FindJobByCV() {
                     </>
                   )}
 
-                  <button
+                  <ActionButton
                     type="button"
+                    variant="ai-gold"
                     onClick={handleFindWithExisting}
                     disabled={!selectedCvId || loading || uploading}
-                    className="mt-3 brutal-btn px-5 py-3 font-bold w-full inline-flex items-center justify-center gap-2 disabled:opacity-50"
-                    style={{ background: "var(--yellow)", color: "#0a0a0a" }}
+                    className="mt-3 px-5 py-3 font-bold w-full"
                   >
-                    {loading ? (
-                      <>
-                        <RefreshCw size={16} className="animate-spin" />
-                        Matching with selected CV...
-                      </>
-                    ) : (
-                      "Find jobs with selected CV"
-                    )}
-                  </button>
+                    {loading
+                      ? "Matching with selected CV..."
+                      : "Find jobs with selected CV"}
+                  </ActionButton>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -444,28 +424,17 @@ export default function FindJobByCV() {
                     disabled={uploading || loading}
                   />
 
-                  <button
+                  <ActionButton
                     type="button"
-                    className="brutal-btn px-5 py-5 font-bold w-full border-dashed border-4 inline-flex items-center justify-center gap-2"
-                    style={{
-                      background: "var(--color-primary)",
-                      color: "var(--color-text-primary)",
-                    }}
+                    variant="ai-gold"
+                    className="px-5 py-5 font-bold w-full"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={uploading || loading}
                   >
-                    {uploading ? (
-                      <>
-                        <RefreshCw size={16} className="animate-spin" />
-                        Uploading and matching...
-                      </>
-                    ) : (
-                      <>
-                        <Upload size={16} />
-                        Upload PDF and find jobs
-                      </>
-                    )}
-                  </button>
+                    {uploading
+                      ? "Uploading and matching..."
+                      : "Upload PDF and find jobs"}
+                  </ActionButton>
 
                   <p className="font-mono text-xs text-(--fg-muted) mt-2">
                     Best when testing a new resume version quickly.
@@ -483,14 +452,14 @@ export default function FindJobByCV() {
                   Results
                 </h2>
                 {jobs && (
-                  <button
+                  <ActionButton
                     type="button"
+                    variant="prism"
                     onClick={clearResults}
-                    className="brutal-btn px-3 py-1 font-bold text-xs"
-                    style={{ background: "var(--card-bg)", color: "var(--fg)" }}
+                    className="px-3 py-1 font-bold text-xs"
                   >
                     Clear
-                  </button>
+                  </ActionButton>
                 )}
               </div>
 

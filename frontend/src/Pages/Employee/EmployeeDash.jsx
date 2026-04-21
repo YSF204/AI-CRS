@@ -250,8 +250,10 @@ export default function EmployeeDash() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
-        <DashboardNav role="employee" />
-        <div className="dashboard-shell p-8">
+        <div className="dashboard-nav-area">
+          <DashboardNav role="employee" />
+        </div>
+        <div className="dashboard-shell py-8">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)]"></div>
@@ -300,9 +302,11 @@ export default function EmployeeDash() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
-      <DashboardNav role="employee" />
+      <div className="dashboard-nav-area">
+        <DashboardNav role="employee" />
+      </div>
 
-      <div className="dashboard-shell p-8">
+      <div className="dashboard-shell py-8">
         {/* ===== BLOCK 1: HERO ACTION ROW ===== */}
         <section className="mb-8">
           <div className="workflow-card p-8 bg-[var(--card-bg)] flex flex-col md:flex-row md:items-center md:justify-between gap-6">

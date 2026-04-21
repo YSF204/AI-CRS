@@ -273,7 +273,7 @@ export default function CVEditor() {
     try {
       const filtered = filteredFormData();
       const flat = {};
-      
+
       if (filtered.summary) flat.summary = filtered.summary;
       if (filtered.jobTitle) flat.jobTitle = filtered.jobTitle;
       filtered.experience?.forEach((exp, i) => { if (exp.summary) flat[`experience_${i}_summary`] = exp.summary; });
@@ -317,7 +317,7 @@ export default function CVEditor() {
 
     setForm((prev) => {
       const next = { ...prev };
-      
+
       // Clone arrays so we can mutate safely
       next.experience = next.experience ? [...next.experience] : [];
       next.education = next.education ? [...next.education] : [];
@@ -334,7 +334,7 @@ export default function CVEditor() {
           }
         }
         else if (key.startsWith('education_')) {
-          const parts = key.split('_'); 
+          const parts = key.split('_');
           const idx = parseInt(parts[1], 10);
           if (next.education[idx]) {
             next.education[idx] = { ...next.education[idx], [parts[2]]: value };
@@ -348,9 +348,9 @@ export default function CVEditor() {
           if (next.customSections[sIdx] && next.customSections[sIdx].items && next.customSections[sIdx].items[iIdx]) {
             next.customSections[sIdx] = { ...next.customSections[sIdx] };
             next.customSections[sIdx].items = [...next.customSections[sIdx].items];
-            next.customSections[sIdx].items[iIdx] = { 
-               ...next.customSections[sIdx].items[iIdx], 
-               description: value 
+            next.customSections[sIdx].items[iIdx] = {
+              ...next.customSections[sIdx].items[iIdx],
+              description: value
             };
           }
         }
@@ -361,7 +361,7 @@ export default function CVEditor() {
 
     showToast("success", "Selected changes applied to your CV.");
     setShowAnalysis(false);
-    
+
     // Wipe local storage so new edits take precedence next time analysis is ran explicitly
     sessionStorage.removeItem(`cv_analysis_${id}`);
   };
@@ -561,8 +561,23 @@ export default function CVEditor() {
   // ── Loading ───────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-[var(--bg)] text-[var(--fg)]">
-        <span className="font-mono text-sm tracking-[0.1em] text-[var(--fg-muted)]">
+      <div style={{
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--nm-bg)',
+        color: 'var(--nm-text-primary)',
+        fontFamily: 'var(--font-body)'
+      }}>
+        <span style={{
+          fontFamily: 'var(--font-body)',
+          fontSize: 'var(--text-sm)',
+          fontWeight: 600,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: 'var(--nm-text-secondary)'
+        }}>
           LOADING CV…
         </span>
       </div>
@@ -571,86 +586,90 @@ export default function CVEditor() {
 
   // ─────────────────────────────────────────────────────────────────────────────
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-[var(--bg)] text-[var(--fg)]">
+    <div style={{
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'hidden',
+      backgroundColor: 'var(--nm-bg)',
+      color: 'var(--nm-text-primary)',
+      fontFamily: 'var(--font-body)'
+    }}>
       {/* ── Nav ── */}
-      <div className="flex-shrink-0 px-8">
+      <div className="flex-shrink-0 dashboard-nav-area">
         <DashboardNav role="employee" />
       </div>
 
-      {/* ── Action bar ── */}
-      <ActionBar
-        form={form}
-        saving={saving}
-        isAutoSaving={isSaving}
-        lastSavedAt={lastSavedAt}
-        analyzing={analyzing}
-        downloadingPdf={downloadingPdf}
-        atsScore={analysisResult?.atsScore}
-        onSave={handleSave}
-        onAnalyze={handleAnalyze}
-        onPreview={() => setShowPreview(true)}
-        onDownloadPdf={handleDownloadPdf}
-        onChangeTemplate={() => setShowTemplateSelector(true)}
-        onBack={handleBack}
-      />
-
-      {/* ── Toast ── */}
-      <Toast toast={toast} />
-
-      {/* ── 3-column content ── */}
-      <div className="flex flex-1 overflow-hidden min-h-0">
-        {/* ══ SIDEBAR ══ */}
-        <Sidebar
-          sidebarOpen={sidebarOpen}
-          setSidebarOpen={setSidebarOpen}
-          activeSections={activeSections}
-          toggleSection={toggleSection}
+      <div className="dashboard-shell cv-editor-shell flex flex-1 min-h-0 flex-col" style={{ padding: 0, paddingRight: 0 }}>
+        {/* ── Action bar ── */}
+        <ActionBar
+          form={form}
+          saving={saving}
+          isAutoSaving={isSaving}
+          lastSavedAt={lastSavedAt}
+          analyzing={analyzing}
+          downloadingPdf={downloadingPdf}
+          atsScore={analysisResult?.atsScore}
+          onSave={handleSave}
+          onAnalyze={handleAnalyze}
+          onPreview={() => setShowPreview(true)}
+          onDownloadPdf={handleDownloadPdf}
+          onChangeTemplate={() => setShowTemplateSelector(true)}
+          onBack={handleBack}
         />
 
-        {/* ══ CENTER: form cards ══ */}
-        <div
-          className="flex-1 overflow-y-auto overflow-x-hidden bg-[var(--bg)]"
-          style={{
-            scrollbarWidth: "thin",
-            scrollbarColor: "rgba(10,10,10,0.15) transparent",
-          }}
-        >
-          <EditorContent
-            form={form}
-            setForm={setForm}
-            user={user}
-            cv={cv}
-            activeSections={activeSections}
-            collapsedSections={collapsedSections}
-            handlers={handlers}
-            toggleSection={toggleSection}
-            toggleCollapse={toggleCollapse}
-            dragOverKey={dragOverKey}
-            onDragStart={onDragStart}
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onDrop={onDrop}
-            onDragEnd={onDragEnd}
-            handleImageUpload={handleImageUpload}
-            removeProfileImage={removeProfileImage}
-            fetchSuggestions={fetchSuggestions}
-            fetchSingleSummarySuggestion={fetchSingleSummarySuggestion}
-            handleSuggestionSelect={handleSuggestionSelect}
-            suggestions={suggestions}
-            isLoadingSuggestions={isLoadingSuggestions}
-          />
-        </div>
+        {/* ── Toast ── */}
+        <Toast toast={toast} />
 
-        {/* ══ RIGHT: live preview ══ */}
-        <div
-          ref={previewRef}
-          className="w-[520px] flex-shrink-0 overflow-hidden flex flex-col p-3 pl-0 border-l-[3px] border-[var(--border-color)]"
-        >
-          <LivePreview
-            formData={filteredFormData()}
-            userName={userName}
-            templateId={cv?.templateId || 1}
+        {/* ── 3-column content ── */}
+        <div className="cv-editor-layout">
+          {/* ══ SIDEBAR ══ */}
+          <Sidebar
+            sidebarOpen={sidebarOpen}
+            setSidebarOpen={setSidebarOpen}
+            activeSections={activeSections}
+            toggleSection={toggleSection}
           />
+
+          {/* ══ CENTER: form cards ══ */}
+          <div className="cv-editor-center">
+            <EditorContent
+              form={form}
+              setForm={setForm}
+              user={user}
+              cv={cv}
+              activeSections={activeSections}
+              collapsedSections={collapsedSections}
+              handlers={handlers}
+              toggleSection={toggleSection}
+              toggleCollapse={toggleCollapse}
+              dragOverKey={dragOverKey}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              onDragEnd={onDragEnd}
+              handleImageUpload={handleImageUpload}
+              removeProfileImage={removeProfileImage}
+              fetchSuggestions={fetchSuggestions}
+              fetchSingleSummarySuggestion={fetchSingleSummarySuggestion}
+              handleSuggestionSelect={handleSuggestionSelect}
+              suggestions={suggestions}
+              isLoadingSuggestions={isLoadingSuggestions}
+            />
+          </div>
+
+          {/* ══ RIGHT: live preview ══ */}
+          <div
+            ref={previewRef}
+            className="cv-editor-preview"
+          >
+            <LivePreview
+              formData={filteredFormData()}
+              userName={userName}
+              templateId={cv?.templateId || 1}
+            />
+          </div>
         </div>
       </div>
 

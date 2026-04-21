@@ -40,6 +40,7 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
     handleSwitchMethod,
     handleFileUpload,
     handleSubmitApplication,
+    handleInstantSubmitApplication,
     loadedApplication,
     isEdit,
     hasDuplicateApplication,
@@ -49,6 +50,25 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
 
   const [tab, setTab] = useState("update"); // update | view
   const methodLocked = isEdit;
+
+  const handleClose = () => {
+    if (onClose) {
+      onClose();
+      return;
+    }
+
+    if (location.state?.source === "find-job-by-cv") {
+      navigate("/employee/find-job-by-cv");
+      return;
+    }
+
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+
+    navigate("/employee/jobs");
+  };
 
   // FIX #2: Show duplicate check screen FIRST (before job loading or anything else)
   if (!duplicateCheckDone) {
@@ -85,7 +105,7 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
               View My Applications
             </button>
             <button
-              onClick={() => navigate("/employee/jobs")}
+              onClick={handleClose}
               className="w-full brutal-btn px-6 py-4 font-black uppercase tracking-widest border-4 border-black"
               style={{
                 background: "var(--card-bg)",
@@ -126,25 +146,6 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
       </div>
     </>
   ) : null;
-
-  const handleClose = () => {
-    if (onClose) {
-      onClose();
-      return;
-    }
-
-    if (location.state?.source === "find-job-by-cv") {
-      navigate("/employee/find-job-by-cv");
-      return;
-    }
-
-    if (window.history.length > 1) {
-      navigate(-1);
-      return;
-    }
-
-    navigate("/employee/jobs");
-  };
 
   // Loading state
   if (jobLoading) {
@@ -302,6 +303,7 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
                   setSelectedCvId={setSelectedCvId}
                   setMatchAnalysis={setMatchAnalysis}
                   handleSubmitApplication={handleSubmitApplication}
+                  handleInstantSubmitApplication={handleInstantSubmitApplication}
                   submitting={submitting}
                   isEdit={isEdit}
                   formHasChanged={formHasChanged}
@@ -313,6 +315,7 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
                   cvFile={cvFile}
                   handleFileUpload={handleFileUpload}
                   handleSubmitApplication={handleSubmitApplication}
+                  handleInstantSubmitApplication={handleInstantSubmitApplication}
                   submitting={submitting}
                   isEdit={isEdit}
                   formHasChanged={formHasChanged}

@@ -1,50 +1,73 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sparkles, X, ArrowRight, Layers, CheckCircle2 } from 'lucide-react';
 import DashboardNav from '../../components/shared/DashboardNav';
 import { TEMPLATES } from '../../Features/CVManagement/index.js';
 import { MOCK_CV_DATA, MOCK_USER_NAME } from '../../Features/CVManagement/mockCvData.js';
-import api from '../../services/api';
 
 // ─── Tag accent colours ───────────────────────────────────────────────────────
 const TAG_COLORS = {
-  Popular: { bg: 'var(--yellow)', text: '#0a0a0a' },
-  Clean: { bg: 'var(--mint)', text: '#0a0a0a' },
-  Premium: { bg: 'var(--blue)', text: '#ffffff' },
-  Corporate: { bg: 'var(--teal)', text: '#0a0a0a' },
-  Creative: { bg: 'var(--coral)', text: '#0a0a0a' },
+  Popular: { bg: '#facc15', text: '#0a0a0a' },
+  Clean: { bg: '#a7f3d0', text: '#0a0a0a' },
+  Premium: { bg: '#2563eb', text: '#ffffff' },
+  Corporate: { bg: '#14b8a6', text: '#0a0a0a' },
+  Creative: { bg: '#f97316', text: '#0a0a0a' },
   Formal: { bg: '#c4b89a', text: '#0a0a0a' },
   Elegant: { bg: '#a0a0b0', text: '#0a0a0a' },
 };
 
+const A4_WIDTH_PX = 794;
+const A4_HEIGHT_PX = 1123;
+const PREVIEW_PADDING = 12;
+
 // ─── Scaled live preview of the actual template component ─────────────────────
 function TemplatePreview({ template }) {
+  const viewportRef = useRef(null);
+  const [scale, setScale] = useState(0.28);
   const TemplateComponent = template.component;
-  const SCALE = 0.27;
+
+  useEffect(() => {
+    const viewportEl = viewportRef.current;
+    if (!viewportEl) return undefined;
+
+    const updateScale = () => {
+      const { width, height } = viewportEl.getBoundingClientRect();
+      if (!width || !height) return;
+
+      const nextScale = Math.min(
+        (width - PREVIEW_PADDING * 2) / A4_WIDTH_PX,
+        (height - PREVIEW_PADDING * 2) / A4_HEIGHT_PX,
+      );
+
+      setScale(Math.max(nextScale, 0.1));
+    };
+
+    updateScale();
+
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(viewportEl);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   return (
     <div
+      ref={viewportRef}
+      className="ats-preview-viewport"
       style={{
-        width: '100%',
-        aspectRatio: '0.707', // A4 ratio
-        overflow: 'hidden',
-        position: 'relative',
-        background: '#fff',
-        borderRadius: '2px',
-        display: 'flex',
-        justifyContent: 'center',
-        paddingTop: '5%',
+        aspectRatio: '0.81',
       }}
     >
-      {/* Scaled wrapper — renders the real JSX at 27% scale, centered */}
       <div
+        className="ats-preview-scaler"
         style={{
-          transform: `scale(${SCALE})`,
-          transformOrigin: 'top center',
-          width: `${100 / SCALE}%`,
+          width: `${A4_WIDTH_PX}px`,
+          height: `${A4_HEIGHT_PX}px`,
+          transform: `translate(-50%, -50%) scale(${scale})`,
           pointerEvents: 'none',
           userSelect: 'none',
-          flexShrink: 0,
         }}
       >
         <TemplateComponent
@@ -66,28 +89,20 @@ function TemplateCard({ template, isSelected, onSelect }) {
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onSelect(template)}
       onClick={() => onSelect(template)}
-      className="brutal-card cursor-pointer flex flex-col"
+      className="ats-preview-card cursor-pointer"
       style={{
         borderColor: isSelected ? template.accent : 'var(--border-color)',
         boxShadow: isSelected
           ? `6px 6px 0 ${template.accent}`
-          : 'var(--brutal-shadow)',
+          : '4px 4px 0 var(--nm-ink)',
         transform: isSelected ? 'translate(-2px, -2px)' : undefined,
         transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',
         outline: 'none',
       }}
     >
-      {/* Preview area */}
-      <div
-        style={{
-          position: 'relative',
-          borderBottom: '3px solid var(--border-color)',
-          overflow: 'hidden',
-        }}
-      >
+      <div style={{ position: 'relative' }}>
         <TemplatePreview template={template} />
 
-        {/* Selected overlay */}
         {isSelected && (
           <div
             style={{
@@ -105,33 +120,32 @@ function TemplateCard({ template, isSelected, onSelect }) {
             />
           </div>
         )}
-
       </div>
 
-      {/* Card footer */}
-      <div className="p-4 flex flex-col gap-1 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <h3
-            style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontWeight: 700,
-              fontSize: '0.9rem',
-              letterSpacing: '0.03em',
-              color: 'var(--fg)',
-              margin: 0,
-            }}
-          >
+      <div className="ats-card-content">
+        <div className="ats-card-header">
+          <h3 className="ats-card-title">
             {template.name}
           </h3>
-          <span
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: '0.65rem',
-              color: 'var(--fg-muted)',
-            }}
-          >
-            #{template.id}
-          </span>
+          <div className="ats-card-meta">
+            <span className="flex items-center gap-1.5">
+              <Sparkles size={14} /> {template.description}
+            </span>
+            <span
+              className="ml-auto"
+              style={{
+                background: tagStyle.bg,
+                color: tagStyle.text,
+                padding: '0.2rem 0.45rem',
+                border: '2px solid var(--nm-ink)',
+                fontFamily: "'DM Mono', monospace",
+                fontSize: '0.65rem',
+                lineHeight: 1.1,
+              }}
+            >
+              #{template.id}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -338,7 +352,7 @@ function CreateModal({ template, onClose, onCreate, loading }) {
                 style={{ minHeight: 46 }}
               />
               {error && (
-                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.66rem', color: 'var(--coral)', marginTop: '0.3rem' }}>
+                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.66rem', color: '#f97316', marginTop: '0.3rem' }}>
                   {error}
                 </p>
               )}
@@ -349,7 +363,7 @@ function CreateModal({ template, onClose, onCreate, loading }) {
                 id="create-cv-submit-btn"
                 type="submit"
                 className="brutal-btn w-full flex items-center justify-center gap-2"
-                style={{ background: 'var(--yellow)', color: '#0a0a0a' }}
+                style={{ background: '#facc15', color: '#0a0a0a' }}
                 disabled={loading}
               >
                 {loading ? 'Creating…' : <><ArrowRight size={14} /> Create CV</>}
@@ -398,14 +412,15 @@ export default function CVTemplates() {
   };
 
   return (
-    <div className="min-h-screen p-8 bg-[var(--bg)] text-[var(--fg)]">
-      <div className="dashboard-shell">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
+      <div className="dashboard-nav-area">
         <DashboardNav role="employee" />
+      </div>
 
+      <div className="dashboard-shell py-6">
         {/* ── Page header ── */}
         <div
-          className="mb-10 brutal-reveal"
-          style={{ animationDelay: '0s' }}
+          className="mb-10"
         >
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
@@ -421,7 +436,7 @@ export default function CVTemplates() {
                   margin: 0,
                 }}
               >
-                <Sparkles size={28} style={{ color: 'var(--yellow)' }} />
+                <Sparkles size={28} style={{ color: '#facc15' }} />
                 CV Templates
               </h1>
               <p
@@ -450,7 +465,7 @@ export default function CVTemplates() {
           <div
             style={{
               height: 4,
-              background: `repeating-linear-gradient(90deg, var(--yellow) 0, var(--yellow) 24px, transparent 24px, transparent 32px)`,
+              background: 'repeating-linear-gradient(90deg, #facc15 0, #facc15 24px, transparent 24px, transparent 32px)',
               marginTop: '1.5rem',
               border: '2px solid var(--border-color)',
             }}
@@ -461,7 +476,7 @@ export default function CVTemplates() {
         {apiError && (
           <div
             className="brutal-card mb-6 p-4"
-            style={{ background: 'var(--coral)', color: '#0a0a0a', fontFamily: "'DM Mono', monospace", fontSize: '0.8rem' }}
+            style={{ background: '#f97316', color: '#0a0a0a', fontFamily: "'DM Mono', monospace", fontSize: '0.8rem' }}
           >
             {apiError}
           </div>
@@ -475,8 +490,7 @@ export default function CVTemplates() {
           {TEMPLATES.map((template, i) => (
             <div
               key={template.id}
-              className="brutal-reveal"
-              style={{ animationDelay: `${0.05 + i * 0.07}s`, opacity: 0 }}
+              style={{ animationDelay: `${0.05 + i * 0.07}s` }}
             >
               <TemplateCard
                 template={template}

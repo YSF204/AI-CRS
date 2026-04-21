@@ -5,14 +5,13 @@ import { ALL_SECTIONS } from '../constants';
 export default function Sidebar({ sidebarOpen, setSidebarOpen, activeSections, toggleSection }) {
   return (
     <div
-      className="flex-shrink-0 border-r-[3px] border-[var(--border-color)] bg-[var(--card-bg)] flex flex-col overflow-hidden"
+      className="cv-editor-sidebar"
       style={{
         width: sidebarOpen ? 224 : 52,
-        transition: 'width 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
       {/* Sidebar header */}
-      <div className="flex items-center border-b-2 border-[var(--border-color)] flex-shrink-0 overflow-hidden"
+      <div className="flex items-center border-b-4 border-[var(--nm-ink)] flex-shrink-0 overflow-hidden"
         style={{ minHeight: 48 }}>
         {sidebarOpen && (
           <div className="px-4 flex-1 overflow-hidden">

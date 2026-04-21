@@ -28,9 +28,9 @@ export default function Profile() {
 
   const stats = useMemo(
     () => ([
-      { label: 'Open Jobs', value: statsState.jobs, color: 'var(--blue)' },
-      { label: 'CVs', value: statsState.cvs, color: 'var(--coral)' },
-      { label: 'Role', value: user?.role || 'EMPLOYEE', color: 'var(--mint)' },
+      { label: 'CVs on File', value: statsState.cvs, color: 'var(--nm-primary)' },
+      { label: 'Job Matches', value: statsState.jobs, color: 'var(--nm-warning)' },
+      { label: 'User Role', value: user?.role || 'EMPLOYEE', color: 'var(--nm-success)' },
     ]),
     [statsState, user?.role],
   );
@@ -51,49 +51,35 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-      <div className="dashboard-shell">
+    <div className="profile-page min-h-screen bg-[var(--bg)] text-[var(--fg)]">
+      <div className="dashboard-nav-area">
         <DashboardNav role="employee" />
+      </div>
 
-        {/* Page heading */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold font-['Space_Grotesk'] uppercase tracking-tight flex items-center gap-3">
-              <User size={28} className="text-(--teal)" />
-              My Profile
-            </h1>
-            <p className="font-mono text-sm text-(--fg-muted) mt-1">
-              Manage your personal info and account security
-            </p>
-          </div>
+      <div className="dashboard-shell jd-shell py-6 lg:py-8">
 
-          {/* Sign-out button */}
-          <button
-            onClick={handleSignOut}
-            className="brutal-btn px-5 py-2.5 font-bold flex items-center gap-2 text-sm shrink-0"
-            style={{ background: 'var(--coral)', color: '#0a0a0a' }}
-          >
-            <LogOut size={15} />
-            SIGN OUT
-          </button>
-        </div>
-
-        {/* Quick stats */}
-        <StatsBar stats={stats} className="mb-6" />
 
         {error && (
-          <div className="mb-6 brutal-card p-4 bg-(--coral) text-black font-mono text-sm">
-            {error}
+          <div className="mb-6 jd-surface-stack" style={{ borderColor: 'var(--nm-error)' }}>
+            <p className="font-mono text-sm text-[var(--nm-error)] m-0 font-bold uppercase py-1">
+              Error: {error}
+            </p>
           </div>
         )}
 
         {/* Header card */}
-        <ProfileHeader user={user} />
+        <div className="mb-8">
+          <ProfileHeader user={user} />
+        </div>
 
-        {/* Two-section stack */}
-        <div className="flex flex-col gap-6">
-          <ProfileForm user={user} onSave={handleSaveProfile} />
-          <SecuritySettings />
+        {/* Forms stack */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-7">
+            <ProfileForm user={user} onSave={handleSaveProfile} />
+          </div>
+          <div className="lg:col-span-5">
+            <SecuritySettings />
+          </div>
         </div>
       </div>
     </div>

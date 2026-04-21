@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Sparkles, CheckCircle } from "lucide-react";
 import DashboardNav from "../../components/shared/DashboardNav";
+import ActionButton from "../../components/shared/ActionButton";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import { DEFAULT_SECTION_ORDER, getSectionMeta } from "./CVEditor/constants";
@@ -194,9 +195,11 @@ export default function CVWizard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen p-8 bg-(--bg) text-(--fg)">
-        <div className="dashboard-shell">
+      <div className="min-h-screen bg-(--bg) text-(--fg)">
+        <div className="dashboard-nav-area">
           <DashboardNav role="employee" />
+        </div>
+        <div className="dashboard-shell py-6">
           <div className="brutal-card p-8 bg-(--card-bg) text-center">
             <p className="font-mono text-sm text-(--fg-muted)">Loading CV...</p>
           </div>
@@ -207,11 +210,13 @@ export default function CVWizard() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
-      <div className="p-8 border-b-4 border-[var(--border-color)]">
+      <div className="dashboard-nav-area">
         <DashboardNav role="employee" />
+      </div>
 
+      <div className="dashboard-shell py-6">
         {/* Header */}
-        <div className="mt-6 mb-6">
+        <div className="mb-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h1 className="text-3xl font-bold font-['Space_Grotesk'] uppercase tracking-tight">
@@ -221,13 +226,14 @@ export default function CVWizard() {
                 Step {currentStep + 1} of {sections.length}: {sectionMeta.label}
               </p>
             </div>
-            <button
+            <ActionButton
+              variant="prism"
               onClick={() => navigate("/employee/cvs")}
-              className="brutal-btn px-4 py-2 flex items-center gap-2"
+              className="px-4 py-2 flex items-center gap-2"
             >
               <ChevronLeft size={16} />
               Back to CVs
-            </button>
+            </ActionButton>
           </div>
 
           {/* Progress Bar */}
@@ -259,13 +265,13 @@ export default function CVWizard() {
 
         {/* Right Column: Live Preview - Smaller, Optional */}
         <div className="flex-1 min-w-0 hidden lg:flex flex-col gap-4">
-          <button
+          <ActionButton
+            variant="prism"
             onClick={() => setShowPreview(!showPreview)}
-            className="brutal-btn px-4 py-3 font-bold uppercase w-full"
-            style={{ background: "var(--teal)", color: "#0a0a0a" }}
+            className="px-4 py-3 font-bold uppercase w-full"
           >
             {showPreview ? "Hide Preview" : "Show Preview"}
-          </button>
+          </ActionButton>
           {showPreview && (
             <div className="brutal-card bg-[var(--card-bg)] p-0 flex-1 flex flex-col border-4 border-[var(--border-color)]">
               <LivePreview
@@ -280,53 +286,55 @@ export default function CVWizard() {
 
       {/* Action Buttons */}
       <div className="sticky bottom-0 p-8 bg-[var(--bg)] border-t-4 border-[var(--border-color)] flex items-center justify-between gap-4 flex-wrap">
-        <button
+        <ActionButton
+          variant="prism"
           onClick={handlePrevious}
           disabled={isFirstStep}
-          className="brutal-btn px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          className="px-6 py-3 flex items-center gap-2"
         >
           <ChevronLeft size={16} />
           Previous
-        </button>
+        </ActionButton>
 
         <div className="flex gap-2 flex-wrap">
           {/* Mobile Preview Button */}
-          <button
+          <ActionButton
+            variant="prism"
             onClick={() => setShowPreview(!showPreview)}
-            className="brutal-btn px-4 py-3 font-bold flex items-center gap-2 lg:hidden"
-            style={{ background: "var(--mint)", color: "#0a0a0a" }}
+            className="px-4 py-3 font-bold flex items-center gap-2 lg:hidden"
           >
             {showPreview ? "Hide" : "Show"} Preview
-          </button>
+          </ActionButton>
 
-          <button
+          <ActionButton
+            variant="ai-gold"
             onClick={handleAnalyze}
             disabled={analyzing}
-            className="brutal-btn px-6 py-3 flex items-center gap-2"
-            style={{ background: "var(--yellow)", color: "#0a0a0a" }}
+            className="px-6 py-3 flex items-center gap-2"
           >
             <Sparkles size={16} />
             {analyzing ? "Analyzing..." : "Analyze"}
-          </button>
+          </ActionButton>
 
           {isLastStep ? (
-            <button
+            <ActionButton
+              variant="prism"
               onClick={handleFinish}
               disabled={saving}
-              className="brutal-btn px-6 py-3 flex items-center gap-2"
-              style={{ background: "var(--mint)", color: "#0a0a0a" }}
+              className="px-6 py-3 flex items-center gap-2"
             >
               <CheckCircle size={16} />
               {saving ? "Saving..." : "Finish"}
-            </button>
+            </ActionButton>
           ) : (
-            <button
+            <ActionButton
+              variant="prism"
               onClick={handleNext}
-              className="brutal-btn px-6 py-3 flex items-center gap-2"
+              className="px-6 py-3 flex items-center gap-2"
             >
               Next Section
               <ChevronRight size={16} />
-            </button>
+            </ActionButton>
           )}
         </div>
       </div>
@@ -340,12 +348,13 @@ export default function CVWizard() {
                 <h2 className="font-['Space_Grotesk'] font-bold uppercase">
                   CV Preview
                 </h2>
-                <button
+                <ActionButton
+                  variant="prism"
                   onClick={() => setShowPreview(false)}
-                  className="brutal-btn px-3 py-1 text-sm"
+                  className="px-3 py-1 text-sm"
                 >
                   Close
-                </button>
+                </ActionButton>
               </div>
               <div className="p-4">
                 <LivePreview

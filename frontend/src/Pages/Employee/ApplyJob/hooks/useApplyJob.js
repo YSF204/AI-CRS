@@ -209,8 +209,14 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
   };
 
   const handleSubmitApplication = async () => {
-    // FIX #5: Validate CV selection and submit immediately
-    // AI analysis now runs silently in background
+    return submitApplication({ skipAnalysis: false });
+  };
+
+  const handleInstantSubmitApplication = async () => {
+    return submitApplication({ skipAnalysis: true });
+  };
+
+  const submitApplication = async ({ skipAnalysis }) => {
     const errors = {};
     if (applicationMethod === "existingCv" && !selectedCvId) {
       errors.cvSelection = "Please select a CV";
@@ -232,28 +238,34 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
         const formData = new FormData();
         formData.append("jobId", jobId);
         formData.append("cvFile", cvFile);
+        if (skipAnalysis) formData.append("skipAnalysis", "true");
         response = isEdit
           ? await api.patch(`/applications/${appId}`, formData, {
-              headers: { "Content-Type": "multipart/form-data" },
-            })
+            headers: { "Content-Type": "multipart/form-data" },
+          })
           : await api.post("/applications", formData, {
-              headers: { "Content-Type": "multipart/form-data" },
-            });
+            headers: { "Content-Type": "multipart/form-data" },
+          });
       } else {
-        const payload = { jobId, cvId: selectedCvId };
+        const payload = {
+          jobId,
+          cvId: selectedCvId,
+          ...(skipAnalysis ? { skipAnalysis: true } : {}),
+        };
         response = isEdit
           ? await api.patch(`/applications/${appId}`, payload)
           : await api.post("/applications", payload);
       }
 
       if (response?.data?.data?.alreadyApplied === true) {
-        // Should not happen due to upfront check
         return;
       }
 
       const msg = isEdit
         ? "✅ Application updated!"
-        : "✅ Application submitted successfully!";
+        : skipAnalysis
+          ? "✅ Application submitted instantly!"
+          : "✅ Application submitted successfully!";
       showToastNotice(msg);
       setTimeout(() => {
         if (onCloseFn) onCloseFn();
@@ -268,7 +280,6 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
         (status === 409 && error?.response?.data?.data?.alreadyApplied) ||
         message.includes("already applied")
       ) {
-        // Should not happen due to upfront check
         return;
       }
       setValidationErrors({
@@ -301,6 +312,7 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
     handleSwitchMethod,
     handleFileUpload,
     handleSubmitApplication,
+    handleInstantSubmitApplication,
     loadedApplication,
     setLoadedApplication,
     isEdit,

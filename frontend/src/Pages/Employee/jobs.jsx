@@ -1,14 +1,24 @@
-import React, { useMemo, useState } from "react";
-import { Briefcase, Search, ChevronRight, FileText } from "lucide-react";
+import React, { useMemo, useRef, useState } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
-import { useNavigate } from "react-router-dom";
+import { RefreshCw, Sparkles } from "lucide-react";
 import DashboardNav from "../../components/shared/DashboardNav";
-import StatsBar from "../../components/shared/StatsBar";
-import JobItem from "../../components/Employee/JobItem";
 import api from "../../services/api";
 import useFetch from "../../hooks/useFetch";
 import { getRelativeTime } from "../../utils/dateFormatter";
 import ApplyJobModal from "./ApplyJob";
+import {
+  CvMatchPanel,
+  JobDetailsPanel,
+  JobDiscoveryHeader,
+  JobDiscoveryState,
+  JobFiltersPanel,
+  JobPagination,
+  JobResultsList,
+  JobResultsToolbar,
+  JobSearchBar,
+} from "../../components/Employee/JobDiscovery";
+
+const PAGE_SIZE = 8;
 
 const toRoleType = (value) => {
   if (value === "FULL_TIME") return "Full-time";
@@ -18,356 +28,438 @@ const toRoleType = (value) => {
   return value || "Open";
 };
 
+const normalizeJob = (job, index = 0) => ({
+  id: job._id || job.id || job.externalUrl || job.url || `job-${index}`,
+  title: job.position || job.title,
+  company: job.employerId?.company?.name || job.sourceName || job.company || "Company",
+  location: job.workSite?.replace("_", " ") || job.location || "N/A",
+  type: toRoleType(job.workDuration),
+  posted: job.createdAt ? getRelativeTime(job.createdAt) : (job.posted || "Recently"),
+  externalUrl: job.externalUrl || job.url || "",
+  sourceName: job.sourceName || "",
+  raw: job,
+});
+
+const normalizeCvMatch = (item, index) => {
+  const rawId = item.jobId || item.job_id || item._id || item.id;
+  const id = typeof rawId === "object" ? rawId?._id : rawId;
+  const score = item.matchScore ?? item.relevance_score ?? item.relevanceScore;
+
+  return {
+    key: id || index,
+    id,
+    title: item.position || item.jobTitle || item.title || "Matched Job",
+    location: item.workSite || item.location || "Location not available",
+    company: item.company || item.companyName || "Company",
+    match: Number.isFinite(Number(score)) ? Number(score) : null,
+    reasoning: item.reasoning || item.recommendation_note,
+    skillsMatched: item.skillsMatched || item.match_reasons || [],
+    skillsMissing: item.skillsMissing || item.missing_skills || [],
+    type: item.workDuration ? toRoleType(item.workDuration) : "Open",
+    posted: item.createdAt ? getRelativeTime(item.createdAt) : "Recently",
+    raw: item,
+  };
+};
+
+const sortJobs = (jobs, sortBy) => {
+  const sorted = [...jobs];
+
+  switch (sortBy) {
+    case "oldest":
+      return sorted.sort(
+        (a, b) =>
+          new Date(a.raw?.createdAt || 0).getTime() -
+          new Date(b.raw?.createdAt || 0).getTime(),
+      );
+    case "salary_desc":
+      return sorted.sort((a, b) => (b.raw?.salary || 0) - (a.raw?.salary || 0));
+    case "salary_asc":
+      return sorted.sort((a, b) => (a.raw?.salary || 0) - (b.raw?.salary || 0));
+    case "relevance":
+      return sorted.sort((a, b) => (b.match || 0) - (a.match || 0));
+    case "newest":
+    default:
+      return sorted.sort(
+        (a, b) =>
+          new Date(b.raw?.createdAt || 0).getTime() -
+          new Date(a.raw?.createdAt || 0).getTime(),
+      );
+  }
+};
+
 export default function Jobs() {
-  const navigate = useNavigate();
+  const [mode, setMode] = useState("browse");
   const [query, setQuery] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
   const [selectedJobId, setSelectedJobId] = useState(null);
   const [applyJobId, setApplyJobId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [filters, setFilters] = useState({
+    workSite: null,
+    workDuration: null,
+    minSalary: null,
+    maxSalary: null,
+    minExperience: null,
+  });
+
+  const [selectedCvId, setSelectedCvId] = useState("");
+  const [cvJobs, setCvJobs] = useState([]);
+  const [cvLoading, setCvLoading] = useState(false);
+  const [cvUploading, setCvUploading] = useState(false);
+  const [cvError, setCvError] = useState("");
+
   const debouncedQuery = useDebounce(query, 250);
+  const hasActiveFilters = Object.values(filters).some((value) => value !== null && value !== "");
+  const fileValidationErrorRef = useRef("");
 
   const {
     data: jobs = [],
-    loading,
-    error,
+    loading: jobsLoading,
+    error: jobsError,
+    refetch: refetchJobs,
   } = useFetch(
     async () => {
       const res = await api.get("/jobs");
-      return (res.data?.data?.jobs || []).map((job) => ({
-        id: job._id,
-        title: job.position,
-        company: job.employerId?.company?.name || "Company",
-        location: job.workSite?.replace("_", " ") || "N/A",
-        type: toRoleType(job.workDuration),
-        posted: getRelativeTime(job.createdAt),
-        raw: job,
-      }));
+      const internalJobs = (res.data?.data?.jobs || []).map((job, index) => normalizeJob(job, index));
+      const externalJobs = (res.data?.data?.externalJobs || []).map((job, index) => normalizeJob(job, internalJobs.length + index));
+      return [...internalJobs, ...externalJobs];
     },
     { initialData: [] },
   );
 
-  const filtered = jobs.filter(
-    (j) =>
-      j.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-      j.company.toLowerCase().includes(debouncedQuery.toLowerCase()),
+  const {
+    data: cvs = [],
+    refetch: refetchCvs,
+  } = useFetch(
+    async () => {
+      const res = await api.get("/cvs");
+      return res.data?.data?.cvs || [];
+    },
+    { initialData: [] },
   );
 
-  const selectedJob = jobs.find((j) => j.id === selectedJobId);
+  const browseFilteredJobs = useMemo(() => {
+    let list = [...jobs];
+
+    if (debouncedQuery) {
+      const q = debouncedQuery.toLowerCase();
+      list = list.filter(
+        (job) =>
+          job.title.toLowerCase().includes(q) ||
+          job.company.toLowerCase().includes(q) ||
+          job.location.toLowerCase().includes(q),
+      );
+    }
+
+    if (filters.workSite) {
+      list = list.filter((job) => job.raw?.workSite === filters.workSite);
+    }
+
+    if (filters.workDuration) {
+      list = list.filter((job) => job.raw?.workDuration === filters.workDuration);
+    }
+
+    if (filters.minSalary !== null) {
+      list = list.filter((job) => Number(job.raw?.salary || 0) >= Number(filters.minSalary));
+    }
+
+    if (filters.maxSalary !== null) {
+      list = list.filter((job) => Number(job.raw?.salary || 0) <= Number(filters.maxSalary));
+    }
+
+    if (filters.minExperience !== null) {
+      list = list.filter(
+        (job) => Number(job.raw?.yearsOfExperience || 0) >= Number(filters.minExperience),
+      );
+    }
+
+    return sortJobs(list, sortBy);
+  }, [debouncedQuery, filters, jobs, sortBy]);
+
+  const cvFilteredJobs = useMemo(() => {
+    let list = [...cvJobs];
+    if (debouncedQuery) {
+      const q = debouncedQuery.toLowerCase();
+      list = list.filter(
+        (job) =>
+          job.title.toLowerCase().includes(q) ||
+          job.company.toLowerCase().includes(q) ||
+          job.location.toLowerCase().includes(q),
+      );
+    }
+    return sortJobs(list, sortBy);
+  }, [cvJobs, debouncedQuery, sortBy]);
+
+  const totalPages = Math.max(1, Math.ceil(browseFilteredJobs.length / PAGE_SIZE));
+  const browsePageJobs = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return browseFilteredJobs.slice(start, start + PAGE_SIZE);
+  }, [browseFilteredJobs, currentPage]);
+
+  const visibleJobs = mode === "browse" ? browsePageJobs : cvFilteredJobs;
+  const selectedJob = visibleJobs.find((job) => job.id === selectedJobId) || null;
 
   const stats = useMemo(() => {
     const recentCutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const recent = jobs.filter((job) => {
-      const timestamp = new Date(job.raw?.createdAt || 0).getTime();
-      return Number.isFinite(timestamp) && timestamp >= recentCutoff;
+      const created = new Date(job.raw?.createdAt || 0).getTime();
+      return Number.isFinite(created) && created >= recentCutoff;
     }).length;
+
     return [
       { label: "Open", value: jobs.length, color: "var(--color-primary)" },
       { label: "New (7d)", value: recent, color: "var(--color-warning)" },
-      { label: "Visible", value: filtered.length, color: "var(--color-danger)" },
+      {
+        label: mode === "browse" ? "Visible" : "Matched",
+        value: mode === "browse" ? browseFilteredJobs.length : cvFilteredJobs.length,
+        color: "var(--color-success)",
+      },
     ];
-  }, [jobs, filtered.length]);
+  }, [browseFilteredJobs.length, cvFilteredJobs.length, jobs, mode]);
+
+  const resetSelectionAndPage = () => {
+    setSelectedJobId(null);
+    setCurrentPage(1);
+  };
+
+  const handleModeChange = (nextMode) => {
+    setMode(nextMode);
+    setQuery("");
+    resetSelectionAndPage();
+  };
+
+  const clearFilters = () => {
+    setFilters({
+      workSite: null,
+      workDuration: null,
+      minSalary: null,
+      maxSalary: null,
+      minExperience: null,
+    });
+    setCurrentPage(1);
+  };
 
   const handleApply = (job) => {
+    if (!job?.id) return;
+
+    const sourceUrl = job.externalUrl || job.raw?.externalUrl || job.raw?.url;
+    if (sourceUrl) {
+      window.open(sourceUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+
     setApplyJobId(job.id);
   };
 
+  const handleMatchWithCv = async () => {
+    if (!selectedCvId) {
+      setCvError("Please select a CV first.");
+      return;
+    }
+
+    setCvLoading(true);
+    setCvError("");
+
+    try {
+      const res = await api.post(`/cvs/${selectedCvId}/recommend-jobs`);
+      const match = res.data?.data?.match;
+      const normalized = (Array.isArray(match) ? match : [match])
+        .filter(Boolean)
+        .map(normalizeCvMatch)
+        .sort((a, b) => (b.match || 0) - (a.match || 0));
+      setCvJobs(normalized);
+      setSelectedJobId(normalized[0]?.id || null);
+    } catch (err) {
+      setCvError(err?.response?.data?.message || "Unable to match jobs with selected CV.");
+    } finally {
+      setCvLoading(false);
+    }
+  };
+
+  const handleUploadAndMatch = async (file) => {
+    setCvUploading(true);
+    setCvError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("cvFile", file);
+
+      const uploadRes = await api.post("/cvs/upload/analyze", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const createdCv = uploadRes.data?.data?.cv;
+      if (!createdCv?._id) {
+        throw new Error("Uploaded CV could not be saved.");
+      }
+
+      await refetchCvs();
+      setSelectedCvId(createdCv._id);
+
+      const matchRes = await api.post(`/cvs/${createdCv._id}/recommend-jobs`);
+      const match = matchRes.data?.data?.match;
+      const normalized = (Array.isArray(match) ? match : [match])
+        .filter(Boolean)
+        .map(normalizeCvMatch)
+        .sort((a, b) => (b.match || 0) - (a.match || 0));
+      setCvJobs(normalized);
+      setSelectedJobId(normalized[0]?.id || null);
+    } catch (err) {
+      setCvError(err?.response?.data?.message || err?.message || "Unable to upload CV and match jobs.");
+    } finally {
+      setCvUploading(false);
+    }
+  };
+
+  const resultCount = mode === "browse" ? browseFilteredJobs.length : cvFilteredJobs.length;
+
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--fg)]">
-      <div className="flex-shrink-0 p-8">
+    <div className="min-h-screen bg-[var(--jd-bg)] text-[var(--jd-text-primary)]">
+      <div className="dashboard-nav-area">
         <DashboardNav role="employee" />
-
-        {/* Header */}
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold font-['Montserrat'] uppercase tracking-tight flex items-center gap-3">
-              <Briefcase size={28} className="text-[var(--color-primary)]" />
-              Find Jobs
-            </h1>
-            <p className="font-mono text-sm text-[var(--color-text-secondary)] mt-1">
-              {filtered.length} positions available
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-            <button
-              onClick={() => navigate("/employee/find-job-by-cv")}
-              className="paper-btn px-5 py-3 font-bold font-mono text-sm whitespace-nowrap flex items-center gap-2 min-h-[44px]"
-              style={{ background: "var(--color-warning)", color: "var(--color-text-primary)" }}
-              title="Match jobs to your CV instantly"
-            >
-              <FileText size={18} />
-              FIND BY CV
-              <span className="text-xs font-normal opacity-80">(Recommended)</span>
-            </button>
-            <div className="flex items-center gap-2 kpi-card px-4 py-2 bg-[var(--card-bg)] w-full sm:w-64 min-h-[44px]">
-              <Search size={15} className="text-[var(--color-text-secondary)] shrink-0" />
-              <input
-                type="text"
-                placeholder="Search jobs..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="bg-transparent outline-none font-mono text-sm w-full placeholder:text-[var(--color-text-tertiary)] text-[var(--color-text-primary)]"
-              />
-            </div>
-          </div>
-        </div>
-
-        <StatsBar stats={stats} />
-
-        {/* ===== PROMOTED: Find Job by CV Section ===== */}
-        <div className="workflow-card p-6 bg-[var(--card-bg)] border-2 border-[var(--color-warning)] relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--color-warning)] opacity-5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
-          <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <FileText size={20} className="text-[var(--color-warning)]" />
-                <h3 className="text-body-lg font-semibold text-[var(--color-text-primary)]">
-                  Find Jobs Matched to Your CV
-                </h3>
-                <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white rounded" style={{ background: 'var(--color-warning)' }}>
-                  Recommended
-                </span>
-              </div>
-              <p className="text-body text-[var(--color-text-secondary)] max-w-xl">
-                Upload your CV or select from your saved resumes to get instant job matches based on your skills and experience.
-              </p>
-            </div>
-            <button
-              onClick={() => navigate("/employee/find-job-by-cv")}
-              className="paper-btn px-6 py-3 font-bold flex items-center gap-2 whitespace-nowrap"
-              style={{ background: "var(--color-warning)", color: "var(--color-text-primary)" }}
-            >
-              <Search size={18} />
-              Find Matching Jobs
-              <ChevronRight size={18} />
-            </button>
-          </div>
-        </div>
       </div>
 
-      {/* Main Content - Split Screen */}
-      <div className="flex-1 flex overflow-hidden px-8 pb-8 gap-4">
-        {/* Left: Job List */}
-        <div
-          className={`${selectedJobId ? "flex-shrink-0 w-full md:w-96" : "w-full"} overflow-y-auto transition-all duration-500`}
-        >
-          {error && (
-            <div className="mb-4 kpi-card p-4 bg-[var(--color-danger)] text-[var(--color-text-primary)] font-mono text-sm">
-              {error.response?.data?.message || "Unable to load jobs."}
+      <div className="dashboard-shell jd-shell py-8 lg:py-10">
+        <div className="jd-hero mb-6 lg:mb-8 space-y-6">
+          <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+            <div className="space-y-4">
+              <span className="jd-hero-label">
+                <Sparkles size={14} />
+                Job Discovery
+              </span>
+              <h1 className="jd-hero-title text-4xl lg:text-5xl font-bold">Find jobs with structure.</h1>
+              <p className="jd-hero-copy text-sm">
+                Browse open roles or match them to a CV. The layout is tuned for fast scanning, sharp hierarchy, and direct action.
+              </p>
             </div>
-          )}
 
-          {loading ? (
-            <div className="kpi-card p-8 bg-[var(--card-bg)] text-center font-mono text-[var(--color-text-secondary)]">
-              Loading jobs...
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="kpi-card p-8 bg-[var(--card-bg)] text-center font-mono text-[var(--color-text-secondary)]">
-              No jobs matched your search.
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {filtered.map((job) => (
-                <div
-                  key={job.id}
-                  onClick={() => {
-                    // Toggle: if clicked job is already selected, deselect it; otherwise select it
-                    if (selectedJobId === job.id) {
-                      setSelectedJobId(null);
-                    } else {
-                      setSelectedJobId(job.id);
-                    }
-                  }}
-                  className={`brutal-card p-4 cursor-pointer transition-all ${selectedJobId === job.id
-                      ? "bg-[var(--yellow)] text-black border-4 border-black"
-                      : "bg-[var(--card-bg)] hover:border-[var(--yellow)]"
-                    }`}
-                >
-                  <p
-                    className={`font-bold font-['Space_Grotesk'] text-sm uppercase tracking-tight mb-1 ${selectedJobId === job.id
-                        ? "text-black"
-                        : "text-[var(--fg)]"
-                      }`}
-                  >
-                    {job.title}
-                  </p>
-                  <p
-                    className={`font-mono text-xs ${selectedJobId === job.id
-                        ? "text-black opacity-75"
-                        : "text-[var(--fg-muted)]"
-                      }`}
-                  >
-                    {job.company}
-                  </p>
-                  <p
-                    className={`font-mono text-xs mt-2 ${selectedJobId === job.id
-                        ? "text-black opacity-60"
-                        : "text-[var(--fg-muted)]"
-                      }`}
-                  >
-                    {job.posted}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Right: Job Details */}
-        <div
-          className={`${selectedJobId ? "flex-1 flex opacity-100" : "hidden opacity-0 absolute"} overflow-hidden transition-all duration-1000`}
-        >
-          {selectedJob ? (
-            <div className="w-full brutal-card bg-[var(--card-bg)] p-6 overflow-y-auto flex flex-col">
-              {/* Header */}
-              <div className="mb-6 pb-6 border-b-4 border-[var(--border-color)]">
-                <h2 className="text-2xl font-bold font-['Space_Grotesk'] uppercase tracking-tight text-[var(--fg)]">
-                  {selectedJob.title}
-                </h2>
-                <p className="font-mono text-sm text-[var(--fg-muted)] mt-1">
-                  {selectedJob.company} • {selectedJob.location}
-                </p>
-                <div className="flex items-center gap-2 mt-3">
-                  <span className="px-3 py-1 text-xs font-bold font-mono border-2 border-black bg-[var(--yellow)] text-black">
-                    {selectedJob.type}
-                  </span>
-                  <span className="px-3 py-1 text-xs font-mono bg-[var(--teal)] text-black font-bold">
-                    $
-                    {selectedJob.raw?.salary?.toLocaleString() ||
-                      "Not specified"}
-                  </span>
-                  <span className="px-3 py-1 text-xs font-mono bg-[var(--coral)] text-black font-bold">
-                    {selectedJob.posted}
-                  </span>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="mb-6">
-                <h3 className="font-['Space_Grotesk'] font-bold text-sm uppercase tracking-wider mb-2 text-[var(--fg)]">
-                  Job Description
-                </h3>
-                <p className="font-mono text-sm leading-relaxed text-[var(--fg-muted)]">
-                  {selectedJob.raw?.description}
-                </p>
-              </div>
-
-              {/* Requirements */}
-              <div className="mb-6">
-                <h3 className="font-['Space_Grotesk'] font-bold text-sm uppercase tracking-wider mb-2 text-[var(--fg)]">
-                  Requirements
-                </h3>
-                <div className="space-y-3">
-                  <div>
-                    <p className="font-mono text-xs font-bold text-[var(--fg-muted)] mb-1">
-                      Years of Experience
-                    </p>
-                    <p className="font-mono text-sm text-[var(--fg)]">
-                      {selectedJob.raw?.yearsOfExperience || 0}+ years
-                    </p>
+            <div className="jd-surface-stack min-w-0 xl:max-w-md">
+              <p className="jd-section-title mb-3">At a glance</p>
+              <div className="jd-meta-grid">
+                {stats.map((stat) => (
+                  <div key={stat.label} className="jd-stat-card">
+                    <p className="jd-stat-label">{stat.label}</p>
+                    <p className="jd-stat-value">{stat.value}</p>
                   </div>
-
-                  {selectedJob.raw?.technicalSkills?.length > 0 && (
-                    <div>
-                      <p className="font-mono text-xs font-bold text-[var(--fg-muted)] mb-1">
-                        Technical Skills
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedJob.raw.technicalSkills.map((skill, i) => (
-                          <span
-                            key={i}
-                            className="px-2 py-1 text-xs font-mono bg-[var(--teal)] text-black rounded"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedJob.raw?.softSkills?.length > 0 && (
-                    <div>
-                      <p className="font-mono text-xs font-bold text-[var(--fg-muted)] mb-1">
-                        Soft Skills
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedJob.raw.softSkills.map((skill, i) => (
-                          <span
-                            key={i}
-                            className="px-2 py-1 text-xs font-mono bg-[var(--mint)] text-black rounded"
-                          >
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedJob.raw?.language?.length > 0 && (
-                    <div>
-                      <p className="font-mono text-xs font-bold text-[var(--fg-muted)] mb-1">
-                        Languages
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedJob.raw.language.map((lang, i) => (
-                          <span
-                            key={i}
-                            className="px-2 py-1 text-xs font-mono bg-[var(--yellow)] text-black rounded"
-                          >
-                            {lang}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Additional Details */}
-              <div className="mb-6">
-                <h3 className="font-['Space_Grotesk'] font-bold text-sm uppercase tracking-wider mb-2 text-[var(--fg)]">
-                  Details
-                </h3>
-                <div className="space-y-2 font-mono text-sm text-[var(--fg-muted)]">
-                  <p>
-                    <span className="font-bold text-[var(--fg)]">
-                      Work Site:
-                    </span>{" "}
-                    {selectedJob.raw?.workSite || "N/A"}
-                  </p>
-                  <p>
-                    <span className="font-bold text-[var(--fg)]">
-                      Duration:
-                    </span>{" "}
-                    {selectedJob.raw?.workDuration || "N/A"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Apply Button */}
-              <div className="mt-auto flex gap-2">
-                <button
-                  onClick={() => handleApply(selectedJob)}
-                  className="flex-1 brutal-btn px-4 py-3 font-bold uppercase tracking-wider flex items-center justify-center gap-2"
-                  style={{ background: "var(--yellow)", color: "#0a0a0a" }}
-                >
-                  <ChevronRight size={16} />
-                  Apply Now
-                </button>
+                ))}
               </div>
             </div>
-          ) : (
-            <div className="w-full brutal-card bg-[var(--card-bg)] p-8 flex items-center justify-center">
-              <p className="font-mono text-[var(--fg-muted)] text-center">
-                Select a job to view details and apply
-              </p>
+          </div>
+        </div>
+
+        <JobDiscoveryHeader mode={mode} onModeChange={handleModeChange} resultCount={resultCount} />
+
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(360px,420px)] gap-5 items-start">
+          <section className="jd-panel">
+            <div className="space-y-4">
+              <JobSearchBar value={query} onChange={setQuery} />
+
+              {mode === "browse" ? (
+                <>
+                  <JobFiltersPanel
+                    filters={filters}
+                    onFilterChange={(nextFilters) => {
+                      setFilters(nextFilters);
+                      setCurrentPage(1);
+                    }}
+                    onClearFilters={clearFilters}
+                    isOpen={filtersOpen}
+                    onToggle={() => setFiltersOpen((prev) => !prev)}
+                  />
+
+                  <JobResultsToolbar
+                    resultCount={browseFilteredJobs.length}
+                    sortBy={sortBy}
+                    onSortChange={setSortBy}
+                    onClearFilters={clearFilters}
+                    hasActiveFilters={hasActiveFilters}
+                  />
+                </>
+              ) : (
+                <>
+                  <CvMatchPanel
+                    cvs={cvs}
+                    selectedCvId={selectedCvId}
+                    onCvSelect={setSelectedCvId}
+                    onMatchWithCv={handleMatchWithCv}
+                    onUploadAndMatch={handleUploadAndMatch}
+                    loading={cvLoading}
+                    uploading={cvUploading}
+                    error={cvError}
+                    onValidationError={(message) => {
+                      fileValidationErrorRef.current = message;
+                      setCvError(message);
+                    }}
+                  />
+
+                  <JobResultsToolbar
+                    resultCount={cvFilteredJobs.length}
+                    sortBy={sortBy}
+                    onSortChange={setSortBy}
+                    onClearFilters={() => setQuery("")}
+                    hasActiveFilters={Boolean(query)}
+                  />
+                </>
+              )}
+
+              {jobsError ? (
+                <JobDiscoveryState
+                  type="error"
+                  description={jobsError?.response?.data?.message || "Unable to load jobs."}
+                  action="Try Again"
+                  onAction={refetchJobs}
+                />
+              ) : mode === "browse" && jobsLoading ? (
+                <JobResultsList
+                  jobs={[]}
+                  selectedJobId={selectedJobId}
+                  onJobSelect={setSelectedJobId}
+                  getJobTypeLabel={(value) => value}
+                  loading
+                />
+              ) : visibleJobs.length === 0 ? (
+                <JobDiscoveryState
+                  type={mode === "browse" ? "empty" : "no-results"}
+                  title={mode === "browse" ? "No jobs match current filters" : "No matches yet"}
+                  description={
+                    mode === "browse"
+                      ? "Try a broader search term or clear filters."
+                      : "Select a CV or upload a PDF to get personalized job matches."
+                  }
+                  action={mode === "browse" && hasActiveFilters ? "Clear Filters" : undefined}
+                  onAction={mode === "browse" && hasActiveFilters ? clearFilters : undefined}
+                />
+              ) : (
+                <JobResultsList
+                  jobs={visibleJobs}
+                  selectedJobId={selectedJobId}
+                  onJobSelect={setSelectedJobId}
+                  getJobTypeLabel={(value) => value}
+                  loading={false}
+                />
+              )}
+
+              {mode === "browse" && !jobsLoading && !jobsError && browseFilteredJobs.length > 0 && (
+                <JobPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={(page) => {
+                    setCurrentPage(page);
+                    setSelectedJobId(null);
+                  }}
+                />
+              )}
             </div>
-          )}
+          </section>
+
+          <aside className="min-h-[420px]">
+            <JobDetailsPanel job={selectedJob} onApply={handleApply} onClose={() => setSelectedJobId(null)} />
+          </aside>
         </div>
       </div>
 
-      {applyJobId && (
-        <ApplyJobModal jobId={applyJobId} onClose={() => setApplyJobId(null)} />
-      )}
+      {applyJobId && <ApplyJobModal jobId={applyJobId} onClose={() => setApplyJobId(null)} />}
     </div>
   );
 }
