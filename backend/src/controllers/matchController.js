@@ -1,8 +1,10 @@
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import CV from "../models/CV.js";
 import Job from "../models/Job.js";
 import { calculateMatchPercentage } from "../services/matching/matchingService.js";
 import { buildNormalizedProfile } from "../utils/profileNormalizer.js";
+import { matchCVToJobs } from "../integrations/ai/openai.js";
 
 const withTimeout = (promise, ms) =>
   Promise.race([
@@ -42,16 +44,16 @@ const buildLocalJobRecommendations = (cv, jobs, normalizedProfile) => {
       );
       const experienceScore = job.yearsOfExperience
         ? Math.min(
-            100,
-            Math.round((cvExperience / job.yearsOfExperience) * 100),
-          )
+          100,
+          Math.round((cvExperience / job.yearsOfExperience) * 100),
+        )
         : 100;
       const score = Math.min(
         100,
         Math.round(
           techMatched.length * 3 +
-            softMatched.length * 1.5 +
-            experienceScore * 0.2,
+          softMatched.length * 1.5 +
+          experienceScore * 0.2,
         ),
       );
 

@@ -3,6 +3,7 @@ import { createJob as createJobService } from "../services/jobs/commands/createJ
 import { updateJob as updateJobService } from "../services/jobs/commands/updateJob.js";
 import { deleteJob as deleteJobService } from "../services/jobs/commands/deleteJob.js";
 import { getAllJobs as getAllJobsService } from "../services/jobs/queries/getAllJobs.js";
+import { getExternalJobs as getExternalJobsService } from "../services/jobs/queries/getExternalJobs.js";
 import { getJobById as getJobByIdService } from "../services/jobs/queries/getJobById.js";
 import { getEmployerJobs as getEmployerJobsService } from "../services/jobs/queries/getEmployerJobs.js";
 
@@ -29,12 +30,15 @@ export const createJob = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const getAllJobs = catchAsync(async (req, res) => {
-  const jobs = await getAllJobsService();
+  const [jobs, externalJobs] = await Promise.all([
+    getAllJobsService(),
+    getExternalJobsService(),
+  ]);
 
   res.status(200).json({
     success: true,
-    count: jobs.length,
-    data: { jobs },
+    count: jobs.length + externalJobs.length,
+    data: { jobs, externalJobs },
   });
 });
 

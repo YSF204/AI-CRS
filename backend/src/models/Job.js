@@ -4,7 +4,8 @@ const jobSchema = new mongoose.Schema({
     employerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Employer',
-        required: true
+        required: false,
+        default: null
     },
     position: {
         type: String,
@@ -57,6 +58,16 @@ const jobSchema = new mongoose.Schema({
     technicalSkills: {
         type: [String],
         default: []
+    },
+    externalUrl: {
+        type: String,
+        trim: true,
+        default: ""
+    },
+    sourceName: {
+        type: String,
+        trim: true,
+        default: ""
     }
 }, {
     timestamps: true,

@@ -1,3 +1,4 @@
+import fs from "fs";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import {
@@ -5,6 +6,8 @@ import {
   analyzeCVFromDatabase,
   analyzeCVSection,
 } from "../integrations/ai/openai.js";
+import CV from "../models/CV.js";
+import CVAnalysis from "../models/CVAnalysis.js";
 import htmlToPdf from "../utils/pdfGen.js";
 import {
   extractCertifications,

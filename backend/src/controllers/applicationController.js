@@ -1,4 +1,6 @@
 import catchAsync from "../utils/catchAsync.js";
+import AppError from "../utils/appError.js";
+import CV from "../models/CV.js";
 import { analyzeCvForJob } from "../services/applications/commands/analyzeCvForJob.js";
 import { createApplication } from "../services/applications/commands/createApplication.js";
 import { updateApplication as updateApplicationCommand } from "../services/applications/commands/updateApplication.js";
@@ -8,6 +10,7 @@ import { getMyApplications as getMyApplicationsQuery } from "../services/applica
 import { getEmployerApplications as getEmployerApplicationsQuery } from "../services/applications/queries/getEmployerApplications.js";
 import { getApplicationsByJob as getApplicationsByJobQuery } from "../services/applications/queries/getApplicationsByJob.js";
 import { getApplicationById as getApplicationByIdQuery } from "../services/applications/queries/getApplicationById.js";
+import { analyzeATSScore } from "../integrations/ai/openai.js";
 
 // ================================== //
 //      ANALYZE CV FOR A JOB          //

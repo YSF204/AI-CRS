@@ -3,6 +3,8 @@ import { authenticate } from "../middleware/Auth.js";
 import { isAdmin } from "../middleware/roleCheck.js";
 import {
   getStats,
+  getTrends,
+  getPendingEmployersList,
   updateUserStatus,
   getAllUsers,
   getUserById,
@@ -17,6 +19,8 @@ const adminRouter = express.Router();
 adminRouter.use(authenticate, isAdmin);
 
 adminRouter.get("/stats", getStats);
+adminRouter.get("/stats/trends", getTrends);
+adminRouter.get("/users/pending-employers", getPendingEmployersList);
 adminRouter.get("/users", getAllUsers);
 adminRouter.get("/users/:id", getUserById);
 adminRouter.post("/users", createUser);
