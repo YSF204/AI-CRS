@@ -36,3 +36,7 @@ backend/src/uploads/
 *.md
 
 .claude/*
+
+# Scraper outputs
+scraper/*.json
+scraper/*.csv
