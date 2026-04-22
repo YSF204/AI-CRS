@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import DashboardNav from "../../components/shared/DashboardNav";
 import api from "../../services/api";
 import ApplicationViewer from "../../components/applications/ApplicationViewer";
@@ -32,53 +33,181 @@ export default function JobApplications() {
   }, [jobId]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--fg)" }}>
+    <div style={{ 
+      minHeight: "100vh", 
+      backgroundColor: "var(--nm-bg)", 
+      color: "var(--nm-text-primary)",
+      fontFamily: "var(--font-body)",
+      overflowX: "hidden"
+    }}>
       <div className="dashboard-nav-area">
         <DashboardNav role="employer" />
       </div>
 
-      <div className="dashboard-shell py-6">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
+      <div className="dashboard-shell" style={{ padding: 'var(--spacing-8)' }}>
+        <div style={{ 
+          display: "flex", 
+          justifyContent: "space-between", 
+          alignItems: "flex-end", 
+          gap: 24, 
+          marginBottom: "3.5rem", 
+          flexWrap: "wrap" 
+        }}>
           <div>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: "var(--fg-muted)", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-              Candidates
+            <div style={{ 
+              fontFamily: "var(--font-display)", 
+              fontSize: 14, 
+              fontWeight: 800,
+              color: "var(--nm-text-tertiary)", 
+              textTransform: "uppercase", 
+              letterSpacing: "0.15em",
+              marginBottom: 8
+            }}>
+              Talent Pipelines
             </div>
-            <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: "clamp(2rem, 4vw, 3rem)", letterSpacing: "-0.04em", margin: 0 }}>
-              {job ? job.position : "Job Applications"}
+            <h1 style={{ 
+              fontFamily: "var(--font-display)", 
+              fontWeight: 900, 
+              fontSize: "clamp(2.5rem, 6vw, 4rem)", 
+              letterSpacing: "-0.04em", 
+              lineHeight: 1,
+              textTransform: "uppercase",
+              margin: 0 
+            }}>
+              {job ? job.position : "Unit Intake"}
             </h1>
           </div>
           <button
             onClick={() => navigate("/employer/jobs")}
-            className="brutal-btn px-4 py-2 font-bold uppercase tracking-wider"
-            style={{ background: "var(--teal)", color: "#0a0a0a" }}
+            className="nm-btn"
+            style={{ 
+              background: "var(--nm-surface)", 
+              color: "var(--nm-text-primary)",
+              padding: '12px 24px',
+              fontFamily: 'var(--font-display)',
+              fontWeight: 900,
+              fontSize: 14,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              border: '4px solid var(--nm-ink)'
+            }}
           >
-            Back to Jobs
+            <ArrowLeft size={18} strokeWidth={3} style={{ marginRight: 8, display: 'inline' }} /> Return to Inventory
           </button>
         </div>
 
         {loading ? (
-          <div className="brutal-card p-6 border-[3px] border-[var(--border-color)] shadow-[6px_6px_0_var(--shadow-color)] font-mono">
-            Loading applications...
+          <div style={{
+            fontFamily: 'var(--font-display)',
+            fontWeight: 800,
+            color: 'var(--nm-text-tertiary)',
+            padding: '5rem',
+            textAlign: 'center',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em'
+          }}>
+            Synchronizing Intake Data...
           </div>
         ) : applications.length === 0 ? (
-          <div className="brutal-card p-6 border-[3px] border-[var(--border-color)] shadow-[6px_6px_0_var(--shadow-color)] font-mono">
-            No applications yet.
+          <div 
+            className="nm-card"
+            style={{
+              background: 'var(--nm-surface)',
+              border: '4px dashed var(--nm-ink)',
+              padding: '5rem 2rem',
+              textAlign: 'center',
+              boxShadow: '8px 8px 0 var(--nm-ink)',
+              borderRadius: '0px'
+            }}
+          >
+            <div style={{ 
+              fontFamily: 'var(--font-display)', 
+              fontWeight: 900, 
+              fontSize: 24, 
+              color: 'var(--nm-text-primary)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
+              No Inbound Requests
+            </div>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', 
+            gap: '2rem' 
+          }}>
             {applications.map((app) => (
               <div
                 key={app._id}
-                className="brutal-card p-4 border-[3px] border-[var(--border-color)] shadow-[6px_6px_0_var(--shadow-color)] bg-[var(--card-bg)] cursor-pointer hover:translate-x-[2px] hover:translate-y-[2px] transition-transform"
+                className="nm-card"
+                style={{
+                  background: 'var(--nm-surface)',
+                  borderWidth: '4px',
+                  boxShadow: '6px 6px 0 var(--nm-ink)',
+                  padding: '2rem',
+                  cursor: 'pointer',
+                  borderRadius: '0px',
+                  transition: 'transform 0.2s ease'
+                }}
                 onClick={() => setSelected(app)}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translate(-4px, -4px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'none'}
               >
-                <div className="font-['Space_Grotesk'] font-black text-lg">{app.applicantInfo?.fullName || "Candidate"}</div>
-                <div className="font-mono text-xs text-[var(--fg-muted)] mt-1">{app.applicantInfo?.email}</div>
-                <div className="mt-2 font-mono text-sm">
-                  Method: {app.applicationMethod} • Match: {app.matchPercentage ?? "—"}%
+                <div style={{ 
+                  fontFamily: 'var(--font-display)', 
+                  fontWeight: 900, 
+                  fontSize: 24, 
+                  color: 'var(--nm-text-primary)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '-0.02em',
+                  marginBottom: 8
+                }}>
+                  {app.applicantInfo?.fullName || "ENTITY UNIDENTIFIED"}
                 </div>
-                <div className="mt-1 font-mono text-xs text-[var(--fg-muted)]">
-                  Submitted: {new Date(app.createdAt).toLocaleString()}
+                <div style={{ 
+                  fontFamily: 'var(--font-display)', 
+                  fontSize: 12, 
+                  fontWeight: 800,
+                  color: 'var(--nm-text-tertiary)', 
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  {app.applicantInfo?.email || "DATA MASKED"}
+                </div>
+                
+                <div style={{ 
+                  marginTop: 24, 
+                  background: 'var(--nm-bg)', 
+                  border: '3px solid var(--nm-ink)', 
+                  padding: '12px 16px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 13, color: 'var(--nm-text-primary)' }}>
+                    MATCH SCORE
+                  </div>
+                  <div style={{ 
+                    fontFamily: 'var(--font-display)', 
+                    fontWeight: 900, 
+                    fontSize: 24, 
+                    color: app.matchPercentage > 80 ? 'var(--nm-success)' : 'var(--nm-warning)' 
+                  }}>
+                    {app.matchPercentage ?? "—"}%
+                  </div>
+                </div>
+
+                <div style={{ 
+                  marginTop: 16, 
+                  fontFamily: 'var(--font-display)', 
+                  fontSize: 11, 
+                  fontWeight: 800,
+                  color: 'var(--nm-text-tertiary)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em'
+                }}>
+                  INTAKE: {new Date(app.createdAt).toLocaleDateString()}
                 </div>
               </div>
             ))}
@@ -87,15 +216,58 @@ export default function JobApplications() {
       </div>
 
       {selected && (
-        <div className="fixed inset-0 z-[1005] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-hidden">
-          <div className="brutal-card bg-[var(--bg)] w-full max-w-5xl max-h-[90vh] overflow-y-auto relative border-[6px] border-black shadow-[16px_16px_0px_0px_#000] p-6">
-            <div className="sticky top-0 z-10 flex justify-end mb-4 bg-[var(--bg)] pb-2 border-b-2 border-black">
+        <div style={{ 
+          position: "fixed", 
+          inset: 0, 
+          zIndex: 1005, 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center", 
+          background: "rgba(0,0,0,0.85)", 
+          backdropFilter: "blur(12px)", 
+          padding: "2rem" 
+        }}>
+          <div 
+            className="nm-card"
+            style={{ 
+              background: "var(--nm-bg)", 
+              width: "100%", 
+              maxW: "1200px", 
+              maxHeight: "90vh", 
+              overflowY: "auto", 
+              position: "relative", 
+              borderWidth: "6px", 
+              boxShadow: "20px 20px 0 #000", 
+              padding: "3rem",
+              borderRadius: '0px'
+            }}
+          >
+            <div style={{ 
+              position: "sticky", 
+              top: 0, 
+              zIndex: 10, 
+              display: "flex", 
+              justifyContent: "flex-end", 
+              marginBottom: "2rem", 
+              background: "var(--nm-bg)", 
+              paddingBottom: "1.5rem", 
+              borderBottom: "4px solid var(--nm-ink)" 
+            }}>
               <button
                 onClick={() => setSelected(null)}
-                className="brutal-btn px-4 py-2 font-bold uppercase tracking-wider"
-                style={{ background: "var(--coral)", color: "#0a0a0a" }}
+                className="nm-btn"
+                style={{ 
+                  background: "var(--nm-error)", 
+                  color: "#fff",
+                  padding: '10px 24px',
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 900,
+                  fontSize: 14,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em'
+                }}
               >
-                Close Header
+                CLOSE DOSSIER
               </button>
             </div>
             <ApplicationViewer application={selected} />

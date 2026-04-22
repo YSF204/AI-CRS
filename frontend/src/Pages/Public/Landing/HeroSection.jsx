@@ -11,21 +11,21 @@ export default function HeroSection() {
         minHeight: '100vh',
         padding: 'clamp(7rem, 14%, 11rem) clamp(1.5rem, 5%, 4rem) clamp(4rem, 8%, 6rem)',
         gap: 'clamp(3rem, 6%, 5rem)',
+        backgroundColor: 'var(--nm-bg)',
       }}
     >
       {/* Left content */}
-      <div className="flex-1 flex flex-col items-start z-10 paper-reveal" style={{ maxWidth: '640px' }}>
+      <div className="flex-1 flex flex-col items-start z-10" style={{ maxWidth: '640px' }}>
         {/* Badge */}
         <div
-          className="paper-badge paper-reveal paper-reveal-delay-1"
-          style={{ marginBottom: 'clamp(1.25rem, 2.5%, 2rem)' }}
+          className="nm-status-pill active"
+          style={{ marginBottom: 'clamp(1.5rem, 2.5%, 2.5rem)', borderWidth: '4px' }}
         >
           <span
             style={{
-              width: 6,
-              height: 6,
-              borderRadius: '50%',
-              backgroundColor: 'var(--accent)',
+              width: 8,
+              height: 8,
+              backgroundColor: 'var(--nm-success)',
               display: 'inline-block',
               marginRight: '0.5rem',
             }}
@@ -34,13 +34,14 @@ export default function HeroSection() {
         </div>
 
         <h1
-          className="paper-reveal paper-reveal-delay-2"
           style={{
+            fontFamily: 'var(--font-display)',
             fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
             lineHeight: 1,
             letterSpacing: '-0.03em',
             marginBottom: 'clamp(1.25rem, 2.5%, 2rem)',
-            color: 'var(--fg)',
+            color: 'var(--nm-text-primary)',
+            textTransform: 'uppercase',
           }}
         >
           <Shuffle
@@ -59,7 +60,7 @@ export default function HeroSection() {
             loopDelay={0}
           />
           <br />
-          <span style={{ color: 'var(--accent)' }}>&amp;</span>{' '}
+          <span style={{ color: 'var(--nm-primary)' }}>&amp;</span>{' '}
           <Shuffle
             text="Analyzer"
             shuffleDirection="right"
@@ -78,14 +79,13 @@ export default function HeroSection() {
         </h1>
 
         <p
-          className="paper-reveal paper-reveal-delay-3"
           style={{
-            fontFamily: "'Public Sans', sans-serif",
+            fontFamily: 'var(--font-body)',
             fontSize: 'clamp(1rem, 1.4vw, 1.15rem)',
             lineHeight: 1.7,
             maxWidth: '480px',
             marginBottom: 'clamp(2rem, 4%, 3rem)',
-            color: 'var(--fg-muted)',
+            color: 'var(--nm-text-secondary)',
             fontWeight: 400,
           }}
         >
@@ -93,24 +93,29 @@ export default function HeroSection() {
           skill gaps, and plan your career path — all in one place.
         </p>
 
-        <div className="flex flex-wrap paper-reveal paper-reveal-delay-4" style={{ gap: 'clamp(0.75rem, 1.5%, 1rem)' }}>
+        <div className="flex flex-wrap" style={{ gap: 'clamp(1rem, 2%, 1.25rem)' }}>
           <Link
             to="/auth?mode=signup"
-            className="paper-btn"
+            className="nm-btn nm-btn-primary"
             style={{
-              padding: 'clamp(0.7rem, 1.2%, 0.85rem) clamp(1.5rem, 3%, 2.25rem)',
+              padding: '1rem 2.5rem',
               fontSize: 'clamp(0.85rem, 1.1vw, 0.95rem)',
+              borderWidth: '4px',
+              boxShadow: '4px 4px 0 var(--nm-ink)'
             }}
           >
             Build My CV
-            <ArrowRight size={16} strokeWidth={2.5} />
+            <ArrowRight size={18} strokeWidth={3} />
           </Link>
           <a
             href="#features"
-            className="paper-btn-outline"
+            className="nm-btn"
             style={{
-              padding: 'clamp(0.7rem, 1.2%, 0.85rem) clamp(1.5rem, 3%, 2.25rem)',
+              padding: '1rem 2.5rem',
               fontSize: 'clamp(0.85rem, 1.1vw, 0.95rem)',
+              borderWidth: '4px',
+              background: 'var(--nm-surface)',
+              boxShadow: '4px 4px 0 var(--nm-ink)'
             }}
           >
             See How It Works
@@ -120,47 +125,18 @@ export default function HeroSection() {
 
       {/* Right — HTML CV Cards (preserved) */}
       <div
-        className="flex-1 flex items-center justify-center z-10 paper-reveal paper-reveal-delay-3"
+        className="flex-1 flex items-center justify-center z-10"
         style={{ maxWidth: '620px', width: '100%' }}
       >
         <CVShowcase />
       </div>
 
-      {/* Background decorative — subtle editorial elements */}
+      {/* Background decorative — industrial grid feel */}
       <div
-        className="absolute hidden lg:block"
+        className="absolute inset-0 pointer-events-none opacity-[0.03]"
         style={{
-          top: '15%',
-          left: '5%',
-          width: 'clamp(80px, 10vw, 140px)',
-          height: '1px',
-          background: 'var(--border-color)',
-          opacity: 0.5,
-          transform: 'rotate(-30deg)',
-        }}
-      />
-      <div
-        className="absolute hidden lg:block"
-        style={{
-          bottom: '20%',
-          right: '4%',
-          width: '1px',
-          height: 'clamp(60px, 8vw, 120px)',
-          background: 'var(--border-color)',
-          opacity: 0.4,
-        }}
-      />
-      {/* Subtle corner accent */}
-      <div
-        className="absolute hidden lg:block"
-        style={{
-          top: '10%',
-          right: '8%',
-          width: 'clamp(3px, 0.4vw, 5px)',
-          height: 'clamp(3px, 0.4vw, 5px)',
-          borderRadius: '50%',
-          background: 'var(--accent)',
-          opacity: 0.3,
+          backgroundImage: 'radial-gradient(var(--nm-ink) 1px, transparent 1px)',
+          backgroundSize: '32px 32px'
         }}
       />
     </section>

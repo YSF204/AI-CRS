@@ -34,92 +34,104 @@ export default function ActionBar({
   };
 
   return (
-    <div className="flex-shrink-0 flex items-center gap-3 px-5 py-2.5 border-t-2 border-b-[3px] border-[var(--border-color)] bg-[var(--bg)]">
+    <div className="flex-shrink-0 flex items-center gap-4 px-6 py-4 border-b-4 border-[var(--nm-ink)] bg-[var(--nm-surface)]">
       <button
         onClick={onBack}
-        className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--fg-muted)] px-3 py-1.5 border-2 border-[var(--border-color)] bg-[var(--card-bg)] hover:text-[var(--fg)] transition-colors no-underline"
+        className="nm-btn"
+        style={{
+          padding: "8px 16px",
+          minHeight: "40px",
+          fontSize: "12px",
+          background: "var(--nm-surface-high)"
+        }}
       >
-        <ArrowLeft size={12} /> Back
+        <ArrowLeft size={14} strokeWidth={3} /> Back
       </button>
       <div className="flex-1">
-        <div className="font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--fg-muted)]">
-          Editing
+        <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--nm-text-tertiary)] font-bold">
+          Active Workspace
         </div>
-        <div className="font-['Space_Grotesk'] font-black text-sm tracking-tight text-[var(--fg)]">
-          {form.jobTitle || "Untitled CV"}
+        <div className="font-[var(--font-display)] font-black text-lg tracking-tight text-[var(--nm-text-primary)] uppercase">
+          {form.jobTitle || "UNTITLED_CV.DRF"}
         </div>
       </div>
 
       {/* Auto-save status */}
-      <div className="flex items-center gap-2 mr-4 flex-wrap">
+      <div className="flex items-center gap-4 mr-4 flex-wrap">
         {atsScore !== undefined && atsScore !== null && (
-          <div className="flex items-center gap-2 font-mono text-[11px] font-bold text-[var(--fg)] px-3 py-1 bg-[var(--yellow)] border-2 border-[#0a0a0a] mr-2">
-            ATS Score: {atsScore}/100
+          <div className="nm-chip nm-chip-primary" style={{ padding: "6px 12px", fontSize: "11px" }}>
+            ATS QUALITY: {atsScore}%
           </div>
         )}
-        {isAutoSaving ? (
-          <div className="flex items-center gap-2 font-mono text-[10px] text-[var(--fg-muted)]">
-            <Clock size={12} className="animate-pulse" />
-            Auto-saving...
-          </div>
-        ) : lastSavedAt ? (
-          <div className="flex items-center gap-2 font-mono text-[10px] text-[var(--fg-muted)]">
-            <Clock size={12} />
-            Auto-saved {formatLastSaved(lastSavedAt)}
-          </div>
-        ) : null}
+        <div className="flex items-center gap-2 font-mono text-[10px] text-[var(--nm-text-tertiary)] uppercase font-bold">
+          <Clock size={12} className={isAutoSaving ? "animate-pulse" : ""} strokeWidth={2.5} />
+          {isAutoSaving ? "Syncing..." : lastSavedAt ? `Last Sync: ${formatLastSaved(lastSavedAt)}` : "Not Synced"}
+        </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        {/* Analyze button */}
+      <div className="flex items-center gap-3">
         <button
           onClick={onAnalyze}
           disabled={analyzing}
-          className="flex items-center gap-2 font-['Space_Grotesk'] font-black text-xs uppercase tracking-wider px-4 py-2.5 bg-[var(--card-bg)] text-[var(--fg)] border-[3px] border-[var(--border-color)] transition-all hover:border-[var(--fg)] hover:translate-x-0.5 hover:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="nm-btn"
           style={{
-            boxShadow: analyzing ? "none" : "3px 3px 0 var(--border-color)",
+            padding: "8px 16px",
+            minHeight: "40px",
+            fontSize: "12px",
+            background: "var(--nm-surface-high)"
           }}
         >
-          <Sparkles size={13} /> {analyzing ? "Analyzing…" : "Analyze"}
+          <Sparkles size={14} strokeWidth={2.5} /> {analyzing ? "ANALYZING..." : "ANALYZE"}
         </button>
-        {/* Change Template button */}
         <button
           onClick={onChangeTemplate}
-          className="flex items-center gap-2 font-['Space_Grotesk'] font-black text-xs uppercase tracking-wider px-4 py-2.5 bg-[var(--card-bg)] text-[var(--fg)] border-[3px] border-[var(--border-color)] transition-all hover:border-[var(--fg)] hover:translate-x-0.5 hover:translate-y-0.5"
-          style={{ boxShadow: "3px 3px 0 var(--border-color)" }}
+          className="nm-btn"
+          style={{
+            padding: "8px 16px",
+            minHeight: "40px",
+            fontSize: "12px",
+            background: "var(--nm-surface-high)"
+          }}
         >
-          <Layers size={13} /> Change Template
+          <Layers size={14} strokeWidth={2.5} /> TEMPLATE
         </button>
-        {/* Preview button */}
         <button
           onClick={onPreview}
-          className="flex items-center gap-2 font-['Space_Grotesk'] font-black text-xs uppercase tracking-wider px-4 py-2.5 bg-[var(--card-bg)] text-[var(--fg)] border-[3px] border-[var(--border-color)] transition-all hover:border-[var(--fg)] hover:translate-x-0.5 hover:translate-y-0.5"
-          style={{ boxShadow: "3px 3px 0 var(--border-color)" }}
+          className="nm-btn"
+          style={{
+            padding: "8px 16px",
+            minHeight: "40px",
+            fontSize: "12px",
+            background: "var(--nm-surface-high)"
+          }}
         >
-          <Eye size={13} /> Preview
+          <Eye size={14} strokeWidth={2.5} /> PREVIEW
         </button>
-        {/* Download PDF button */}
         <button
           onClick={onDownloadPdf}
           disabled={downloadingPdf}
-          className="flex items-center gap-2 font-['Space_Grotesk'] font-black text-xs uppercase tracking-wider px-4 py-2.5 bg-[var(--card-bg)] text-[var(--fg)] border-[3px] border-[var(--border-color)] transition-all hover:border-[var(--fg)] hover:translate-x-0.5 hover:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="nm-btn"
           style={{
-            boxShadow: downloadingPdf
-              ? "none"
-              : "3px 3px 0 var(--border-color)",
+            padding: "8px 16px",
+            minHeight: "40px",
+            fontSize: "12px",
+            background: "var(--nm-surface-high)"
           }}
         >
-          <Download size={13} />{" "}
-          {downloadingPdf ? "Generating…" : "Download PDF"}
+          <Download size={14} strokeWidth={2.5} /> {downloadingPdf ? "EXPORTING..." : "PDF"}
         </button>
-        {/* Save CV button */}
         <button
           onClick={onSave}
           disabled={saving}
-          className="flex items-center gap-2 font-['Space_Grotesk'] font-black text-xs uppercase tracking-wider px-5 py-2.5 bg-[var(--yellow)] text-[#0a0a0a] border-[3px] border-[#0a0a0a] transition-all hover:translate-x-0.5 hover:translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ boxShadow: saving ? "none" : "4px 4px 0 #0a0a0a" }}
+          className="nm-btn nm-btn-primary"
+          style={{
+            padding: "8px 24px",
+            minHeight: "40px",
+            fontSize: "12px",
+            boxShadow: "4px 4px 0 var(--nm-ink)"
+          }}
         >
-          <Save size={13} /> {saving ? "Saving…" : "Save CV"}
+          <Save size={14} strokeWidth={2.5} /> {saving ? "WRITING..." : "SAVE CV"}
         </button>
       </div>
     </div>

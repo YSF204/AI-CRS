@@ -568,82 +568,78 @@ export default function SectionCard({
   };
 
   return (
-    <div className="border-[3px] border-[var(--border-color)] bg-[var(--card-bg)] overflow-hidden flex-shrink-0">
+    <div className="nm-card" style={{ padding: 0, overflow: 'hidden' }}>
       {/* Card header */}
       <div
-        className="flex items-center gap-2.5 px-4 py-3 border-b-[3px] border-[var(--border-color)]"
+        className="flex items-center gap-3 px-5 py-4 border-b-4 border-[var(--nm-ink)]"
         style={{ background: meta.accent }}
       >
-        <GripVertical
-          size={14}
-          style={{
-            color: meta.textColor,
-            opacity: 0.5,
-            cursor: "grab",
-            flexShrink: 0,
-          }}
-        />
-        <Icon size={15} style={{ color: meta.textColor }} />
+        <div style={{ cursor: "grab", opacity: 0.6, display: 'flex', alignItems: 'center' }}>
+          <GripVertical size={18} color={meta.textColor} strokeWidth={2.5} />
+        </div>
+        <Icon size={18} style={{ color: meta.textColor }} strokeWidth={2.5} />
         <span
-          className="font-['Space_Grotesk'] font-black text-xs uppercase tracking-[0.1em] flex-1"
+          className="font-[var(--font-display)] font-black text-xs uppercase tracking-[0.15em] flex-1"
           style={{ color: meta.textColor }}
         >
           {meta.label}
         </span>
-        {/* Collapse toggle */}
-        <button
-          type="button"
-          onClick={onToggleCollapse}
-          title={collapsed ? "Expand section" : "Collapse section"}
-          style={{
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            color: meta.textColor,
-            display: "flex",
-            alignItems: "center",
-            padding: "2px 6px",
-          }}
-        >
-          <ChevronDown
-            size={14}
+        
+        <div className="flex items-center gap-2">
+          {/* Collapse toggle */}
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            title={collapsed ? "EXPAND_SECTION" : "COLLAPSE_SECTION"}
+            className="nm-btn"
             style={{
-              transform: collapsed ? "rotate(-90deg)" : "rotate(0deg)",
-              transition: "transform 0.22s ease",
+              padding: "6px",
+              minHeight: "32px",
+              background: "rgba(0,0,0,0.1)",
+              borderColor: meta.textColor,
+              color: meta.textColor,
+              borderWidth: '2px'
             }}
-          />
-        </button>
-        {/* Remove */}
-        <button
-          type="button"
-          onClick={onRemove}
-          className="flex items-center gap-1 font-mono text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border transition-colors"
-          style={{
-            borderColor: meta.textColor,
-            color: meta.textColor,
-            background: "transparent",
-            cursor: "pointer",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "rgba(0,0,0,0.15)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-          }}
-        >
-          <X size={9} /> Remove
-        </button>
+          >
+            <ChevronDown
+              size={14}
+              strokeWidth={3}
+              style={{
+                transform: collapsed ? "rotate(-90deg)" : "rotate(0deg)",
+                transition: "transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)",
+              }}
+            />
+          </button>
+          {/* Remove */}
+          <button
+            type="button"
+            onClick={onRemove}
+            className="nm-btn"
+            style={{
+              padding: "6px 12px",
+              minHeight: "32px",
+              background: "rgba(0,0,0,0.1)",
+              borderColor: meta.textColor,
+              color: meta.textColor,
+              fontSize: '10px',
+              borderWidth: '2px'
+            }}
+          >
+            <X size={12} strokeWidth={3} /> REMOVE
+          </button>
+        </div>
       </div>
 
       {/* Collapsible body */}
       <div
         style={{
-          maxHeight: collapsed ? 0 : 2000,
+          maxHeight: collapsed ? 0 : 4000,
           overflow: "hidden",
-          transition: "max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1)",
+          transition: "max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+          background: 'var(--nm-bg)'
         }}
       >
-        <div className="p-4">{formBody()}</div>
+        <div className="p-6">{formBody()}</div>
       </div>
     </div>
   );

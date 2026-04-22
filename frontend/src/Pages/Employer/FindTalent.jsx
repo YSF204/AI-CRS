@@ -5,18 +5,30 @@ import ActionButton from '../../components/shared/ActionButton';
 import api from '../../services/api';
 
 const INPUT = {
-  width: '100%', padding: '14px 18px', boxSizing: 'border-box',
-  fontFamily: "'DM Mono', monospace", fontSize: 14,
-  background: 'var(--bg)', color: 'var(--fg)',
-  border: '3px solid var(--border-color)', outline: 'none',
-  boxShadow: '4px 4px 0 var(--shadow-color)',
-  transition: 'all 0.15s ease'
+  width: '100%', 
+  padding: '16px 20px', 
+  boxSizing: 'border-box',
+  fontFamily: 'var(--font-body)', 
+  fontSize: 15,
+  fontWeight: 600,
+  background: 'var(--nm-bg)', 
+  color: 'var(--nm-text-primary)',
+  border: '4px solid var(--nm-ink)', 
+  outline: 'none',
+  boxShadow: '4px 4px 0 var(--nm-ink)',
+  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+  borderRadius: '0px',
 };
 
 const LABEL = {
-  display: 'block', fontFamily: "'Space Grotesk', sans-serif",
-  fontWeight: 800, fontSize: 12, textTransform: 'uppercase',
-  letterSpacing: '0.1em', color: 'var(--fg)', marginBottom: 8,
+  display: 'block', 
+  fontFamily: 'var(--font-display)',
+  fontWeight: 800, 
+  fontSize: 12, 
+  textTransform: 'uppercase',
+  letterSpacing: '0.15em', 
+  color: 'var(--nm-text-tertiary)', 
+  marginBottom: 10,
 };
 
 const EMPTY_FORM = {
@@ -86,83 +98,195 @@ export default function FindTalent() {
   };
 
   const renderForm = () => (
-    <div style={{
-      background: 'var(--card-bg)', border: '4px solid var(--border-color)',
-      boxShadow: '8px 8px 0 var(--shadow-color)', padding: 'clamp(2rem, 5vw, 4rem)',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-        <Sparkles size={36} color="#A78BFA" />
-        <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.5rem)', color: 'var(--fg)', textTransform: 'uppercase', letterSpacing: '-0.03em', lineHeight: 1 }}>
+    <div 
+      className="nm-card"
+      style={{
+        background: 'var(--nm-surface)', 
+        borderWidth: '4px',
+        boxShadow: '12px 12px 0 var(--nm-ink)', 
+        padding: 'clamp(2rem, 6vw, 5rem)',
+        borderRadius: '0px',
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
+        <div style={{ 
+          background: 'var(--nm-primary)', 
+          padding: 12, 
+          border: '4px solid var(--nm-ink)', 
+          boxShadow: '4px 4px 0 var(--nm-ink)',
+          display: 'inline-flex'
+        }}>
+          <Sparkles size={32} color="#fff" strokeWidth={2.5} />
+        </div>
+        <h1 style={{ 
+          fontFamily: 'var(--font-display)', 
+          fontWeight: 900, 
+          fontSize: 'clamp(2.5rem, 6vw, 4rem)', 
+          color: 'var(--nm-text-primary)', 
+          textTransform: 'uppercase', 
+          letterSpacing: '-0.04em', 
+          lineHeight: 1, 
+          margin: 0 
+        }}>
           AI Matchmaker
         </h1>
       </div>
-      <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: 'var(--fg-muted)', marginBottom: '3rem' }}>
-        Define your ideal candidate. Our AI engine will analyze the entire talent pool and return ranked matches based on your criteria.
+      <p style={{ 
+        fontFamily: 'var(--font-body)', 
+        fontSize: 16, 
+        color: 'var(--nm-text-secondary)', 
+        marginBottom: '4rem',
+        maxWidth: '800px',
+        lineHeight: 1.6
+      }}>
+        Harness advanced neural filtering to identify top-tier talent. Our engine analyzes competencies, soft skills, and experience history to deliver precision matching.
       </p>
 
       {error && (
-        <div style={{ padding: '16px 20px', background: '#FF6B6B', color: '#0a0a0a', border: '3px solid #0a0a0a', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <AlertCircle size={20} /> {error}
+        <div style={{ 
+          padding: '20px 24px', 
+          background: 'var(--nm-error)', 
+          color: '#fff', 
+          border: '4px solid var(--nm-ink)', 
+          fontFamily: 'var(--font-display)', 
+          fontWeight: 800, 
+          fontSize: 14, 
+          textTransform: 'uppercase', 
+          letterSpacing: '0.1em', 
+          marginBottom: 32, 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 12,
+          boxShadow: '4px 4px 0 var(--nm-ink)'
+        }}>
+          <AlertCircle size={24} strokeWidth={3} /> {error}
         </div>
       )}
 
-      <form onSubmit={handleSearch} style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 24 }}>
+      <form onSubmit={handleSearch} style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
           <div>
-            <label style={LABEL}>Position Title *</label>
-            <input style={INPUT} value={form.position} onChange={set('position')} placeholder="e.g. Senior Frontend Engineer" required />
+            <label style={LABEL}>Position Designation *</label>
+            <input 
+              style={INPUT} 
+              value={form.position} 
+              onChange={set('position')} 
+              placeholder="e.g. SYSTEMS ARCHITECT" 
+              required 
+              onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+              onBlur={e => e.target.style.transform = 'none'}
+            />
           </div>
           <div>
-            <label style={LABEL}>Years Exp. Required</label>
-            <input style={INPUT} type="number" min="0" value={form.yearsOfExperience} onChange={set('yearsOfExperience')} placeholder="e.g. 5" />
+            <label style={LABEL}>Experience Threshold (Years)</label>
+            <input 
+              style={INPUT} 
+              type="number" 
+              min="0" 
+              value={form.yearsOfExperience} 
+              onChange={set('yearsOfExperience')} 
+              placeholder="e.g. 5" 
+              onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+              onBlur={e => e.target.style.transform = 'none'}
+            />
           </div>
         </div>
 
         <div>
-          <label style={LABEL}>Role Description</label>
-          <textarea style={{ ...INPUT, minHeight: 120, resize: 'vertical' }} value={form.description} onChange={set('description')} placeholder="Summarize the core responsibilities and team environment..." />
+          <label style={LABEL}>Contextual Role Requirements</label>
+          <textarea 
+            style={{ ...INPUT, minHeight: 140, resize: 'vertical' }} 
+            value={form.description} 
+            onChange={set('description')} 
+            placeholder="Specify technical complexity, leadership expectations, and operational environment..." 
+            onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+            onBlur={e => e.target.style.transform = 'none'}
+          />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
           <div>
-            <label style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, color: 'var(--fg-muted)' }}>(comma-separated)</span></label>
-            <input style={INPUT} value={form.technicalSkills} onChange={set('technicalSkills')} placeholder="React, Node.js, AWS" />
+            <label style={LABEL}>Technical Competencies <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+            <input 
+              style={INPUT} 
+              value={form.technicalSkills} 
+              onChange={set('technicalSkills')} 
+              placeholder="React, Docker, Kubernetes" 
+              onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+              onBlur={e => e.target.style.transform = 'none'}
+            />
           </div>
           <div>
-            <label style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, color: 'var(--fg-muted)' }}>(comma-separated)</span></label>
-            <input style={INPUT} value={form.softSkills} onChange={set('softSkills')} placeholder="Leadership, Agile, Communication" />
+            <label style={LABEL}>Behavioral Traits <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+            <input 
+              style={INPUT} 
+              value={form.softSkills} 
+              onChange={set('softSkills')} 
+              placeholder="Strategic Thinking, Resilience" 
+              onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+              onBlur={e => e.target.style.transform = 'none'}
+            />
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
           <div>
-            <label style={LABEL}>Languages <span style={{ textTransform: 'none', fontWeight: 500, color: 'var(--fg-muted)' }}>(comma-separated)</span></label>
-            <input style={INPUT} value={form.language} onChange={set('language')} placeholder="English, Spanish" />
+            <label style={LABEL}>Linguistic Proficiency <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+            <input 
+              style={INPUT} 
+              value={form.language} 
+              onChange={set('language')} 
+              placeholder="English (Fluent), German" 
+              onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+              onBlur={e => e.target.style.transform = 'none'}
+            />
           </div>
           <div>
-            <label style={LABEL}>Additional Notes</label>
-            <input style={INPUT} value={form.additionalNotes} onChange={set('additionalNotes')} placeholder="Must be willing to relocate to Mars..." />
+            <label style={LABEL}>Strategic Constraints</label>
+            <input 
+              style={INPUT} 
+              value={form.additionalNotes} 
+              onChange={set('additionalNotes')} 
+              placeholder="Specific timezone, clearance, or relocation..." 
+              onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+              onBlur={e => e.target.style.transform = 'none'}
+            />
           </div>
         </div>
 
-        <ActionButton
+        <button
           type="submit"
-          variant="ai-gold"
+          className="nm-btn"
           disabled={loading}
-          className="mt-4 flex justify-center items-center gap-3 p-4 w-full font-bold text-lg"
+          style={{
+            background: 'var(--nm-primary)',
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 16,
+            padding: '20px',
+            width: '100%',
+            fontFamily: 'var(--font-display)',
+            fontWeight: 900,
+            fontSize: 18,
+            textTransform: 'uppercase',
+            letterSpacing: '0.15em',
+            marginTop: 16,
+          }}
         >
           {loading ? (
             <>
-              <Search className="animate-spin" size={24} />
-              PROCESSING AI MATCH...
+              <Search className="animate-spin" size={28} strokeWidth={3} />
+              ANALYZING DATASETS...
             </>
           ) : (
             <>
-              <Sparkles size={24} />
-              RUN AI MATCH ENGINE →
+              <Sparkles size={28} strokeWidth={2.5} />
+              ACTIVATE AI SCAN →
             </>
           )}
-        </ActionButton>
+        </button>
       </form>
     </div>
   );
@@ -170,125 +294,255 @@ export default function FindTalent() {
   const renderResults = () => (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(8px)',
-      zIndex: 100, display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
-      overflowY: 'auto', padding: 'clamp(2rem, 5vw, 4rem)',
+      background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(12px)',
+      zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
+      overflowY: 'auto', padding: 'clamp(1rem, 5vw, 4rem)',
     }}>
-      <div style={{
-        background: 'var(--bg)', width: 'min(96vw, 1500px)',
-        border: '3px solid var(--border-color)', boxShadow: '8px 8px 0 rgba(0,0,0,0.5)',
-        padding: 'clamp(1.5rem, 4%, 3rem)', position: 'relative', marginTop: '2rem', marginBottom: '4rem',
-        borderRadius: 8,
-      }}>
+      <div 
+        className="nm-card"
+        style={{
+          background: 'var(--nm-bg)', width: 'min(96vw, 1200px)',
+          border: '4px solid var(--nm-ink)', boxShadow: '20px 20px 0 rgba(0,0,0,0.5)',
+          padding: 'clamp(2rem, 5vw, 4rem)', position: 'relative', marginTop: '4rem', marginBottom: '4rem',
+          borderRadius: '0px',
+        }}
+      >
         <button 
           onClick={() => setResults(null)}
+          className="nm-btn"
           style={{
-            position: 'absolute', top: -20, right: -20, width: 44, height: 44,
-            background: 'var(--bg)', border: '2px solid var(--border-color)', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)', transition: 'all 0.2s ease', zIndex: 10, color: 'var(--fg)',
+            position: 'absolute', top: -30, right: -30, width: 60, height: 60,
+            background: 'var(--nm-error)', color: '#fff',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 0
           }}
-          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.1)'; e.currentTarget.style.color = '#FF6B6B'; }}
-          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.color = 'var(--fg)'; }}
         >
-          <XCircle size={24} />
+          <XCircle size={32} strokeWidth={2.5} />
         </button>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem', flexWrap: 'wrap', gap: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem', flexWrap: 'wrap', gap: 24 }}>
           <div>
-            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', color: 'var(--fg)', textTransform: 'uppercase', letterSpacing: '-0.02em', lineHeight: 1, margin: 0 }}>
-              Top {results.length} Matches
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--nm-primary)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 8 }}>
+              Neural Match Logic v2.4
+            </div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(2.5rem, 6vw, 4rem)', color: 'var(--nm-text-primary)', textTransform: 'uppercase', letterSpacing: '-0.04em', lineHeight: 1, margin: 0 }}>
+              Primary Targets
             </h2>
           </div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, background: '#FFE630', color: '#0a0a0a', border: '2px solid #0a0a0a', padding: '6px 14px', fontWeight: 'bold' }}>
-            RANKED BY AI
+          <div style={{ 
+            fontFamily: 'var(--font-display)', 
+            fontSize: 14, 
+            background: 'var(--nm-warning)', 
+            color: '#0a0a0a', 
+            border: '4px solid var(--nm-ink)', 
+            padding: '10px 20px', 
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            boxShadow: '6px 6px 0 var(--nm-ink)'
+          }}>
+            PRECISION RANKED
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
         {results.map((candidate, i) => (
-          <div key={candidate.cvId?._id || candidate.cvId || i} style={{
-            background: '#1e293b', border: '2px solid #334155', borderRadius: 8,
-            boxShadow: '4px 4px 0 rgba(0,0,0,0.3)', padding: '2rem',
-            position: 'relative'
-          }}>
+          <div key={candidate.cvId?._id || candidate.cvId || i} 
+            className="nm-card"
+            style={{
+              background: 'var(--nm-surface)', 
+              borderWidth: '4px',
+              boxShadow: '8px 8px 0 var(--nm-ink)', 
+              padding: '2.5rem',
+              position: 'relative',
+              borderRadius: '0px'
+            }}
+          >
             {/* Rank Badge */}
-            <div style={{ position: 'absolute', top: -16, left: -16, width: 40, height: 40, background: '#818cf8', border: '2px solid #1e1e1e', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 18, color: '#fff', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}>
+            <div style={{ 
+              position: 'absolute', 
+              top: -20, 
+              left: -20, 
+              width: 50, 
+              height: 50, 
+              background: 'var(--nm-primary)', 
+              border: '4px solid var(--nm-ink)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              fontFamily: 'var(--font-display)', 
+              fontWeight: 900, 
+              fontSize: 22, 
+              color: '#fff', 
+              boxShadow: '4px 4px 0 var(--nm-ink)' 
+            }}>
               #{candidate.rank}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 24 }}>
               <div>
-                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 24, margin: '0 0 4px', color: '#f8fafc' }}>
-                  {candidate.profile?.name || candidate.userId?.firstName + ' ' + candidate.userId?.lastName || 'Unknown Talent'}
+                <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 32, margin: '0 0 8px', color: 'var(--nm-text-primary)', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>
+                  {candidate.profile?.name || candidate.userId?.firstName + ' ' + candidate.userId?.lastName || 'SECURE ENTITY'}
                 </h3>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 14, color: '#94a3b8', marginBottom: 12 }}>
-                  {candidate.profile?.jobTitle || candidate.CVId?.jobTitle || 'No Title'} • {candidate.profile?.email || candidate.userId?.email || 'Confidential'}
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 16, fontWeight: 600, color: 'var(--nm-text-tertiary)', marginBottom: 12 }}>
+                  {candidate.profile?.jobTitle || candidate.CVId?.jobTitle || 'UNSPECIFIED ROLE'} • {candidate.profile?.email || candidate.userId?.email || 'DATA ENCRYPTED'}
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 32, color: candidate.matchScore > 80 ? '#34d399' : (candidate.matchScore > 60 ? '#fde047' : '#f87171'), lineHeight: 1 }}>
+                <div style={{ 
+                  fontFamily: 'var(--font-display)', 
+                  fontWeight: 900, 
+                  fontSize: 48, 
+                  color: candidate.matchScore > 80 ? 'var(--nm-success)' : (candidate.matchScore > 60 ? 'var(--nm-warning)' : 'var(--nm-error)'), 
+                  lineHeight: 1 
+                }}>
                   {candidate.matchScore}%
                 </div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                  Match Score
+                <div style={{ 
+                  fontFamily: 'var(--font-display)', 
+                  fontSize: 12, 
+                  color: 'var(--nm-text-tertiary)', 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '0.15em',
+                  fontWeight: 800
+                }}>
+                  Compatibility
                 </div>
               </div>
             </div>
 
-            <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: 6, padding: '1.5rem', marginTop: '1.5rem' }}>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: '#c084fc', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                <Sparkles size={16} /> AI Reasoning
+            <div style={{ 
+              background: 'var(--nm-bg)', 
+              border: '4px solid var(--nm-ink)', 
+              padding: '2rem', 
+              marginTop: '2rem',
+              boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.1)'
+            }}>
+              <div style={{ 
+                fontFamily: 'var(--font-display)', 
+                fontSize: 13, 
+                color: 'var(--nm-primary)', 
+                textTransform: 'uppercase', 
+                letterSpacing: '0.15em', 
+                marginBottom: 12, 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 8,
+                fontWeight: 900
+              }}>
+                <Sparkles size={18} strokeWidth={3} /> Neural Reasoning
               </div>
-              <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 17, color: '#f8fafc', lineHeight: 1.7, margin: 0 }}>
+              <p style={{ 
+                fontFamily: 'var(--font-body)', 
+                fontSize: 18, 
+                fontWeight: 500,
+                color: 'var(--nm-text-primary)', 
+                lineHeight: 1.7, 
+                margin: 0 
+              }}>
                 {candidate.reasoning}
               </p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', marginTop: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem', marginTop: '2.5rem' }}>
               <div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CheckCircle2 size={16} /> Key Strengths
+                <div style={{ 
+                  fontFamily: 'var(--font-display)', 
+                  fontSize: 13, 
+                  color: 'var(--nm-success)', 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '0.15em', 
+                  marginBottom: 16, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 10,
+                  fontWeight: 900
+                }}>
+                  <CheckCircle2 size={20} strokeWidth={3} /> Strategic Strengths
                 </div>
-                <ul style={{ margin: 0, paddingLeft: 18, fontFamily: "'DM Mono', monospace", fontSize: 15, color: '#e2e8f0', lineHeight: 1.6 }}>
+                <ul style={{ 
+                  margin: 0, 
+                  padding: 0, 
+                  listStyle: 'none',
+                  fontFamily: 'var(--font-body)', 
+                  fontSize: 16, 
+                  fontWeight: 600,
+                  color: 'var(--nm-text-secondary)', 
+                  lineHeight: 1.6 
+                }}>
                   {candidate.strengths?.map((str, idx) => (
-                    <li key={idx} style={{ marginBottom: 6 }}>{str}</li>
+                    <li key={idx} style={{ 
+                      marginBottom: 10, 
+                      display: 'flex', 
+                      gap: 12, 
+                      alignItems: 'flex-start' 
+                    }}>
+                      <span style={{ color: 'var(--nm-success)', fontWeight: 900 }}>•</span>
+                      {str}
+                    </li>
                   ))}
                 </ul>
               </div>
 
               <div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <XCircle size={16} /> Missing Skills
+                <div style={{ 
+                  fontFamily: 'var(--font-display)', 
+                  fontSize: 13, 
+                  color: 'var(--nm-error)', 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '0.15em', 
+                  marginBottom: 16, 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: 10,
+                  fontWeight: 900
+                }}>
+                  <XCircle size={20} strokeWidth={3} /> Critical Gaps
                 </div>
                 {candidate.skillsMissing?.length > 0 ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
                     {candidate.skillsMissing.map(skill => (
-                      <span key={skill} style={{ background: 'transparent', border: '1px solid #f87171', color: '#fca5a5', padding: '4px 10px', fontSize: 13, fontFamily: "'DM Mono', monospace", borderRadius: 99 }}>
+                      <span key={skill} style={{ 
+                        background: 'var(--nm-bg)', 
+                        border: '3px solid var(--nm-error)', 
+                        color: 'var(--nm-error)', 
+                        padding: '6px 14px', 
+                        fontSize: 14, 
+                        fontFamily: 'var(--font-display)', 
+                        fontWeight: 800,
+                        textTransform: 'uppercase'
+                      }}>
                         {skill}
                       </span>
                     ))}
                   </div>
                 ) : (
-                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 15, color: '#94a3b8', fontStyle: 'italic', paddingLeft: 4 }}>None identified</span>
+                  <span style={{ 
+                    fontFamily: 'var(--font-body)', 
+                    fontSize: 16, 
+                    color: 'var(--nm-text-tertiary)', 
+                    fontStyle: 'italic',
+                    fontWeight: 500
+                  }}>Zero deficiency detected</span>
                 )}
               </div>
             </div>
 
-            <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end' }}>
+            <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'flex-end' }}>
                <button 
-                onClick={() => alert('Viewing specific profiles feature is coming in Phase 3!')}
+                onClick={() => alert('Detailed dossier access coming in next build phase.')}
+                className="nm-btn"
                 style={{
-                  padding: '10px 20px', background: 'var(--fg)', color: 'var(--bg)',
-                  border: '2px solid var(--border-color)', boxShadow: '3px 3px 0 var(--shadow-color)',
-                  fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 13,
-                  textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer',
-                  transition: 'transform 0.1s ease, box-shadow 0.1s ease'
+                  padding: '14px 28px', 
+                  background: 'var(--nm-text-primary)', 
+                  color: 'var(--nm-bg)',
+                  fontFamily: 'var(--font-display)', 
+                  fontWeight: 900, 
+                  fontSize: 14,
+                  textTransform: 'uppercase', 
+                  letterSpacing: '0.15em',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translate(2px,2px)'; e.currentTarget.style.boxShadow = '1px 1px 0 var(--shadow-color)'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '3px 3px 0 var(--shadow-color)'; }}
                >
-                 View Full Profile
+                 View Full Dossier
                </button>
             </div>
           </div>
@@ -299,36 +553,86 @@ export default function FindTalent() {
   );
 
   const renderHistory = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {historyLoading ? (
-        <div style={{ fontFamily: "'DM Mono', monospace", color: 'var(--fg-muted)', padding: '2rem', textAlign: 'center' }}>Loading search histories...</div>
+        <div style={{ 
+          fontFamily: 'var(--font-display)', 
+          fontWeight: 800,
+          color: 'var(--nm-text-tertiary)', 
+          padding: '4rem', 
+          textAlign: 'center',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em'
+        }}>Syncing Intelligence Cache...</div>
       ) : history.length === 0 ? (
-        <div style={{ background: 'var(--card-bg)', border: '2px solid var(--border-color)', padding: '3rem', textAlign: 'center', color: 'var(--fg-muted)', fontFamily: "'DM Mono', monospace" }}>
-          <Clock size={32} style={{ margin: '0 auto 16px', opacity: 0.5 }} />
-          No past AI searches found.
+        <div style={{ 
+          background: 'var(--nm-surface)', 
+          border: '4px solid var(--nm-ink)', 
+          padding: '5rem', 
+          textAlign: 'center', 
+          color: 'var(--nm-text-tertiary)', 
+          boxShadow: '10px 10px 0 var(--nm-ink)'
+        }}>
+          <Clock size={48} strokeWidth={2.5} style={{ margin: '0 auto 24px', opacity: 0.5 }} />
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 18, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            No Search Logs Identified
+          </div>
         </div>
       ) : (
         history.map((record) => (
           <div key={record._id} 
             onClick={() => setResults(record.candidate)}
+            className="nm-card"
             style={{ 
-              background: 'var(--card-bg)', border: '2px solid var(--border-color)', 
-              padding: '1.5rem 2rem', borderRadius: 8, cursor: 'pointer', transition: 'all 0.15s ease',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 20
+              background: 'var(--nm-surface)', 
+              borderWidth: '4px', 
+              padding: '2rem 2.5rem', 
+              borderRadius: '0px', 
+              cursor: 'pointer',
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              gap: 24,
+              boxShadow: '6px 6px 0 var(--nm-ink)'
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#A78BFA'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translate(-4px, -4px)'; e.currentTarget.style.boxShadow = '10px 10px 0 var(--nm-ink)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '6px 6px 0 var(--nm-ink)'; }}
           >
             <div>
-              <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 20, color: 'var(--fg)', margin: '0 0 8px' }}>
+              <h3 style={{ 
+                fontFamily: 'var(--font-display)', 
+                fontWeight: 900, 
+                fontSize: 24, 
+                color: 'var(--nm-text-primary)', 
+                margin: '0 0 10px',
+                textTransform: 'uppercase',
+                letterSpacing: '-0.02em'
+              }}>
                 {record.searchRequirements.position}
               </h3>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: 'var(--fg-muted)' }}>
-                {new Date(record.createdAt).toLocaleDateString()} • {record.candidate.length} Matches Found
+              <div style={{ 
+                fontFamily: 'var(--font-body)', 
+                fontSize: 14, 
+                fontWeight: 600,
+                color: 'var(--nm-text-tertiary)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>
+                {new Date(record.createdAt).toLocaleDateString()} • {record.candidate.length} Neural Matches
               </div>
             </div>
-            <div style={{ width: 44, height: 44, background: 'var(--bg)', border: '2px solid var(--border-color)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--fg)' }}>
-              <ChevronRight size={20} />
+            <div style={{ 
+              width: 52, 
+              height: 52, 
+              background: 'var(--nm-bg)', 
+              border: '4px solid var(--nm-ink)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              color: 'var(--nm-text-primary)',
+              boxShadow: '4px 4px 0 var(--nm-ink)'
+            }}>
+              <ChevronRight size={28} strokeWidth={3} />
             </div>
           </div>
         ))
@@ -337,20 +641,74 @@ export default function FindTalent() {
   );
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', overflowX: 'hidden' }}>
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'var(--nm-bg)', 
+      color: 'var(--nm-text-primary)', 
+      overflowX: 'hidden',
+      fontFamily: 'var(--font-body)'
+    }}>
       <div className="dashboard-nav-area">
         <DashboardNav role="employer" />
       </div>
 
-      <div className="dashboard-shell py-6">
+      <div className="dashboard-shell" style={{ padding: 'var(--spacing-8)' }}>
 
         {/* Toggle Tabs */}
-        <div style={{ display: 'flex', gap: 12, marginBottom: '2rem', borderBottom: '3px solid var(--border-color)', paddingBottom: 16 }}>
-           <button onClick={() => setActiveTab('search')} style={{ background: activeTab === 'search' ? '#A78BFA' : 'transparent', color: activeTab === 'search' ? '#0a0a0a' : 'var(--fg)', border: activeTab === 'search' ? '3px solid #0a0a0a' : '3px solid transparent', padding: '10px 24px', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 16, cursor: 'pointer', borderRadius: 4, transition: 'all 0.1s ease', display: 'flex', alignItems: 'center', gap: 8 }}>
-             <Search size={18} /> New Search
+        <div style={{ 
+          display: 'flex', 
+          gap: 16, 
+          marginBottom: '3rem', 
+          borderBottom: '4px solid var(--nm-ink)', 
+          paddingBottom: 20 
+        }}>
+           <button 
+             onClick={() => setActiveTab('search')} 
+             style={{ 
+               background: activeTab === 'search' ? 'var(--nm-primary)' : 'transparent', 
+               color: activeTab === 'search' ? '#fff' : 'var(--nm-text-tertiary)', 
+               border: '4px solid var(--nm-ink)', 
+               padding: '12px 32px', 
+               fontFamily: 'var(--font-display)', 
+               fontWeight: 900, 
+               fontSize: 16, 
+               cursor: 'pointer', 
+               borderRadius: '0px', 
+               transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)', 
+               display: 'flex', 
+               alignItems: 'center', 
+               gap: 12,
+               textTransform: 'uppercase',
+               letterSpacing: '0.1em',
+               boxShadow: activeTab === 'search' ? '4px 4px 0 var(--nm-ink)' : 'none',
+               transform: activeTab === 'search' ? 'translate(-2px, -2px)' : 'none'
+             }}
+           >
+             <Search size={20} strokeWidth={3} /> Primary Sync
            </button>
-           <button onClick={fetchHistory} style={{ background: activeTab === 'history' ? '#A78BFA' : 'transparent', color: activeTab === 'history' ? '#0a0a0a' : 'var(--fg)', border: activeTab === 'history' ? '3px solid #0a0a0a' : '3px solid transparent', padding: '10px 24px', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 16, cursor: 'pointer', borderRadius: 4, transition: 'all 0.1s ease', display: 'flex', alignItems: 'center', gap: 8 }}>
-             <Clock size={18} /> Search History
+           <button 
+             onClick={fetchHistory} 
+             style={{ 
+               background: activeTab === 'history' ? 'var(--nm-primary)' : 'transparent', 
+               color: activeTab === 'history' ? '#fff' : 'var(--nm-text-tertiary)', 
+               border: '4px solid var(--nm-ink)', 
+               padding: '12px 32px', 
+               fontFamily: 'var(--font-display)', 
+               fontWeight: 900, 
+               fontSize: 16, 
+               cursor: 'pointer', 
+               borderRadius: '0px', 
+               transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)', 
+               display: 'flex', 
+               alignItems: 'center', 
+               gap: 12,
+               textTransform: 'uppercase',
+               letterSpacing: '0.1em',
+               boxShadow: activeTab === 'history' ? '4px 4px 0 var(--nm-ink)' : 'none',
+               transform: activeTab === 'history' ? 'translate(-2px, -2px)' : 'none'
+             }}
+           >
+             <Clock size={20} strokeWidth={3} /> Archive Logs
            </button>
         </div>
 

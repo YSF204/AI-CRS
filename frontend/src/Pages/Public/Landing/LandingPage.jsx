@@ -11,9 +11,9 @@ export default function LandingPage() {
     <div
       className="min-h-screen"
       style={{
-        backgroundColor: 'var(--bg)',
-        color: 'var(--fg)',
-        backgroundImage: 'var(--paper-texture)',
+        backgroundColor: 'var(--nm-bg)',
+        color: 'var(--nm-text-primary)',
+        fontFamily: 'var(--font-body)',
       }}
     >
       <Navbar />

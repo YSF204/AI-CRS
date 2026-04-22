@@ -4,26 +4,23 @@ import {
   Title, Tooltip, Legend
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { useTheme } from '../../../context/ThemeContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-/**
- * ChartWidget
- * A brutalist-styled bar chart displaying real job postings over the last 6 months.
- */
 export default function ChartWidget({ jobs = [] }) {
-  // Process the real jobs data
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   const { labels, data: chartData } = useMemo(() => {
     const today = new Date();
     const thisYear = today.getFullYear();
-    // Start from March 1st of the current year
     const startDate = new Date(thisYear, 2, 1); 
 
     const wLabels = [];
     const wCounts = [];
     const bins = [];
 
-    // Generate weekly bins from March 1st up to today
     let currentWeekStart = new Date(startDate);
     while (currentWeekStart <= today) {
       const nextWeekStart = new Date(currentWeekStart);
@@ -39,11 +36,10 @@ export default function ChartWidget({ jobs = [] }) {
       currentWeekStart = nextWeekStart;
     }
 
-    // Tally up jobs into their respective weekly bins
     jobs.forEach((job) => {
       if (!job.createdAt) return;
       const jobDate = new Date(job.createdAt);
-      if (jobDate < startDate) return; // ignore anything before March
+      if (jobDate < startDate) return;
       
       for (let i = 0; i < bins.length; i++) {
         if (jobDate >= bins[i].start && jobDate < bins[i].end) {
@@ -60,31 +56,35 @@ export default function ChartWidget({ jobs = [] }) {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false }, // Only one dataset, no legend needed
+      legend: { display: false },
       tooltip: {
-        backgroundColor: '#0a0a0a',
-        titleFont: { family: "'Space Grotesk', sans-serif", size: 14 },
-        bodyFont: { family: "'DM Mono', monospace", size: 13 },
-        padding: 12,
+        backgroundColor: 'var(--nm-ink)',
+        titleFont: { family: 'var(--font-display)', size: 14, weight: 800 },
+        bodyFont: { family: 'var(--font-body)', size: 13, weight: 600 },
+        padding: 16,
         cornerRadius: 0,
         displayColors: false,
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: 'var(--nm-primary)',
+        borderWidth: 2,
       },
     },
     scales: {
       x: {
-        grid: { color: 'rgba(0,0,0,0.1)', tickColor: '#0a0a0a', tickLength: 6 },
-        ticks: { font: { family: "'DM Mono', monospace", size: 11 }, color: '#0a0a0a' },
-        border: { color: '#0a0a0a', width: 3 },
+        grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', tickColor: 'var(--nm-ink)', tickLength: 8, tickWidth: 3 },
+        ticks: { font: { family: 'var(--font-display)', size: 11, weight: 700 }, color: 'var(--nm-text-tertiary)' },
+        border: { color: 'var(--nm-ink)', width: 4 },
       },
       y: {
-        grid: { color: 'rgba(0,0,0,0.1)', tickLength: 0 },
+        grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)', tickLength: 0 },
         ticks: { 
-          font: { family: "'DM Mono', monospace", size: 11 }, 
-          color: '#0a0a0a', 
-          padding: 10,
-          stepSize: 1, // Jobs are integers
+          font: { family: 'var(--font-display)', size: 11, weight: 700 }, 
+          color: 'var(--nm-text-tertiary)', 
+          padding: 12,
+          stepSize: 1,
         },
-        border: { color: '#0a0a0a', width: 3 },
+        border: { color: 'var(--nm-ink)', width: 4 },
         beginAtZero: true,
       },
     },
@@ -96,39 +96,72 @@ export default function ChartWidget({ jobs = [] }) {
       {
         label: 'Jobs Posted',
         data: chartData,
-        backgroundColor: '#4ECDC4',
-        borderColor: '#0a0a0a',
-        borderWidth: 3,
-        hoverBackgroundColor: '#FFE630',
+        backgroundColor: 'var(--nm-primary)',
+        borderColor: 'var(--nm-ink)',
+        borderWidth: 4,
+        hoverBackgroundColor: 'var(--nm-warning)',
+        borderRadius: 0,
       }
     ],
   };
 
   return (
-    <div style={{
-      gridColumn: 'span 8',
-      background: 'var(--card-bg)',
-      border: '4px solid var(--border-color)',
-      boxShadow: '6px 6px 0 var(--shadow-color)',
-      padding: '1.5rem',
-      display: 'flex', flexDirection: 'column', gap: 16,
-      minHeight: '380px'
-    }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div 
+      className="nm-card"
+      style={{
+        gridColumn: 'span 8',
+        background: 'var(--nm-surface)',
+        borderWidth: '4px',
+        boxShadow: '10px 10px 0 var(--nm-ink)',
+        padding: '2.5rem',
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: 20,
+        minHeight: '400px',
+        borderRadius: '0px',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            Analytics Overview
+          <div style={{ 
+            fontFamily: 'var(--font-display)', 
+            fontSize: 12, 
+            fontWeight: 800,
+            color: 'var(--nm-text-tertiary)', 
+            textTransform: 'uppercase', 
+            letterSpacing: '0.15em' 
+          }}>
+            Platform Pulse
           </div>
-          <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 20, color: 'var(--fg)', letterSpacing: '-0.02em', marginTop: 4 }}>
-            Job Postings
+          <div style={{ 
+            fontFamily: 'var(--font-display)', 
+            fontWeight: 900, 
+            fontSize: 28, 
+            color: 'var(--nm-text-primary)', 
+            letterSpacing: '-0.02em', 
+            marginTop: 4,
+            textTransform: 'uppercase'
+          }}>
+            Hiring Velocity
           </div>
         </div>
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, background: '#4ECDC4', color: '#0a0a0a', border: '2px solid #0a0a0a', padding: '4px 8px', fontWeight: 'bold' }}>
-          WEEKLY SINCE MARCH
+        <div style={{ 
+          fontFamily: 'var(--font-display)', 
+          fontSize: 11, 
+          background: 'var(--nm-warning)', 
+          color: '#0a0a0a', 
+          border: '4px solid var(--nm-ink)', 
+          padding: '6px 12px', 
+          fontWeight: 800,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          boxShadow: '3px 3px 0 var(--nm-ink)'
+        }}>
+          Live Activity
         </div>
       </div>
       
-      <div style={{ flex: 1, position: 'relative', marginTop: 10 }}>
+      <div style={{ flex: 1, position: 'relative', marginTop: 15 }}>
         <Bar options={options} data={data} />
       </div>
     </div>

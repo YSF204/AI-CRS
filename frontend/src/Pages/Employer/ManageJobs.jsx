@@ -33,19 +33,49 @@ export default function ManageJobs() {
   const goViewCandidates = (jobId) => navigate(`/employer/jobs/${jobId}/applications`);
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', overflowX: 'hidden' }}>
+    <div style={{ 
+      minHeight: '100vh', 
+      backgroundColor: 'var(--nm-bg)', 
+      color: 'var(--nm-text-primary)', 
+      fontFamily: 'var(--font-body)',
+      overflowX: 'hidden' 
+    }}>
       <div className="dashboard-nav-area">
         <DashboardNav role="employer" />
       </div>
 
-      <div className="dashboard-shell py-6">
-        <div style={{ marginBottom: 'clamp(1.5rem, 3%, 2.5rem)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 16 }}>
+      <div className="dashboard-shell" style={{ padding: 'var(--spacing-8)' }}>
+        <div style={{ 
+          marginBottom: '3.5rem', 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'flex-end', 
+          flexWrap: 'wrap', 
+          gap: 24 
+        }}>
           <div>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 6 }}>
-              Job Management
+            <div style={{ 
+              fontFamily: 'var(--font-display)', 
+              fontSize: 14, 
+              fontWeight: 800,
+              color: 'var(--nm-text-tertiary)', 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.15em', 
+              marginBottom: 8 
+            }}>
+              Asset Administration
             </div>
-            <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.2rem)', color: 'var(--fg)', letterSpacing: '-0.04em', lineHeight: 1 }}>
-              All Listings
+            <h1 style={{ 
+              fontFamily: 'var(--font-display)', 
+              fontWeight: 900, 
+              fontSize: 'clamp(2.5rem, 6vw, 3.5rem)', 
+              color: 'var(--nm-text-primary)', 
+              letterSpacing: '-0.04em', 
+              lineHeight: 1,
+              textTransform: 'uppercase',
+              margin: 0
+            }}>
+              Job Inventory
             </h1>
           </div>
         </div>

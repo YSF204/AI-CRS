@@ -699,26 +699,27 @@ export default function CVEditor() {
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(10,10,10,0.55)",
-            backdropFilter: "blur(6px)",
+            background: "rgba(0,0,0,0.85)",
+            backdropFilter: "blur(12px)",
             zIndex: 9000,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "40px",
+            padding: "2rem",
           }}
           onClick={() => setShowTemplateSelector(false)}
         >
           <div
+            className="nm-card"
             style={{
               display: "flex",
               flexDirection: "column",
               width: "100%",
               maxWidth: "1200px",
               maxHeight: "85vh",
-              background: "#fafafa",
-              borderRadius: "12px",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
+              background: "var(--nm-bg)",
+              borderWidth: "6px",
+              boxShadow: "20px 20px 0 var(--nm-ink)",
               overflow: "hidden",
             }}
             onClick={(e) => e.stopPropagation()}
@@ -728,31 +729,40 @@ export default function CVEditor() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "12px",
-                padding: "10px 20px",
-                background: "rgba(10,10,10,0.92)",
-                borderBottom: "2px solid #333",
+                gap: "16px",
+                padding: "20px 32px",
+                background: "var(--nm-ink)",
+                borderBottom: "4px solid var(--nm-ink)",
                 flexShrink: 0,
               }}
             >
               <span
                 style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontFamily: "var(--font-display)",
                   fontWeight: 900,
-                  fontSize: "13px",
+                  fontSize: "14px",
                   textTransform: "uppercase",
-                  letterSpacing: "0.1em",
+                  letterSpacing: "0.15em",
                   color: "#fff",
                   marginRight: "auto",
                 }}
               >
-                Select New Template
+                Template Configuration Matrix
               </span>
               <button
                 onClick={() => setShowTemplateSelector(false)}
-                className="flex items-center gap-1 font-['Space_Grotesk'] font-bold text-xs uppercase tracking-wider px-4 py-2 bg-[#ffe630] text-[#0a0a0a] border-2 border-[#0a0a0a]"
+                className="nm-btn"
+                style={{
+                  padding: "10px 24px",
+                  background: "var(--nm-error)",
+                  color: "#fff",
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 900,
+                  fontSize: 12,
+                  textTransform: "uppercase"
+                }}
               >
-                Close
+                Abort
               </button>
             </div>
 
@@ -763,8 +773,8 @@ export default function CVEditor() {
                 overflowY: "auto",
                 padding: "32px",
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                gap: "20px",
+                gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+                gap: "24px",
                 scrollbarWidth: "thin",
               }}
             >
@@ -773,37 +783,45 @@ export default function CVEditor() {
                   key={tmpl.id}
                   onClick={() => handleChangeTemplate(tmpl.id)}
                   disabled={saving || cv?.templateId === tmpl.id}
+                  className="nm-card"
                   style={{
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: "12px",
-                    padding: "16px",
-                    border:
-                      cv?.templateId === tmpl.id
-                        ? "3px solid #0a0a0a"
-                        : "2px solid #ccc",
-                    background: cv?.templateId === tmpl.id ? "#ffe630" : "#fff",
-                    borderRadius: "8px",
-                    cursor:
-                      saving || cv?.templateId === tmpl.id
-                        ? "not-allowed"
-                        : "pointer",
-                    opacity: saving || cv?.templateId === tmpl.id ? 0.5 : 1,
+                    gap: "16px",
+                    padding: "24px",
+                    border: "4px solid var(--nm-ink)",
+                    background: cv?.templateId === tmpl.id ? "var(--nm-primary)" : "var(--nm-surface)",
+                    boxShadow: cv?.templateId === tmpl.id ? "none" : "6px 6px 0 var(--nm-ink)",
+                    transform: cv?.templateId === tmpl.id ? "translate(4px, 4px)" : "none",
+                    cursor: saving || cv?.templateId === tmpl.id ? "not-allowed" : "pointer",
+                    opacity: saving ? 0.5 : 1,
                     transition: "all 0.2s ease",
                   }}
                 >
+                  <div style={{
+                    width: "100%",
+                    height: "140px",
+                    background: "var(--nm-bg)",
+                    border: "3px solid var(--nm-ink)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "40px"
+                  }}>
+                    {tmpl.id === 1 ? "📄" : tmpl.id === 5 ? "👤" : "📝"}
+                  </div>
                   <span
                     style={{
-                      fontWeight: "bold",
+                      fontFamily: "var(--font-display)",
+                      fontWeight: 900,
                       fontSize: "14px",
-                      color: "#0a0a0a",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                      color: cv?.templateId === tmpl.id ? "#fff" : "var(--nm-text-primary)",
                     }}
                   >
                     {tmpl.name}
-                  </span>
-                  <span style={{ fontSize: "12px", color: "#666" }}>
-                    {cv?.templateId === tmpl.id ? "✓ Current" : "Select"}
                   </span>
                 </button>
               ))}

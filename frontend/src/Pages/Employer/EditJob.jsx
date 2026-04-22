@@ -6,17 +6,30 @@ import api from '../../services/api';
 import useFetch from '../../hooks/useFetch';
 
 const INPUT = {
-  width: '100%', padding: '14px 18px', boxSizing: 'border-box',
-  fontFamily: "'DM Mono', monospace", fontSize: 14,
-  background: 'var(--bg)', color: 'var(--fg)',
-  border: '3px solid var(--border-color)', outline: 'none',
-  boxShadow: '4px 4px 0 var(--shadow-color)',
-  transition: 'all 0.1s ease'
+  width: '100%', 
+  padding: '16px 20px', 
+  boxSizing: 'border-box',
+  fontFamily: 'var(--font-body)', 
+  fontSize: 15,
+  fontWeight: 600,
+  background: 'var(--nm-bg)', 
+  color: 'var(--nm-text-primary)',
+  border: '4px solid var(--nm-ink)', 
+  outline: 'none',
+  boxShadow: '4px 4px 0 var(--nm-ink)',
+  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+  borderRadius: '0px',
 };
+
 const LABEL = {
-  display: 'block', fontFamily: "'Space Grotesk', sans-serif",
-  fontWeight: 800, fontSize: 12, textTransform: 'uppercase',
-  letterSpacing: '0.1em', color: 'var(--fg)', marginBottom: 8,
+  display: 'block', 
+  fontFamily: 'var(--font-display)',
+  fontWeight: 800, 
+  fontSize: 12, 
+  textTransform: 'uppercase',
+  letterSpacing: '0.15em', 
+  color: 'var(--nm-text-tertiary)', 
+  marginBottom: 10,
 };
 
 export default function EditJob() {
@@ -47,7 +60,7 @@ export default function EditJob() {
   useEffect(() => {
     if (jobLoading) return;
     if (jobError) {
-      setError('Could not load job details.');
+      setError('FAILED TO LOAD UNIT DATA.');
       setLoading(false);
       return;
     }
@@ -76,7 +89,6 @@ export default function EditJob() {
     setSaving(true);
     setError('');
     
-    // Process comma-separated skills
     const parseList = (str) => str.split(',').map(s => s.trim()).filter(Boolean);
     
     const payload = {
@@ -89,9 +101,9 @@ export default function EditJob() {
 
     try {
       await api.patch(`/jobs/${id}`, payload);
-      navigate('/employer'); // or navigate to manage jobs page
+      navigate('/employer');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update job.');
+      setError(err.response?.data?.message || 'SYSTEM UPDATE FAILURE.');
     } finally {
       setSaving(false);
     }
@@ -99,114 +111,226 @@ export default function EditJob() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', padding: 'clamp(1.5rem, 4%, 2.5rem)' }}>
-        <div style={{ fontFamily: "'DM Mono', monospace", padding: '4rem 0', textAlign: 'center' }}>Loading Job...</div>
+      <div style={{ minHeight: '100vh', background: 'var(--nm-bg)', color: 'var(--nm-text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Accessing Data Stream...</div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', overflowX: 'hidden' }}>
+    <div style={{ 
+      minHeight: '100vh', 
+      backgroundColor: 'var(--nm-bg)', 
+      color: 'var(--nm-text-primary)', 
+      fontFamily: 'var(--font-body)',
+      overflowX: 'hidden' 
+    }}>
       <div className="dashboard-nav-area">
         <DashboardNav role="employer" />
       </div>
 
-      <div className="dashboard-shell py-6">
+      <div className="dashboard-shell" style={{ padding: 'var(--spacing-8)' }}>
 
         <button 
           onClick={() => navigate(-1)}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: "'DM Mono', monospace", fontSize: 12, fontWeight: 700, textTransform: 'uppercase', background: 'none', border: 'none', color: 'var(--fg)', cursor: 'pointer', marginTop: '2rem', marginBottom: '1rem', padding: 0 }}
+          className="nm-btn"
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 12, 
+            fontFamily: 'var(--font-display)', 
+            fontSize: 12, 
+            fontWeight: 900, 
+            textTransform: 'uppercase', 
+            background: 'var(--nm-surface)', 
+            color: 'var(--nm-text-primary)', 
+            cursor: 'pointer', 
+            marginBottom: '2rem', 
+            padding: '10px 20px',
+            border: '4px solid var(--nm-ink)'
+          }}
         >
-          <ArrowLeft size={16} /> Back
+          <ArrowLeft size={18} strokeWidth={3} /> Return
         </button>
 
-        <div style={{
-          background: 'var(--card-bg)', border: '4px solid var(--border-color)',
-          boxShadow: '8px 8px 0 var(--shadow-color)', padding: 'clamp(2rem, 5vw, 4rem)',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-            <div style={{ background: '#4ECDC4', border: '3px solid #0a0a0a', padding: 12, boxShadow: '4px 4px 0 #0a0a0a' }}>
-              <Briefcase size={28} color="#0a0a0a" strokeWidth={2.5} />
+        <div 
+          className="nm-card"
+          style={{
+            background: 'var(--nm-surface)', 
+            borderWidth: '4px',
+            boxShadow: '12px 12px 0 var(--nm-ink)', 
+            padding: 'clamp(2rem, 6vw, 4rem)',
+            borderRadius: '0px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 12 }}>
+            <div style={{ background: 'var(--nm-primary)', border: '4px solid var(--nm-ink)', padding: 12, boxShadow: '4px 4px 0 var(--nm-ink)', display: 'inline-flex' }}>
+              <Briefcase size={32} color="#fff" strokeWidth={3} />
             </div>
-            <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.5rem)', color: 'var(--fg)', textTransform: 'uppercase', letterSpacing: '-0.03em', lineHeight: 1 }}>
-              Edit Job
+            <h1 style={{ 
+              fontFamily: 'var(--font-display)', 
+              fontWeight: 900, 
+              fontSize: 'clamp(2.5rem, 6vw, 4rem)', 
+              color: 'var(--nm-text-primary)', 
+              textTransform: 'uppercase', 
+              letterSpacing: '-0.04em', 
+              lineHeight: 1,
+              margin: 0
+            }}>
+              Adjust Listing
             </h1>
           </div>
           
           {error && (
-            <div style={{ padding: '16px 20px', background: '#FF6B6B', color: '#0a0a0a', border: '3px solid #0a0a0a', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 24, marginTop: 24 }}>
-              ⚠ {error}
+            <div style={{ 
+              padding: '20px 24px', 
+              background: 'var(--nm-error)', 
+              color: '#fff', 
+              border: '4px solid var(--nm-ink)', 
+              fontFamily: 'var(--font-display)', 
+              fontWeight: 900, 
+              fontSize: 14, 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.1em', 
+              marginBottom: 32,
+              marginTop: 32,
+              boxShadow: '4px 4px 0 var(--nm-ink)'
+            }}>
+              SYSTEM ALERT: {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 32, marginTop: 32 }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 32, marginTop: 40 }}>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 24 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
               <div style={{ gridColumn: '1 / -1' }}>
-                <label style={LABEL}>Job Title / Position *</label>
-                <input style={INPUT} value={form.position} onChange={setField('position')} required />
+                <label style={LABEL}>Position Designation *</label>
+                <input 
+                  style={INPUT} 
+                  value={form.position} 
+                  onChange={setField('position')} 
+                  required 
+                  onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+                  onBlur={e => e.target.style.transform = 'none'}
+                />
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
-                <label style={LABEL}>Job Description *</label>
-                <textarea style={{ ...INPUT, minHeight: 150, resize: 'vertical' }} value={form.description} onChange={setField('description')} required />
+                <label style={LABEL}>Role Specification *</label>
+                <textarea 
+                  style={{ ...INPUT, minHeight: 180, resize: 'vertical', lineHeight: 1.7 }} 
+                  value={form.description} 
+                  onChange={setField('description')} 
+                  required 
+                  onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+                  onBlur={e => e.target.style.transform = 'none'}
+                />
               </div>
 
               <div>
-                <label style={LABEL}>Work Site *</label>
-                <select style={INPUT} value={form.workSite} onChange={setField('workSite')} required>
-                  <option value="ON_SITE">On-Site</option>
-                  <option value="REMOTE">Remote</option>
-                  <option value="HYBRID">Hybrid</option>
+                <label style={LABEL}>Workspace Configuration *</label>
+                <select 
+                  style={{ ...INPUT, cursor: 'pointer' }} 
+                  value={form.workSite} 
+                  onChange={setField('workSite')} 
+                  required
+                  onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+                  onBlur={e => e.target.style.transform = 'none'}
+                >
+                  <option value="ON_SITE">ON-SITE</option>
+                  <option value="REMOTE">REMOTE</option>
+                  <option value="HYBRID">HYBRID</option>
                 </select>
               </div>
 
               <div>
-                <label style={LABEL}>Job Type *</label>
-                <select style={INPUT} value={form.workDuration} onChange={setField('workDuration')} required>
-                  <option value="FULL_TIME">Full-Time</option>
-                  <option value="PART_TIME">Part-Time</option>
-                  <option value="INTERNSHIP">Internship</option>
-                  <option value="CONTRACT">Contract</option>
+                <label style={LABEL}>Temporal Commitment *</label>
+                <select 
+                  style={{ ...INPUT, cursor: 'pointer' }} 
+                  value={form.workDuration} 
+                  onChange={setField('workDuration')} 
+                  required
+                  onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+                  onBlur={e => e.target.style.transform = 'none'}
+                >
+                  <option value="FULL_TIME">FULL-TIME</option>
+                  <option value="PART_TIME">PART-TIME</option>
+                  <option value="INTERNSHIP">INTERNSHIP</option>
+                  <option value="CONTRACT">CONTRACT</option>
                 </select>
               </div>
 
               <div>
-                <label style={LABEL}>Years of Experience *</label>
-                <input style={INPUT} type="number" min="0" value={form.yearsOfExperience} onChange={setField('yearsOfExperience')} required />
+                <label style={LABEL}>Experience Threshold (Y) *</label>
+                <input 
+                  style={INPUT} 
+                  type="number" 
+                  min="0" 
+                  value={form.yearsOfExperience} 
+                  onChange={setField('yearsOfExperience')} 
+                  required 
+                  onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+                  onBlur={e => e.target.style.transform = 'none'}
+                />
               </div>
 
               <div>
-                <label style={LABEL}>Salary (Optional)</label>
-                <input style={INPUT} type="number" min="0" value={form.salary} onChange={setField('salary')} placeholder="e.g. 75000" />
+                <label style={LABEL}>Base Remuneration ($/YR)</label>
+                <input 
+                  style={INPUT} 
+                  type="number" 
+                  min="0" 
+                  value={form.salary} 
+                  onChange={setField('salary')} 
+                  placeholder="e.g. 75000" 
+                  onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+                  onBlur={e => e.target.style.transform = 'none'}
+                />
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
-                <label style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, color: 'var(--fg-muted)' }}>(Comma separated)</span></label>
-                <input style={INPUT} value={form.technicalSkills} onChange={setField('technicalSkills')} placeholder="React, Node.js, MongoDB" />
+                <label style={LABEL}>Technical Competencies <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+                <input 
+                  style={INPUT} 
+                  value={form.technicalSkills} 
+                  onChange={setField('technicalSkills')} 
+                  placeholder="React, Node.js, MongoDB" 
+                  onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+                  onBlur={e => e.target.style.transform = 'none'}
+                />
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
-                <label style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, color: 'var(--fg-muted)' }}>(Comma separated)</span></label>
-                <input style={INPUT} value={form.softSkills} onChange={setField('softSkills')} placeholder="Communication, Leadership" />
+                <label style={LABEL}>Operational Traits <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+                <input 
+                  style={INPUT} 
+                  value={form.softSkills} 
+                  onChange={setField('softSkills')} 
+                  placeholder="Communication, Leadership" 
+                  onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+                  onBlur={e => e.target.style.transform = 'none'}
+                />
               </div>
             </div>
 
             <button
-              type="submit" disabled={saving}
+              type="submit" 
+              disabled={saving}
+              className="nm-btn"
               style={{
-                marginTop: '1rem',
-                padding: '18px', background: '#FFE630', color: '#0a0a0a',
-                border: '4px solid #0a0a0a', boxShadow: '6px 6px 0 #0a0a0a',
-                fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 18,
-                textTransform: 'uppercase', letterSpacing: '0.1em',
-                cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.6 : 1,
-                transition: 'transform 0.1s ease, box-shadow 0.1s ease'
+                marginTop: '1.5rem',
+                padding: '22px', 
+                background: 'var(--nm-primary)', 
+                color: '#fff',
+                fontFamily: 'var(--font-display)', 
+                fontWeight: 900, 
+                fontSize: 18,
+                textTransform: 'uppercase', 
+                letterSpacing: '0.15em',
+                cursor: saving ? 'not-allowed' : 'pointer',
               }}
-              onMouseEnter={e => { if(!saving) { e.currentTarget.style.transform = 'translate(2px,2px)'; e.currentTarget.style.boxShadow = '4px 4px 0 #0a0a0a'; } }}
-              onMouseLeave={e => { if(!saving) { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '6px 6px 0 #0a0a0a'; } }}
             >
-              {saving ? 'SAVING...' : 'SAVE CHANGES →'}
+              {saving ? 'UPDATING...' : 'COMMIT CHANGES →'}
             </button>
           </form>
         </div>

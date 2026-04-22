@@ -3,11 +3,13 @@ import AuthInput from "../AuthInput";
 import GenderSelect from "../GenderSelect";
 
 const heading = {
-  fontFamily: "'Space Grotesk', sans-serif",
-  fontWeight: 700,
-  fontSize: 20,
-  color: "var(--fg)",
-  marginBottom: 16,
+  fontFamily: 'var(--font-display)',
+  fontWeight: 800,
+  fontSize: 24,
+  color: 'var(--nm-text-primary)',
+  marginBottom: 24,
+  textTransform: 'uppercase',
+  letterSpacing: '-0.02em',
 };
 
 export default function ProfileStep({ form, setForm, field }) {
@@ -18,7 +20,7 @@ export default function ProfileStep({ form, setForm, field }) {
         style={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
-          gap: "0 14px",
+          gap: "0 16px",
         }}
       >
         <GenderSelect

@@ -1,5 +1,4 @@
 import { FileText, Brain, Zap, TrendingUp, Shield } from 'lucide-react';
-import BorderGlow from './components/BorderGlow';
 import { useTheme } from '../../../context/ThemeContext';
 
 const features = [
@@ -7,73 +6,76 @@ const features = [
     Icon: FileText,
     title: 'CV Builder',
     description: 'Create professional, ATS-optimized resumes with our intelligent builder. Pick from multiple templates and customize every detail.',
-    glowColor: '160 60 45',
-    colors: ['#34d399', '#059669', '#10b981'],
+    color: 'var(--nm-primary)',
   },
   {
     Icon: Brain,
     title: 'ATS Score',
     description: 'Instant compatibility score and feedback for applicant tracking systems. Know exactly where your CV stands.',
-    glowColor: '35 85 60',
-    colors: ['#f59e0b', '#d97706', '#fbbf24'],
+    color: 'var(--nm-warning)',
   },
   {
     Icon: Zap,
     title: 'Skill Gap Detection',
     description: 'AI identifies exactly which skills you need to develop for target roles. Bridge the gap between where you are and where you want to be.',
-    glowColor: '190 70 55',
-    colors: ['#22d3ee', '#0891b2', '#67e8f9'],
+    color: 'var(--nm-success)',
   },
   {
     Icon: TrendingUp,
     title: 'Career Path AI',
     description: 'Personalized career trajectories based on your experience and industry trends. Plan your next 5 years with confidence.',
-    glowColor: '270 55 60',
-    colors: ['#a78bfa', '#7c3aed', '#c4b5fd'],
+    color: 'var(--nm-primary)',
   },
   {
     Icon: Shield,
     title: 'Secure & Private',
     description: 'Your data stays encrypted end-to-end. We never share your information with third parties. Your career data belongs to you.',
-    glowColor: '30 10 50',
-    colors: ['#a8a29e', '#78716c', '#d6d3d1'],
+    color: 'var(--nm-text-secondary)',
   },
 ];
 
 export default function FeaturesSection() {
   const { theme } = useTheme();
-  const isDark = theme === 'dark';
 
   return (
     <section
       id="features"
       className="w-full"
-      style={{ padding: 'clamp(5rem, 12%, 9rem) clamp(1.5rem, 5%, 4rem)' }}
+      style={{ 
+        padding: 'clamp(5rem, 12%, 9rem) clamp(1.5rem, 5%, 4rem)',
+        backgroundColor: 'var(--nm-bg)'
+      }}
     >
       {/* Section header */}
-      <div className="text-center" style={{ marginBottom: 'clamp(3rem, 6%, 5rem)' }}>
-        <span className="paper-section-label" style={{ display: 'block', marginBottom: '0.75rem' }}>
+      <div className="text-center" style={{ marginBottom: 'clamp(4rem, 8%, 6rem)' }}>
+        <span 
+          className="nm-status-pill active" 
+          style={{ marginBottom: '1.25rem', borderWidth: '4px' }}
+        >
           Features
         </span>
         <h2
           style={{
-            fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-            letterSpacing: '-0.03em',
-            lineHeight: 1.1,
-            color: 'var(--fg)',
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+            letterSpacing: '-0.04em',
+            lineHeight: 1,
+            color: 'var(--nm-text-primary)',
+            textTransform: 'uppercase',
+            marginTop: '0.5rem'
           }}
         >
           Everything Your
           <br />
-          <span style={{ color: 'var(--accent)' }}>CV Needs</span>
+          <span style={{ color: 'var(--nm-primary)' }}>CV Needs</span>
         </h2>
         <p
           style={{
-            fontFamily: "'Public Sans', sans-serif",
-            fontSize: 'clamp(0.9rem, 1.2vw, 1.05rem)',
-            color: 'var(--fg-muted)',
+            fontFamily: 'var(--font-body)',
+            fontSize: 'clamp(1rem, 1.4vw, 1.15rem)',
+            color: 'var(--nm-text-secondary)',
             maxWidth: '520px',
-            margin: '1rem auto 0',
+            margin: '1.5rem auto 0',
             lineHeight: 1.7,
           }}
         >
@@ -81,76 +83,79 @@ export default function FeaturesSection() {
         </p>
       </div>
 
-      {/* Feature cards grid with BorderGlow */}
+      {/* Feature cards grid */}
       <div
-        className="grid w-full max-w-6xl mx-auto"
+        className="grid w-full max-w-7xl mx-auto"
         style={{
-          gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(280px, 30vw, 340px), 1fr))',
-          gap: 'clamp(1.5rem, 3%, 2rem)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(280px, 30vw, 380px), 1fr))',
+          gap: '2.5rem',
         }}
       >
-        {features.map(({ Icon, title, description, glowColor, colors }, i) => (
-          <BorderGlow
+        {features.map(({ Icon, title, description, color }, i) => (
+          <div
             key={i}
-            edgeSensitivity={35}
-            glowColor={glowColor}
-            backgroundColor={isDark ? '#262220' : '#ffffff'}
-            borderRadius={16}
-            glowRadius={30}
-            glowIntensity={isDark ? 1.2 : 0.6}
-            coneSpread={30}
-            colors={colors}
-            fillOpacity={isDark ? 0.4 : 0.15}
+            className="nm-card"
+            style={{ 
+              padding: 'clamp(2rem, 4%, 3rem)',
+              borderWidth: '4px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.5rem',
+              transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              background: 'var(--nm-surface)',
+              boxShadow: '8px 8px 0 var(--nm-ink)'
+            }}
           >
-            <div style={{ padding: 'clamp(1.5rem, 3%, 2.25rem)' }}>
-              {/* Icon */}
-              <div
+            {/* Icon */}
+            <div
+              style={{
+                width: '4rem',
+                height: '4rem',
+                border: '4px solid var(--nm-ink)',
+                background: color,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '4px 4px 0 var(--nm-ink)'
+              }}
+            >
+              <Icon
                 style={{
-                  width: 'clamp(2.5rem, 4vw, 3rem)',
-                  height: 'clamp(2.5rem, 4vw, 3rem)',
-                  marginBottom: 'clamp(1rem, 2%, 1.5rem)',
-                  borderRadius: '10px',
-                  background: `${colors[0]}18`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  width: '2rem',
+                  height: '2rem',
+                  color: '#fff',
                 }}
-              >
-                <Icon
-                  style={{
-                    width: 'clamp(1.1rem, 1.6vw, 1.35rem)',
-                    height: 'clamp(1.1rem, 1.6vw, 1.35rem)',
-                    color: colors[0],
-                  }}
-                  strokeWidth={2}
-                />
-              </div>
+                strokeWidth={2.5}
+              />
+            </div>
 
+            <div>
               <h3
                 style={{
-                  fontFamily: "'Libre Bodoni', serif",
-                  fontSize: 'clamp(1.05rem, 1.4vw, 1.25rem)',
-                  fontWeight: 600,
-                  letterSpacing: '-0.01em',
-                  marginBottom: 'clamp(0.5rem, 1%, 0.75rem)',
-                  color: 'var(--fg)',
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 'clamp(1.25rem, 1.8vw, 1.75rem)',
+                  fontWeight: 800,
+                  letterSpacing: '-0.02em',
+                  marginBottom: '1rem',
+                  color: 'var(--nm-text-primary)',
+                  textTransform: 'uppercase'
                 }}
               >
                 {title}
               </h3>
               <p
                 style={{
-                  fontFamily: "'Public Sans', sans-serif",
-                  fontSize: 'clamp(0.82rem, 1vw, 0.92rem)',
-                  lineHeight: 1.7,
-                  color: 'var(--fg-muted)',
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 'clamp(0.9rem, 1.1vw, 1.05rem)',
+                  lineHeight: 1.6,
+                  color: 'var(--nm-text-secondary)',
                   margin: 0,
                 }}
               >
                 {description}
               </p>
             </div>
-          </BorderGlow>
+          </div>
         ))}
       </div>
     </section>

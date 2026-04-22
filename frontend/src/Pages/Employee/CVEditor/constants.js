@@ -85,64 +85,64 @@ export const ALL_SECTIONS = [
     key: "summary",
     label: "Summary",
     icon: FileText,
-    accent: "#ffe630",
-    textColor: "#0a0a0a",
+    accent: "var(--nm-primary)",
+    textColor: "#ffffff",
   },
   {
     key: "contact",
     label: "Contact",
     icon: Phone,
-    accent: "#4ecdc4",
-    textColor: "#0a0a0a",
+    accent: "var(--nm-surface-high)",
+    textColor: "var(--nm-text-primary)",
   },
   {
     key: "address",
     label: "Address",
     icon: MapPin,
-    accent: "#ff6b6b",
-    textColor: "#0a0a0a",
+    accent: "var(--nm-surface-high)",
+    textColor: "var(--nm-text-primary)",
   },
   {
     key: "experience",
     label: "Experience",
     icon: Briefcase,
-    accent: "#6c63ff",
+    accent: "var(--nm-ink)",
     textColor: "#ffffff",
   },
   {
     key: "education",
     label: "Education",
     icon: GraduationCap,
-    accent: "#a78bfa",
-    textColor: "#0a0a0a",
+    accent: "var(--nm-primary)",
+    textColor: "#ffffff",
   },
   {
     key: "technicalSkills",
     label: "Technical Skills",
     icon: Code,
-    accent: "#a8e6cf",
-    textColor: "#0a0a0a",
+    accent: "var(--nm-warning)",
+    textColor: "#ffffff",
   },
   {
     key: "softSkills",
     label: "Soft Skills",
     icon: Heart,
-    accent: "#ff6b6b",
-    textColor: "#0a0a0a",
+    accent: "var(--nm-error)",
+    textColor: "#ffffff",
   },
   {
     key: "language",
     label: "Languages",
     icon: Globe,
-    accent: "#4ecdc4",
-    textColor: "#0a0a0a",
+    accent: "var(--nm-surface-high)",
+    textColor: "var(--nm-text-primary)",
   },
   {
     key: "customSections",
     label: "Custom Sections",
     icon: Layers,
-    accent: "#ffe630",
-    textColor: "#0a0a0a",
+    accent: "var(--nm-primary)",
+    textColor: "#ffffff",
   },
 ];
 
@@ -150,6 +150,5 @@ export const getSectionMeta = (key) =>
   ALL_SECTIONS.find((s) => s.key === key) || ALL_SECTIONS[0];
 
 // ─── Shared CSS class strings ─────────────────────────────────────────────────
-export const inpCls =
-  "w-full border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)] focus:bg-[rgba(255,230,48,0.08)] transition-colors";
-export const txtCls = `${inpCls} resize-y min-h-[80px] leading-relaxed`;
+export const inpCls = "nm-input";
+export const txtCls = "nm-input resize-y min-h-[100px]";

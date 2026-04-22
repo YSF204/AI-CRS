@@ -2,8 +2,8 @@ import { Briefcase, User } from 'lucide-react';
 import { Step } from '../Stepper';
 import RoleCard from '../RoleCard';
 
-const heading = { fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 20, color: 'var(--fg)', marginBottom: 16 };
-const subtext  = { fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--fg-muted)', marginBottom: 20 };
+const heading = { fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 24, color: 'var(--nm-text-primary)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '-0.02em' };
+const subtext  = { fontFamily: 'var(--font-body)', fontSize: 14, color: 'var(--nm-text-secondary)', marginBottom: 32 };
 
 export default function RoleStep({ role, onSelectRole }) {
   return (
@@ -13,15 +13,15 @@ export default function RoleStep({ role, onSelectRole }) {
         <p style={subtext}>Choose your account type to get started</p>
         <div style={{ display: 'flex', gap: 14, justifyContent: 'center' }}>
           <RoleCard
-            icon={<User size={28} />}
+            icon={<User size={32} strokeWidth={2.5} />}
             label="Employee" desc="Looking for a job"
-            selected={role === 'EMPLOYEE'} color="#FFE630"
+            selected={role === 'EMPLOYEE'} color="var(--nm-primary)"
             onClick={() => onSelectRole('EMPLOYEE')}
           />
           <RoleCard
-            icon={<Briefcase size={28} />}
+            icon={<Briefcase size={32} strokeWidth={2.5} />}
             label="Employer" desc="Hiring talent"
-            selected={role === 'EMPLOYER'} color="#4ECDC4"
+            selected={role === 'EMPLOYER'} color="var(--nm-warning)"
             onClick={() => onSelectRole('EMPLOYER')}
           />
         </div>

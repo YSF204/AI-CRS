@@ -76,21 +76,6 @@ export default function LoginForm({ setMode }) {
 
   return (
     <form onSubmit={handleLogin} noValidate>
-      <style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(-8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .forgot-password-link {
-          animation: fadeIn 0.3s ease forwards;
-        }
-      `}</style>
       <ErrorBanner message={errorMsg} />
 
       <AuthInput
@@ -122,18 +107,16 @@ export default function LoginForm({ setMode }) {
         {showForgotLink && (
           <a
             href="/forgot-password"
-            className="forgot-password-link"
             style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: 12,
-              color: "var(--teal)",
+              fontFamily: "var(--font-body)",
+              fontSize: 13,
+              color: "var(--nm-text-tertiary)",
               textDecoration: "none",
               fontWeight: 600,
               transition: "color 0.2s ease",
               display: "inline-block",
             }}
-            onMouseEnter={(e) => (e.target.style.color = "var(--yellow)")}
-            onMouseLeave={(e) => (e.target.style.color = "var(--teal)")}
+            className="hover:text-[var(--nm-primary)]"
           >
             Forgot Password?
           </a>
@@ -142,13 +125,13 @@ export default function LoginForm({ setMode }) {
 
       <button
         type="submit"
-        className="brutal-btn"
+        className="nm-btn"
         style={{
           width: "100%",
-          padding: "12px",
+          padding: "16px",
           fontSize: 14,
-          background: "#FFE630",
-          color: "#0a0a0a",
+          background: "var(--nm-primary)",
+          color: "#fff",
           marginTop: 8,
           marginBottom: 16,
         }}
@@ -156,22 +139,24 @@ export default function LoginForm({ setMode }) {
         Login →
       </button>
 
-      <div style={{ display: "flex", alignItems: "center", margin: "16px 0" }}>
+      <div style={{ display: "flex", alignItems: "center", margin: "2rem 0" }}>
         <div
-          style={{ flex: 1, height: "2px", background: "var(--border-color)" }}
+          style={{ flex: 1, height: "4px", background: "var(--nm-ink)", opacity: 0.1 }}
         />
         <span
           style={{
-            padding: "0 12px",
-            fontFamily: "'DM Mono', monospace",
+            padding: "0 16px",
+            fontFamily: "var(--font-display)",
             fontSize: 12,
-            color: "var(--fg-muted)",
+            fontWeight: 800,
+            color: "var(--nm-text-tertiary)",
+            letterSpacing: "0.1em",
           }}
         >
           OR
         </span>
         <div
-          style={{ flex: 1, height: "2px", background: "var(--border-color)" }}
+          style={{ flex: 1, height: "4px", background: "var(--nm-ink)", opacity: 0.1 }}
         />
       </div>
 
@@ -179,10 +164,10 @@ export default function LoginForm({ setMode }) {
         <div
           style={{
             display: "inline-flex",
-            border: "3px solid #0a0a0a",
-            boxShadow: "3px 3px 0 #0a0a0a",
+            border: "4px solid var(--nm-ink)",
+            boxShadow: "6px 6px 0 var(--nm-ink)",
             background: "#fff",
-            borderRadius: "4px",
+            borderRadius: "0px",
             overflow: "hidden",
           }}
         >

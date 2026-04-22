@@ -19,25 +19,25 @@ export default function Navbar() {
   }, []);
 
   const logoNode = (
-    <div style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+    <div style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
       <span
         style={{
-          fontFamily: "'Montserrat', sans-serif",
+          fontFamily: 'var(--font-display)',
           fontSize: '1.25rem',
           fontWeight: 800,
           letterSpacing: '-0.02em',
           lineHeight: 1,
-          color: 'var(--text-primary)',
+          color: 'var(--nm-text-primary)',
+          textTransform: 'uppercase',
         }}
       >
         AI-CRS
       </span>
       <span
         style={{
-          width: 6,
-          height: 6,
-          borderRadius: '50%',
-          backgroundColor: 'var(--color-primary)',
+          width: 8,
+          height: 8,
+          backgroundColor: 'var(--nm-primary)',
           display: 'inline-block',
         }}
       />
@@ -49,15 +49,26 @@ export default function Navbar() {
       <button
         onClick={toggleTheme}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        className="nav-action-button"
+        className="nm-btn"
+        style={{
+          padding: '0.5rem',
+          minHeight: '40px',
+          minWidth: '40px',
+          background: 'var(--nm-surface)',
+          borderWidth: '4px'
+        }}
       >
-        {theme === 'light' ? <Moon size={16} strokeWidth={2} /> : <Sun size={16} strokeWidth={2} />}
+        {theme === 'light' ? <Moon size={18} strokeWidth={2.5} /> : <Sun size={18} strokeWidth={2.5} />}
       </button>
 
       <Link
         to="/auth?mode=login"
-        className="nav-user-button focus-ring"
-        style={{ background: 'var(--color-primary)', color: 'white', borderColor: 'var(--color-primary)' }}
+        className="nm-btn nm-btn-primary"
+        style={{
+          padding: '0.5rem 1.25rem',
+          minHeight: '40px',
+          borderWidth: '4px'
+        }}
       >
         Sign In
       </Link>
@@ -77,54 +88,54 @@ export default function Navbar() {
         top: 0,
         left: 0,
         width: '100%',
-        zIndex: 50,
-        transition: 'transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+        zIndex: 100,
+        transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         transform: visible ? 'translateY(0)' : 'translateY(-100%)',
-        padding: '1rem 1rem 0 1rem',
+        padding: '1.5rem',
         pointerEvents: 'none',
       }}
     >
-      <div style={{ pointerEvents: 'auto', maxWidth: 920, margin: '0 auto' }}>
+      <div style={{ pointerEvents: 'auto', maxWidth: 1100, margin: '0 auto' }}>
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '1rem',
-            padding: '0.85rem 1rem',
-            border: '4px solid var(--border-color)',
-            background: 'var(--nav-bg)',
-            boxShadow: '4px 4px 0 var(--nm-ink)',
-            backdropFilter: 'blur(10px)',
+            padding: '0.75rem 1.5rem',
+            border: '4px solid var(--nm-ink)',
+            background: 'var(--nm-bg)',
+            boxShadow: '6px 6px 0 var(--nm-ink)',
+            borderRadius: '0px',
           }}
         >
           {logoNode}
 
           <div
             style={{
-              display: 'flex',
               alignItems: 'center',
               gap: '0.5rem',
               flexWrap: 'wrap',
               justifyContent: 'center',
             }}
+            className="hidden md:flex"
           >
             {navItems.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className="focus-ring"
                 style={{
                   textDecoration: 'none',
-                  color: 'var(--nav-text-default)',
+                  color: 'var(--nm-text-primary)',
                   fontFamily: 'var(--font-display)',
                   fontSize: '0.8rem',
                   fontWeight: 700,
                   letterSpacing: '0.12em',
                   textTransform: 'uppercase',
-                  padding: '0.7rem 0.9rem',
-                  border: '2px solid transparent',
+                  padding: '0.5rem 1rem',
+                  transition: 'background 0.2s ease',
                 }}
+                className="hover:bg-[var(--nm-surface-high)]"
               >
                 {item.label}
               </a>

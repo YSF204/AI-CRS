@@ -10,7 +10,9 @@ export const Card = forwardRef(({ children, style, className = '' }, ref) => (
       position: 'absolute',
       width: '100%',
       height: '100%',
-      borderRadius: '4px',
+      borderRadius: '0px',
+      border: '4px solid var(--nm-ink)',
+      boxShadow: '8px 8px 0 var(--nm-ink)',
       overflow: 'hidden',
       ...style,
     }}

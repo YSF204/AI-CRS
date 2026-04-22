@@ -32,40 +32,44 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "clamp(1rem, 4%, 3rem)",
-        background: "var(--bg)",
+        padding: "clamp(1.5rem, 5%, 4rem)",
+        background: "var(--nm-bg)",
       }}
     >
       <div
+        className="nm-card"
         style={{
           width: "100%",
           maxWidth: 520,
-          background: "var(--card-bg)",
-          border: "3px solid var(--border-color)",
-          boxShadow: "8px 8px 0 var(--shadow-color)",
-          padding: "clamp(2rem, 4%, 3rem)",
+          background: "var(--nm-surface)",
+          borderWidth: "4px",
+          boxShadow: "10px 10px 0 var(--nm-ink)",
+          padding: "clamp(2rem, 5%, 3.5rem)",
         }}
       >
-        <div className="flex flex-col items-center justify-center py-8">
+        <div className="flex flex-col items-center justify-center">
           <div
             style={{
-              background: "var(--teal)",
-              borderRadius: "50%",
-              padding: 16,
-              marginBottom: 24,
+              background: "var(--nm-primary)",
+              padding: 20,
+              marginBottom: 32,
+              border: '4px solid var(--nm-ink)',
+              boxShadow: '4px 4px 0 var(--nm-ink)',
             }}
           >
-            <Mail size={48} color="#0a0a0a" />
+            <Mail size={48} color="#fff" strokeWidth={2.5} />
           </div>
 
           <h1
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontWeight: 700,
-              fontSize: "clamp(1.5rem, 3.5vw, 2rem)",
-              color: "var(--fg)",
+              fontFamily: "var(--font-display)",
+              fontWeight: 800,
+              fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
+              color: "var(--nm-text-primary)",
               textAlign: "center",
               marginBottom: 16,
+              textTransform: 'uppercase',
+              letterSpacing: '-0.03em',
             }}
           >
             Check Your Email
@@ -73,9 +77,9 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
 
           <p
             style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: 14,
-              color: "var(--fg-muted)",
+              fontFamily: "var(--font-body)",
+              fontSize: 15,
+              color: "var(--nm-text-secondary)",
               textAlign: "center",
               marginBottom: 8,
               lineHeight: 1.6,
@@ -86,45 +90,35 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
 
           <p
             style={{
-              fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: 14,
-              fontWeight: 700,
-              color: "var(--fg)",
+              fontFamily: "var(--font-display)",
+              fontSize: 16,
+              fontWeight: 800,
+              color: "var(--nm-text-primary)",
               textAlign: "center",
-              marginBottom: 24,
+              marginBottom: 32,
               wordBreak: "break-all",
+              textDecoration: 'underline',
+              textDecorationColor: 'var(--nm-primary)',
+              textDecorationThickness: '3px',
             }}
           >
             {email}
-          </p>
-
-          <p
-            style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: 13,
-              color: "var(--fg-muted)",
-              textAlign: "center",
-              marginBottom: 24,
-              lineHeight: 1.5,
-            }}
-          >
-            Click the link in the email to verify your account and log in. The
-            link expires in 24 hours.
           </p>
 
           {resendMessage && (
             <div
               style={{
                 width: "100%",
-                padding: "12px",
-                marginBottom: 16,
-                background: "var(--teal)",
-                color: "#0a0a0a",
-                fontFamily: "'DM Mono', monospace",
-                fontSize: 12,
+                padding: "14px",
+                marginBottom: 20,
+                background: "var(--nm-success)",
+                color: "#fff",
+                fontFamily: "var(--font-body)",
+                fontSize: 13,
                 fontWeight: 700,
                 textAlign: "center",
-                border: "2px solid #0a0a0a",
+                border: "4px solid var(--nm-ink)",
+                boxShadow: "4px 4px 0 var(--nm-ink)",
               }}
             >
               {resendMessage}
@@ -135,15 +129,16 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
             <div
               style={{
                 width: "100%",
-                padding: "12px",
-                marginBottom: 16,
-                background: "var(--coral)",
-                color: "#0a0a0a",
-                fontFamily: "'DM Mono', monospace",
-                fontSize: 12,
+                padding: "14px",
+                marginBottom: 20,
+                background: "var(--nm-error)",
+                color: "#fff",
+                fontFamily: "var(--font-body)",
+                fontSize: 13,
                 fontWeight: 700,
                 textAlign: "center",
-                border: "2px solid #0a0a0a",
+                border: "4px solid var(--nm-ink)",
+                boxShadow: "4px 4px 0 var(--nm-ink)",
               }}
             >
               {resendError}
@@ -155,58 +150,54 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
               width: "100%",
               display: "flex",
               flexDirection: "column",
-              gap: 12,
+              gap: 16,
             }}
           >
             <button
               onClick={handleResendEmail}
               disabled={resendLoading}
+              className="nm-btn"
               style={{
                 width: "100%",
-                padding: "12px",
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontWeight: 700,
+                padding: "16px",
+                fontFamily: "var(--font-display)",
+                fontWeight: 800,
                 fontSize: 14,
                 textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                border: "3px solid #0a0a0a",
-                background: "#FFE630",
-                color: "#0a0a0a",
-                cursor: resendLoading ? "not-allowed" : "pointer",
-                boxShadow: "3px 3px 0 #0a0a0a",
+                letterSpacing: "0.1em",
+                background: "var(--nm-primary)",
+                color: "#fff",
                 opacity: resendLoading ? 0.6 : 1,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 8,
+                gap: 10,
               }}
             >
-              {resendLoading && <Loader size={16} className="animate-spin" />}
+              {resendLoading && <Loader size={18} className="animate-spin" strokeWidth={2.5} />}
               {resendLoading ? "Sending..." : "Resend Verification Email"}
             </button>
 
             <button
               onClick={onBackClick}
+              className="nm-btn"
               style={{
                 width: "100%",
-                padding: "12px",
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontWeight: 700,
+                padding: "16px",
+                fontFamily: "var(--font-display)",
+                fontWeight: 800,
                 fontSize: 14,
                 textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                border: "3px solid #0a0a0a",
-                background: "transparent",
-                color: "#0a0a0a",
-                cursor: "pointer",
-                boxShadow: "3px 3px 0 #0a0a0a",
+                letterSpacing: "0.1em",
+                background: "var(--nm-surface)",
+                color: "var(--nm-text-primary)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 8,
+                gap: 10,
               }}
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft size={18} strokeWidth={2.5} />
               Back to Login
             </button>
           </div>

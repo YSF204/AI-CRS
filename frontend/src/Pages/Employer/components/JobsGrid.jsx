@@ -11,39 +11,100 @@ export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJob
   return (
     <div style={{ gridColumn: 'span 12' }}>
       {/* Section heading */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 20, color: 'var(--fg)', textTransform: 'uppercase', letterSpacing: '-0.01em' }}>
-          Your Job Listings
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <h2 style={{ 
+          fontFamily: 'var(--font-display)', 
+          fontWeight: 800, 
+          fontSize: 22, 
+          color: 'var(--nm-text-primary)', 
+          textTransform: 'uppercase', 
+          letterSpacing: '-0.01em',
+          margin: 0
+        }}>
+          Active Listings
         </h2>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: 'var(--fg-muted)' }}>
-          {loading ? '...' : `${jobs.length} total`}
+        <span style={{ 
+          fontFamily: 'var(--font-display)', 
+          fontSize: 14, 
+          fontWeight: 800,
+          color: 'var(--nm-text-tertiary)',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em'
+        }}>
+          {loading ? 'SYNCING...' : `${jobs.length} UNIT${jobs.length !== 1 ? 'S' : ''}`}
         </span>
       </div>
 
       {/* States */}
       {loading ? (
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: 'var(--fg-muted)', padding: '2rem 0' }}>
-          Loading jobs...
+        <div style={{ 
+          fontFamily: 'var(--font-display)', 
+          fontSize: 14, 
+          fontWeight: 800,
+          color: 'var(--nm-text-tertiary)', 
+          padding: '4rem 0',
+          textAlign: 'center',
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em'
+        }}>
+          Data Stream Loading...
         </div>
       ) : jobs.length === 0 ? (
-        <div style={{ background: 'var(--card-bg)', border: '3px dashed var(--border-color)', padding: '3rem', textAlign: 'center' }}>
-          <Briefcase size={36} style={{ color: 'var(--fg-muted)', margin: '0 auto 12px' }} />
-          <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 16, color: 'var(--fg)', marginBottom: 8 }}>
-            No jobs posted yet
+        <div 
+          className="nm-card"
+          style={{ 
+            background: 'var(--nm-surface)', 
+            border: '4px dashed var(--nm-ink)', 
+            padding: '5rem 2rem', 
+            textAlign: 'center',
+            borderRadius: '0px',
+            boxShadow: '8px 8px 0 var(--nm-ink)'
+          }}
+        >
+          <Briefcase size={48} strokeWidth={2.5} style={{ color: 'var(--nm-text-tertiary)', margin: '0 auto 20px' }} />
+          <div style={{ 
+            fontFamily: 'var(--font-display)', 
+            fontWeight: 900, 
+            fontSize: 24, 
+            color: 'var(--nm-text-primary)', 
+            marginBottom: 10,
+            textTransform: 'uppercase'
+          }}>
+            Zero Active Nodes
           </div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--fg-muted)', marginBottom: 16 }}>
-            Post your first job to start finding talent.
+          <div style={{ 
+            fontFamily: 'var(--font-body)', 
+            fontSize: 15, 
+            color: 'var(--nm-text-secondary)', 
+            marginBottom: 32,
+            fontWeight: 500
+          }}>
+            Initiate your first deployment to start intelligence matching.
           </div>
           <button
             onClick={onPostJob}
-            style={{ padding: '10px 20px', background: '#FFE630', color: '#0a0a0a', border: '3px solid #0a0a0a', boxShadow: '3px 3px 0 #0a0a0a', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 13, cursor: 'pointer', textTransform: 'uppercase' }}
+            className="nm-btn"
+            style={{ 
+              padding: '16px 32px', 
+              background: 'var(--nm-primary)', 
+              color: '#fff', 
+              fontFamily: 'var(--font-display)', 
+              fontWeight: 900, 
+              fontSize: 14, 
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em'
+            }}
           >
-            Post a Job →
+            Create Listing →
           </button>
         </div>
       ) : (
         <div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: 'clamp(1rem, 2.4%, 1.6rem)' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', 
+            gap: '2rem' 
+          }}>
             {jobs.map((job) => (
               <JobCard
                 key={job._id}
@@ -56,21 +117,26 @@ export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJob
           </div>
 
           {viewAllLink && totalJobsCount > 6 && (
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 32 }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 48 }}>
               <Link
                 to="/employer/jobs"
+                className="nm-btn"
                 style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 8,
-                  padding: '12px 24px', background: '#fff', color: '#0a0a0a',
-                  border: '3px solid #0a0a0a', boxShadow: '4px 4px 0 #0a0a0a',
-                  fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 13,
-                  textTransform: 'uppercase', textDecoration: 'none',
-                  transition: 'transform 0.1s ease, box-shadow 0.1s ease',
+                  display: 'inline-flex', 
+                  alignItems: 'center', 
+                  gap: 12,
+                  padding: '16px 32px', 
+                  background: 'var(--nm-surface)', 
+                  color: 'var(--nm-text-primary)',
+                  fontFamily: 'var(--font-display)', 
+                  fontWeight: 900, 
+                  fontSize: 14,
+                  textTransform: 'uppercase', 
+                  textDecoration: 'none',
+                  letterSpacing: '0.1em'
                 }}
-                onMouseEnter={e => { e.currentTarget.style.transform = 'translate(2px,2px)'; e.currentTarget.style.boxShadow = '2px 2px 0 #0a0a0a'; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '4px 4px 0 #0a0a0a'; }}
               >
-                View All {totalJobsCount} Listings →
+                Access Archive ({totalJobsCount} Units) →
               </Link>
             </div>
           )}

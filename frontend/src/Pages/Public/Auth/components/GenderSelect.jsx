@@ -1,7 +1,18 @@
 export default function GenderSelect({ value, onChange }) {
   return (
-    <div style={{ marginBottom: 14 }}>
-      <label style={{ display: 'block', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 12, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--fg)', marginBottom: 6 }}>
+    <div style={{ marginBottom: 20 }}>
+      <label 
+        style={{ 
+          display: 'block', 
+          fontFamily: 'var(--font-display)', 
+          fontWeight: 800, 
+          fontSize: 12, 
+          textTransform: 'uppercase', 
+          letterSpacing: '0.12em', 
+          color: 'var(--nm-text-secondary)', 
+          marginBottom: 8 
+        }}
+      >
         Gender
       </label>
       <div style={{ display: 'flex', gap: 8 }}>
@@ -11,14 +22,20 @@ export default function GenderSelect({ value, onChange }) {
             type="button"
             onClick={() => onChange(g)}
             style={{
-              flex: 1, padding: '8px',
-              fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 11,
-              textTransform: 'uppercase', letterSpacing: '0.06em',
-              border: '3px solid #0a0a0a',
-              background: value === g ? '#FFE630' : '#fff',
-              color: '#0a0a0a', cursor: 'pointer',
-              boxShadow: value === g ? '3px 3px 0 #0a0a0a' : '2px 2px 0 #0a0a0a',
-              transition: 'all 0.15s ease',
+              flex: 1, 
+              padding: '12px 8px',
+              fontFamily: 'var(--font-display)', 
+              fontWeight: 800, 
+              fontSize: 12,
+              textTransform: 'uppercase', 
+              letterSpacing: '0.05em',
+              border: '4px solid var(--nm-ink)',
+              background: value === g ? 'var(--nm-primary)' : 'var(--nm-bg)',
+              color: value === g ? '#fff' : 'var(--nm-text-primary)', 
+              cursor: 'pointer',
+              boxShadow: value === g ? '4px 4px 0 var(--nm-ink)' : '2px 2px 0 var(--nm-ink)',
+              transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+              borderRadius: '0px',
             }}
           >
             {g}

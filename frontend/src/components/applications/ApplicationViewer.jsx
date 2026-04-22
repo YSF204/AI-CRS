@@ -15,27 +15,34 @@ const buildFileUrl = (cvFile) => {
 };
 
 const Section = ({ title, icon, children }) => (
-  <div style={{
-    background: "var(--card-bg)",
-    border: "2px solid var(--border-color)",
-    borderRadius: "8px",
-    padding: "20px",
-    marginBottom: "16px"
-  }}>
+  <div 
+    className="nm-card"
+    style={{
+      background: "var(--nm-surface)",
+      borderWidth: "4px",
+      borderRadius: "0px",
+      padding: "24px",
+      marginBottom: "24px",
+      boxShadow: "6px 6px 0 var(--nm-ink)"
+    }}
+  >
     <div style={{
       display: "flex",
       alignItems: "center",
-      gap: 12,
-      marginBottom: "16px"
+      gap: 16,
+      marginBottom: "20px",
+      borderBottom: "3px solid var(--nm-ink)",
+      paddingBottom: "12px"
     }}>
-      {icon && <span style={{ fontSize: "20px", color: "var(--accent)" }}>{icon}</span>}
+      {icon && <span style={{ fontSize: "24px" }}>{icon}</span>}
       <h3 style={{
-        fontFamily: "'Space Grotesk', sans-serif",
-        fontWeight: 700,
-        fontSize: "16px",
-        color: "var(--fg)",
+        fontFamily: "var(--font-display)",
+        fontWeight: 900,
+        fontSize: "18px",
+        color: "var(--nm-text-primary)",
         margin: 0,
-        letterSpacing: "0.02em"
+        letterSpacing: "0.05em",
+        textTransform: "uppercase"
       }}>
         {title}
       </h3>
@@ -45,29 +52,30 @@ const Section = ({ title, icon, children }) => (
 );
 
 const SkillTag = ({ skill, type }) => {
-  const colors = {
-    technical: { bg: "#E3F2FD", text: "#fff" },
-    soft: { bg: "#4CAF50", text: "#fff" },
-    language: { bg: "#2196F3", text: "#fff" },
-    certification: { bg: "#FF9800", text: "#fff" }
+  const typeColors = {
+    technical: "var(--nm-primary)",
+    soft: "var(--nm-success)",
+    language: "var(--nm-warning)",
+    certification: "var(--nm-error)"
   };
 
-  const color = colors[type] || colors.technical;
+  const color = typeColors[type] || typeColors.technical;
 
   return (
     <span style={{
       display: "inline-block",
-      padding: "6px 12px",
-      background: color.bg,
-      color: color.text,
-      borderRadius: "6px",
-      fontFamily: "'DM Mono', monospace",
+      padding: "6px 14px",
+      background: color,
+      color: "#fff",
+      border: "3px solid var(--nm-ink)",
+      fontFamily: "var(--font-display)",
       fontSize: "11px",
-      fontWeight: 600,
+      fontWeight: 900,
       textTransform: "uppercase",
-      letterSpacing: "0.05em",
-      marginRight: "8px",
-      marginBottom: "8px"
+      letterSpacing: "0.1em",
+      marginRight: "10px",
+      marginBottom: "10px",
+      boxShadow: "3px 3px 0 var(--nm-ink)"
     }}>
       {skill}
     </span>
@@ -78,27 +86,28 @@ const InfoItem = ({ label, value, icon }) => (
   <div style={{
     display: "flex",
     alignItems: "flex-start",
-    gap: 12,
-    padding: "12px 0",
-    borderBottom: "1px solid rgba(0,0,0,0.05)"
+    gap: 16,
+    padding: "16px 0",
+    borderBottom: "2px solid var(--nm-ink)"
   }}>
-    {icon && <span style={{ fontSize: "16px", color: "var(--accent)", minWidth: "20px" }}>{icon}</span>}
+    {icon && <span style={{ fontSize: "18px", color: "var(--nm-primary)", minWidth: "24px" }}>{icon}</span>}
     <div style={{ flex: 1 }}>
       <div style={{
         fontSize: "11px",
-        color: "var(--fg-muted)",
-        fontFamily: "'DM Mono', monospace",
+        color: "var(--nm-text-tertiary)",
+        fontFamily: "var(--font-display)",
+        fontWeight: 800,
         textTransform: "uppercase",
-        letterSpacing: "0.05em",
-        marginBottom: "4px"
+        letterSpacing: "0.1em",
+        marginBottom: "6px"
       }}>
         {label}
       </div>
       <div style={{
-        fontSize: "14px",
-        color: "var(--fg)",
-        fontFamily: "'Space Grotesk', sans-serif",
-        fontWeight: 500
+        fontSize: "15px",
+        color: "var(--nm-text-primary)",
+        fontFamily: "var(--font-body)",
+        fontWeight: 700
       }}>
         {value || "—"}
       </div>
@@ -177,51 +186,72 @@ export default function ApplicationViewer({ application }) {
   const templateCvData = normalizeCvForTemplate(cv);
 
   return (
-    <div style={{ fontFamily: "'Space Grotesk', sans-serif", color: "var(--fg)" }}>
+    <div style={{ fontFamily: "var(--font-body)", color: "var(--nm-text-primary)" }}>
       {/* Submission Overview */}
       <Section
-        title="Submission Overview"
-        icon="📋"
+        title="Deployment Protocol"
+        icon="📡"
       >
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px" }}>
-          <InfoItem label="Application Method" value={method === "manual" ? "Manual Form" : "CV Upload"} icon="📝" />
-          <InfoItem label="Match Score" value={application.matchPercentage != null ? `${application.matchPercentage}%` : "Pending"} icon="🎯" />
-          <InfoItem label="Status" value={
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "24px" }}>
+          <InfoItem label="Methodology" value={method === "manual" ? "DIRECT INTAKE" : "SYSTEM UPLOAD"} icon="📝" />
+          <InfoItem label="Signal Strength" value={application.matchPercentage != null ? `${application.matchPercentage}%` : "CALCULATING..."} icon="🎯" />
+          <InfoItem label="Current State" value={
             <span style={{
-              padding: "4px 8px",
-              borderRadius: "4px",
+              padding: "6px 12px",
+              background: "var(--nm-ink)",
+              color: "#fff",
               fontSize: "12px",
-              fontWeight: 600,
-              textTransform: "uppercase"
+              fontWeight: 900,
+              textTransform: "uppercase",
+              letterSpacing: "0.1em",
+              border: "2px solid var(--nm-ink)",
+              boxShadow: "3px 3px 0 var(--nm-primary)"
             }}>
-              {application.status === 'pending' && <span style={{ background: "#F59E0B", color: "#fff" }}>Under Review</span>}
-              {application.status === 'accepted' && <span style={{ background: "#10B981", color: "#fff" }}>Hired</span>}
-              {application.status === 'rejected' && <span style={{ background: "#EF4444", color: "#fff" }}>Not Selected</span>}
+              {application.status === 'pending' && "UNDER REVIEW"}
+              {application.status === 'accepted' && "UNIT ENGAGED"}
+              {application.status === 'rejected' && "UNIT ARCHIVED"}
             </span>
           } icon="📊" />
-          <InfoItem label="Submitted On" value={new Date(application.createdAt).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })} icon="📅" />
+          <InfoItem label="Timestamp" value={new Date(application.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} icon="📅" />
         </div>
       </Section>
 
       {/* AI Match Analysis */}
       {matchDetails.matchAnalysis && (
         <Section
-          title="AI Match Analysis"
-          icon="🤖"
+          title="Intelligence Analysis"
+          icon="👁️"
         >
           <div style={{
-            background: "linear-gradient(135deg, rgba(67, 233, 186, 0.1), rgba(67, 233, 186, 0.05))",
-            padding: "16px",
-            borderRadius: "8px",
-            border: "1px solid var(--border-color)"
+            background: "var(--nm-bg)",
+            padding: "24px",
+            border: "4px solid var(--nm-ink)",
+            boxShadow: "inset 0 0 40px rgba(0,0,0,0.05)",
+            position: "relative",
+            overflow: "hidden"
           }}>
+            <div style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              padding: "8px 12px",
+              background: "var(--nm-primary)",
+              color: "#fff",
+              fontFamily: "var(--font-display)",
+              fontSize: "10px",
+              fontWeight: 900,
+              textTransform: "uppercase"
+            }}>
+              AI CORE OUTPUT
+            </div>
             <p style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: "13px",
-              color: "var(--fg)",
-              lineHeight: 1.6,
+              fontFamily: "var(--font-body)",
+              fontSize: "15px",
+              color: "var(--nm-text-primary)",
+              lineHeight: 1.8,
               whiteSpace: "pre-wrap",
-              margin: 0
+              margin: 0,
+              fontWeight: 500
             }}>
               {matchDetails.matchAnalysis}
             </p>
@@ -232,35 +262,39 @@ export default function ApplicationViewer({ application }) {
       {/* Manual Application Details */}
       {method === "manual" && (
         <Section
-          title="Applicant Information"
+          title="Subject Dossier"
           icon="👤"
         >
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "12px" }}>
-            <InfoItem label="Full Name" value={applicant.fullName || "Not provided"} icon="👤" />
-            <InfoItem label="Email Address" value={applicant.email || "Not provided"} icon="📧" />
-            <InfoItem label="Phone Number" value={applicant.phone || "Not provided"} icon="📱" />
-            <InfoItem label="LinkedIn Profile" value={applicant.linkedin || "Not provided"} icon="💼" />
-            <InfoItem label="Portfolio URL" value={applicant.portfolioUrl || "Not provided"} icon="🔗" />
-            <InfoItem label="Years of Experience" value={applicant.yearsOfExperience != null ? `${applicant.yearsOfExperience} years` : "Not specified"} icon="💼" />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
+            <InfoItem label="Full Name" value={applicant.fullName} icon="👤" />
+            <InfoItem label="Email Interface" value={applicant.email} icon="📧" />
+            <InfoItem label="Comms Link" value={applicant.phone} icon="📱" />
+            <InfoItem label="Professional Hub" value={applicant.linkedin} icon="💼" />
+            <InfoItem label="Asset Repository" value={applicant.portfolioUrl} icon="🔗" />
+            <InfoItem label="Experience Magnitude" value={applicant.yearsOfExperience != null ? `${applicant.yearsOfExperience} YEARS` : "N/A"} icon="💼" />
           </div>
 
           {applicant.summary && (
-            <div style={{ marginTop: "16px" }}>
+            <div style={{ marginTop: "32px" }}>
               <div style={{
                 fontSize: "12px",
-                color: "var(--fg-muted)",
-                fontFamily: "'DM Mono', monospace",
+                color: "var(--nm-text-tertiary)",
+                fontFamily: "var(--font-display)",
+                fontWeight: 900,
                 textTransform: "uppercase",
-                letterSpacing: "0.05em",
-                marginBottom: "8px"
+                letterSpacing: "0.15em",
+                marginBottom: "12px"
               }}>
-                Professional Summary
+                Executive Summary
               </div>
               <p style={{
-                fontSize: "14px",
-                color: "var(--fg)",
-                lineHeight: 1.6,
-                whiteSpace: "pre-wrap"
+                fontSize: "15px",
+                color: "var(--nm-text-secondary)",
+                lineHeight: 1.7,
+                whiteSpace: "pre-wrap",
+                background: "var(--nm-bg)",
+                padding: "20px",
+                border: "3px solid var(--nm-ink)"
               }}>
                 {applicant.summary}
               </p>
@@ -268,20 +302,11 @@ export default function ApplicationViewer({ application }) {
           )}
 
           {/* Skills Display */}
-          <div style={{ marginTop: "16px" }}>
+          <div style={{ marginTop: "32px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
             {(applicant.technicalSkills || []).length > 0 && (
-              <div style={{ marginBottom: "12px" }}>
-                <div style={{
-                  fontSize: "12px",
-                  color: "var(--fg-muted)",
-                  fontFamily: "'DM Mono', monospace",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  marginBottom: "8px"
-                }}>
-                  Technical Skills
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              <div>
+                <div style={LABEL_STYLE}>Technical Competencies</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                   {(applicant.technicalSkills || []).map((skill, i) => (
                     <SkillTag key={`tech-${i}`} skill={skill} type="technical" />
                   ))}
@@ -290,60 +315,11 @@ export default function ApplicationViewer({ application }) {
             )}
 
             {(applicant.softSkills || []).length > 0 && (
-              <div style={{ marginBottom: "12px" }}>
-                <div style={{
-                  fontSize: "12px",
-                  color: "var(--fg-muted)",
-                  fontFamily: "'DM Mono', monospace",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  marginBottom: "8px"
-                }}>
-                  Soft Skills
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              <div>
+                <div style={LABEL_STYLE}>Operational Traits</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                   {(applicant.softSkills || []).map((skill, i) => (
                     <SkillTag key={`soft-${i}`} skill={skill} type="soft" />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {(applicant.languages || []).length > 0 && (
-              <div style={{ marginBottom: "12px" }}>
-                <div style={{
-                  fontSize: "12px",
-                  color: "var(--fg-muted)",
-                  fontFamily: "'DM Mono', monospace",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  marginBottom: "8px"
-                }}>
-                  Languages
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                  {(applicant.languages || []).map((lang, i) => (
-                    <SkillTag key={`lang-${i}`} skill={lang} type="language" />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {(applicant.certifications || []).length > 0 && (
-              <div>
-                <div style={{
-                  fontSize: "12px",
-                  color: "var(--fg-muted)",
-                  fontFamily: "'DM Mono', monospace",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  marginBottom: "8px"
-                }}>
-                  Certifications
-                </div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
-                  {(applicant.certifications || []).map((cert, i) => (
-                    <SkillTag key={`cert-${i}`} skill={cert} type="certification" />
                   ))}
                 </div>
               </div>
@@ -355,7 +331,7 @@ export default function ApplicationViewer({ application }) {
       {/* CV Display */}
       {method !== "manual" && (
         <Section
-          title="Resume / CV"
+          title="Digital Asset Scan"
           icon="📄"
         >
           {loadingCv ? (
@@ -363,50 +339,52 @@ export default function ApplicationViewer({ application }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              padding: "40px",
-              background: "var(--bg)",
-              borderRadius: "8px",
-              border: "2px dashed var(--border-color)"
+              padding: "60px",
+              background: "var(--nm-bg)",
+              border: "4px dashed var(--nm-ink)"
             }}>
               <div style={{
                 fontSize: "14px",
-                color: "var(--fg-muted)",
-                fontFamily: "'Space Grotesk', sans-serif"
+                color: "var(--nm-text-tertiary)",
+                fontFamily: "var(--font-display)",
+                fontWeight: 900,
+                textTransform: "uppercase"
               }}>
-                Loading CV...
+                Scanning Data Matrix...
               </div>
             </div>
           ) : cv && (
             <div>
               <div style={{
-                marginBottom: "12px",
+                marginBottom: "20px",
                 fontSize: "12px",
-                color: "var(--fg-muted)",
-                fontFamily: "'DM Mono', monospace",
+                color: "var(--nm-text-tertiary)",
+                fontFamily: "var(--font-display)",
+                fontWeight: 900,
                 textTransform: "uppercase",
-                letterSpacing: "0.05em"
+                letterSpacing: "0.1em"
               }}>
-                Template: {template?.name || "CV Template"} • Candidate: {cv.fullName || "Not specified"}
+                Configuration: {template?.name || "STD-V1"} • Subject: {cv.fullName || "IDENTIFIED"}
               </div>
               <div style={{
-                border: "3px solid var(--border-color)",
+                border: "4px solid var(--nm-ink)",
                 background: "#fff",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                borderRadius: "8px",
+                boxShadow: "10px 10px 0 var(--nm-ink)",
                 overflow: "auto",
-                maxHeight: "60vh"
+                maxHeight: "70vh"
               }}>
                 {TemplateComponent ? (
                   <TemplateComponent userName={cv.fullName || "Candidate"} cvData={templateCvData} />
                 ) : (
                   <p style={{
-                    fontFamily: "'Space Grotesk', sans-serif",
+                    fontFamily: "var(--font-display)",
                     fontSize: "14px",
-                    color: "var(--fg-muted)",
-                    padding: "24px",
-                    textAlign: "center"
+                    color: "var(--nm-text-tertiary)",
+                    padding: "40px",
+                    textAlign: "center",
+                    textTransform: "uppercase"
                   }}>
-                    CV template preview is unavailable.
+                    Visual Matrix Unavailable.
                   </p>
                 )}
               </div>
@@ -414,74 +392,34 @@ export default function ApplicationViewer({ application }) {
           )}
 
           {!cv && fileUrl && (
-            <Section
-              title="Uploaded PDF"
-              icon="📎"
-            >
+            <div style={{ marginTop: "24px" }}>
+              <div style={LABEL_STYLE}>Uploaded PDF Stream</div>
               <div style={{
-                height: "500px",
-                border: "3px solid var(--border-color)",
-                borderRadius: "8px",
-                background: "var(--bg)"
+                height: "600px",
+                border: "4px solid var(--nm-ink)",
+                boxShadow: "10px 10px 0 var(--nm-ink)",
+                background: "var(--nm-bg)"
               }}>
                 <iframe
                   src={fileUrl}
                   title="CV PDF"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    border: "none"
-                  }}
+                  style={{ width: "100%", height: "100%", border: "none" }}
                 />
               </div>
-            </Section>
-          )}
-
-          {!cv && !fileUrl && (
-            <div style={{
-              padding: "24px",
-              textAlign: "center",
-              background: "var(--card-bg)",
-              borderRadius: "8px",
-              border: "2px solid var(--border-color)"
-            }}>
-              <p style={{
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontSize: "14px",
-                color: "var(--fg-muted)",
-                margin: 0
-              }}>
-                CV record not available for this application.
-              </p>
             </div>
-          )}
-
-          {applicant.additionalInformation && (
-            <Section
-              title="Additional Information"
-              icon="📝"
-            >
-              <div style={{
-                background: "linear-gradient(135deg, rgba(67, 233, 186, 0.1), rgba(67, 233, 186, 0.05))",
-                padding: "16px",
-                borderRadius: "8px",
-                border: "1px solid var(--border-color)"
-              }}>
-                <p style={{
-                  fontFamily: "'DM Mono', monospace",
-                  fontSize: "13px",
-                  color: "var(--fg)",
-                  lineHeight: 1.6,
-                  whiteSpace: "pre-wrap",
-                  margin: 0
-                }}>
-                  {applicant.additionalInformation}
-                </p>
-              </div>
-            </Section>
           )}
         </Section>
       )}
     </div>
   );
 }
+
+const LABEL_STYLE = {
+  fontSize: "12px",
+  color: "var(--nm-text-tertiary)",
+  fontFamily: "var(--font-display)",
+  fontWeight: 900,
+  textTransform: "uppercase",
+  letterSpacing: "0.15em",
+  marginBottom: "16px"
+};

@@ -6,17 +6,30 @@ import api from '../../services/api';
 import useFetch from '../../hooks/useFetch';
 
 const INPUT = {
-  width: '100%', padding: '14px 18px', boxSizing: 'border-box',
-  fontFamily: "'DM Mono', monospace", fontSize: 14,
-  background: 'var(--bg)', color: 'var(--fg)',
-  border: '3px solid var(--border-color)', outline: 'none',
-  boxShadow: '4px 4px 0 var(--shadow-color)',
-  transition: 'all 0.1s ease'
+  width: '100%', 
+  padding: '16px 20px', 
+  boxSizing: 'border-box',
+  fontFamily: 'var(--font-body)', 
+  fontSize: 15,
+  fontWeight: 600,
+  background: 'var(--nm-bg)', 
+  color: 'var(--nm-text-primary)',
+  border: '4px solid var(--nm-ink)', 
+  outline: 'none',
+  boxShadow: '4px 4px 0 var(--nm-ink)',
+  transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+  borderRadius: '0px',
 };
+
 const LABEL = {
-  display: 'block', fontFamily: "'Space Grotesk', sans-serif",
-  fontWeight: 800, fontSize: 12, textTransform: 'uppercase',
-  letterSpacing: '0.1em', color: 'var(--fg)', marginBottom: 8,
+  display: 'block', 
+  fontFamily: 'var(--font-display)',
+  fontWeight: 800, 
+  fontSize: 12, 
+  textTransform: 'uppercase',
+  letterSpacing: '0.15em', 
+  color: 'var(--nm-text-tertiary)', 
+  marginBottom: 10,
 };
 
 export default function CompanyProfile() {
@@ -24,7 +37,7 @@ export default function CompanyProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [isEditing, setIsEditing] = useState(false); // true if profile already exists
+  const [isEditing, setIsEditing] = useState(false);
   const [cooldownDaysLeft, setCooldownDaysLeft] = useState(0);
 
   const [form, setForm] = useState({
@@ -79,7 +92,6 @@ export default function CompanyProfile() {
 
   const setField = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
 
-  // Branch handlers
   const updateBranch = (index, field, value) => {
     const newBranches = [...form.branches];
     newBranches[index][field] = value;
@@ -104,7 +116,7 @@ export default function CompanyProfile() {
       }
       navigate('/employer');
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to save company profile.');
+      setError(err.response?.data?.message || 'CRITICAL FAILURE: DATA NOT PERSISTED.');
     } finally {
       setSaving(false);
     }
@@ -112,121 +124,204 @@ export default function CompanyProfile() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', padding: 'clamp(1.5rem, 4%, 2.5rem)' }}>
-        <div style={{ fontFamily: "'DM Mono', monospace", padding: '4rem 0', textAlign: 'center' }}>Loading profile...</div>
+      <div style={{ minHeight: '100vh', backgroundColor: 'var(--nm-bg)', color: 'var(--nm-text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Accessing Organizational Data...</div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--fg)', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--nm-bg)', color: 'var(--nm-text-primary)', fontFamily: 'var(--font-body)', overflowX: 'hidden' }}>
       <div className="dashboard-nav-area">
         <DashboardNav role="employer" />
       </div>
 
-      <div className="dashboard-shell py-6">
+      <div className="dashboard-shell" style={{ padding: 'var(--spacing-8)' }}>
 
-        <div style={{
-          background: 'var(--card-bg)', border: '4px solid var(--border-color)',
-          boxShadow: '8px 8px 0 var(--shadow-color)', padding: 'clamp(2rem, 5vw, 4rem)',
-          marginTop: '2rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-            <div style={{ background: '#FFE630', border: '3px solid #0a0a0a', padding: 12, boxShadow: '4px 4px 0 #0a0a0a' }}>
-              <Building2 size={28} color="#0a0a0a" strokeWidth={2.5} />
+        <div 
+          className="nm-card"
+          style={{
+            background: 'var(--nm-surface)', 
+            borderWidth: '4px',
+            boxShadow: '12px 12px 0 var(--nm-ink)', 
+            padding: 'clamp(2rem, 6vw, 4rem)',
+            borderRadius: '0px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 16 }}>
+            <div style={{ background: 'var(--nm-primary)', border: '4px solid var(--nm-ink)', padding: 12, boxShadow: '4px 4px 0 var(--nm-ink)', display: 'inline-flex' }}>
+              <Building2 size={32} color="#fff" strokeWidth={3} />
             </div>
-            <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 'clamp(2rem, 5vw, 3.5rem)', color: 'var(--fg)', textTransform: 'uppercase', letterSpacing: '-0.03em', lineHeight: 1 }}>
-              {isEditing ? 'Company Profile' : 'Setup Company'}
+            <h1 style={{ 
+              fontFamily: 'var(--font-display)', 
+              fontWeight: 900, 
+              fontSize: 'clamp(2.5rem, 6vw, 4rem)', 
+              color: 'var(--nm-text-primary)', 
+              textTransform: 'uppercase', 
+              letterSpacing: '-0.04em', 
+              lineHeight: 1,
+              margin: 0
+            }}>
+              {isEditing ? 'Unit Identity' : 'Initialize Unit'}
             </h1>
           </div>
-          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: 'var(--fg-muted)', marginBottom: '3rem' }}>
-            {isEditing ? 'Update your company details and branch locations.' : 'You must complete this profile before posting any jobs.'}
+          <p style={{ 
+            fontFamily: 'var(--font-body)', 
+            fontSize: 16, 
+            color: 'var(--nm-text-secondary)', 
+            marginBottom: '4rem',
+            maxWidth: '600px',
+            lineHeight: 1.6
+          }}>
+            {isEditing 
+              ? 'Update operational parameters for the primary organizational unit.' 
+              : 'Initial synchronization required. Establish corporate identity to enable listing deployment.'}
           </p>
 
           {error && (
-            <div style={{ padding: '16px 20px', background: '#FF6B6B', color: '#0a0a0a', border: '3px solid #0a0a0a', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 24 }}>
-              ⚠ {error}
+            <div style={{ 
+              padding: '20px 24px', 
+              background: 'var(--nm-error)', 
+              color: '#fff', 
+              border: '4px solid var(--nm-ink)', 
+              fontFamily: 'var(--font-display)', 
+              fontWeight: 900, 
+              fontSize: 14, 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.1em', 
+              marginBottom: 32,
+              boxShadow: '4px 4px 0 var(--nm-ink)'
+            }}>
+              SYSTEM ALERT: {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
             
             {/* Core Info */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-              <div style={{ gridColumn: 'span 2' }}>
-                <label style={LABEL}>Company Name *</label>
-                <input style={INPUT} value={form.name} onChange={setField('name')} placeholder="e.g. Acme Corp" required />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={LABEL}>Legal Entity Name *</label>
+                <input 
+                  style={INPUT} 
+                  value={form.name} 
+                  onChange={setField('name')} 
+                  placeholder="e.g. ACME GLOBAL OPERATIONS" 
+                  required 
+                  onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+                  onBlur={e => e.target.style.transform = 'none'}
+                />
               </div>
               <div style={{ position: 'relative' }}>
                 <label style={LABEL}>
-                  Commercial License * 
-                  {isEditing && <span style={{ textTransform: 'none', fontWeight: 500, color: '#FF6B6B', marginLeft: 8 }}>(Cannot be changed)</span>}
+                  Operational License * 
+                  {isEditing && <span style={{ textTransform: 'none', fontWeight: 800, color: 'var(--nm-error)', marginLeft: 8 }}>(LOCKED)</span>}
                 </label>
                 <input 
                   style={{ 
                     ...INPUT, 
-                    background: isEditing ? 'rgba(0,0,0,0.05)' : 'var(--bg)', 
-                    color: isEditing ? 'var(--fg-muted)' : 'var(--fg)', 
-                    cursor: isEditing ? 'not-allowed' : 'text' 
+                    background: isEditing ? 'var(--nm-bg)' : 'var(--nm-bg)', 
+                    color: isEditing ? 'var(--nm-text-tertiary)' : 'var(--nm-text-primary)', 
+                    cursor: isEditing ? 'not-allowed' : 'text',
+                    borderColor: isEditing ? 'var(--nm-ink)' : 'var(--nm-ink)',
+                    opacity: isEditing ? 0.7 : 1
                   }} 
                   value={form.license} 
                   onChange={setField('license')} 
-                  placeholder="License number" 
+                  placeholder="REGISTRATION_ID" 
                   required 
                   disabled={isEditing} 
                 />
               </div>
               <div>
-                <label style={LABEL}>Contact Email *</label>
-                <input style={INPUT} type="email" value={form.contactEmail} onChange={setField('contactEmail')} placeholder="hr@acme.com" required />
+                <label style={LABEL}>Primary Intake Email *</label>
+                <input 
+                  style={INPUT} 
+                  type="email" 
+                  value={form.contactEmail} 
+                  onChange={setField('contactEmail')} 
+                  placeholder="hr@acme.corp" 
+                  required 
+                  onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+                  onBlur={e => e.target.style.transform = 'none'}
+                />
               </div>
-              <div style={{ gridColumn: 'span 2' }}>
-                <label style={LABEL}>Website <span style={{ textTransform: 'none', fontWeight: 500, color: 'var(--fg-muted)' }}>(Optional)</span></label>
-                <input style={INPUT} type="url" value={form.website} onChange={setField('website')} placeholder="https://acme.com" />
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={LABEL}>Digital Domain URL <span style={{ textTransform: 'none', fontWeight: 500, color: 'var(--nm-text-tertiary)' }}>(OPTIONAL)</span></label>
+                <input 
+                  style={INPUT} 
+                  type="url" 
+                  value={form.website} 
+                  onChange={setField('website')} 
+                  placeholder="https://acme.io" 
+                  onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
+                  onBlur={e => e.target.style.transform = 'none'}
+                />
               </div>
             </div>
 
-            <hr style={{ borderTop: '3px dashed var(--border-color)', margin: '1rem 0' }} />
+            <div style={{ height: '4px', background: 'var(--nm-ink)', margin: '1rem 0' }} />
 
             {/* Branches */}
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
                 <div>
-                  <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 20, color: 'var(--fg)', textTransform: 'uppercase' }}>Branch Locations *</h3>
-                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--fg-muted)', marginTop: 4 }}>At least one branch is required.</div>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 24, color: 'var(--nm-text-primary)', textTransform: 'uppercase', margin: 0 }}>Operational Nodes *</h3>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 11, color: 'var(--nm-text-tertiary)', marginTop: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>MINIMUM 1 ACTIVE NODE REQUIRED</div>
                 </div>
                 <button
                   type="button" onClick={addBranch}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', background: '#4ECDC4', color: '#0a0a0a', border: '2px solid #0a0a0a', boxShadow: '3px 3px 0 #0a0a0a', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 12, textTransform: 'uppercase', cursor: 'pointer' }}
+                  className="nm-btn"
+                  style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 10, 
+                    padding: '12px 24px', 
+                    background: 'var(--nm-success)', 
+                    color: '#fff', 
+                    fontFamily: 'var(--font-display)', 
+                    fontWeight: 900, 
+                    fontSize: 13, 
+                    textTransform: 'uppercase' 
+                  }}
                 >
-                  <PlusCircle size={14} strokeWidth={3} /> Add Branch
+                  <PlusCircle size={16} strokeWidth={3} /> Add Node
                 </button>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                 {form.branches.map((branch, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: 'var(--bg)', padding: '1rem', border: '3px solid var(--border-color)' }}>
-                    <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 16 }}>
+                  <div key={i} style={{ 
+                    display: 'flex', 
+                    gap: 20, 
+                    alignItems: 'flex-start', 
+                    background: 'var(--nm-bg)', 
+                    padding: '24px', 
+                    border: '4px solid var(--nm-ink)',
+                    boxShadow: '6px 6px 0 var(--nm-ink)'
+                  }}>
+                    <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 20 }}>
                       <div>
-                        <label style={{ ...LABEL, fontSize: 10 }}>Branch Name</label>
-                        <input style={{ ...INPUT, padding: '10px 14px', boxShadow: 'none' }} value={branch.name} onChange={(e) => updateBranch(i, 'name', e.target.value)} placeholder="e.g. HQ" required />
+                        <label style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>NODE DESIGNATION</label>
+                        <input style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none', borderSize: '3px' }} value={branch.name} onChange={(e) => updateBranch(i, 'name', e.target.value)} placeholder="e.g. SECTOR_HQ" required />
                       </div>
                       <div>
-                        <label style={{ ...LABEL, fontSize: 10 }}>City</label>
-                        <input style={{ ...INPUT, padding: '10px 14px', boxShadow: 'none' }} value={branch.city} onChange={(e) => updateBranch(i, 'city', e.target.value)} placeholder="e.g. New York" required />
+                        <label style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>SECTOR / CITY</label>
+                        <input style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none', borderSize: '3px' }} value={branch.city} onChange={(e) => updateBranch(i, 'city', e.target.value)} placeholder="e.g. LONDON" required />
                       </div>
                       <div>
-                        <label style={{ ...LABEL, fontSize: 10 }}>Street Address</label>
-                        <input style={{ ...INPUT, padding: '10px 14px', boxShadow: 'none' }} value={branch.street} onChange={(e) => updateBranch(i, 'street', e.target.value)} placeholder="123 Corporate Blvd" required />
+                        <label style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>GEOSPATIAL ADDRESS</label>
+                        <input style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none', borderSize: '3px' }} value={branch.street} onChange={(e) => updateBranch(i, 'street', e.target.value)} placeholder="123 VECTOR ST" required />
                       </div>
                     </div>
                     {form.branches.length > 1 && (
                       <button
                         type="button" onClick={() => removeBranch(i)}
-                        style={{ marginTop: 24, padding: '10px', background: '#FF6B6B', color: '#0a0a0a', border: '2px solid #0a0a0a', cursor: 'pointer' }}
-                        title="Remove Branch"
+                        className="nm-btn"
+                        style={{ marginTop: 24, padding: '12px', background: 'var(--nm-error)', color: '#fff' }}
+                        title="TERMINATE NODE"
                       >
-                        <Trash2 size={16} strokeWidth={2.5} />
+                        <Trash2 size={18} strokeWidth={3} />
                       </button>
                     )}
                   </div>
@@ -235,20 +330,24 @@ export default function CompanyProfile() {
             </div>
 
             <button
-              type="submit" disabled={saving || cooldownDaysLeft > 0}
+              type="submit" 
+              disabled={saving || cooldownDaysLeft > 0}
+              className="nm-btn"
               style={{
-                marginTop: '1rem',
-                padding: '18px', background: (saving || cooldownDaysLeft > 0) ? '#aaa' : '#FFE630', color: '#0a0a0a',
-                border: '4px solid #0a0a0a', boxShadow: '6px 6px 0 #0a0a0a',
-                fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 18,
-                textTransform: 'uppercase', letterSpacing: '0.1em',
-                cursor: (saving || cooldownDaysLeft > 0) ? 'not-allowed' : 'pointer', opacity: (saving || cooldownDaysLeft > 0) ? 0.6 : 1,
-                transition: 'transform 0.1s ease, box-shadow 0.1s ease'
+                marginTop: '1.5rem',
+                padding: '22px', 
+                background: (saving || cooldownDaysLeft > 0) ? 'var(--nm-text-tertiary)' : 'var(--nm-primary)', 
+                color: '#fff',
+                fontFamily: 'var(--font-display)', 
+                fontWeight: 900, 
+                fontSize: 18,
+                textTransform: 'uppercase', 
+                letterSpacing: '0.15em',
+                cursor: (saving || cooldownDaysLeft > 0) ? 'not-allowed' : 'pointer', 
+                opacity: (saving || cooldownDaysLeft > 0) ? 0.7 : 1,
               }}
-              onMouseEnter={e => { if(!saving && cooldownDaysLeft === 0) { e.currentTarget.style.transform = 'translate(2px,2px)'; e.currentTarget.style.boxShadow = '4px 4px 0 #0a0a0a'; } }}
-              onMouseLeave={e => { if(!saving && cooldownDaysLeft === 0) { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '6px 6px 0 #0a0a0a'; } }}
             >
-              {saving ? 'SAVING...' : cooldownDaysLeft > 0 ? `UPDATE AVAILABLE IN ${cooldownDaysLeft} DAYS` : isEditing ? 'UPDATE PROFILE →' : 'SAVE & CONTINUE →'}
+              {saving ? 'COMMITTING...' : cooldownDaysLeft > 0 ? `IDENTITY LOCKED [${cooldownDaysLeft} DAYS]` : isEditing ? 'COMMIT UPDATES →' : 'INITIALIZE UNIT →'}
             </button>
           </form>
         </div>

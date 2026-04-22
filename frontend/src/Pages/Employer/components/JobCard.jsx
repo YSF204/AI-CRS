@@ -22,7 +22,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
   const [currentStatus, setCurrentStatus] = useState(job.status);
 
   const handleDelete = async () => {
-    if (!window.confirm(`Delete "${job.position}"?`)) return;
+    if (!window.confirm(`Terminate listing "${job.position}"?`)) return;
     setDeleting(true);
     try {
       await api.delete(`/jobs/${job._id}`);
@@ -41,133 +41,199 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
       if (onUpdate) onUpdate(job._id, newStatus);
     } catch (err) {
       console.error(err);
-      alert('Failed to update job status.');
+      alert('Failed to update system status.');
     } finally {
       setToggling(false);
     }
   };
 
   return (
-    <div style={{
-      background: 'var(--card-bg)',
-      border: '3px solid var(--border-color)',
-      boxShadow: '6px 6px 0 var(--shadow-color)',
-      padding: '1.45rem 1.6rem',
-      display: 'flex', flexDirection: 'column', gap: 10,
-    }}>
+    <div 
+      className="nm-card"
+      style={{
+        background: 'var(--nm-surface)',
+        borderWidth: '4px',
+        boxShadow: '8px 8px 0 var(--nm-ink)',
+        padding: '2rem',
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: 16,
+        borderRadius: '0px',
+        transition: 'transform 0.2s ease',
+      }}
+    >
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
-        <div>
-          <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 19, color: 'var(--fg)', lineHeight: 1.2 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ 
+            fontFamily: 'var(--font-display)', 
+            fontWeight: 900, 
+            fontSize: 22, 
+            color: 'var(--nm-text-primary)', 
+            lineHeight: 1.1,
+            textTransform: 'uppercase',
+            letterSpacing: '-0.02em'
+          }}>
             {job.position}
           </div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: 'var(--fg-muted)', marginTop: 5 }}>
-            {ago(job.createdAt)}
+          <div style={{ 
+            fontFamily: 'var(--font-display)', 
+            fontSize: 12, 
+            fontWeight: 800,
+            color: 'var(--nm-text-tertiary)', 
+            marginTop: 8,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
+          }}>
+            LOGGED: {ago(job.createdAt)}
           </div>
         </div>
         <div style={{
-          background: currentStatus === 'OPEN' ? '#4ECDC4' : '#999',
-          border: '2px solid #0a0a0a', padding: '5px 10px',
-          fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 800,
-          textTransform: 'uppercase', color: '#0a0a0a', flexShrink: 0,
+          background: currentStatus === 'OPEN' ? 'var(--nm-success)' : 'var(--nm-text-tertiary)',
+          border: '4px solid var(--nm-ink)', 
+          padding: '6px 14px',
+          fontFamily: 'var(--font-display)', 
+          fontSize: 12, 
+          fontWeight: 900,
+          textTransform: 'uppercase', 
+          color: '#fff', 
+          flexShrink: 0,
+          boxShadow: '3px 3px 0 var(--nm-ink)'
         }}>
           {currentStatus}
         </div>
       </div>
 
       {/* Meta row */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 14px' }}>
+      <div style={{ 
+        display: 'flex', 
+        flexWrap: 'wrap', 
+        gap: '12px 20px',
+        background: 'var(--nm-bg)',
+        padding: '12px 16px',
+        border: '3px solid var(--nm-ink)',
+      }}>
         {job.salary != null && (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontFamily: "'DM Mono', monospace", color: 'var(--fg)', fontWeight: 700 }}>
-            <DollarSign size={13} />{fmt(job.salary)}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontFamily: 'var(--font-display)', color: 'var(--nm-text-primary)', fontWeight: 800 }}>
+            <DollarSign size={16} strokeWidth={3} /> {fmt(job.salary)}
           </span>
         )}
         {job.workSite && (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontFamily: "'DM Mono', monospace", color: 'var(--fg)', fontWeight: 700 }}>
-            <Wifi size={13} />{job.workSite}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontFamily: 'var(--font-display)', color: 'var(--nm-text-primary)', fontWeight: 800 }}>
+            <Wifi size={16} strokeWidth={3} /> {job.workSite.toUpperCase()}
           </span>
         )}
         {job.workDuration && (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontFamily: "'DM Mono', monospace", color: 'var(--fg)', fontWeight: 700 }}>
-            <Clock size={13} />{job.workDuration}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontFamily: 'var(--font-display)', color: 'var(--nm-text-primary)', fontWeight: 800 }}>
+            <Clock size={16} strokeWidth={3} /> {job.workDuration.toUpperCase()}
           </span>
         )}
         {job.yearsOfExperience != null && (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontFamily: "'DM Mono', monospace", color: 'var(--fg)', fontWeight: 700 }}>
-            <Briefcase size={13} />{job.yearsOfExperience}yr exp
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontFamily: 'var(--font-display)', color: 'var(--nm-text-primary)', fontWeight: 800 }}>
+            <Briefcase size={16} strokeWidth={3} /> {job.yearsOfExperience}Y EXP
           </span>
         )}
       </div>
 
       {/* Skill pills */}
       {job.technicalSkills?.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {job.technicalSkills.slice(0, 4).map((s, i) => (
-            <span key={i} style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, padding: '4px 9px', border: '1.5px solid var(--border-color)', color: 'var(--fg)', fontWeight: 700, background: 'var(--bg)', textTransform: 'uppercase' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {job.technicalSkills.slice(0, 3).map((s, i) => (
+            <span key={i} style={{ 
+              fontFamily: 'var(--font-display)', 
+              fontSize: 11, 
+              fontWeight: 900,
+              padding: '5px 10px', 
+              border: '2px solid var(--nm-ink)', 
+              color: 'var(--nm-text-secondary)', 
+              background: 'var(--nm-bg)', 
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em'
+            }}>
               {s}
             </span>
           ))}
-          {job.technicalSkills.length > 4 && (
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, padding: '4px 9px', color: 'var(--fg)', fontWeight: 700 }}>
-              +{job.technicalSkills.length - 4}
+          {job.technicalSkills.length > 3 && (
+            <span style={{ 
+              fontFamily: 'var(--font-display)', 
+              fontSize: 11, 
+              fontWeight: 900,
+              color: 'var(--nm-text-tertiary)',
+              padding: '5px 0'
+            }}>
+              +{job.technicalSkills.length - 3} MORE
             </span>
           )}
         </div>
       )}
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 'auto' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: 10, 
+        flexWrap: 'wrap', 
+        marginTop: '1.5rem',
+        paddingTop: '1.5rem',
+        borderTop: '3px solid var(--nm-ink)'
+      }}>
         <button
           onClick={handleToggleStatus}
           disabled={toggling}
+          className="nm-btn"
           style={{
-            display: 'flex', alignItems: 'center', gap: 4,
-            padding: '8px 13px', fontFamily: "'DM Mono', monospace", fontSize: 11,
-            fontWeight: 700, textTransform: 'uppercase',
-            background: currentStatus === 'OPEN' ? '#FFE630' : '#4ECDC4', color: '#0a0a0a',
-            border: '2px solid #0a0a0a', cursor: toggling ? 'not-allowed' : 'pointer',
+            flex: 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            padding: '12px', fontFamily: 'var(--font-display)', fontSize: 12,
+            fontWeight: 900, textTransform: 'uppercase',
+            background: currentStatus === 'OPEN' ? 'var(--nm-warning)' : 'var(--nm-primary)', 
+            color: '#0a0a0a',
           }}
         >
-          <Power size={13} /> {toggling ? 'WAIT...' : currentStatus === 'OPEN' ? 'CLOSE' : 'OPEN'}
+          <Power size={16} strokeWidth={3} /> {toggling ? 'WAIT' : currentStatus === 'OPEN' ? 'DEACTIVATE' : 'ACTIVATE'}
         </button>
 
         <Link
           to={`/employer/edit-job/${job._id}`}
+          className="nm-btn"
           style={{
-            display: 'flex', alignItems: 'center', gap: 4, textDecoration: 'none',
-            padding: '8px 13px', fontFamily: "'DM Mono', monospace", fontSize: 11,
-            fontWeight: 700, textTransform: 'uppercase',
-            background: '#fff', color: '#0a0a0a',
-            border: '2px solid #0a0a0a', cursor: 'pointer',
+            flex: 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, textDecoration: 'none',
+            padding: '12px', fontFamily: 'var(--font-display)', fontSize: 12,
+            fontWeight: 900, textTransform: 'uppercase',
+            background: 'var(--nm-surface)', color: 'var(--nm-text-primary)',
           }}
         >
-          <Edit size={13} /> EDIT
+          <Edit size={16} strokeWidth={3} /> EDIT
         </Link>
+
         <button
           onClick={() => onViewCandidates && onViewCandidates(job._id)}
+          className="nm-btn"
           style={{
-            display: 'flex', alignItems: 'center', gap: 4,
-            padding: '8px 13px', fontFamily: "'DM Mono', monospace", fontSize: 11,
-            fontWeight: 700, textTransform: 'uppercase',
-            background: '#E0E7FF', color: '#0a0a0a',
-            border: '2px solid #0a0a0a', cursor: 'pointer',
+            width: '100%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+            padding: '14px', fontFamily: 'var(--font-display)', fontSize: 13,
+            fontWeight: 900, textTransform: 'uppercase',
+            background: 'var(--nm-primary)', color: '#fff',
+            marginTop: 4
           }}
         >
-          <Users size={13} /> View Candidates
+          <Users size={18} strokeWidth={3} /> Intelligence Scan
         </button>
         
         <button
           onClick={handleDelete}
           disabled={deleting}
+          className="nm-btn"
           style={{
-            display: 'flex', alignItems: 'center', gap: 4,
-            padding: '8px 13px', fontFamily: "'DM Mono', monospace", fontSize: 11,
-            fontWeight: 700, textTransform: 'uppercase',
-            background: deleting ? '#ccc' : '#FF6B6B', color: '#0a0a0a',
-            border: '2px solid #0a0a0a', cursor: deleting ? 'not-allowed' : 'pointer',
+            width: '100%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+            padding: '14px', fontFamily: 'var(--font-display)', fontSize: 13,
+            fontWeight: 900, textTransform: 'uppercase',
+            background: 'var(--nm-error)', color: '#fff',
           }}
         >
-          <Trash2 size={13} /> {deleting ? 'DELETING...' : 'DELETE'}
+          <Trash2 size={18} strokeWidth={3} /> {deleting ? 'PURGING...' : 'PURGE LISTING'}
         </button>
       </div>
     </div>

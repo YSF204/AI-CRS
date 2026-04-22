@@ -1,21 +1,19 @@
 import { Eye, EyeOff } from 'lucide-react';
 
 export default function AuthInput({ label, error, type, showToggle, showPw, onToggle, ...props }) {
-  const isPassword = type === 'password' || (showToggle && type === undefined);
-
   return (
-    <div style={{ marginBottom: 14, position: showToggle ? 'relative' : undefined }}>
+    <div style={{ marginBottom: 20, position: showToggle ? 'relative' : undefined }}>
       {label && (
         <label
           style={{
             display: 'block',
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontWeight: 700,
+            fontFamily: 'var(--font-display)',
+            fontWeight: 800,
             fontSize: 12,
             textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            color: 'var(--fg)',
-            marginBottom: 6,
+            letterSpacing: '0.12em',
+            color: 'var(--nm-text-secondary)',
+            marginBottom: 8,
           }}
         >
           {label}
@@ -26,28 +24,29 @@ export default function AuthInput({ label, error, type, showToggle, showPw, onTo
         type={showToggle ? (showPw ? 'text' : 'password') : type}
         style={{
           width: '100%',
-          padding: '10px 14px',
-          paddingRight: showToggle ? 40 : 14,
-          fontFamily: "'DM Mono', monospace",
-          fontSize: 13,
-          background: 'var(--bg)',
-          color: 'var(--fg)',
-          borderWidth: '3px',
+          padding: '12px 16px',
+          paddingRight: showToggle ? 44 : 16,
+          fontFamily: 'var(--font-body)',
+          fontSize: 14,
+          background: 'var(--nm-bg)',
+          color: 'var(--nm-text-primary)',
+          borderWidth: '4px',
           borderStyle: 'solid',
-          borderColor: error ? '#FF6B6B' : 'var(--border-color)',
-          boxShadow: '3px 3px 0 var(--shadow-color)',
+          borderColor: error ? 'var(--nm-error)' : 'var(--nm-ink)',
+          boxShadow: '4px 4px 0 var(--nm-ink)',
           outline: 'none',
-          transition: 'box-shadow 0.15s ease',
+          transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
           boxSizing: 'border-box',
+          borderRadius: '0px',
         }}
         onFocus={(e) => {
-          e.target.style.boxShadow = '5px 5px 0 #FFE630';
-          e.target.style.borderColor = '#FFE630';
+          e.target.style.boxShadow = '6px 6px 0 var(--nm-primary)';
+          e.target.style.borderColor = 'var(--nm-primary)';
           if (props.onFocus) props.onFocus(e);
         }}
         onBlur={(e) => {
-          e.target.style.boxShadow = '3px 3px 0 var(--shadow-color)';
-          e.target.style.borderColor = error ? '#FF6B6B' : 'var(--border-color)';
+          e.target.style.boxShadow = '4px 4px 0 var(--nm-ink)';
+          e.target.style.borderColor = error ? 'var(--nm-error)' : 'var(--nm-ink)';
           if (props.onBlur) props.onBlur(e);
         }}
       />
@@ -57,19 +56,27 @@ export default function AuthInput({ label, error, type, showToggle, showPw, onTo
           onClick={onToggle}
           style={{
             position: 'absolute',
-            right: 12,
-            top: label ? 34 : 10,
+            right: 14,
+            top: label ? 38 : 10,
             background: 'none',
             border: 'none',
             cursor: 'pointer',
-            color: 'var(--fg-muted)',
+            color: 'var(--nm-text-tertiary)',
           }}
         >
-          {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+          {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
       )}
       {error && (
-        <div style={{ fontSize: 11, color: '#FF6B6B', marginTop: 4, fontFamily: "'DM Mono', monospace" }}>
+        <div 
+          style={{ 
+            fontSize: 12, 
+            color: 'var(--nm-error)', 
+            marginTop: 6, 
+            fontFamily: 'var(--font-body)',
+            fontWeight: 600,
+          }}
+        >
           {error}
         </div>
       )}

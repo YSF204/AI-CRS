@@ -11,6 +11,7 @@
   display: flex;
   flex-direction: column;
   overflow: visible;
+  border-radius: 0px;
 }
 
 /* Dark mode sidebar adjustments */
@@ -54,37 +55,30 @@
 .mobile-menu-btn {
   display: none;
   position: fixed;
-  top: var(--spacing-4);
-  left: var(--spacing-4);
-  z-index: 40;
-  width: 44px;
-  height: 44px;
+  top: 1rem;
+  left: 1rem;
+  z-index: 60;
+  width: 48px;
+  height: 48px;
   border: 4px solid var(--nm-ink);
-  background: var(--nm-surface);
-  color: var(--nm-text-primary);
+  background: var(--nm-primary);
+  color: #fff;
   cursor: pointer;
   align-items: center;
   justify-content: center;
-  box-shadow: 2px 2px 0 var(--nm-ink);
+  box-shadow: 4px 4px 0 var(--nm-ink);
   border-radius: 0px;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .mobile-menu-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--nm-ink);
+}
+
+.mobile-menu-btn:active {
   transform: translate(2px, 2px);
-  box-shadow: -2px -2px 0 var(--nm-ink);
-  background: var(--nm-primary);
-  color: var(--nm-text-inverse);
-}
-
-[data-theme="dark"] .mobile-menu-btn {
-  background: var(--nm-surface);
-  color: var(--nm-text-primary);
-}
-
-[data-theme="dark"] .mobile-menu-btn:hover {
-  background: var(--nm-primary);
-  color: var(--nm-text-inverse);
+  box-shadow: 2px 2px 0 var(--nm-ink);
 }
 
 /* Show mobile menu button only on mobile */
@@ -95,13 +89,14 @@
 
   /* Adjust dashboard shell padding on mobile to account for menu button */
   .dashboard-shell {
-    padding-top: calc(44px + var(--spacing-4)) !important;
+    padding-top: 5rem !important;
   }
 }
 
 /* Hide menu button when sidebar is open on mobile */
 body.mobile-sidebar-open .mobile-menu-btn {
-  display: none;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Tablet and desktop - always show sidebar */
@@ -116,7 +111,7 @@ body.mobile-sidebar-open .mobile-menu-btn {
 }
 
 .jd-sidebar-header {
-  height: 80px;
+  height: 90px;
   display: flex;
   align-items: center;
   padding: 0 var(--spacing-4);
@@ -129,45 +124,30 @@ body.mobile-sidebar-open .mobile-menu-btn {
   transition: background 0.3s ease, border-color 0.3s ease;
 }
 
-[data-theme="dark"] .jd-sidebar-header {
-  background: var(--nm-surface);
-}
-
 .jd-sidebar-brand {
   display: flex;
   align-items: center;
   gap: var(--spacing-3);
   white-space: nowrap;
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.25rem;
+  font-weight: 800;
+  font-size: 1.5rem;
   color: var(--nm-text-primary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: -0.02em;
   transition: opacity 0.2s;
   width: 100%;
 }
 
-.jd-sidebar-brand-icon {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 4px solid var(--nm-ink);
-  background: var(--nm-primary);
-  color: #fff;
-  font-weight: 900;
-  font-size: 1.2rem;
-  flex-shrink: 0;
-  box-shadow: 4px 4px 0 var(--nm-ink);
-  border-radius: 0px;
-}
-
 .jd-sidebar-brand-text {
   opacity: 0;
-  transform: translateX(-10px);
-  transition: opacity 0.2s, transform 0.2s;
+  transform: translateX(-15px);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0.2rem 0.6rem;
+  background: var(--nm-primary);
+  color: #fff;
+  border: 3px solid var(--nm-ink);
+  boxShadow: 3px 3px 0 var(--nm-ink);
 }
 
 body.sidebar-open .jd-sidebar-brand-text {
@@ -178,10 +158,10 @@ body.sidebar-open .jd-sidebar-brand-text {
 
 .jd-sidebar-toggle {
   position: absolute;
-  top: 1.5rem;
-  right: -16px;
-  width: 32px;
-  height: 32px;
+  top: 1.75rem;
+  right: -18px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -189,43 +169,30 @@ body.sidebar-open .jd-sidebar-brand-text {
   background: var(--nm-surface);
   color: var(--nm-text-primary);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 55;
-  box-shadow: 2px 2px 0 var(--nm-ink);
+  box-shadow: 4px 4px 0 var(--nm-ink);
   border-radius: 0px;
-}
-
-[data-theme="dark"] .jd-sidebar-toggle {
-  background: var(--nm-surface-high);
-  color: var(--nm-text-primary);
-}
-
-/* Mobile sidebar toggle - positioned differently on mobile */
-@media (max-width: 767px) {
-  .jd-sidebar-toggle {
-    top: 1rem;
-    right: auto;
-    left: calc(100% + 8px);
-  }
-
-  body.mobile-sidebar-open .jd-sidebar-toggle {
-    left: calc(100% + 8px);
-  }
 }
 
 .jd-sidebar-toggle:hover {
   background: var(--nm-primary);
   color: #fff;
-  transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0 var(--nm-ink);
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--nm-ink);
+}
+
+.jd-sidebar-toggle:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--nm-ink);
 }
 
 .jd-sidebar-nav {
   flex: 1;
-  padding: var(--spacing-6) var(--spacing-4);
+  padding: var(--spacing-8) var(--spacing-4);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2);
+  gap: var(--spacing-3);
   overflow-y: auto;
   overflow-x: hidden;
 }
@@ -234,37 +201,34 @@ body.sidebar-open .jd-sidebar-brand-text {
   display: flex;
   align-items: center;
   gap: var(--spacing-4);
-  height: 48px;
-  padding: 0 var(--spacing-2);
+  height: 52px;
+  padding: 0 var(--spacing-3);
   color: var(--nm-text-secondary);
   text-decoration: none;
-  font-weight: 700;
+  font-weight: 800;
   border: 4px solid transparent;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
   font-family: var(--font-display);
   text-transform: uppercase;
-  font-size: var(--text-sm);
-  letter-spacing: 0.05em;
+  font-size: 13px;
+  letter-spacing: 0.1em;
   border-radius: 0px;
-}
-
-[data-theme="dark"] .jd-sidebar-link {
-  color: var(--nm-text-secondary);
 }
 
 .jd-sidebar-link:hover {
   border-color: var(--nm-ink);
-  background: var(--nm-surface);
+  background: var(--nm-bg);
   color: var(--nm-text-primary);
-  box-shadow: 2px 2px 0 var(--nm-ink);
+  box-shadow: 4px 4px 0 var(--nm-ink);
+  transform: translate(-2px, -2px);
 }
 
 .jd-sidebar-link[data-active="true"] {
-  border-color: var(--nm-primary);
+  border-color: var(--nm-ink);
   background: var(--nm-primary);
   color: #fff;
-  box-shadow: 2px 2px 0 var(--nm-surface-high);
+  box-shadow: 4px 4px 0 var(--nm-ink);
 }
 
 .jd-sidebar-link-icon {
@@ -277,8 +241,8 @@ body.sidebar-open .jd-sidebar-brand-text {
 
 .jd-sidebar-link-text {
   opacity: 0;
-  transform: translateX(-10px);
-  transition: opacity 0.2s, transform 0.2s;
+  transform: translateX(-15px);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body.sidebar-open .jd-sidebar-link-text {
@@ -298,43 +262,43 @@ body.sidebar-open .jd-sidebar-link-text {
   transition: background 0.3s ease, border-color 0.3s ease;
 }
 
-[data-theme="dark"] .jd-sidebar-footer {
-  background: var(--nm-surface);
-}
-
 .jd-sidebar-action {
   display: flex;
   align-items: center;
   gap: var(--spacing-4);
   height: 48px;
-  padding: 0 var(--spacing-2);
+  padding: 0 var(--spacing-3);
   color: var(--nm-text-primary);
   border: 4px solid transparent;
   background: transparent;
   cursor: pointer;
-  font-weight: 700;
-  transition: all 0.2s;
+  font-weight: 800;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
   width: 100%;
   font-family: var(--font-display);
   text-transform: uppercase;
-  font-size: var(--text-sm);
+  font-size: 12px;
   box-sizing: border-box;
   border-radius: 0px;
+  letter-spacing: 0.05em;
 }
 
 .jd-sidebar-action:hover {
   border-color: var(--nm-ink);
-  background: var(--nm-surface);
-  box-shadow: 2px 2px 0 var(--nm-ink);
+  background: var(--nm-bg);
+  box-shadow: 4px 4px 0 var(--nm-ink);
+  transform: translate(-2px, -2px);
 }
 
 .jd-sidebar-action-text {
   opacity: 0;
-  transition: opacity 0.2s;
+  transform: translateX(-10px);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body.sidebar-open .jd-sidebar-action-text {
   opacity: 1;
+  transform: translateX(0);
   transition-delay: 0.1s;
 }

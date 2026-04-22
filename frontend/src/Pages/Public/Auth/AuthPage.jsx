@@ -29,9 +29,10 @@ export default function AuthPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 'clamp(1rem, 4%, 3rem)',
-        background: 'var(--bg)',
+        padding: 'clamp(1.5rem, 5%, 4rem)',
+        background: 'var(--nm-bg)',
         position: 'relative',
+        overflow: 'hidden',
       }}
     >
       {/* Top bar */}
@@ -45,9 +46,9 @@ export default function AuthPage() {
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          padding: 'clamp(0.6rem, 1.5%, 1rem) clamp(1.25rem, 3%, 2.5rem)',
-          background: 'var(--nav-bg)',
-          borderBottom: '3px solid var(--border-color)',
+          padding: 'clamp(0.75rem, 1.5%, 1.25rem) clamp(1.5rem, 5%, 4rem)',
+          background: 'var(--nm-bg)',
+          borderBottom: '4px solid var(--nm-ink)',
         }}
       >
         <Link
@@ -55,21 +56,24 @@ export default function AuthPage() {
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: 8,
+            gap: 12,
             textDecoration: 'none',
-            color: 'var(--fg)',
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontWeight: 700,
-            fontSize: 14,
+            color: 'var(--nm-text-primary)',
+            fontFamily: 'var(--font-display)',
+            fontWeight: 800,
+            fontSize: 16,
+            textTransform: 'uppercase',
           }}
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={20} strokeWidth={2.5} />
           <span
-            className="bg-brutal-yellow text-black font-bold"
             style={{
-              padding: '0.1em 0.35em',
-              fontSize: 'clamp(0.9rem, 1.5vw, 1.2rem)',
-              letterSpacing: '-0.03em',
+              padding: '0.2rem 0.6rem',
+              background: 'var(--nm-primary)',
+              color: '#fff',
+              border: '3px solid var(--nm-ink)',
+              boxShadow: '3px 3px 0 var(--nm-ink)',
+              letterSpacing: '-0.02em',
             }}
           >
             AI-CRS
@@ -77,41 +81,43 @@ export default function AuthPage() {
         </Link>
         <button
           onClick={toggleTheme}
+          className="nm-btn"
           style={{
-            width: 36,
-            height: 36,
-            border: '3px solid var(--border-color)',
-            boxShadow: '3px 3px 0 var(--shadow-color)',
-            background: theme === 'dark' ? '#FFE630' : 'var(--bg)',
-            color: theme === 'dark' ? '#0a0a0a' : 'var(--fg)',
-            cursor: 'pointer',
+            width: 44,
+            height: 44,
+            padding: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            background: 'var(--nm-surface)',
           }}
         >
-          {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+          {theme === 'light' ? <Moon size={20} strokeWidth={2.5} /> : <Sun size={20} strokeWidth={2.5} />}
         </button>
       </div>
 
       {/* Auth card */}
       <div
+        className="nm-card"
         style={{
           width: '100%',
-          maxWidth: 520,
-          background: 'var(--card-bg)',
-          border: '3px solid var(--border-color)',
-          boxShadow: '8px 8px 0 var(--shadow-color)',
-          padding: 'clamp(1.5rem, 4%, 2.5rem)',
-          marginTop: 60,
+          maxWidth: 540,
+          background: 'var(--nm-surface)',
+          borderWidth: '4px',
+          boxShadow: '12px 12px 0 var(--nm-ink)',
+          padding: 'clamp(2rem, 6%, 3.5rem)',
+          marginTop: 40,
+          position: 'relative',
+          zIndex: 2,
         }}
       >
         {/* Tab toggle */}
         <div
           style={{
             display: 'flex',
-            marginBottom: 'clamp(1.25rem, 3%, 2rem)',
-            border: '3px solid #0a0a0a',
+            marginBottom: '2.5rem',
+            border: '4px solid var(--nm-ink)',
+            background: 'var(--nm-bg)',
           }}
         >
           {['login', 'signup'].map((m) => (
@@ -120,18 +126,18 @@ export default function AuthPage() {
               onClick={() => handleModeChange(m)}
               style={{
                 flex: 1,
-                padding: '10px',
-                fontFamily: "'Space Grotesk', sans-serif",
-                fontWeight: 700,
+                padding: '14px',
+                fontFamily: 'var(--font-display)',
+                fontWeight: 800,
                 fontSize: 14,
                 textTransform: 'uppercase',
-                letterSpacing: '0.06em',
+                letterSpacing: '0.1em',
                 border: 'none',
-                background: mode === m ? '#FFE630' : '#fff',
-                color: '#0a0a0a',
+                background: mode === m ? 'var(--nm-primary)' : 'transparent',
+                color: mode === m ? '#fff' : 'var(--nm-text-secondary)',
                 cursor: 'pointer',
-                borderRight: m === 'login' ? '3px solid #0a0a0a' : 'none',
-                transition: 'background 0.2s ease',
+                borderRight: m === 'login' ? '4px solid var(--nm-ink)' : 'none',
+                transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
               }}
             >
               {m}
@@ -142,29 +148,33 @@ export default function AuthPage() {
         {/* Title */}
         <h1
           style={{
-            fontFamily: "'Space Grotesk', sans-serif",
-            fontWeight: 700,
-            fontSize: 'clamp(1.5rem, 3.5vw, 2.2rem)',
-            color: 'var(--fg)',
-            marginBottom: 4,
+            fontFamily: 'var(--font-display)',
+            fontWeight: 800,
+            fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+            color: 'var(--nm-text-primary)',
+            letterSpacing: '-0.04em',
+            textTransform: 'uppercase',
+            lineHeight: 1,
+            marginBottom: '0.75rem',
           }}
         >
           {mode === 'login' ? 'Welcome Back' : 'Create Account'}
         </h1>
         <p
           style={{
-            fontFamily: "'DM Mono', monospace",
-            fontSize: 12,
-            color: 'var(--fg-muted)',
-            marginBottom: 'clamp(1rem, 2.5%, 1.5rem)',
+            fontFamily: 'var(--font-body)',
+            fontSize: 14,
+            color: 'var(--nm-text-secondary)',
+            marginBottom: '2rem',
+            lineHeight: 1.6,
           }}
         >
           {mode === 'login'
-            ? 'Login to your AI-CRS account'
-            : "Let's get you set up in a few steps"}
+            ? 'Access your intelligent career dashboard.'
+            : "Join the platform building the future of recruitment."}
         </p>
 
-        {/* Form content — both always mounted, shown/hidden via CSS to prevent Google SDK re-init */}
+        {/* Form content */}
         <div style={{ display: mode === 'login' ? 'block' : 'none' }}>
           <LoginForm setMode={setMode} />
         </div>
@@ -173,33 +183,34 @@ export default function AuthPage() {
         </div>
       </div>
 
-      {/* Decorative elements */}
+      {/* Decorative elements - Neo Minimal style */}
       <div
         className="hidden lg:block"
         style={{
           position: 'fixed',
-          bottom: '10%',
-          left: '5%',
-          width: 60,
-          height: 60,
-          background: '#FFE630',
-          border: '3px solid #0a0a0a',
-          transform: 'rotate(12deg)',
-          opacity: 0.5,
+          top: '15%',
+          left: '10%',
+          width: '200px',
+          height: '200px',
+          border: '4px solid var(--nm-ink)',
+          opacity: 0.05,
+          zIndex: 1,
+          transform: 'rotate(-15deg)',
         }}
       />
       <div
         className="hidden lg:block"
         style={{
           position: 'fixed',
-          top: '20%',
-          right: '8%',
-          width: 40,
-          height: 80,
-          background: '#4ECDC4',
-          border: '3px solid #0a0a0a',
-          transform: 'rotate(-8deg)',
-          opacity: 0.4,
+          bottom: '10%',
+          right: '12%',
+          width: '150px',
+          height: '150px',
+          border: '4px solid var(--nm-ink)',
+          background: 'var(--nm-primary)',
+          opacity: 0.1,
+          zIndex: 1,
+          transform: 'rotate(10deg)',
         }}
       />
     </div>

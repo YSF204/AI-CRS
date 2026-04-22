@@ -6,36 +6,36 @@ export default function Footer() {
       id="contact"
       className="w-full"
       style={{
-        borderTop: '1px solid var(--border-color)',
-        backgroundColor: 'var(--bg)',
+        borderTop: '4px solid var(--nm-ink)',
+        backgroundColor: 'var(--nm-bg)',
       }}
     >
       <div
         className="flex flex-col md:flex-row items-center justify-between w-full"
         style={{
-          padding: 'clamp(1.5rem, 3%, 2.5rem) clamp(1.5rem, 5%, 4rem)',
-          gap: 'clamp(1rem, 2%, 1.5rem)',
+          padding: 'clamp(2rem, 4%, 3rem) clamp(1.5rem, 5%, 4rem)',
+          gap: '1.5rem',
         }}
       >
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span
             style={{
-              fontFamily: "'Libre Bodoni', serif",
-              fontSize: 'clamp(1rem, 1.5vw, 1.2rem)',
-              fontWeight: 700,
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(1rem, 1.5vw, 1.25rem)',
+              fontWeight: 800,
               letterSpacing: '-0.02em',
-              color: 'var(--fg)',
+              color: 'var(--nm-text-primary)',
+              textTransform: 'uppercase'
             }}
           >
             AI-CRS
           </span>
           <span
             style={{
-              width: 5,
-              height: 5,
-              borderRadius: '50%',
-              backgroundColor: 'var(--accent)',
+              width: 8,
+              height: 8,
+              backgroundColor: 'var(--nm-primary)',
               display: 'inline-block',
             }}
           />
@@ -48,16 +48,16 @@ export default function Footer() {
               key={link}
               href={`#${link.toLowerCase()}`}
               style={{
-                fontFamily: "'Public Sans', sans-serif",
-                fontSize: 'clamp(0.72rem, 0.9vw, 0.82rem)',
-                fontWeight: 600,
-                letterSpacing: '0.04em',
-                color: 'var(--fg-muted)',
+                fontFamily: 'var(--font-display)',
+                fontSize: 'clamp(0.75rem, 1vw, 0.85rem)',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                color: 'var(--nm-text-secondary)',
                 textDecoration: 'none',
+                textTransform: 'uppercase',
                 transition: 'color 0.2s ease',
               }}
-              onMouseEnter={(e) => (e.target.style.color = 'var(--accent)')}
-              onMouseLeave={(e) => (e.target.style.color = 'var(--fg-muted)')}
+              className="hover:text-[var(--nm-primary)]"
             >
               {link}
             </a>
@@ -68,10 +68,12 @@ export default function Footer() {
         <p
           className="text-center md:text-right"
           style={{
-            fontFamily: "'Public Sans', sans-serif",
-            fontSize: 'clamp(0.6rem, 0.8vw, 0.72rem)',
-            letterSpacing: '0.03em',
-            color: 'var(--fg-subtle)',
+            fontFamily: 'var(--font-body)',
+            fontSize: 'clamp(0.65rem, 0.8vw, 0.75rem)',
+            letterSpacing: '0.05em',
+            color: 'var(--nm-text-tertiary)',
+            textTransform: 'uppercase',
+            fontWeight: 600,
           }}
         >
           Palestine Polytechnic University · Hebron · 2025–2026

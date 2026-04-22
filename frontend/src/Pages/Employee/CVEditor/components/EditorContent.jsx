@@ -45,58 +45,57 @@ export default function EditorContent({
   }
 
   return (
-    <div className="p-5 flex flex-col gap-4 w-full max-w-full">
+    <div className="p-8 flex flex-col gap-6 w-full max-w-full">
       {/* Static Section: Name Override */}
-      <div className="border-[3px] border-[var(--border-color)] bg-[var(--card-bg)] overflow-hidden w-full">
-        <div className="flex items-center gap-2.5 px-4 py-3 border-b-[3px] border-[var(--border-color)] bg-[var(--yellow)]">
-          <User size={15} color="#000" />
-          <span className="font-['Space_Grotesk'] font-black text-xs uppercase tracking-[0.1em] text-[#0a0a0a] flex-1">
-            CV Name Holder
+      <div className="nm-card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div className="flex items-center gap-3 px-5 py-4 border-b-4 border-[var(--nm-ink)] bg-[var(--nm-primary)]">
+          <User size={18} color="#fff" strokeWidth={2.5} />
+          <span className="font-[var(--font-display)] font-black text-xs uppercase tracking-[0.15em] text-white flex-1">
+            Identity Override
           </span>
         </div>
-        <div className="p-4 flex flex-col gap-2">
-          <label className="font-mono text-[9px] uppercase font-bold tracking-widest text-[#0a0a0a]">
-            Who is this CV for?
+        <div className="p-6 flex flex-col gap-4">
+          <label className="font-mono text-[11px] uppercase font-bold tracking-widest text-[var(--nm-text-tertiary)]">
+            Override System Designation
           </label>
           <input
-            className="w-full p-2.5 border-2 border-[var(--border-color)] bg-[var(--bg)] text-sm font-mono focus:outline-none focus:bg-[var(--yellow)]/10"
+            className="nm-input"
             placeholder={
               user
                 ? `${user.firstName || ""} ${user.lastName || ""}`.trim()
-                : "Default Name"
+                : "DEFAULT_USER"
             }
             value={form.fullName}
             onChange={(e) =>
               setForm((f) => ({ ...f, fullName: e.target.value }))
             }
           />
-          <p className="font-mono text-[8px] text-[var(--fg-muted)]">
-            Type any name here to override your account name on the CV preview
-            and PDF.
+          <p className="font-mono text-[10px] text-[var(--nm-text-tertiary)] uppercase font-bold">
+            Note: This value overrides the account primary name for document generation purposes.
           </p>
         </div>
       </div>
 
       {/* Profile image upload — shown for Two-Column template (id:5) */}
       {cv?.templateId === 5 && (
-        <div className="border-[3px] border-[var(--border-color)] bg-[var(--card-bg)] overflow-hidden">
-          <div className="flex items-center gap-2.5 px-4 py-3 border-b-[3px] border-[var(--border-color)] bg-[#6c63ff]">
-            <ImagePlus size={15} style={{ color: "#fff" }} />
-            <span className="font-['Space_Grotesk'] font-black text-xs uppercase tracking-[0.1em] text-white flex-1">
-              Profile Photo
+        <div className="nm-card" style={{ padding: 0, overflow: 'hidden' }}>
+          <div className="flex items-center gap-3 px-5 py-4 border-b-4 border-[var(--nm-ink)] bg-[var(--nm-warning)]">
+            <ImagePlus size={18} color="#fff" strokeWidth={2.5} />
+            <span className="font-[var(--font-display)] font-black text-xs uppercase tracking-[0.15em] text-white flex-1">
+              Visual Asset: Profile
             </span>
           </div>
-          <div className="p-4 flex items-center gap-4">
+          <div className="p-6 flex items-center gap-6">
             {form.profileImage ? (
               <>
                 <img
                   src={form.profileImage}
                   alt="Profile"
-                  className="w-20 h-20 rounded-full object-cover border-2 border-[var(--border-color)]"
+                  className="w-24 h-24 object-cover border-4 border-[var(--nm-ink)]"
                 />
-                <div className="flex flex-col gap-2">
-                  <label className="flex items-center gap-1.5 cursor-pointer font-mono text-[10px] font-bold uppercase tracking-wider text-[var(--fg)] px-3 py-1.5 border-2 border-[var(--border-color)] bg-[var(--bg)] hover:border-[var(--fg)] transition-colors">
-                    <ImagePlus size={11} /> Change
+                <div className="flex flex-col gap-3">
+                  <label className="nm-btn" style={{ fontSize: '11px', padding: '8px 16px', minHeight: '40px' }}>
+                    <ImagePlus size={14} strokeWidth={2.5} /> RE-UPLOAD
                     <input
                       type="file"
                       accept="image/*"
@@ -106,15 +105,17 @@ export default function EditorContent({
                   </label>
                   <button
                     onClick={removeProfileImage}
-                    className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white transition-colors"
+                    className="nm-btn"
+                    style={{ fontSize: '11px', padding: '8px 16px', minHeight: '40px', borderColor: 'var(--nm-error)', color: 'var(--nm-error)' }}
                   >
-                    <Trash2 size={10} /> Remove
+                    <Trash2 size={14} strokeWidth={2.5} /> DELETE
                   </button>
                 </div>
               </>
             ) : (
-              <label className="flex items-center justify-center gap-2 w-full py-4 border-2 border-dashed border-[var(--border-color)] text-[var(--fg-muted)] font-mono text-[11px] font-bold uppercase tracking-wider hover:border-[var(--fg)] hover:text-[var(--fg)] transition-colors cursor-pointer">
-                <ImagePlus size={14} /> Upload Profile Photo (max 500KB)
+              <label className="flex flex-col items-center justify-center gap-3 w-full py-10 border-4 border-dashed border-[var(--nm-ink)] bg-[var(--nm-surface-low)] text-[var(--nm-text-tertiary)] font-mono text-[11px] font-bold uppercase tracking-widest hover:bg-[var(--nm-surface-high)] transition-colors cursor-pointer">
+                <ImagePlus size={24} strokeWidth={2} /> 
+                <span>Upload Profile Data (Max: 512KB)</span>
                 <input
                   type="file"
                   accept="image/*"
@@ -128,41 +129,39 @@ export default function EditorContent({
       )}
 
       {/* Draggable section cards */}
-      {activeSections.map((key) => (
-        <div
-          key={key}
-          draggable
-          onDragStart={() => onDragStart(key)}
-          onDragOver={(e) => onDragOver(e, key)}
-          onDragLeave={onDragLeave}
-          onDrop={() => onDrop(key)}
-          onDragEnd={onDragEnd}
-          style={{
-            transition: "transform 0.15s ease, opacity 0.15s ease",
-            transform: dragOverKey === key ? "scale(1.01)" : "none",
-            borderTop:
-              dragOverKey === key
-                ? "3px solid var(--yellow)"
-                : "3px solid transparent",
-            cursor: "grab",
-          }}
-        >
-          <SectionCard
-            sectionKey={key}
-            form={form}
-            handlers={handlers}
-            onRemove={() => toggleSection(key)}
-            collapsed={!!collapsedSections[key]}
-            onToggleCollapse={() => toggleCollapse(key)}
-            fetchSuggestions={fetchSuggestions}
-            fetchSingleSummarySuggestion={fetchSingleSummarySuggestion}
-            handleSuggestionSelect={handleSuggestionSelect}
-            suggestions={suggestions}
-            isLoadingSuggestions={isLoadingSuggestions}
-          />
-        </div>
-      ))}
-      <div className="h-12" />
+      <div className="flex flex-col gap-6">
+        {activeSections.map((key) => (
+          <div
+            key={key}
+            draggable
+            onDragStart={() => onDragStart(key)}
+            onDragOver={(e) => onDragOver(e, key)}
+            onDragLeave={onDragLeave}
+            onDrop={() => onDrop(key)}
+            onDragEnd={onDragEnd}
+            style={{
+              transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease",
+              transform: dragOverKey === key ? "scale(1.02)" : "none",
+              cursor: "grab",
+            }}
+          >
+            <SectionCard
+              sectionKey={key}
+              form={form}
+              handlers={handlers}
+              onRemove={() => toggleSection(key)}
+              collapsed={!!collapsedSections[key]}
+              onToggleCollapse={() => toggleCollapse(key)}
+              fetchSuggestions={fetchSuggestions}
+              fetchSingleSummarySuggestion={fetchSingleSummarySuggestion}
+              handleSuggestionSelect={handleSuggestionSelect}
+              suggestions={suggestions}
+              isLoadingSuggestions={isLoadingSuggestions}
+            />
+          </div>
+        ))}
+      </div>
+      <div className="h-20" />
     </div>
   );
 }

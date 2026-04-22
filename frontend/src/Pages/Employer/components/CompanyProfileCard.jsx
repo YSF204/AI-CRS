@@ -1,31 +1,54 @@
 import { Link } from 'react-router-dom';
 import { Building2 } from 'lucide-react';
 
-/**
- * CompanyProfileCard
- * Displays the employer's company profile data.
- * Pure presentational — receives profile data as props.
- */
 export default function CompanyProfileCard({ company, loading, error }) {
   return (
-    <div style={{
-      gridColumn: 'span 4',
-      background: 'var(--card-bg)',
-      border: '3px solid var(--border-color)',
-      boxShadow: '5px 5px 0 var(--shadow-color)',
-      padding: '1.5rem',
-      display: 'flex', flexDirection: 'column', gap: 16,
-    }}>
+    <div 
+      className="nm-card"
+      style={{
+        gridColumn: 'span 4',
+        background: 'var(--nm-surface)',
+        borderWidth: '4px',
+        boxShadow: '8px 8px 0 var(--nm-ink)',
+        padding: '2rem',
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: 24,
+        borderRadius: '0px',
+      }}
+    >
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{ background: '#FF6B6B', border: '2px solid #0a0a0a', padding: 12, display: 'inline-flex', flexShrink: 0 }}>
-          <Building2 size={24} color="#0a0a0a" strokeWidth={2.5} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <div style={{ 
+          background: 'var(--nm-error)', 
+          border: '4px solid var(--nm-ink)', 
+          padding: 14, 
+          display: 'inline-flex', 
+          flexShrink: 0,
+          boxShadow: '4px 4px 0 var(--nm-ink)'
+        }}>
+          <Building2 size={28} color="#fff" strokeWidth={3} />
         </div>
         <div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            Company
+          <div style={{ 
+            fontFamily: 'var(--font-display)', 
+            fontSize: 12, 
+            fontWeight: 800,
+            color: 'var(--nm-text-tertiary)', 
+            textTransform: 'uppercase', 
+            letterSpacing: '0.12em' 
+          }}>
+            Entity Profile
           </div>
-          <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: 22, color: 'var(--fg)', letterSpacing: '-0.02em', marginTop: 2 }}>
+          <div style={{ 
+            fontFamily: 'var(--font-display)', 
+            fontWeight: 900, 
+            fontSize: 24, 
+            color: 'var(--nm-text-primary)', 
+            letterSpacing: '-0.02em', 
+            marginTop: 4,
+            textTransform: 'uppercase'
+          }}>
             {loading ? 'Loading...' : (company?.name ?? 'No Profile')}
           </div>
         </div>
@@ -33,12 +56,20 @@ export default function CompanyProfileCard({ company, loading, error }) {
 
       {/* Body */}
       {error ? (
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: '#FF6B6B' }}>
-          Could not load profile.{' '}
-          <Link to="/employer/profile" style={{ color: '#FFE630' }}>Set it up →</Link>
+        <div style={{ 
+          fontFamily: 'var(--font-body)', 
+          fontSize: 14, 
+          color: 'var(--nm-error)',
+          fontWeight: 600,
+          padding: '1rem',
+          border: '3px solid var(--nm-ink)',
+          background: 'var(--nm-bg)'
+        }}>
+          Profile Unreachable.{' '}
+          <Link to="/employer/profile" style={{ color: 'var(--nm-primary)', textDecoration: 'underline' }}>Initialize Now →</Link>
         </div>
       ) : company ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {[
             { label: 'License',  val: company.license },
             { label: 'Contact',  val: company.contactEmail },
@@ -47,10 +78,25 @@ export default function CompanyProfileCard({ company, loading, error }) {
           ].map(({ label, val }) =>
             val ? (
               <div key={label}>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--fg-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 4 }}>
+                <div style={{ 
+                  fontFamily: 'var(--font-display)', 
+                  fontSize: 11, 
+                  fontWeight: 800,
+                  color: 'var(--nm-text-tertiary)', 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '0.1em', 
+                  marginBottom: 6 
+                }}>
                   {label}
                 </div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 15, color: 'var(--fg)', wordBreak: 'break-word', lineHeight: 1.4 }}>
+                <div style={{ 
+                  fontFamily: 'var(--font-body)', 
+                  fontSize: 15, 
+                  fontWeight: 600,
+                  color: 'var(--nm-text-primary)', 
+                  wordBreak: 'break-word', 
+                  lineHeight: 1.4 
+                }}>
                   {val}
                 </div>
               </div>
@@ -58,8 +104,13 @@ export default function CompanyProfileCard({ company, loading, error }) {
           )}
         </div>
       ) : !loading ? (
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--fg-muted)' }}>
-          No company profile found.
+        <div style={{ 
+          fontFamily: 'var(--font-body)', 
+          fontSize: 14, 
+          color: 'var(--nm-text-tertiary)',
+          fontStyle: 'italic'
+        }}>
+          No company profile detected.
         </div>
       ) : null}
     </div>
