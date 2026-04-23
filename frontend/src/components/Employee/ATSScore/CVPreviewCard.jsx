@@ -112,7 +112,7 @@ export default function CVPreviewCard({ cv, loading, onAnalyze }) {
             <span className="flex items-center gap-1.5">
               <Calendar size={14} /> {createdDate}
             </span>
-            <span className="flex items-center gap-1.5 ml-auto text-[var(--jd-text-tertiary)]">
+            <span className="flex items-center gap-1.5 ml-auto text-[var(--nm-text-tertiary)]">
               <LayoutTemplate size={14} /> {templateObj.name}
             </span>
           </div>

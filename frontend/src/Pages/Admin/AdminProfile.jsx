@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { User } from 'lucide-react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import { User, Camera } from 'lucide-react';
 import DashboardNav from '../../components/shared/DashboardNav';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -34,6 +34,8 @@ function Field({ id, label, value, onChange, type = 'text' }) {
 export default function AdminProfile() {
     const { user, updateUserState } = useAuth();
     const { theme } = useTheme();
+    const fileInputRef = useRef(null);
+    const [uploading, setUploading] = useState(false);
     const [form, setForm] = useState({
         firstName: '',
         lastName: '',
@@ -73,6 +75,12 @@ export default function AdminProfile() {
             .toUpperCase();
     }, [fullName]);
 
+    const profilePicUrl = user?.profilePic
+        ? (user.profilePic.startsWith('http')
+            ? user.profilePic
+            : `http://localhost:3001${user.profilePic}`)
+        : null;
+
     const panelStyles = useMemo(() => {
         if (theme === 'dark') {
             return {
@@ -93,6 +101,31 @@ export default function AdminProfile() {
 
     const setField = (field) => (event) => {
         setForm((prev) => ({ ...prev, [field]: event.target.value }));
+    };
+
+    const handlePhotoClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handlePhotoChange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        try {
+            const formData = new FormData();
+            formData.append('profilePic', file);
+            const res = await api.post('/users/profile-picture', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            if (res.data?.data?.user) {
+                updateUserState(res.data.data.user);
+            }
+        } catch (err) {
+            setError('Failed to upload profile picture.');
+        } finally {
+            setUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
     };
 
     const handleSubmit = async (event) => {
@@ -141,16 +174,48 @@ export default function AdminProfile() {
                     }}
                 >
                     <div className="grid gap-6 p-6 md:grid-cols-[auto_1fr] md:items-center">
-                        <div
-                            className="flex h-24 w-24 items-center justify-center border-[4px] text-3xl font-black"
-                            style={{
-                                background: panelStyles.badge,
-                                color: panelStyles.badgeText,
-                                borderColor: 'var(--nm-ink, #000)',
-                                borderRadius: '0px',
-                            }}
-                        >
-                            {initials}
+                        <div className="relative">
+                            <div
+                                className="flex h-24 w-24 items-center justify-center border-[4px] text-3xl font-black overflow-hidden"
+                                style={{
+                                    background: panelStyles.badge,
+                                    color: panelStyles.badgeText,
+                                    borderColor: 'var(--nm-ink, #000)',
+                                    borderRadius: '0px',
+                                }}
+                            >
+                                {profilePicUrl ? (
+                                    <img
+                                        src={profilePicUrl}
+                                        alt={fullName}
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                ) : (
+                                    initials
+                                )}
+                            </div>
+                            <button
+                                onClick={handlePhotoClick}
+                                disabled={uploading}
+                                className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center border-[4px]"
+                                style={{
+                                    background: panelStyles.accent,
+                                    color: '#fff',
+                                    borderColor: 'var(--nm-ink, #000)',
+                                    borderRadius: '0px',
+                                    cursor: uploading ? 'wait' : 'pointer',
+                                }}
+                                title="Change photo"
+                            >
+                                <Camera size={14} />
+                            </button>
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handlePhotoChange}
+                                style={{ display: 'none' }}
+                            />
                         </div>
                         <div>
                             <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-(--fg-muted)">

@@ -10,7 +10,7 @@ import {
   verifyEmail,
   resendVerificationEmail,
 } from "../controllers/authController.js";
-import { googleAuth, googleRegister } from "../controllers/OauthController.js";
+import { googleAuth, googleRegister, googleCompleteProfile } from "../controllers/OauthController.js";
 import { authenticate } from "../middleware/Auth.js";
 
 const router = express.Router();
@@ -30,5 +30,6 @@ router.post("/resend-verification-email", resendVerificationEmail);
 // Google OAuth routes
 router.post("/google", googleAuth);
 router.post("/google/register", googleRegister);
+router.post("/google/complete-profile", googleCompleteProfile);
 
 export default router;

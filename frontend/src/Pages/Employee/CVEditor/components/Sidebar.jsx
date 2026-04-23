@@ -42,7 +42,8 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen, activeSections, t
       <div className="flex-1 overflow-y-auto py-4"
         style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,0,0,0.2) transparent' }}>
         {ALL_SECTIONS.map(({ key, label, icon: Icon, accent, textColor }) => {
-          const active = activeSections.includes(key);
+          const normalize = (str) => String(str).toLowerCase().replace(/\s+/g, '');
+          const active = activeSections.some(s => normalize(s) === normalize(key));
           return (
             <button
               key={key}

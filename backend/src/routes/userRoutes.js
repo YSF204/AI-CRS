@@ -8,6 +8,8 @@ import {
   updateMe,
   deleteMe,
   confirmDelete,
+  uploadProfilePic,
+  uploadProfilePicture,
 } from "../controllers/userController.js";
 import { getAllUsers } from "../controllers/userController.js";
 import { authenticate } from "../middleware/Auth.js";
@@ -21,6 +23,7 @@ userRouter.patch("/updatepassword", authenticate, updatePassword);
 userRouter.patch("/updateMe", authenticate, updateMe);
 userRouter.delete("/deleteMe", authenticate, deleteMe);
 userRouter.get("/confirmDelete/:token", confirmDelete);
+userRouter.post("/profile-picture", authenticate, uploadProfilePic, uploadProfilePicture);
 
 userRouter.get("/", authenticate, isAdmin, getAllUsers);
 

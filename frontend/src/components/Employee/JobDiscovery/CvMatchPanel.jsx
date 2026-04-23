@@ -19,12 +19,11 @@ const CvMatchPanel = ({
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith(".pdf")) {
-      onValidationError?.("Please upload a PDF file only.");
+      onValidationError?.("Invalid File Format: PDF_REQUIRED");
       return;
     }
 
     onValidationError?.("");
-
     onUploadAndMatch(file);
 
     if (fileInputRef.current) {
@@ -35,69 +34,80 @@ const CvMatchPanel = ({
   const hasCvs = cvs && cvs.length > 0;
 
   return (
-    <div className="jd-surface-stack">
-      <div className="flex items-center gap-2 mb-4">
-        <Sparkles size={20} className="text-[var(--jd-primary)]" />
-        <h2 className="font-[var(--jd-font-display)] text-lg font-bold uppercase tracking-tight text-[var(--jd-text-primary)]">
-          Match Jobs to Your CV
-        </h2>
+    <div className="jd-surface-stack p-6 bg-[var(--nm-surface-low)] border-4 border-[var(--nm-ink)] shadow-[6px_6px_0_var(--nm-ink)]">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 flex items-center justify-center bg-[var(--nm-ink)] text-white shadow-[4px_4px_0_var(--nm-primary)]">
+          <Sparkles size={20} strokeWidth={2.5} />
+        </div>
+        <div>
+          <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase">AI_MATCHING_ENGINE</p>
+          <h2 className="font-[var(--font-display)] text-xl font-black uppercase tracking-tighter text-[var(--nm-text-primary)] leading-tight">
+            Sync CV Analysis
+          </h2>
+        </div>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-[var(--jd-danger-light)] border-4 border-[var(--jd-danger)] rounded-none">
-          <p className="text-sm text-[var(--jd-danger)] font-[var(--jd-font-body)]">{error}</p>
+        <div className="mb-6 p-4 bg-[var(--nm-error-surface)] border-4 border-[var(--nm-error)]">
+          <div className="flex items-center gap-2 mb-1">
+             <div className="w-2 h-2 bg-[var(--nm-error)]" />
+             <span className="font-mono text-[10px] font-black uppercase text-[var(--nm-error)]">System_Error</span>
+          </div>
+          <p className="text-sm text-[var(--nm-text-primary)] font-[var(--font-body)] font-bold">{error}</p>
         </div>
       )}
 
-      <div className="space-y-5">
+      <div className="space-y-6">
         {hasCvs && (
-          <div className="p-4 bg-[var(--jd-surface-hover)] border-4 border-[var(--jd-border)] rounded-none">
-            <p className="jd-section-title mb-3">
-              Use Saved CV
-            </p>
-            <label htmlFor="cv-select" className="sr-only">
-              Select a CV
-            </label>
-            <select
-              id="cv-select"
-              value={selectedCvId || ""}
-              onChange={(e) => onCvSelect(e.target.value)}
-              disabled={loading || uploading}
-              className="jd-select mb-2"
-            >
-              <option value="">Select a CV</option>
-              {cvs.map((cv) => (
-                <option key={cv._id} value={cv._id}>
-                  {cv.jobTitle || `CV ${cv._id.substring(0, 6)}`}
-                </option>
-              ))}
-            </select>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-[10px] font-black text-[var(--nm-text-tertiary)] uppercase whitespace-nowrap">Local_Storage</span>
+              <div className="h-[2px] flex-1 bg-[var(--nm-ink)] opacity-10" />
+            </div>
+            
+            <div className="relative">
+              <label htmlFor="cv-select" className="sr-only">
+                Select a CV
+              </label>
+              <select
+                id="cv-select"
+                value={selectedCvId || ""}
+                onChange={(e) => onCvSelect(e.target.value)}
+                disabled={loading || uploading}
+                className="jd-select w-full font-bold uppercase tracking-tight text-xs pr-10"
+              >
+                <option value="">-- SELECT_ASSET --</option>
+                {cvs.map((cv) => (
+                  <option key={cv._id} value={cv._id}>
+                    {cv.jobTitle ? cv.jobTitle.toUpperCase() : `CV_REF_${cv._id.substring(0, 6).toUpperCase()}`}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <button
               type="button"
               onClick={onMatchWithCv}
               disabled={!selectedCvId || loading || uploading}
-              className="jd-btn jd-btn-primary w-full"
+              className="jd-btn jd-btn-primary w-full py-4 font-black shadow-[4px_4px_0_var(--nm-ink)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
             >
-              {loading ? "Matching with CV…" : "Find Jobs with Selected CV"}
+              {loading ? "INITIALIZING_SYNC..." : "LAUNCH_SYNC_PROTOCOL"}
             </button>
           </div>
         )}
 
-        {hasCvs && (
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-1 bg-[var(--jd-border)]" />
-            <span className="text-xs uppercase text-[var(--jd-text-tertiary)] font-semibold tracking-[0.14em]">
-              or
-            </span>
-            <div className="flex-1 h-1 bg-[var(--jd-border)]" />
-          </div>
-        )}
+        <div className="flex items-center gap-3 py-2">
+          <div className="flex-1 h-[2px] bg-[var(--nm-ink)] opacity-20" />
+          <span className="font-mono text-[10px] font-black text-[var(--nm-text-tertiary)] uppercase">OR</span>
+          <div className="flex-1 h-[2px] bg-[var(--nm-ink)] opacity-20" />
+        </div>
 
-        <div className="p-4 bg-[var(--jd-surface-hover)] border-4 border-[var(--jd-border)] border-dashed rounded-none">
-          <p className="jd-section-title mb-3">
-            Upload New PDF
-          </p>
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-[10px] font-black text-[var(--nm-text-tertiary)] uppercase whitespace-nowrap">External_Uplink</span>
+            <div className="h-[2px] flex-1 bg-[var(--nm-ink)] opacity-10" />
+          </div>
+
           <input
             ref={fileInputRef}
             type="file"
@@ -110,12 +120,12 @@ const CvMatchPanel = ({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading || loading}
-            className="jd-btn jd-btn-secondary w-full"
+            className="jd-btn jd-btn-secondary w-full py-4 font-black border-dashed bg-transparent hover:bg-white shadow-[4px_4px_0_var(--nm-ink)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
           >
-            {uploading ? "Uploading and matching…" : "Upload PDF & Find Jobs"}
+            {uploading ? "UPLOADING_ASSET..." : "UPLOAD_PDF_STREAM"}
           </button>
-          <p className="text-xs text-[var(--jd-text-tertiary)] mt-2 font-[var(--jd-font-body)]">
-            Best for testing new resume versions quickly.
+          <p className="text-[10px] text-[var(--nm-text-tertiary)] font-[var(--font-body)] italic text-center">
+            Supported Format: PDF (MAX_SIZE: 5MB)
           </p>
         </div>
       </div>

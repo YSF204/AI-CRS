@@ -308,6 +308,50 @@ export default function CVEditor() {
     }
   };
 
+  const handleAnalyzeSection = async (sectionKey) => {
+    setAnalyzing(true);
+    try {
+      const filtered = filteredFormData();
+      const flat = {};
+
+      if (sectionKey === "summary" && filtered.summary) flat.summary = filtered.summary;
+      if (sectionKey === "experience") {
+        filtered.experience?.forEach((exp, i) => { if (exp.summary) flat[`experience_${i}_summary`] = exp.summary; });
+      }
+      if (sectionKey === "education") {
+        filtered.education?.forEach((edu, i) => { if (edu.summary) flat[`education_${i}_summary`] = edu.summary; });
+      }
+      if (sectionKey === "customSections") {
+        filtered.customSections?.forEach((sec, sIdx) => {
+          sec.items?.forEach((item, iIdx) => {
+            if (item.description) flat[`customSections_${sIdx}_items_${iIdx}_description`] = item.description;
+          });
+        });
+      }
+
+      const response = await api.post("/cvs/analyze-section", {
+        section: sectionKey,
+        data: flat,
+        fullName: userName,
+      });
+
+      if (response.data?.success && response.data?.data) {
+        const result = response.data.data;
+        setAnalysisResult(result);
+        setShowAnalysis(true);
+      } else {
+        showToast("error", "Unable to generate analysis. Please try again.");
+      }
+    } catch (err) {
+      showToast(
+        "error",
+        err?.response?.data?.message || err?.message || "Analysis failed.",
+      );
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
   const handleApplyAnalysis = (updatesToApply) => {
     if (!updatesToApply || Object.keys(updatesToApply).length === 0) {
       showToast("info", "No changes were selected.");
@@ -430,9 +474,12 @@ export default function CVEditor() {
 
   // ── Section toggles ──────────────────────────────────────────────────────────
   const toggleSection = (key) =>
-    setActiveSections((p) =>
-      p.includes(key) ? p.filter((k) => k !== key) : [...p, key],
-    );
+    setActiveSections((p) => {
+      const normalize = (str) => String(str).toLowerCase().replace(/\s+/g, '');
+      const normalizedKey = normalize(key);
+      const exists = p.some((k) => normalize(k) === normalizedKey);
+      return exists ? p.filter((k) => normalize(k) !== normalizedKey) : [...p, key];
+    });
   const toggleCollapse = (key) =>
     setCollapsedSections((p) => ({ ...p, [key]: !p[key] }));
 
@@ -536,7 +583,30 @@ export default function CVEditor() {
         templateId,
         experience: filtered.experience.map((e) => ({ ...e })),
         education: filtered.education.map((e) => ({ ...e })),
-        customSections: filtered.customSections,
+        customSections: filtered.customSections
+          .filter(
+            (s) => s.title || s.items.some((it) => it.name || it.description),
+          )
+          .map((s) => ({
+            title: s.title,
+            sectionType: s.sectionType || "other",
+            items: s.items
+              .filter(
+                (it) =>
+                  it.name ||
+                  it.description ||
+                  it.durationFrom ||
+                  it.durationTo ||
+                  it.link,
+              )
+              .map((it) => ({
+                name: it.name || "",
+                description: it.description,
+                durationFrom: it.durationFrom || "",
+                durationTo: it.durationTo || "",
+                link: it.link,
+              })),
+          })),
         profileImage: form.profileImage,
         layout: {
           sectionOrder: [...activeSections],
@@ -656,6 +726,7 @@ export default function CVEditor() {
               handleSuggestionSelect={handleSuggestionSelect}
               suggestions={suggestions}
               isLoadingSuggestions={isLoadingSuggestions}
+              onAnalyzeSection={handleAnalyzeSection}
             />
           </div>
 

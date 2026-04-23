@@ -49,7 +49,6 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
   } = applyParams;
 
   const [tab, setTab] = useState("update"); // update | view
-  const methodLocked = isEdit;
 
   const handleClose = () => {
     if (onClose) {
@@ -256,27 +255,12 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
             )
           ) : (
             <div className="space-y-8">
-              {!methodLocked && (
-                <MethodSelector
-                  applicationMethod={applicationMethod}
-                  handleSwitchMethod={handleSwitchMethod}
-                  setSelectedCvId={setSelectedCvId}
-                />
-              )}
-              {methodLocked && (
-                <div className="brutal-card bg-[var(--card-bg)] border-4 border-[var(--border-color)] p-4 font-mono text-sm flex items-center justify-between">
-                  <span className="font-bold uppercase tracking-wider text-[var(--fg-muted)]">
-                    Application Method
-                  </span>
-                  <span className="font-black text-lg text-[var(--fg)]">
-                    {applicationMethod === "uploadPdf"
-                      ? "Uploaded PDF"
-                      : applicationMethod === "existingCv"
-                        ? "Existing CV"
-                        : "Unknown"}
-                  </span>
-                </div>
-              )}
+              {/* FIX #4: Allow method switching during update */}
+              <MethodSelector
+                applicationMethod={applicationMethod}
+                handleSwitchMethod={handleSwitchMethod}
+                setSelectedCvId={setSelectedCvId}
+              />
 
               {/* Display validation errors */}
               {Object.keys(validationErrors).length > 0 && (
@@ -303,7 +287,9 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
                   setSelectedCvId={setSelectedCvId}
                   setMatchAnalysis={setMatchAnalysis}
                   handleSubmitApplication={handleSubmitApplication}
-                  handleInstantSubmitApplication={handleInstantSubmitApplication}
+                  handleInstantSubmitApplication={
+                    handleInstantSubmitApplication
+                  }
                   submitting={submitting}
                   isEdit={isEdit}
                   formHasChanged={formHasChanged}
@@ -315,7 +301,9 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
                   cvFile={cvFile}
                   handleFileUpload={handleFileUpload}
                   handleSubmitApplication={handleSubmitApplication}
-                  handleInstantSubmitApplication={handleInstantSubmitApplication}
+                  handleInstantSubmitApplication={
+                    handleInstantSubmitApplication
+                  }
                   submitting={submitting}
                   isEdit={isEdit}
                   formHasChanged={formHasChanged}

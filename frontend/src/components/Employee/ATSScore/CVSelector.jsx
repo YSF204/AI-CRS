@@ -34,7 +34,7 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
   if (isEmpty) {
     return (
       <div className="jd-surface-stack p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
-        <p className="font-mono text-[var(--jd-text-tertiary)] mb-6">
+        <p className="font-mono text-[var(--nm-text-tertiary)] mb-6">
           No CVs found. Create your first CV to unlock ATS optimization insights.
         </p>
         <a
@@ -55,7 +55,7 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
         <h2 className="jd-section-title mb-0 w-full sm:w-auto">Select a CV to Analyze</h2>
         <div className="flex w-full sm:w-auto gap-3 flex-wrap sm:flex-nowrap">
           <div className="input-with-icon-wrapper flex-grow max-w-sm relative flex items-center">
-            <Search size={16} className="absolute left-3 text-[var(--jd-text-tertiary)]" />
+            <Search size={16} className="absolute left-3 text-[var(--nm-text-tertiary)]" />
             <input
               type="text"
               placeholder="Search CV names..."
@@ -90,7 +90,7 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
           ))}
         </div>
       ) : (
-        <div className="jd-surface-stack p-8 text-center text-[var(--jd-text-tertiary)]">
+        <div className="jd-surface-stack p-8 text-center text-[var(--nm-text-tertiary)]">
           No CVs match your search criteria.
         </div>
       )}

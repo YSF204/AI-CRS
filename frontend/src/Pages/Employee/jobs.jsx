@@ -315,7 +315,7 @@ export default function Jobs() {
   const resultCount = mode === "browse" ? browseFilteredJobs.length : cvFilteredJobs.length;
 
   return (
-    <div className="min-h-screen bg-[var(--jd-bg)] text-[var(--jd-text-primary)]">
+    <div className="min-h-screen bg-[var(--nm-bg)] text-[var(--nm-text-primary)]">
       <div className="dashboard-nav-area">
         <DashboardNav role="employee" />
       </div>

@@ -7,6 +7,11 @@ import { getCurrentUserProfile } from "../services/auth/queries/getCurrentUserPr
 import { sendPasswordResetEmail } from "../services/auth/commands/sendPasswordResetEmail.js";
 import { resetUserPassword } from "../services/auth/commands/resetUserPassword.js";
 import { updateUserPassword } from "../services/auth/commands/updateUserPassword.js";
+import User from "../models/User.js";
+import Employer from "../models/Employer.js";
+import { sendEmail } from "../utils/email.js";
+import { generateToken } from "../utils/generateToken.js";
+import crypto from "crypto";
 
 // ================================== //
 //       REGISTER NEW USER            //
@@ -45,7 +50,8 @@ export const register = catchAsync(async (req, res, next) => {
   // if the role is EMPLOYEE , then the account status will be ACTIVE
   // if the role is EMPLOYER , then the account status will be PENDING ( waiting for admin approval )
 
-  const accountStatus = role === "EMPLOYER" ? "PENDING" : "ACTIVE";
+  const normalizedRole = role?.toUpperCase();
+  const accountStatus = normalizedRole === "EMPLOYER" ? "PENDING" : "ACTIVE";
 
   const user = await User.create({
     firstName,
@@ -54,14 +60,14 @@ export const register = catchAsync(async (req, res, next) => {
     password,
     passwordConfirm,
     gender,
-    role,
+    role: normalizedRole,
     telephone: telephone || [],
     age,
     accountStatus, // it will be based on the role
     isEmailVerified: false, // Email not verified yet
   });
 
-  if (role === "EMPLOYER" && company) {
+  if (normalizedRole === "EMPLOYER" && company) {
     await Employer.create({
       userId: user._id,
       company,
@@ -205,7 +211,7 @@ export const register = catchAsync(async (req, res, next) => {
     emailSent: true,
     requiresEmailVerification: true,
     data: {
-      user: resultData.user,
+      user: userResponse,
     },
   });
 });
@@ -235,12 +241,12 @@ export const login = catchAsync(async (req, res, next) => {
   // check if the Account is ACTIVE or not
 
   if (user.accountStatus !== "ACTIVE") {
-    return next(
-      new AppError(
-        `Account is not active. Current status: ${user.accountStatus}`,
-        403,
-      ),
-    );
+    return res.status(403).json({
+      success: false,
+      message: `Account is not active. Current status: ${user.accountStatus}`,
+      role: user.role,
+      accountStatus: user.accountStatus,
+    });
   }
 
   const isPasswordValid = await user.comparePassword(String(password));
@@ -251,12 +257,11 @@ export const login = catchAsync(async (req, res, next) => {
 
   // FIX #1: Check if email is verified before allowing login
   if (!user.isEmailVerified) {
-    return next(
-      new AppError(
-        "Please verify your email first. Check your inbox or request a new verification link.",
-        403,
-      ),
-    );
+    return res.status(403).json({
+      success: false,
+      message: "Please verify your email first. Check your inbox or request a new verification link.",
+      isEmailVerified: false,
+    });
   }
 
   // Gen token for the user
@@ -279,9 +284,9 @@ export const login = catchAsync(async (req, res, next) => {
   res.status(200).json({
     success: true,
     message: "Login successful",
-    token: resultData.token,
+    token: token,
     data: {
-      user: resultData.user,
+      user: userResponse,
     },
   });
 });
@@ -452,22 +457,6 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 export const resetPassword = catchAsync(async (req, res, next) => {
-  const hashedToken = crypto
-    .createHash("sha256")
-    .update(req.params.token)
-    .digest("hex");
-
-  const user = await User.findOne({
-    passwordResetToken: hashedToken,
-    passwordResetExpires: { $gt: Date.now() },
-  });
-
-  res.status(200).json({
-    status: "success",
-    message: "Token has been sent to email",
-  });
-});
-export const resetPasswordToken = catchAsync(async (req, res, next) => {
   const resultData = await resetUserPassword({
     rawToken: req.params.token,
     password: req.body.password,
@@ -528,10 +517,11 @@ export const verifyEmail = catchAsync(async (req, res, next) => {
   }
 
   // Mark email as verified
-  user.isEmailVerified = true;
-  user.emailVerificationToken = undefined;
-  user.emailVerificationExpires = undefined;
-  await user.save({ validateBeforeSave: false });
+  await User.findByIdAndUpdate(user._id, {
+    isEmailVerified: true,
+    emailVerificationToken: undefined,
+    emailVerificationExpires: undefined
+  });
 
   res.status(200).json({
     success: true,
@@ -565,8 +555,9 @@ export const resendVerificationEmail = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   // Send verification email
-  const verificationURL = `${process.env.FRONTEND_URL || "http://localhost:5173"
-    }/verify-email/${verificationToken}`;
+  const verificationURL = `${
+    process.env.FRONTEND_URL || "http://localhost:5173"
+  }/verify-email/${verificationToken}`;
 
   const htmlMessage = `
 <!DOCTYPE html>

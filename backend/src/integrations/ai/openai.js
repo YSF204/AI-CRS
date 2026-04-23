@@ -155,9 +155,17 @@ export const matchCandidatesToJob = async (jobPosting, candidates) => {
  * @returns {Promise<string>} Matching result
  */
 export const matchCVToJobs = async (candidateCV, jobs) => {
-  const response = await getClient().responses.create({
+  // FIX #7: Use chat.completions.create with JSON mode instead of deprecated responses API
+  const response = await getClient().chat.completions.create({
     model: "gpt-4o-mini",
-    input: [
+    temperature: 0.7,
+    response_format: { type: "json_object" },
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a job matching AI. You MUST respond with ONLY valid JSON, no additional text, no markdown formatting. Always return a JSON array of match objects.",
+      },
       {
         role: "user",
         content: JOB_MATCHING_PROMPTS.MATCH_JOBS_TO_CANDIDATE(
@@ -168,7 +176,24 @@ export const matchCVToJobs = async (candidateCV, jobs) => {
     ],
   });
 
-  return response.output_text;
+  const rawResponse = response.choices[0].message.content;
+
+  // FIX #7: Log first 300 chars of response for debugging
+  console.log(
+    `[AI Matching] Raw response (first 300 chars): ${rawResponse.substring(0, 300)}`,
+  );
+
+  // Try to parse as JSON
+  try {
+    const parsed = JSON.parse(rawResponse);
+    // If the result is an object with a 'matches' property, use that; otherwise treat array as-is
+    return Array.isArray(parsed) ? parsed : parsed.matches || parsed;
+  } catch (error) {
+    console.error(`[AI Matching] Failed to parse JSON response:`, rawResponse);
+    throw new Error(
+      `AI matching failed to return valid JSON: ${error.message}`,
+    );
+  }
 };
 
 /**

@@ -25,7 +25,7 @@ const JobPagination = ({ currentPage, totalPages, onPageChange, disabled = false
       role="navigation"
       aria-label="Job list pagination"
     >
-      <div className="text-sm text-[var(--jd-text-secondary)] font-[var(--jd-font-body)]">
+      <div className="text-sm text-[var(--nm-text-secondary)] font-[var(--font-body)]">
         Page {currentPage} of {totalPages}
       </div>
 

@@ -36,7 +36,7 @@ export default function ATSScore() {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-        "Failed to analyze CV. Please try again.",
+          "Failed to analyze CV. Please try again.",
       );
       setSelectedCvId(null);
     } finally {
@@ -51,12 +51,12 @@ export default function ATSScore() {
   };
 
   const stats = [
-    { label: "Total CVs", value: cvs.length, color: "var(--jd-primary)" },
-    { label: "Average Score", value: "—", color: "var(--jd-warning)" },
+    { label: "Total CVs", value: cvs.length, color: "var(--nm-primary)" },
+    { label: "Average Score", value: "—", color: "var(--nm-warning)" },
     {
       label: "Latest Analysis",
       value: atsResult ? "Complete" : "—",
-      color: "var(--jd-success)",
+      color: "var(--nm-success)",
     },
   ];
 
@@ -75,9 +75,12 @@ export default function ATSScore() {
                 <BarChart3 size={14} />
                 ATS Analyzer
               </span>
-              <h1 className="jd-hero-title text-2xl lg:text-3xl font-bold">Optimize for impact.</h1>
+              <h1 className="jd-hero-title text-2xl lg:text-3xl font-bold">
+                Optimize for impact.
+              </h1>
               <p className="jd-hero-copy text-sm">
-                Get detailed ATS optimization recommendations for your CVs before you apply.
+                Get detailed ATS optimization recommendations for your CVs
+                before you apply.
               </p>
             </div>
 
@@ -85,9 +88,17 @@ export default function ATSScore() {
               <p className="jd-section-title mb-2">Analysis Stats</p>
               <div className="jd-meta-grid ats-score-stats-grid">
                 {stats.map((stat) => (
-                  <div key={stat.label} className="jd-stat-card ats-score-stat-card">
+                  <div
+                    key={stat.label}
+                    className="jd-stat-card ats-score-stat-card"
+                  >
                     <p className="jd-stat-label">{stat.label}</p>
-                    <p className="jd-stat-value" style={{ color: stat.color }}>{stat.value}</p>
+                    <p
+                      className="jd-stat-value overflow-hidden text-overflow-ellipsis whitespace-nowrap"
+                      style={{ color: stat.color }}
+                    >
+                      {stat.value}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -96,9 +107,14 @@ export default function ATSScore() {
         </div>
 
         {(error || cvFetchError) && (
-          <div className="mb-6 jd-surface-stack" style={{ borderColor: 'var(--jd-danger)' }}>
-            <p className="font-mono text-sm text-[var(--jd-danger)] m-0 font-bold uppercase py-2">
-              {error || cvFetchError?.response?.data?.message || "Unable to load CVs."}
+          <div
+            className="mb-6 jd-surface-stack"
+            style={{ borderColor: "var(--nm-error)" }}
+          >
+            <p className="font-mono text-sm text-[var(--nm-error)] m-0 font-bold uppercase py-2">
+              {error ||
+                cvFetchError?.response?.data?.message ||
+                "Unable to load CVs."}
             </p>
           </div>
         )}

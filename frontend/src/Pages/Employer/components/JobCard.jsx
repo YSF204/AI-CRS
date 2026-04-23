@@ -20,15 +20,16 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
   const [deleting, setDeleting] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(job.status);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
   const handleDelete = async () => {
-    if (!window.confirm(`Terminate listing "${job.position}"?`)) return;
     setDeleting(true);
     try {
       await api.delete(`/jobs/${job._id}`);
       onDelete(job._id);
     } catch {
       setDeleting(false);
+      setShowConfirmDelete(false);
     }
   };
 
@@ -48,6 +49,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
   };
 
   return (
+    <>
     <div 
       className="nm-card"
       style={{
@@ -222,7 +224,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
         </button>
         
         <button
-          onClick={handleDelete}
+          onClick={() => setShowConfirmDelete(true)}
           disabled={deleting}
           className="nm-btn"
           style={{
@@ -237,5 +239,32 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
         </button>
       </div>
     </div>
+    
+    {/* Confirmation Modal */}
+    {showConfirmDelete && (
+      <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyItems: "center", justifyContent: "center" }}>
+        <div className="nm-card" style={{ background: "var(--nm-surface)", padding: "32px", maxWidth: "400px", width: "90%", border: "4px solid var(--nm-ink)", boxShadow: "8px 8px 0 var(--nm-ink)", borderRadius: "0px" }}>
+          <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "20px", textTransform: "uppercase", marginBottom: "12px", color: "var(--nm-text-primary)" }}>Confirm Termination</h3>
+          <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", marginBottom: "24px", color: "var(--nm-text-secondary)" }}>Are you sure you want to permanently terminate the listing "{job.position}"? This action cannot be undone.</p>
+          <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+            <button 
+              onClick={() => setShowConfirmDelete(false)}
+              className="nm-btn"
+              style={{ padding: "10px 16px", background: "var(--nm-surface-high)", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "12px", textTransform: "uppercase" }}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleDelete}
+              className="nm-btn"
+              style={{ padding: "10px 16px", background: "var(--nm-error)", color: "#fff", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "12px", textTransform: "uppercase" }}
+            >
+              Purge
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

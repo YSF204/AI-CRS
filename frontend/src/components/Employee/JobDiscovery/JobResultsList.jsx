@@ -4,12 +4,15 @@ import { Clock, MapPin, DollarSign, Briefcase } from "lucide-react";
 const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loading }) => {
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="jd-card">
-            <div className="jd-skeleton h-5 w-3/4 mb-2" />
-            <div className="jd-skeleton h-4 w-1/2 mb-2" />
-            <div className="jd-skeleton h-4 w-1/3" />
+          <div key={i} className="jd-card opacity-50">
+            <div className="h-6 w-3/4 mb-3 bg-[var(--nm-surface-high)] animate-pulse" />
+            <div className="h-4 w-1/2 mb-4 bg-[var(--nm-surface-high)] animate-pulse" />
+            <div className="flex gap-4">
+               <div className="h-4 w-20 bg-[var(--nm-surface-high)] animate-pulse" />
+               <div className="h-4 w-20 bg-[var(--nm-surface-high)] animate-pulse" />
+            </div>
           </div>
         ))}
       </div>
@@ -21,68 +24,84 @@ const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loa
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6 pb-12">
       {jobs.map((job, index) => {
         const isSelected = job.id === selectedJobId;
         const salary = job.raw?.salary
           ? `$${job.raw.salary.toLocaleString()}`
-          : "Not specified";
+          : "NOT_SPECIFIED";
 
         return (
           <button
             key={job.id || index}
             type="button"
             onClick={() => onJobSelect(job.id)}
-            className={`jd-card w-full text-left ${isSelected ? "jd-card-selected" : ""}`}
+            className={`w-full text-left transition-all relative group
+              ${isSelected 
+                ? "translate-x-[4px] translate-y-[4px]" 
+                : "hover:translate-x-[2px] hover:translate-y-[2px]"
+              }`}
             aria-pressed={isSelected}
           >
-            <div className="flex flex-col gap-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-[var(--jd-font-display)] text-lg font-bold uppercase tracking-tight text-[var(--jd-text-primary)] truncate">
-                    {job.title}
-                  </h3>
-                  <p className="text-sm text-[var(--jd-text-secondary)] truncate">
-                    {job.company}
-                  </p>
+            <div className={`p-6 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface)] transition-all
+              ${isSelected 
+                ? "shadow-none border-[var(--nm-primary)] bg-[var(--nm-surface-low)]" 
+                : "shadow-[6px_6px_0_var(--nm-ink)] group-hover:shadow-[4px_4px_0_var(--nm-ink)]"
+              }`}
+            >
+              <div className="flex flex-col gap-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2">
+                       <div className={`w-1.5 h-1.5 ${isSelected ? 'bg-[var(--nm-primary)]' : 'bg-[var(--nm-ink)]'}`} />
+                       <span className="font-mono text-[9px] font-black uppercase tracking-widest text-[var(--nm-text-tertiary)]">Job_Listing #{index + 1}</span>
+                    </div>
+                    <h3 className="font-[var(--font-display)] text-xl font-black uppercase tracking-tight text-[var(--nm-text-primary)] leading-none mb-1 group-hover:text-[var(--nm-primary)] transition-colors">
+                      {job.title}
+                    </h3>
+                    <p className="text-sm font-[var(--font-body)] font-bold text-[var(--nm-text-secondary)] uppercase">
+                      {job.company}
+                    </p>
+                  </div>
+                  {job.match !== undefined && job.match !== null && (
+                    <div
+                      className={`px-3 py-1 border-4 border-[var(--nm-ink)] font-black text-xs uppercase tracking-tighter
+                        ${job.match >= 80
+                          ? "bg-[var(--nm-success)] text-white"
+                          : job.match >= 60
+                            ? "bg-[var(--nm-warning)] text-white"
+                            : "bg-[var(--nm-error)] text-white"
+                        }`}
+                    >
+                      {job.match}% MATCH
+                    </div>
+                  )}
                 </div>
-                {job.match !== undefined && job.match !== null && (
-                  <div
-                    className={`jd-badge shrink-0 ${job.match >= 80
-                      ? "jd-badge-success"
-                      : job.match >= 60
-                        ? "jd-badge-warning"
-                        : "jd-badge-danger"
-                      }`}
-                  >
-                    {job.match}% Match
+
+                <div className="flex flex-wrap items-center gap-6">
+                  <div className="flex items-center gap-2 text-[var(--nm-text-secondary)]">
+                    <MapPin size={14} strokeWidth={2.5} className="text-[var(--nm-primary)]" />
+                    <span className="text-[10px] font-black uppercase tracking-wider">{job.location}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[var(--nm-text-secondary)]">
+                    <Briefcase size={14} strokeWidth={2.5} className="text-[var(--nm-primary)]" />
+                    <span className="text-[10px] font-black uppercase tracking-wider">{getJobTypeLabel(job.type)}</span>
+                  </div>
+                  {job.posted && (
+                    <div className="flex items-center gap-2 text-[var(--nm-text-secondary)]">
+                      <Clock size={14} strokeWidth={2.5} className="text-[var(--nm-primary)]" />
+                      <span className="text-[10px] font-black uppercase tracking-wider">{job.posted.toUpperCase()}</span>
+                    </div>
+                  )}
+                </div>
+
+                {job.raw?.salary && (
+                  <div className="pt-4 border-t-2 border-[var(--nm-ink)] border-dashed flex items-center gap-2">
+                    <span className="font-mono text-[10px] font-black text-[var(--nm-text-tertiary)] uppercase">Compensation_Package:</span>
+                    <span className="font-mono text-[11px] font-black text-[var(--nm-text-primary)]">{salary}</span>
                   </div>
                 )}
               </div>
-
-              <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--jd-text-secondary)]">
-                <span className="flex items-center gap-1">
-                  <MapPin size={14} />
-                  {job.location}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Briefcase size={14} />
-                  {getJobTypeLabel(job.type)}
-                </span>
-                {job.posted && (
-                  <span className="flex items-center gap-1">
-                    <Clock size={14} />
-                    {job.posted}
-                  </span>
-                )}
-              </div>
-
-              {job.raw?.salary && (
-                <div className="flex items-center gap-1 text-sm text-[var(--jd-text-secondary)]">
-                  <DollarSign size={14} />
-                  {salary}
-                </div>
-              )}
             </div>
           </button>
         );

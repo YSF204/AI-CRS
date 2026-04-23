@@ -25,6 +25,7 @@ export default function EditorContent({
   handleSuggestionSelect,
   suggestions,
   isLoadingSuggestions,
+  onAnalyzeSection,
 }) {
   if (activeSections.length === 0) {
     return (
@@ -157,6 +158,7 @@ export default function EditorContent({
               handleSuggestionSelect={handleSuggestionSelect}
               suggestions={suggestions}
               isLoadingSuggestions={isLoadingSuggestions}
+              onAnalyzeSection={onAnalyzeSection}
             />
           </div>
         ))}

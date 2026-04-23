@@ -12,6 +12,7 @@ export default function CVs() {
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const fileInputRef = useRef(null);
 
   const {
@@ -44,13 +45,15 @@ export default function CVs() {
     return list;
   }, [cvs, query, sortBy]);
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this CV?")) return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await api.delete(`/cvs/${id}`);
+      await api.delete(`/cvs/${deleteTarget}`);
+      setDeleteTarget(null);
       await refetch();
     } catch (err) {
       setError(err?.response?.data?.message || "Unable to delete CV.");
+      setDeleteTarget(null);
     }
   };
 
@@ -82,7 +85,7 @@ export default function CVs() {
   };
 
   return (
-    <div className="cvs-page min-h-screen bg-[var(--bg)] text-[var(--fg)]">
+    <div className="cvs-page min-h-screen bg-[var(--nm-bg)] text-[var(--nm-text-primary)]">
       <div className="dashboard-nav-area">
         <DashboardNav role="employee" />
       </div>
@@ -95,7 +98,7 @@ export default function CVs() {
               <FileText size={24} className="text-[var(--nm-primary)]" />
               Resume Vault
             </h1>
-            <p className="font-mono text-xs text-[var(--fg-muted)]">
+            <p className="font-mono text-xs text-[var(--nm-text-tertiary)]">
               {cvs.length} professional resumes on file
             </p>
           </div>
@@ -131,7 +134,7 @@ export default function CVs() {
           <h2 className="jd-section-title mb-0">Saved CVs ({cvs.length})</h2>
           <div className="flex w-full sm:w-auto gap-3">
             <div className="relative flex-grow sm:max-w-xs flex items-center">
-              <Search size={16} className="absolute left-3 text-[var(--fg-muted)]" />
+              <Search size={16} className="absolute left-3 text-[var(--nm-text-tertiary)]" />
               <input
                 type="text"
                 placeholder="Search resumes..."
@@ -185,7 +188,7 @@ export default function CVs() {
                     <Edit size={14} />
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); handleDelete(cv._id); }}
+                    onClick={(e) => { e.stopPropagation(); setDeleteTarget(cv._id); }}
                     className="w-8 h-8 flex items-center justify-center bg-[var(--nm-error)] text-white border-4 border-[var(--nm-ink)] hover:translate-x-[2px] hover:translate-y-[2px] transition-transform"
                     title="Delete CV"
                   >
@@ -197,17 +200,43 @@ export default function CVs() {
 
             {/* Empty State / Add Card */}
             <div
-              className="jd-panel flex flex-col items-center justify-center gap-4 min-h-[400px] border-dashed border-[var(--fg-muted)] cursor-pointer hover:bg-[var(--nm-surface-high)] transition-colors"
+              className="jd-panel flex flex-col items-center justify-center gap-4 min-h-[400px] border-dashed border-[var(--nm-text-tertiary)] cursor-pointer hover:bg-[var(--nm-surface-high)] transition-colors"
               onClick={goToTemplates}
             >
-              <div className="w-16 h-16 border-4 border-dashed border-[var(--fg-muted)] flex items-center justify-center">
-                <Plus size={32} className="text-[var(--fg-muted)]" />
+              <div className="w-16 h-16 border-4 border-dashed border-[var(--nm-text-tertiary)] flex items-center justify-center">
+                <Plus size={32} className="text-[var(--nm-text-tertiary)]" />
               </div>
               <p className="jd-section-title mb-0">Add New Resume</p>
             </div>
           </div>
         )}
       </div>
+
+      {/* Confirmation Modal */}
+      {deleteTarget && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyItems: "center", justifyContent: "center" }}>
+          <div className="nm-card" style={{ background: "var(--nm-surface)", padding: "32px", maxWidth: "400px", width: "90%", border: "4px solid var(--nm-ink)", boxShadow: "8px 8px 0 var(--nm-ink)", borderRadius: "0px" }}>
+            <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "20px", textTransform: "uppercase", marginBottom: "12px", color: "var(--nm-text-primary)" }}>Confirm Deletion</h3>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", marginBottom: "24px", color: "var(--nm-text-secondary)" }}>Are you sure you want to permanently delete this CV? This action cannot be undone.</p>
+            <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+              <button 
+                onClick={() => setDeleteTarget(null)}
+                className="nm-btn"
+                style={{ padding: "10px 16px", background: "var(--nm-surface-high)", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "12px", textTransform: "uppercase" }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleDelete}
+                className="nm-btn"
+                style={{ padding: "10px 16px", background: "var(--nm-error)", color: "#fff", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "12px", textTransform: "uppercase" }}
+              >
+                Purge CV
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

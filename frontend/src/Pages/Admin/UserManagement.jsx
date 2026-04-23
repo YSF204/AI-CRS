@@ -369,7 +369,6 @@ export default function UserManagement() {
                           fontFamily: 'var(--font-body)',
                           fontSize: 'var(--text-xs)',
                           color: 'var(--nm-text-tertiary)',
-                          fontFamily: 'var(--font-body)',
                         }}>
                           {userId}
                         </div>

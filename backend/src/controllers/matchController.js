@@ -44,16 +44,16 @@ const buildLocalJobRecommendations = (cv, jobs, normalizedProfile) => {
       );
       const experienceScore = job.yearsOfExperience
         ? Math.min(
-          100,
-          Math.round((cvExperience / job.yearsOfExperience) * 100),
-        )
+            100,
+            Math.round((cvExperience / job.yearsOfExperience) * 100),
+          )
         : 100;
       const score = Math.min(
         100,
         Math.round(
           techMatched.length * 3 +
-          softMatched.length * 1.5 +
-          experienceScore * 0.2,
+            softMatched.length * 1.5 +
+            experienceScore * 0.2,
         ),
       );
 
@@ -191,9 +191,8 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
     );
     const match = await withTimeout(matchCVToJobs(cvText, jobsText), 25000);
 
-    // Safe JSON parsing with error recovery
-    let cleanJson = match.replace(/```json|```/g, "").trim();
-    let aiResult = JSON.parse(cleanJson);
+    // FIX #7: matchCVToJobs now returns parsed JSON directly, not a string
+    let aiResult = Array.isArray(match) ? match : match;
 
     if (Array.isArray(aiResult)) {
       console.log(`[recommendJobs] AI returned ${aiResult.length} matches`);

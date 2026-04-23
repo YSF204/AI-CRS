@@ -8,38 +8,38 @@ const JobDiscoveryState = ({ type, title, description, action, onAction }) => {
         return {
           icon: Loader2,
           iconProps: { className: "animate-spin" },
-          defaultTitle: "Loading Jobs…",
-          defaultDescription: "Please wait while we fetch available positions."
+          defaultTitle: "SYNCHRONIZING_MATRIX",
+          defaultDescription: "Fetching available positions from the central database..."
         };
       case "error":
         return {
           icon: AlertCircle,
-          defaultTitle: "Unable to load jobs",
-          defaultDescription: "There was a problem loading the jobs. Please try again."
+          defaultTitle: "CRITICAL_SYSTEM_ERROR",
+          defaultDescription: "The job retrieval protocol encountered an unexpected anomaly."
         };
       case "empty":
         return {
           icon: Search,
-          defaultTitle: "No jobs found",
-          defaultDescription: "Try adjusting your search or filters to find more results."
+          defaultTitle: "ZERO_MATCHES_DETECTED",
+          defaultDescription: "No available positions align with your current search parameters."
         };
       case "no-results":
         return {
           icon: Inbox,
-          defaultTitle: "No matching jobs",
-          defaultDescription: "We couldn't find any jobs that match your criteria."
+          defaultTitle: "EMPTY_RESULT_SET",
+          defaultDescription: "The matching engine has exhausted all available possibilities."
         };
       case "no-cv":
         return {
           icon: FileText,
-          defaultTitle: "No CVs uploaded",
-          defaultDescription: "Upload a CV to get personalized job recommendations."
+          defaultTitle: "ASSET_MISSING",
+          defaultDescription: "Upload a CV profile to initialize the personalized matching engine."
         };
       default:
         return {
           icon: Inbox,
-          defaultTitle: "No results",
-          defaultDescription: "No results found."
+          defaultTitle: "NULL_STATE",
+          defaultDescription: "No data available in the current context."
         };
     }
   };
@@ -48,19 +48,26 @@ const JobDiscoveryState = ({ type, title, description, action, onAction }) => {
   const Icon = config.icon;
 
   return (
-    <div className="jd-state-container">
-      <div className="jd-state-icon">
-        <Icon size={48} {...config.iconProps} />
+    <div className="p-12 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface-low)] text-left shadow-[8px_8px_0_var(--nm-ink)]">
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-16 h-16 flex items-center justify-center bg-[var(--nm-ink)] text-white shadow-[6px_6px_0_var(--nm-primary)]">
+          <Icon size={32} strokeWidth={2.5} {...config.iconProps} />
+        </div>
+        <div className="w-2 h-2 bg-[var(--nm-primary)] animate-pulse" />
       </div>
-      <h3 className="jd-state-title">{title || config.defaultTitle}</h3>
-      <p className="jd-state-description">{description || config.defaultDescription}</p>
+      <h3 className="font-[var(--font-display)] text-2xl font-black uppercase tracking-tighter text-[var(--nm-text-primary)] leading-none mb-3">
+        {title ? title.toUpperCase().replace(/\s+/g, '_') : config.defaultTitle}
+      </h3>
+      <p className="font-[var(--font-body)] text-[var(--nm-text-secondary)] font-bold text-sm max-w-md mb-8">
+        {description || config.defaultDescription}
+      </p>
       {action && onAction && (
         <button
           type="button"
           onClick={onAction}
-          className="jd-btn jd-btn-primary"
+          className="jd-btn jd-btn-primary px-8 py-4 font-black shadow-[6px_6px_0_var(--nm-ink)] active:shadow-none active:translate-x-[6px] active:translate-y-[6px]"
         >
-          {action}
+          {action.toUpperCase()}
         </button>
       )}
     </div>

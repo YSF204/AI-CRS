@@ -15,11 +15,12 @@ const JobDetailsPanel = ({
 }) => {
   if (!job) {
     return (
-      <div className="jd-detail-panel h-full flex items-center justify-center">
-        <div className="text-left">
-          <Briefcase size={48} className="mb-4 text-[var(--jd-primary)]" />
-          <p className="text-[var(--jd-text-secondary)] font-[var(--jd-font-body)] max-w-sm">
-            Select a job to view details and apply
+      <div className="jd-detail-panel h-full flex items-center justify-center bg-[var(--nm-surface-low)]">
+        <div className="text-left p-8 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface)] shadow-[8px_8px_0_var(--nm-ink)]">
+          <Briefcase size={48} className="mb-4 text-[var(--nm-primary)]" />
+          <h3 className="font-[var(--font-display)] font-black text-xl uppercase mb-2">Discovery Portal</h3>
+          <p className="text-[var(--nm-text-secondary)] font-[var(--font-body)] max-w-sm">
+            Select a job from the matrix to initialize detail extraction and application protocols.
           </p>
         </div>
       </div>
@@ -28,88 +29,105 @@ const JobDetailsPanel = ({
 
   const salary = job.raw?.salary
     ? `$${job.raw.salary.toLocaleString()}`
-    : "Not specified";
+    : "NOT_SPECIFIED";
   const sourceUrl = job.externalUrl || job.raw?.externalUrl || job.raw?.url || "";
 
   return (
-    <div className="jd-detail-panel h-full flex flex-col">
-      <div className="flex items-start justify-between gap-4 mb-6">
-        <div className="flex-1 min-w-0">
-          <p className="jd-section-title mb-2">Selected Job</p>
-          <h2 className="font-[var(--jd-font-display)] text-2xl font-bold uppercase tracking-tight text-[var(--jd-text-primary)] mb-2">
-            {job.title}
-          </h2>
-          <p className="text-sm text-[var(--jd-text-secondary)] mb-3 font-[var(--jd-font-body)]">
-            {job.company} • {job.location}
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="jd-badge jd-badge-primary">
-              {job.type}
-            </span>
-            {job.raw?.salary && (
-              <span className="flex items-center gap-1 text-sm text-[var(--jd-text-secondary)]">
-                <DollarSign size={14} />
-                {salary}
+    <div className="jd-detail-panel h-full flex flex-col bg-[var(--nm-surface)] overflow-hidden">
+      {/* Header Section */}
+      <div className="p-6 border-b-4 border-[var(--nm-ink)] bg-[var(--nm-surface-low)] relative">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-3">
+               <div className="w-2 h-2 bg-[var(--nm-primary)] animate-pulse" />
+               <p className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--nm-text-tertiary)]">Protocol: JOB_DETAIL_VIEW</p>
+            </div>
+            <h2 className="font-[var(--font-display)] text-3xl font-black uppercase tracking-tighter text-[var(--nm-text-primary)] leading-none mb-4">
+              {job.title}
+            </h2>
+            <div className="flex flex-col gap-1.5 mb-5">
+              <div className="flex items-center gap-2 text-[var(--nm-text-secondary)] font-[var(--font-body)] font-bold text-sm">
+                <Briefcase size={14} className="text-[var(--nm-primary)]" />
+                <span className="uppercase">{job.company}</span>
+              </div>
+              <div className="flex items-center gap-2 text-[var(--nm-text-secondary)] font-[var(--font-body)] text-sm">
+                <MapPin size={14} className="text-[var(--nm-primary)]" />
+                <span>{job.location}</span>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="jd-badge jd-badge-primary">
+                {job.type}
               </span>
-            )}
-            {job.posted && (
-              <span className="flex items-center gap-1 text-sm text-[var(--jd-text-secondary)]">
-                <Clock size={14} />
-                {job.posted}
-              </span>
-            )}
+              {job.raw?.salary && (
+                <div className="flex items-center gap-2 px-3 py-1 border-2 border-[var(--nm-ink)] bg-[var(--nm-surface)] font-mono text-[10px] font-bold">
+                  <DollarSign size={12} />
+                  {salary}
+                </div>
+              )}
+              {job.posted && (
+                <div className="flex items-center gap-2 px-3 py-1 border-2 border-[var(--nm-ink)] bg-[var(--nm-surface)] font-mono text-[10px] font-bold">
+                  <Clock size={12} />
+                  {job.posted.toUpperCase()}
+                </div>
+              )}
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-12 h-12 flex items-center justify-center border-4 border-[var(--nm-ink)] bg-[var(--nm-surface)] hover:bg-[var(--nm-error)] hover:text-white transition-all shadow-[4px_4px_0_var(--nm-ink)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_var(--nm-ink)] active:translate-x-[4px] active:translate-y-[4px] active:shadow-none"
+            aria-label="Close job details"
+          >
+            <X size={24} strokeWidth={3} />
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="jd-btn jd-btn-ghost"
-          aria-label="Close job details"
-        >
-          <X size={20} />
-        </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-6">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-[var(--nm-bg)]" style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--nm-ink) transparent' }}>
         {job.raw?.description && (
-          <div className="jd-card">
-            <h3 className="jd-section-title mb-2">
-              Job Description
-            </h3>
-            <p className="text-sm text-[var(--jd-text-secondary)] leading-relaxed font-[var(--jd-font-body)]">
-              {job.raw.description}
-            </p>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="h-0.5 flex-1 bg-[var(--nm-ink)]" />
+              <h3 className="font-[var(--font-display)] font-black text-xs uppercase tracking-widest text-[var(--nm-text-primary)]">
+                Mission Overview
+              </h3>
+              <div className="h-0.5 w-4 bg-[var(--nm-ink)]" />
+            </div>
+            <div className="p-6 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface)] shadow-[6px_6px_0_var(--nm-ink)]">
+              <p className="text-sm text-[var(--nm-text-secondary)] leading-relaxed font-[var(--font-body)]">
+                {job.raw.description}
+              </p>
+            </div>
           </div>
         )}
 
-        <div className="jd-card">
-          <h3 className="jd-section-title mb-3">
-            Requirements
-          </h3>
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-0.5 flex-1 bg-[var(--nm-ink)]" />
+            <h3 className="font-[var(--font-display)] font-black text-xs uppercase tracking-widest text-[var(--nm-text-primary)]">
+              Requirements Matrix
+            </h3>
+            <div className="h-0.5 w-4 bg-[var(--nm-ink)]" />
+          </div>
 
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-4">
             {job.raw?.yearsOfExperience !== undefined && (
-              <div>
-                <p className="text-xs font-semibold text-[var(--jd-text-tertiary)] mb-1">
-                  Years of Experience
-                </p>
-                <p className="text-sm text-[var(--jd-text-primary)]">
-                  {job.raw.yearsOfExperience}+ years
+              <div className="p-4 border-2 border-[var(--nm-ink)] bg-[var(--nm-surface-low)]">
+                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase mb-1">XP_REQUIRED</p>
+                <p className="font-[var(--font-display)] font-bold text-base text-[var(--nm-text-primary)] uppercase">
+                  {job.raw.yearsOfExperience}+ Standard Years
                 </p>
               </div>
             )}
 
             {job.raw?.technicalSkills?.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-[var(--jd-text-tertiary)] mb-1">
-                  Technical Skills
-                </p>
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
+              <div className="p-4 border-2 border-[var(--nm-ink)] bg-[var(--nm-surface-low)]">
+                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase mb-2">Technical_Assets</p>
+                <div className="flex flex-wrap gap-2">
                   {job.raw.technicalSkills.map((skill, i) => (
-                    <span
-                      key={i}
-                      className="text-sm font-medium font-[var(--jd-font-display)] text-[var(--jd-text-primary)]"
-                    >
+                    <span key={i} className="px-2 py-1 bg-[var(--nm-ink)] text-white font-mono text-[10px] font-bold uppercase">
                       {skill}
                     </span>
                   ))}
@@ -118,70 +136,60 @@ const JobDetailsPanel = ({
             )}
 
             {job.raw?.softSkills?.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-[var(--jd-text-tertiary)] mb-1">
-                  Soft Skills
-                </p>
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
+              <div className="p-4 border-2 border-[var(--nm-ink)] bg-[var(--nm-surface-low)]">
+                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase mb-2">Behavioral_Vectors</p>
+                <div className="flex flex-wrap gap-2">
                   {job.raw.softSkills.map((skill, i) => (
-                    <span
-                      key={i}
-                      className="text-sm font-medium font-[var(--jd-font-display)] text-[var(--jd-text-primary)]"
-                    >
+                    <span key={i} className="px-2 py-1 border border-[var(--nm-ink)] bg-white text-[var(--nm-ink)] font-mono text-[10px] font-bold uppercase">
                       {skill}
                     </span>
                   ))}
                 </div>
               </div>
             )}
-
-            {job.raw?.language?.length > 0 && (
-              <div>
-                <p className="text-xs font-semibold text-[var(--jd-text-tertiary)] mb-1">
-                  Languages
-                </p>
-                <div className="flex flex-wrap gap-x-3 gap-y-1">
-                  {job.raw.language.map((lang, i) => (
-                    <span
-                      key={i}
-                      className="text-sm font-medium font-[var(--jd-font-display)] text-[var(--jd-text-primary)]"
-                    >
-                      {lang}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
 
-        <div className="jd-card">
-          <h3 className="jd-section-title mb-2">
-            Details
-          </h3>
-          <div className="space-y-2 text-sm text-[var(--jd-text-secondary)]">
-            <div className="flex items-center gap-2">
-              <MapPin size={16} className="text-[var(--jd-text-tertiary)]" />
-              <span className="text-[var(--jd-text-primary)]">Work Site:</span>
-              <span>{job.raw?.workSite || job.location || "N/A"}</span>
+        <div className="space-y-4">
+           <div className="flex items-center gap-3">
+            <div className="h-0.5 flex-1 bg-[var(--nm-ink)]" />
+            <h3 className="font-[var(--font-display)] font-black text-xs uppercase tracking-widest text-[var(--nm-text-primary)]">
+              Operational Details
+            </h3>
+            <div className="h-0.5 w-4 bg-[var(--nm-ink)]" />
+          </div>
+          <div className="p-6 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface)] shadow-[6px_6px_0_var(--nm-ink)] space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 flex items-center justify-center bg-[var(--nm-surface-low)] border-2 border-[var(--nm-ink)]">
+                <MapPin size={18} className="text-[var(--nm-primary)]" />
+              </div>
+              <div>
+                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase">Deployment_Zone</p>
+                <p className="font-[var(--font-display)] font-bold text-sm text-[var(--nm-text-primary)] uppercase">{job.raw?.workSite || job.location || "REMOTE_OPS"}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Briefcase size={16} className="text-[var(--jd-text-tertiary)]" />
-              <span className="text-[var(--jd-text-primary)]">Duration:</span>
-              <span>{job.raw?.workDuration || "N/A"}</span>
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 flex items-center justify-center bg-[var(--nm-surface-low)] border-2 border-[var(--nm-ink)]">
+                <Briefcase size={18} className="text-[var(--nm-primary)]" />
+              </div>
+              <div>
+                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase">Contract_Duration</p>
+                <p className="font-[var(--font-display)] font-bold text-sm text-[var(--nm-text-primary)] uppercase">{job.raw?.workDuration || "PERMANENT_STATION"}</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-6">
+      {/* Action Footer */}
+      <div className="p-6 border-t-4 border-[var(--nm-ink)] bg-[var(--nm-surface)]">
         <button
           type="button"
           onClick={() => onApply(job)}
-          className="jd-btn jd-btn-primary w-full"
+          className="jd-btn jd-btn-primary w-full py-6 text-base font-black shadow-[6px_6px_0_var(--nm-ink)] active:shadow-none active:translate-x-[6px] active:translate-y-[6px]"
         >
-          {sourceUrl ? "Open Source" : "Apply Now"}
-          <ChevronRight size={16} />
+          {sourceUrl ? "Initialize Source Uplink" : "Initialize Application"}
+          <ChevronRight size={20} strokeWidth={3} />
         </button>
       </div>
     </div>

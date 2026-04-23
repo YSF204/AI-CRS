@@ -1,5 +1,5 @@
 import React from "react";
-import { GripVertical, ChevronDown, X, Plus, Trash2 } from "lucide-react";
+import { GripVertical, ChevronDown, X, Plus, Trash2, Sparkles } from "lucide-react";
 import {
   getSectionMeta,
   inpCls,
@@ -27,6 +27,7 @@ export default function SectionCard({
   handleSuggestionSelect,
   suggestions,
   isLoadingSuggestions,
+  onAnalyzeSection,
 }) {
   const meta = getSectionMeta(sectionKey);
   const Icon = meta.icon;
@@ -586,6 +587,27 @@ export default function SectionCard({
         </span>
         
         <div className="flex items-center gap-2">
+          {/* Analyze */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAnalyzeSection(sectionKey);
+            }}
+            title={`Analyze ${meta.label}`}
+            className="nm-btn"
+            style={{
+              padding: "6px 12px",
+              minHeight: "32px",
+              background: "rgba(0,0,0,0.1)",
+              borderColor: meta.textColor,
+              color: meta.textColor,
+              fontSize: '10px',
+              borderWidth: '2px'
+            }}
+          >
+            <Sparkles size={12} strokeWidth={3} /> REVIEW
+          </button>
           {/* Collapse toggle */}
           <button
             type="button"

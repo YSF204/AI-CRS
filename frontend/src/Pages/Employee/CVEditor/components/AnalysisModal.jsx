@@ -139,16 +139,34 @@ export default function AnalysisModal({
                     border: "1px solid rgba(0,123,255,0.18)",
                   }}
                 >
-                  <h3
-                    style={{
-                      margin: 0,
-                      marginBottom: "16px",
-                      fontSize: "1.05rem",
-                      fontWeight: 700,
-                    }}
-                  >
-                    Actionable Improvements
-                  </h3>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
+                    <h3
+                      style={{
+                        margin: 0,
+                        fontSize: "1.05rem",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Actionable Improvements
+                    </h3>
+                    {analysis.atsScore != null && (
+                      <span style={{
+                        background: analysis.atsScore >= 80 ? "#166534" : analysis.atsScore >= 60 ? "#ca8a04" : "#b91c1c",
+                        color: "#fff",
+                        padding: "4px 10px",
+                        borderRadius: "12px",
+                        fontSize: "0.85rem",
+                        fontWeight: 700,
+                      }}>
+                        ATS: {analysis.atsScore}%
+                      </span>
+                    )}
+                  </div>
+                  {analysis.atsFeedback && (
+                    <p style={{ margin: "0 0 16px 0", fontSize: "0.95rem", color: "#333", background: "#fff", padding: "12px", borderRadius: "8px", border: "1px solid #ddd" }}>
+                      {analysis.atsFeedback}
+                    </p>
+                  )}
                   <div style={{ display: "grid", gap: "16px" }}>
                     {analysis.issues.map((issue) => (
                       <div

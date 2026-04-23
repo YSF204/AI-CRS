@@ -31,7 +31,7 @@ const JobFiltersPanel = ({ filters, onFilterChange, onClearFilters, isOpen, onTo
         aria-controls="filters-content"
       >
         <div className="flex items-center gap-2">
-          <SlidersHorizontal size={18} className="text-[var(--jd-primary)]" />
+          <SlidersHorizontal size={18} className="text-[var(--nm-primary)]" />
           <span className="jd-section-title mb-0">Filters</span>
           {hasActiveFilters && (
             <span className="jd-badge jd-badge-primary">
@@ -40,7 +40,7 @@ const JobFiltersPanel = ({ filters, onFilterChange, onClearFilters, isOpen, onTo
           )}
         </div>
         <svg
-          className={`w-5 h-5 text-[var(--jd-text-tertiary)] transition-transform ${isOpen ? "rotate-180" : ""
+          className={`w-5 h-5 text-[var(--nm-text-tertiary)] transition-transform ${isOpen ? "rotate-180" : ""
             }`}
           fill="none"
           stroke="currentColor"

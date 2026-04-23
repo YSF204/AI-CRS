@@ -133,10 +133,10 @@ export default function ATSResults({ result, onBack }) {
                 {/* Score Header */}
                 <div
                   onClick={() => toggleSection(sectionKey)}
-                  className="flex items-center justify-between cursor-pointer"
+                  className="flex items-center justify-between cursor-pointer gap-4"
                 >
-                  <div className="flex-1">
-                    <h4 className="font-bold font-['Space_Grotesk'] capitalize mb-2">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold font-['Space_Grotesk'] capitalize mb-2 overflow-hidden text-overflow-ellipsis break-words">
                       {sectionKey
                         .replace(/([A-Z])/g, " $1")
                         .toLowerCase()
@@ -155,9 +155,9 @@ export default function ATSResults({ result, onBack }) {
                       </div>
                     </div>
                   </div>
-                  <div className="text-right ml-4 flex flex-col items-end">
+                  <div className="text-right flex-shrink-0 flex flex-col items-end">
                     <span
-                      className="font-bold text-2xl font-['Space_Grotesk']"
+                      className="font-bold text-2xl font-['Space_Grotesk'] whitespace-nowrap"
                       style={{ color: getScoreColor(score) }}
                     >
                       {score}
@@ -180,7 +180,10 @@ export default function ATSResults({ result, onBack }) {
                         </div>
                         <ul className="space-y-1">
                           {strengths.map((strength, idx) => (
-                            <li key={idx} className="font-mono text-sm">
+                            <li
+                              key={idx}
+                              className="font-mono text-sm break-words"
+                            >
                               • {strength}
                             </li>
                           ))}
@@ -195,7 +198,10 @@ export default function ATSResults({ result, onBack }) {
                         </div>
                         <ul className="space-y-1">
                           {weaknesses.map((weakness, idx) => (
-                            <li key={idx} className="font-mono text-sm">
+                            <li
+                              key={idx}
+                              className="font-mono text-sm break-words"
+                            >
                               • {weakness}
                             </li>
                           ))}
@@ -228,10 +234,7 @@ export default function ATSResults({ result, onBack }) {
 
       {/* Back Button Bottom */}
       <div className="flex justify-center pt-4">
-        <button
-          onClick={onBack}
-          className="jd-btn jd-btn-primary"
-        >
+        <button onClick={onBack} className="jd-btn jd-btn-primary">
           Analyze Another CV
         </button>
       </div>

@@ -121,7 +121,7 @@ export const ALL_SECTIONS = [
     label: "Technical Skills",
     icon: Code,
     accent: "var(--nm-warning)",
-    textColor: "#ffffff",
+    textColor: "var(--nm-ink)",
   },
   {
     key: "softSkills",

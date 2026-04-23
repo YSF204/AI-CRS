@@ -28,9 +28,6 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
 
   // Track initial state to detect form changes (FIX #6)
   const [initialFormData, setInitialFormData] = useState(null);
-  const [initialSelectedCvId, setInitialSelectedCvId] = useState("");
-  const [initialApplicationMethod, setInitialApplicationMethod] =
-    useState(null);
 
   const showToastNotice = (message) => {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
@@ -58,46 +55,24 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
     return res.data?.data?.job;
   });
 
-  // FIX #6: Helper function to deep compare form data
-  const deepEqual = (obj1, obj2) => {
-    if (obj1 === obj2) return true;
-    if (!obj1 || !obj2) return false;
-
-    const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
-    for (const key of keys) {
-      const val1 = obj1[key];
-      const val2 = obj2[key];
-
-      if (Array.isArray(val1) && Array.isArray(val2)) {
-        if (val1.length !== val2.length) return false;
-        if (!val1.every((v, i) => v === val2[i])) return false;
-      } else if (
-        typeof val1 === "object" &&
-        typeof val2 === "object" &&
-        val1 !== null &&
-        val2 !== null
-      ) {
-        if (!deepEqual(val1, val2)) return false;
-      } else if (val1 !== val2) {
-        return false;
-      }
-    }
-    return true;
-  };
-
-  // FIX #6: Compute whether form has changed (removed manual form logic per Bug 3)
+  // FIX #6: Compute whether form has changed using JSON stringify for accurate diffing
   const formHasChanged = useMemo(() => {
     if (!isEdit || !initialFormData) return false;
 
-    const cvChanged = selectedCvId !== initialSelectedCvId;
-    const methodChanged = applicationMethod !== initialApplicationMethod;
+    // If uploading a new PDF, the form has definitively changed
+    if (applicationMethod === "uploadPdf" && cvFile) return true;
 
-    return cvChanged || methodChanged;
+    const currentFormData = JSON.stringify({
+      method: applicationMethod,
+      cvId: applicationMethod === "existingCv" ? selectedCvId : null
+    });
+
+    return currentFormData !== initialFormData;
   }, [
     selectedCvId,
     applicationMethod,
-    initialSelectedCvId,
-    initialApplicationMethod,
+    cvFile,
+    initialFormData,
     isEdit,
   ]);
 
@@ -155,23 +130,23 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
           const requestedMethod =
             editMethod || (forceFresh ? null : application.applicationMethod);
 
-          if (requestedMethod === "existingCv") {
-            setApplicationMethod("existingCv");
-            setSelectedCvId(application.cvId?._id || "");
-          } else if (requestedMethod === "uploadPdf") {
-            setApplicationMethod("uploadPdf");
-          } else if (!forceFresh) {
-            if (application.applicationMethod === "uploadPdf") {
-              setApplicationMethod("uploadPdf");
-            } else if (application.cvId) {
-              setApplicationMethod("existingCv");
-              setSelectedCvId(application.cvId._id || "");
-            }
-          }
+          const cvIdToSet = application.cvId?._id || "";
+          const methodToSet =
+            requestedMethod === "existingCv"
+              ? "existingCv"
+              : requestedMethod === "uploadPdf"
+                ? "uploadPdf"
+                : !forceFresh && application.applicationMethod
+                  ? application.applicationMethod
+                  : null;
 
-          // FIX #6: Capture initial state for form change detection (removed manual form)
-          setInitialSelectedCvId(application.cvId?._id || "");
-          setInitialApplicationMethod(application.applicationMethod || null);
+          // FIX #4: Set initial and current state ATOMICALLY at the exact same time
+          setInitialFormData(JSON.stringify({
+            method: methodToSet,
+            cvId: methodToSet === "existingCv" ? cvIdToSet : null
+          }));
+          setSelectedCvId(cvIdToSet);
+          setApplicationMethod(methodToSet);
 
           if (application.matchDetails) {
             setMatchAnalysis(application.matchDetails);
@@ -201,7 +176,7 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
   };
 
   const handleSwitchMethod = (method) => {
-    if (isEdit) return; // lock method during edit
+    // FIX #4: Allow switching method during update
     setApplicationMethod(method);
     setMatchAnalysis(null);
     setValidationErrors({});
@@ -241,11 +216,11 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
         if (skipAnalysis) formData.append("skipAnalysis", "true");
         response = isEdit
           ? await api.patch(`/applications/${appId}`, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          })
+              headers: { "Content-Type": "multipart/form-data" },
+            })
           : await api.post("/applications", formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-          });
+              headers: { "Content-Type": "multipart/form-data" },
+            });
       } else {
         const payload = {
           jobId,

@@ -38,9 +38,11 @@ export default function LoginForm({ setMode }) {
       navigate("/");
     } catch (err) {
       if (err.response?.status === 403) {
-        // Account exists but is PENDING approval — send to the waiting page
-        navigate("/pending");
-        return;
+        if (err.response?.data?.role === 'EMPLOYER' && err.response?.data?.accountStatus === 'PENDING') {
+          // Account exists but is PENDING approval — send to the waiting page
+          navigate("/pending");
+          return;
+        }
       }
       setErrorMsg(err.response?.data?.message || "Invalid email or password");
       setShowForgotLink(true);

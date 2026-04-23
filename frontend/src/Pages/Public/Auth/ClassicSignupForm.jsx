@@ -181,7 +181,7 @@ export default function ClassicSignupForm() {
 
       const { token, data } = res.data;
 
-      if (data.user.accountStatus === "PENDING") {
+      if (data.user.role === "EMPLOYER" && data.user.accountStatus === "PENDING") {
         navigate("/pending");
         return;
       }

@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { User, Mail, Briefcase, MapPin, Camera } from 'lucide-react';
+import api from '../../services/api';
+import { useAuth } from '../../context/AuthContext';
 
 /**
- * ProfileHeader — displays the user's avatar (initials), name, role,
- * and key stats. Purely presentational.
+ * ProfileHeader — displays the user's avatar (initials or photo), name, role,
+ * and key stats. Handles profile picture upload.
  */
 export default function ProfileHeader({ user }) {
+  const { updateUserState } = useAuth();
+  const fileInputRef = useRef(null);
+  const [uploading, setUploading] = useState(false);
+
   const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
   const initials = (fullName || user?.email || 'U')
     .split(' ')
@@ -13,6 +19,42 @@ export default function ProfileHeader({ user }) {
     .slice(0, 2)
     .join('')
     .toUpperCase();
+
+  const profilePicUrl = user?.profilePic
+    ? (user.profilePic.startsWith('http')
+      ? user.profilePic
+      : `http://localhost:3001${user.profilePic}`)
+    : null;
+
+  const handleCameraClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('profilePic', file);
+
+      const res = await api.post('/users/profile-picture', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      // Update the user state immediately so the avatar refreshes
+      if (res.data?.data?.user) {
+        updateUserState(res.data.data.user);
+      }
+    } catch (err) {
+      console.error('Profile picture upload failed:', err);
+    } finally {
+      setUploading(false);
+      // Reset file input so the same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   return (
     <div className="nm-card profile-header-card overflow-hidden">
@@ -23,16 +65,35 @@ export default function ProfileHeader({ user }) {
         {/* Avatar */}
         <div className="relative shrink-0">
           <div
-            className="w-20 h-20 border-4 border-[var(--nm-ink)] flex items-center justify-center font-bold text-2xl font-display bg-[var(--nm-warning)] text-[var(--nm-ink)]"
+            className="w-20 h-20 border-4 border-[var(--nm-ink)] flex items-center justify-center font-bold text-2xl font-display bg-[var(--nm-warning)] text-[var(--nm-ink)] overflow-hidden"
           >
-            {initials}
+            {profilePicUrl ? (
+              <img
+                src={profilePicUrl}
+                alt={fullName}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              initials
+            )}
           </div>
           <button
             className="absolute -bottom-2 -right-2 w-8 h-8 flex items-center justify-center border-4 border-[var(--nm-ink)] bg-[var(--nm-primary)] text-white hover:translate-x-[2px] hover:translate-y-[2px] transition-transform"
             title="Change avatar"
+            onClick={handleCameraClick}
+            disabled={uploading}
+            style={{ cursor: uploading ? 'wait' : 'pointer' }}
           >
             <Camera size={14} />
           </button>
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+          />
         </div>
 
         {/* Info */}

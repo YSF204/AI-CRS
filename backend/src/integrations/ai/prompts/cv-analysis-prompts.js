@@ -106,7 +106,12 @@ Please analyze this CV data and identify any poorly written parts.
 Data provided as a flattened dictionary (Key = Field ID, Value = Text Content):
 ${JSON.stringify(sectionData, null, 2)}
 
-CRITICAL: Return ONLY valid JSON. NO markdown, NO code fences, NO preamble.
+CRITICAL INSTRUCTIONS:
+1. Return ONLY a valid JSON object.
+2. DO NOT wrap the response in markdown code blocks (\`\`\`json).
+3. DO NOT include any conversational text, preamble, or explanations.
+4. Output must start exactly with { and end exactly with }.
+5. If the provided data dictionary is completely empty or contains no meaningful text, you MUST return an empty issues array [] and state that there is no text to review. DO NOT fabricate issues for non-existent text.
 
 Return exactly this JSON structure:
 {
