@@ -1,51 +1,48 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import api from '../services/api';
+import { createContext, useContext, useState, useEffect } from 'react'
+import api from '../services/api'
 
-const AuthContext = createContext(null);
+const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   const fetchUser = async () => {
     try {
-      const res = await api.get('/auth/me');
-      setUser(res.data.data.user);
+      const res = await api.get('/auth/me')
+      setUser(res.data.data.user)
     } catch (err) {
-      // Only log out if the token is actually invalid (401).
-      // Do NOT log out on 429 (rate-limited), 5xx, or network errors —
-      // those are transient and should not destroy the session.
       if (err.response?.status === 401) {
-        localStorage.removeItem('token');
-        setUser(null);
+        localStorage.removeItem('token')
+        setUser(null)
       }
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token')
     if (token) {
-      fetchUser(token);
+      fetchUser()
     } else {
-      setLoading(false);
+      setLoading(false)
     }
-  }, []);
+  }, [])
 
   const login = (token, userData) => {
-    localStorage.setItem('token', token);
-    setUser(userData);
-  };
+    localStorage.setItem('token', token)
+    setUser(userData)
+  }
 
   const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-  };
+    localStorage.removeItem('token')
+    setUser(null)
+  }
 
   const updateUserState = (nextUser) => {
-    setUser(nextUser);
-  };
+    setUser(nextUser)
+  }
 
   return (
     <AuthContext.Provider
@@ -60,13 +57,13 @@ export function AuthProvider({ children }) {
     >
       {children}
     </AuthContext.Provider>
-  );
+  )
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
+  const context = useContext(AuthContext)
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within an AuthProvider')
   }
-  return context;
+  return context
 }

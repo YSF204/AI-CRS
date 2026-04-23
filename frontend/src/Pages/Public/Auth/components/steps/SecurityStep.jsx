@@ -19,6 +19,7 @@ export default function SecurityStep({ field }) {
         label="Create Password"
         type="password"
         placeholder="••••••••"
+        autoComplete="new-password"
         required
         {...field("password")}
       />
@@ -26,6 +27,7 @@ export default function SecurityStep({ field }) {
         label="Confirm Password"
         type="password"
         placeholder="••••••••"
+        autoComplete="new-password"
         required
         {...field("passwordConfirm")}
       />

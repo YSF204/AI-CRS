@@ -1,6 +1,16 @@
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react'
 
-export default function AuthInput({ label, error, type, showToggle, showPw, onToggle, ...props }) {
+export default function AuthInput({ label, error, type, showToggle, showPw, onToggle, autoComplete, ...props }) {
+  const inputType = showToggle ? (showPw ? 'text' : 'password') : type
+
+  const resolvedAutoComplete =
+    autoComplete ||
+    (inputType === 'email'
+      ? 'email'
+      : showToggle
+      ? 'current-password'
+      : undefined)
+
   return (
     <div style={{ marginBottom: 20, position: showToggle ? 'relative' : undefined }}>
       {label && (
@@ -21,7 +31,8 @@ export default function AuthInput({ label, error, type, showToggle, showPw, onTo
       )}
       <input
         {...props}
-        type={showToggle ? (showPw ? 'text' : 'password') : type}
+        type={inputType}
+        autoComplete={resolvedAutoComplete}
         style={{
           width: '100%',
           padding: '12px 16px',
@@ -40,14 +51,14 @@ export default function AuthInput({ label, error, type, showToggle, showPw, onTo
           borderRadius: '0px',
         }}
         onFocus={(e) => {
-          e.target.style.boxShadow = '6px 6px 0 var(--nm-primary)';
-          e.target.style.borderColor = 'var(--nm-primary)';
-          if (props.onFocus) props.onFocus(e);
+          e.target.style.boxShadow = '6px 6px 0 var(--nm-primary)'
+          e.target.style.borderColor = 'var(--nm-primary)'
+          if (props.onFocus) props.onFocus(e)
         }}
         onBlur={(e) => {
-          e.target.style.boxShadow = '4px 4px 0 var(--nm-ink)';
-          e.target.style.borderColor = error ? 'var(--nm-error)' : 'var(--nm-ink)';
-          if (props.onBlur) props.onBlur(e);
+          e.target.style.boxShadow = '4px 4px 0 var(--nm-ink)'
+          e.target.style.borderColor = error ? 'var(--nm-error)' : 'var(--nm-ink)'
+          if (props.onBlur) props.onBlur(e)
         }}
       />
       {showToggle && (
@@ -68,11 +79,11 @@ export default function AuthInput({ label, error, type, showToggle, showPw, onTo
         </button>
       )}
       {error && (
-        <div 
-          style={{ 
-            fontSize: 12, 
-            color: 'var(--nm-error)', 
-            marginTop: 6, 
+        <div
+          style={{
+            fontSize: 12,
+            color: 'var(--nm-error)',
+            marginTop: 6,
             fontFamily: 'var(--font-body)',
             fontWeight: 600,
           }}
@@ -81,5 +92,5 @@ export default function AuthInput({ label, error, type, showToggle, showPw, onTo
         </div>
       )}
     </div>
-  );
+  )
 }

@@ -13,7 +13,6 @@ import ProfileStep from "./components/steps/ProfileStep";
 import SecurityStep from "./components/steps/SecurityStep";
 import CompanyStep from "./components/steps/CompanyStep";
 
-// Steps: [0] Role  [1] Personal  [2] Profile  [3] Security  [4?] Company
 const STEP_FIELDS = [
   ["role"],
   ["firstName", "lastName", "email"],
@@ -115,7 +114,7 @@ export default function ClassicSignupForm() {
         return !!(form.gender && form.age && !errors.age);
       case 3:
         return !!(
-          form.password.length >= 6 &&
+          form.password.length >= 8 &&
           form.password === form.passwordConfirm &&
           !errors.password &&
           !errors.passwordConfirm
@@ -127,10 +126,9 @@ export default function ClassicSignupForm() {
     }
   };
 
-  // Clicking a role card saves role AND immediately jumps to next step
   const handleRoleSelect = (r) => {
     setRole(r);
-    setTimeout(() => advanceRef.current?.(), 0); // defer so state update is committed first
+    setTimeout(() => advanceRef.current?.(), 0);
   };
 
   const handleComplete = async () => {
@@ -138,7 +136,9 @@ export default function ClassicSignupForm() {
     try {
       const parsed = signupSchema.safeParse(validationData);
       if (!parsed.success) {
-        setErrorMsg(parsed.error.issues[0]?.message || "Validation failed");
+        const firstIssue = parsed.error.issues[0];
+        setErrorMsg(firstIssue?.message || "Validation failed");
+        console.log("Validation errors:", parsed.error.issues);
         return;
       }
 
@@ -173,7 +173,6 @@ export default function ClassicSignupForm() {
 
       const res = await api.post("/auth/register", body);
 
-      // FIX #1: If requiresEmailVerification is true, show CheckYourEmailPage instead of logging in
       if (res.data.requiresEmailVerification) {
         setVerificationEmail(res.data.data.user.email);
         return;
@@ -188,10 +187,16 @@ export default function ClassicSignupForm() {
       login(token, data.user);
       navigate("/");
     } catch (err) {
+      console.error("Registration error:", err.response?.data);
+      const serverMessage = err.response?.data?.message;
       setErrorMsg(
-        err.response?.data?.message || "Registration failed. Please try again.",
+        serverMessage || "Registration failed. Please try again.",
       );
     }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
   };
 
   const steps = [
@@ -212,7 +217,7 @@ export default function ClassicSignupForm() {
           onBackClick={() => setVerificationEmail(null)}
         />
       ) : (
-        <>
+        <form onSubmit={handleSubmit} noValidate>
           <ErrorBanner message={errorMsg} />
           <Stepper
             initialStep={1}
@@ -225,7 +230,7 @@ export default function ClassicSignupForm() {
           >
             {steps}
           </Stepper>
-        </>
+        </form>
       )}
     </>
   );
