@@ -439,12 +439,21 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 </html>
 `;
   try {
-    await sendEmail({
-      email: user.email,
-      subject: "Your password token valid for (10 min)",
-      html: htmlMessage,
-      text: `Reset your password using this link (valid for 10 minutes): ${resetURL}`,
-    });
+    if (!process.env.EMAIL_USERNAME || !process.env.EMAIL_PASSWORD) {
+      console.log("\n==================================================");
+      console.log("DEVELOPMENT MODE: EMAIL CREDENTIALS NOT CONFIGURED");
+      console.log("Mocking email send. Password Reset URL is:");
+      console.log(resetURL);
+      console.log("==================================================\n");
+    } else {
+      await sendEmail({
+        email: user.email,
+        subject: "Your password token valid for (10 min)",
+        html: htmlMessage,
+        text: `Reset your password using this link (valid for 10 minutes): ${resetURL}`,
+      });
+    }
+    
     res.status(200).json({
       status: "success",
       message: "Token has been sent to email",

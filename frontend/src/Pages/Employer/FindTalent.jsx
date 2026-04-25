@@ -139,7 +139,7 @@ export default function FindTalent() {
         maxWidth: '800px',
         lineHeight: 1.6
       }}>
-        Harness advanced neural filtering to identify top-tier talent. Our engine analyzes competencies, soft skills, and experience history to deliver precision matching.
+        Find Candidates Based on the most qualified candidates for the job, prioritizing those with strong communication skills and direct relevance to your company's goals.
       </p>
 
       {error && (
@@ -322,9 +322,6 @@ export default function FindTalent() {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem', flexWrap: 'wrap', gap: 24 }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--nm-primary)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 8 }}>
-              Neural Match Logic v2.4
-            </div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(2.5rem, 6vw, 4rem)', color: 'var(--nm-text-primary)', textTransform: 'uppercase', letterSpacing: '-0.04em', lineHeight: 1, margin: 0 }}>
               Primary Targets
             </h2>
@@ -618,7 +615,7 @@ export default function FindTalent() {
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em'
               }}>
-                {new Date(record.createdAt).toLocaleDateString()} • {record.candidate.length} Neural Matches
+                {new Date(record.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} • {record.candidate.length} Matches
               </div>
             </div>
             <div style={{ 

@@ -47,7 +47,7 @@ const normalizeCvForTemplate = (cv) => ({
 export default function CVPreviewCard({ cv, loading, onAnalyze }) {
   const viewportRef = useRef(null);
   const [scale, setScale] = useState(0.28);
-  const createdDate = new Date(cv.updatedAt || cv.createdAt).toLocaleDateString();
+  const createdDate = new Date(cv.updatedAt || cv.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   const templateObj = getTemplateById(cv.templateId || 1);
   const TemplateComponent = templateObj.component;
   const templateCvData = normalizeCvForTemplate(cv);

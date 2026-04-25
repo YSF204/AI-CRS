@@ -7,8 +7,19 @@ const JobSearchBar = ({ value, onChange, placeholder = "Search jobs by title or 
       <label htmlFor="job-search" className="jd-section-title mb-2 block">
         Search Jobs
       </label>
-      <div className="input-with-icon-wrapper">
-        <Search size={18} aria-hidden="true" />
+      <div style={{ position: "relative" }}>
+        <Search
+          size={18}
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            left: "14px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            color: "var(--nm-text-tertiary)",
+            pointerEvents: "none",
+          }}
+        />
         <input
           id="job-search"
           type="text"
@@ -18,7 +29,8 @@ const JobSearchBar = ({ value, onChange, placeholder = "Search jobs by title or 
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           disabled={disabled}
-          className="jd-input input-with-icon"
+          className="jd-input"
+          style={{ paddingLeft: "42px" }}
           aria-label="Search jobs"
         />
       </div>

@@ -27,6 +27,7 @@ const PREVIEW_PADDING = 12;
 function TemplatePreview({ template }) {
   const viewportRef = useRef(null);
   const [scale, setScale] = useState(0.28);
+  const timerRef = useRef(null);
   const TemplateComponent = template.component;
 
   useEffect(() => {
@@ -45,12 +46,20 @@ function TemplatePreview({ template }) {
       setScale(Math.max(nextScale, 0.1));
     };
 
-    updateScale();
+    // Debounced version — waits until the sidebar animation finishes
+    // before recalculating, preventing all cards from updating mid-transition
+    const debouncedUpdate = () => {
+      clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(updateScale, 160);
+    };
 
-    const observer = new ResizeObserver(updateScale);
+    updateScale(); // immediate first run
+
+    const observer = new ResizeObserver(debouncedUpdate);
     observer.observe(viewportEl);
 
     return () => {
+      clearTimeout(timerRef.current);
       observer.disconnect();
     };
   }, []);
@@ -61,6 +70,8 @@ function TemplatePreview({ template }) {
       className="ats-preview-viewport"
       style={{
         aspectRatio: "0.81",
+        contain: "strict",
+        willChange: "transform",
       }}
     >
       <div
@@ -446,22 +457,65 @@ function CreateModal({ template, onClose, onCreate, loading }) {
               <button
                 id="create-cv-submit-btn"
                 type="submit"
-                className="brutal-btn w-full flex items-center justify-center gap-2"
-                style={{ background: "#facc15", color: "#0a0a0a" }}
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  background: "var(--nm-primary)",
+                  color: "#ffffff",
+                  padding: "16px",
+                  border: "4px solid var(--nm-ink)",
+                  boxShadow: "6px 6px 0 var(--nm-ink)",
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 900,
+                  fontSize: "14px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  opacity: loading ? 0.7 : 1,
+                  transition: "transform 0.1s"
+                }}
+                onMouseDown={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.transform = "translate(4px, 4px)"; e.currentTarget.style.boxShadow = "2px 2px 0 var(--nm-ink)"; } }}
+                onMouseUp={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "6px 6px 0 var(--nm-ink)"; } }}
+                onMouseLeave={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "6px 6px 0 var(--nm-ink)"; } }}
                 disabled={loading}
               >
                 {loading ? (
                   "Creating…"
                 ) : (
                   <>
-                    <ArrowRight size={14} /> Create CV
+                    <ArrowRight size={18} strokeWidth={3} /> Create CV
                   </>
                 )}
               </button>
               <button
                 type="button"
                 onClick={onClose}
-                className="brutal-btn-outline w-full"
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  background: "var(--nm-bg)",
+                  color: "var(--nm-ink)",
+                  padding: "16px",
+                  border: "4px solid var(--nm-ink)",
+                  boxShadow: "6px 6px 0 var(--nm-ink)",
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 900,
+                  fontSize: "14px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                  cursor: loading ? "not-allowed" : "pointer",
+                  opacity: loading ? 0.7 : 1,
+                  transition: "transform 0.1s"
+                }}
+                onMouseDown={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.transform = "translate(4px, 4px)"; e.currentTarget.style.boxShadow = "2px 2px 0 var(--nm-ink)"; } }}
+                onMouseUp={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "6px 6px 0 var(--nm-ink)"; } }}
+                onMouseLeave={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "6px 6px 0 var(--nm-ink)"; } }}
                 disabled={loading}
               >
                 Cancel

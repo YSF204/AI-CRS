@@ -228,7 +228,7 @@ export default function EditJob() {
               </div>
 
               <div>
-                <label style={LABEL}>Workspace Configuration *</label>
+                <label style={LABEL}>Work Location *</label>
                 <select 
                   style={{ ...INPUT, cursor: 'pointer' }} 
                   value={form.workSite} 
@@ -244,7 +244,7 @@ export default function EditJob() {
               </div>
 
               <div>
-                <label style={LABEL}>Temporal Commitment *</label>
+                <label style={LABEL}>Job Type *</label>
                 <select 
                   style={{ ...INPUT, cursor: 'pointer' }} 
                   value={form.workDuration} 
@@ -261,7 +261,7 @@ export default function EditJob() {
               </div>
 
               <div>
-                <label style={LABEL}>Experience Threshold (Y) *</label>
+                <label style={LABEL}>Years of Experience *</label>
                 <input 
                   style={INPUT} 
                   type="number" 
@@ -275,7 +275,7 @@ export default function EditJob() {
               </div>
 
               <div>
-                <label style={LABEL}>Base Remuneration ($/YR)</label>
+                <label style={LABEL}>Base Salary ($/YR)</label>
                 <input 
                   style={INPUT} 
                   type="number" 
@@ -289,7 +289,7 @@ export default function EditJob() {
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
-                <label style={LABEL}>Technical Competencies <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+                <label style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
                 <input 
                   style={INPUT} 
                   value={form.technicalSkills} 
@@ -301,7 +301,7 @@ export default function EditJob() {
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
-                <label style={LABEL}>Operational Traits <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+                <label style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
                 <input 
                   style={INPUT} 
                   value={form.softSkills} 

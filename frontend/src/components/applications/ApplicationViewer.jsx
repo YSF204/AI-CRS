@@ -4,14 +4,11 @@ import { getTemplateById } from "../../Features/CVManagement";
 
 const buildFileUrl = (cvFile) => {
   if (!cvFile?.path) return null;
-  const cleaned = cvFile.path.replace(/^src\//, "");
-  const origin =
-    typeof window !== "undefined"
-      ? `${window.location.protocol}//${window.location.hostname}:${window.location.port || "5173"}`
-      : "";
-  const apiBase = api.defaults.baseURL?.replace(/\/api$/, "") || "";
-  const base = apiBase || origin;
-  return `${base}/${cleaned}`;
+  // Normalize path — strip leading "src/" or "/" so we can append cleanly
+  const cleaned = cvFile.path.replace(/^src[\\/]/, "").replace(/^\//, "");
+  // Always derive from the API base URL (e.g. http://localhost:3001/api → http://localhost:3001)
+  const backendOrigin = (api.defaults.baseURL || "").replace(/\/api\/?$/, "");
+  return `${backendOrigin}/${cleaned}`;
 };
 
 const Section = ({ title, icon, children }) => (
@@ -366,15 +363,41 @@ export default function ApplicationViewer({ application }) {
               }}>
                 Configuration: {template?.name || "STD-V1"} • Subject: {cv.fullName || "IDENTIFIED"}
               </div>
-              <div style={{
-                border: "4px solid var(--nm-ink)",
-                background: "#fff",
-                boxShadow: "10px 10px 0 var(--nm-ink)",
-                overflow: "auto",
-                maxHeight: "70vh"
-              }}>
+              <div 
+                style={{
+                  /* Force light mode variables for the CV render */
+                  "--nm-bg": "#fbfaee",
+                  "--nm-surface": "#ffffff",
+                  "--nm-surface-high": "#e9e9dd",
+                  "--nm-surface-low": "#f5f4e8",
+                  "--nm-ink": "#1b1c15",
+                  "--nm-text-primary": "#1b1c15",
+                  "--nm-text-secondary": "#6b6963",
+                  "--nm-text-tertiary": "#9c9a92",
+
+                  border: "4px solid var(--nm-ink)",
+                  background: "#fff",
+                  boxShadow: "10px 10px 0 var(--nm-ink)",
+                  width: "100%",
+                  maxWidth: "600px", // Larger size
+                  aspectRatio: "210 / 297", // A4 paper ratio
+                  margin: "0 auto",
+                  position: "relative",
+                  overflow: "hidden"
+                }}
+              >
                 {TemplateComponent ? (
-                  <TemplateComponent userName={cv.fullName || "Candidate"} cvData={templateCvData} />
+                  <div style={{
+                    width: "800px", 
+                    height: "1131px", // 800 * 1.414 (A4 ratio)
+                    transform: "scale(0.75)", // 600px / 800px
+                    transformOrigin: "top left",
+                    position: "absolute",
+                    top: 0,
+                    left: 0
+                  }}>
+                    <TemplateComponent userName={cv.fullName || "Candidate"} cvData={templateCvData} />
+                  </div>
                 ) : (
                   <p style={{
                     fontFamily: "var(--font-display)",

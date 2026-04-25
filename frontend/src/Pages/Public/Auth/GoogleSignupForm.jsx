@@ -4,23 +4,51 @@ import { useAuth } from '../../../context/AuthContext';
 import Stepper from './components/Stepper';
 import ErrorBanner from './components/ErrorBanner';
 import api from '../../../services/api';
+import AuthInput from './components/AuthInput';
 import RoleStep    from './components/steps/RoleStep';
 import ProfileStep from './components/steps/ProfileStep';
 import CompanyStep from './components/steps/CompanyStep';
+import { Step } from './components/Stepper';
 
-// Steps: [0] Role  [1] Profile(gender+age+phone)  [2?] Company
-const EMPTY_FORM = {
+const nameInputStyle = {
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: '0 16px',
+  marginBottom: 8,
+};
+
+const nameHintStyle = {
+  fontSize: 12,
+  color: 'var(--fg-muted)',
+  marginBottom: 16,
+  fontFamily: "'DM Mono', monospace",
+};
+
+const headingStyle = {
+  fontFamily: 'var(--font-display)',
+  fontWeight: 800,
+  fontSize: 24,
+  color: 'var(--nm-text-primary)',
+  marginBottom: 24,
+  textTransform: 'uppercase',
+  letterSpacing: '-0.02em',
+};
+
+// Steps: [0] Role  [1] Name  [2] Profile(gender+age+phone)  [3?] Company
+const makeEmptyForm = (googleData) => ({
+  firstName: googleData?.firstName || '',
+  lastName: googleData?.lastName || '',
   gender: '', age: '', telephone: '',
   companyName: '', companyLicense: '', contactEmail: '',
   website: '', branchName: '', branchCity: '', branchStreet: '',
-};
+});
 
 export default function GoogleSignupForm({ googleData, onClear }) {
   const { login } = useAuth();
   const navigate  = useNavigate();
   const [errorMsg, setErrorMsg] = useState('');
   const [role, setRole] = useState('');
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState(() => makeEmptyForm(googleData));
   const [fieldErrors, setFieldErrors] = useState({});
   const advanceRef = useRef(null);
 
@@ -32,32 +60,8 @@ export default function GoogleSignupForm({ googleData, onClear }) {
     ...overrides,
   });
 
-  // Validate profile fields and return errors object
-  const validateProfileFields = () => {
-    const errs = {};
-    const ageNum = parseInt(form.age);
-    if (!form.age || isNaN(ageNum) || ageNum < 1 || ageNum > 100) {
-      errs.age = 'Please enter a valid age between 1 and 100';
-    }
-    if (form.telephone && !/^\d{10}$/.test(form.telephone)) {
-      errs.telephone = 'Phone number must be exactly 10 digits';
-    }
-    if (!form.gender) {
-      errs.gender = 'Please select your gender.';
-    }
-    return errs;
-  };
-
   const handleNextAttempt = (idx) => {
     setErrorMsg('');
-    if (idx === 1) {
-      const errs = validateProfileFields();
-      setFieldErrors(errs);
-      if (Object.keys(errs).length > 0) {
-        // Show first error as banner too
-        setErrorMsg(Object.values(errs)[0]);
-      }
-    }
   };
 
   const companyValid = (
@@ -68,21 +72,22 @@ export default function GoogleSignupForm({ googleData, onClear }) {
   const canProceed = (idx) => {
     switch (idx) {
       case 0: return role !== '';
-      case 1: {
+      case 1: return !!(form.firstName.trim() && form.lastName.trim()); // Name step
+      case 2: {
         const ageNum = parseInt(form.age);
         const ageValid = form.age && !isNaN(ageNum) && ageNum >= 1 && ageNum <= 100;
         const telValid = !form.telephone || /^\d{10}$/.test(form.telephone);
         return !!(form.gender && ageValid && telValid);
       }
-      case 2: return companyValid;
+      case 3: return companyValid;
       default: return true;
     }
   };
 
   const handleRoleSelect = (r) => {
     setRole(r);
-    // Reset ALL role-specific fields when switching roles
-    setForm(EMPTY_FORM);
+    // Reset profile fields but keep name
+    setForm((prev) => ({ ...makeEmptyForm(googleData), firstName: prev.firstName, lastName: prev.lastName }));
     setFieldErrors({});
     setErrorMsg('');
     setTimeout(() => advanceRef.current?.(), 0);
@@ -91,21 +96,12 @@ export default function GoogleSignupForm({ googleData, onClear }) {
   const handleComplete = async () => {
     setErrorMsg('');
 
-    // Final validation before submit
-    const errs = validateProfileFields();
-    if (Object.keys(errs).length > 0) {
-      setFieldErrors(errs);
-      setErrorMsg(Object.values(errs)[0]);
-      return;
-    }
-
     try {
-      // Send the Google profile data directly instead of re-verifying the token
-      // (Google ID tokens expire after ~1 hour, so re-verification often fails)
+      // Send user-edited name (pre-filled from Google but editable)
       const body = {
         email: googleData.email,
-        firstName: googleData.firstName,
-        lastName: googleData.lastName,
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
         profilePic: googleData.profilePic,
         role:  role.toUpperCase(),
         gender: form.gender,
@@ -134,8 +130,40 @@ export default function GoogleSignupForm({ googleData, onClear }) {
     }
   };
 
+  const NameStep = (
+    <Step key="name">
+      <h2 style={headingStyle}>Your Name</h2>
+      <p style={nameHintStyle}>Pre-filled from your Google account — feel free to edit.</p>
+      <div style={nameInputStyle}>
+        <AuthInput
+          label="First Name"
+          type="text"
+          placeholder="First name"
+          required
+          value={form.firstName}
+          onChange={(e) => setForm((prev) => ({ ...prev, firstName: e.target.value }))}
+          onFocus={() => {}}
+          onBlur={() => {}}
+          error={fieldErrors.firstName || ''}
+        />
+        <AuthInput
+          label="Last Name"
+          type="text"
+          placeholder="Last name"
+          required
+          value={form.lastName}
+          onChange={(e) => setForm((prev) => ({ ...prev, lastName: e.target.value }))}
+          onFocus={() => {}}
+          onBlur={() => {}}
+          error={fieldErrors.lastName || ''}
+        />
+      </div>
+    </Step>
+  );
+
   const steps = [
     <RoleStep    key="role"    role={role} onSelectRole={handleRoleSelect} />,
+    NameStep,
     <ProfileStep key="profile" form={form} setForm={setForm} field={field} errors={fieldErrors} />,
     ...(role === 'EMPLOYER' ? [<CompanyStep key="company" field={field} />] : []),
   ];

@@ -3,11 +3,10 @@ import { X } from "lucide-react";
 
 const JobResultsToolbar = ({ resultCount, sortBy, onSortChange, onClearFilters, hasActiveFilters }) => {
   const sortOptions = [
-    { value: "newest", label: "DATE_DESC" },
-    { value: "oldest", label: "DATE_ASC" },
-    { value: "salary_desc", label: "PAY_DESC" },
-    { value: "salary_asc", label: "PAY_ASC" },
-    { value: "relevance", label: "MATCH_SCORE" }
+    { value: "newest", label: "Newest First" },
+    { value: "oldest", label: "Oldest First" },
+    { value: "salary_desc", label: "Highest Pay" },
+    { value: "salary_asc", label: "Lowest Pay" }
   ];
 
   return (
@@ -15,7 +14,7 @@ const JobResultsToolbar = ({ resultCount, sortBy, onSortChange, onClearFilters, 
       <div className="flex items-center gap-3">
         <div className="w-2 h-2 bg-[var(--nm-primary)]" />
         <span className="font-mono text-[11px] font-black uppercase tracking-widest text-[var(--nm-text-primary)]">
-          {resultCount === 1 ? "001_OBJECT_LOADED" : `${String(resultCount).padStart(3, '0')}_OBJECTS_LOADED`}
+          {resultCount === 1 ? "1 Job Found" : `${resultCount} Jobs Found`}
         </span>
       </div>
 
@@ -32,7 +31,7 @@ const JobResultsToolbar = ({ resultCount, sortBy, onSortChange, onClearFilters, 
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>
-                SORT_BY: {option.label}
+                {option.label}
               </option>
             ))}
           </select>
@@ -46,7 +45,7 @@ const JobResultsToolbar = ({ resultCount, sortBy, onSortChange, onClearFilters, 
             aria-label="Clear all filters"
           >
             <X size={12} strokeWidth={3} />
-            RESET_FILTERS
+            Clear Filters
           </button>
         )}
       </div>

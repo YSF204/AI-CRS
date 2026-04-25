@@ -10,6 +10,40 @@ export const loginSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number"),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().email("Please enter a valid email address"),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Must contain at least one number"),
+    passwordConfirm: z.string().min(1, "Please confirm your password"),
+  })
+  .refine((d) => d.password === d.passwordConfirm, {
+    message: "Passwords do not match",
+    path: ["passwordConfirm"],
+  });
+
+export const googleNameSchema = z.object({
+  firstName: z.string().trim().min(1, "First name is required").regex(/^[^0-9]*$/, "First name should not contain numbers"),
+  lastName:  z.string().trim().min(1, "Last name is required").regex(/^[^0-9]*$/, "Last name should not contain numbers"),
+});
+
+export const googleProfileSchema = z.object({
+  gender: z.enum(["MALE", "FEMALE"], { errorMap: () => ({ message: "Please select a gender" }) }),
+  age: z.coerce.number().min(1, "Please enter a valid age").max(100, "Please enter a valid age"),
+  telephone: z
+    .string()
+    .regex(/^\d{10}$/, "Phone number must be exactly 10 digits")
+    .optional()
+    .or(z.literal("")),
+});
+
 export const signupSchema = z
   .object({
     firstName: z

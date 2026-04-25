@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
         alignItems: "center",
         justifyContent: "center",
         padding: "clamp(1rem, 4%, 3rem)",
-        background: "var(--bg)",
+        background: "#fbfaee",
       }}
     >
       {/* Top bar */}
@@ -64,8 +64,8 @@ export default function ForgotPasswordPage() {
           justifyContent: "space-between",
           alignItems: "center",
           padding: "clamp(0.6rem, 1.5%, 1rem) clamp(1.25rem, 3%, 2.5rem)",
-          background: "var(--nav-bg)",
-          borderBottom: "3px solid var(--border-color)",
+          background: "#fbfaee",
+          borderBottom: "4px solid #1b1c15",
         }}
       >
         <Link
@@ -75,19 +75,22 @@ export default function ForgotPasswordPage() {
             alignItems: "center",
             gap: 8,
             textDecoration: "none",
-            color: "var(--fg)",
+            color: "#1b1c15",
             fontFamily: "'Space Grotesk', sans-serif",
-            fontWeight: 700,
+            fontWeight: 800,
             fontSize: 14,
           }}
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={20} strokeWidth={3} />
           <span
-            className="bg-brutal-yellow text-black font-bold"
             style={{
-              padding: "0.1em 0.35em",
+              background: "#1e51f6",
+              color: "#ffffff",
+              padding: "4px 8px",
               fontSize: "clamp(0.9rem, 1.5vw, 1.2rem)",
               letterSpacing: "-0.03em",
+              border: "4px solid #1b1c15",
+              fontWeight: 800,
             }}
           >
             AI-CRS
@@ -99,11 +102,12 @@ export default function ForgotPasswordPage() {
         style={{
           width: "100%",
           maxWidth: 520,
-          background: "var(--card-bg)",
-          border: "3px solid var(--border-color)",
-          boxShadow: "8px 8px 0 var(--shadow-color)",
+          background: "#ffffff",
+          border: "4px solid #1b1c15",
+          boxShadow: "8px 8px 0px 0px #1b1c15",
           padding: "clamp(1.5rem, 4%, 2.5rem)",
           marginTop: 60,
+          borderRadius: 0,
         }}
       >
         {status === "form" && (
@@ -111,20 +115,22 @@ export default function ForgotPasswordPage() {
             <h1
               style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontWeight: 700,
+                fontWeight: 800,
                 fontSize: "clamp(1.5rem, 3.5vw, 2.2rem)",
-                color: "var(--fg)",
+                color: "#1b1c15",
                 marginBottom: 8,
+                letterSpacing: "-0.02em",
               }}
             >
               Forgot Password?
             </h1>
             <p
               style={{
-                fontFamily: "'DM Mono', monospace",
-                fontSize: 12,
-                color: "var(--fg-muted)",
+                fontFamily: "'Manrope', sans-serif",
+                fontSize: 14,
+                color: "#1b1c15",
                 marginBottom: "clamp(1rem, 2.5%, 1.5rem)",
+                fontWeight: 500,
               }}
             >
               Enter your email address and we'll send you a link to reset your
@@ -135,14 +141,14 @@ export default function ForgotPasswordPage() {
               <div style={{ marginBottom: 16 }}>
                 <label
                   style={{
-                    fontFamily: "'DM Mono', monospace",
+                    fontFamily: "'Manrope', sans-serif",
                     fontSize: 12,
                     fontWeight: 700,
                     textTransform: "uppercase",
                     letterSpacing: "0.06em",
                     display: "block",
                     marginBottom: 8,
-                    color: "var(--fg)",
+                    color: "#1b1c15",
                   }}
                 >
                   Email Address
@@ -156,19 +162,19 @@ export default function ForgotPasswordPage() {
                   style={{
                     width: "100%",
                     padding: "12px",
-                    border: "3px solid var(--border-color)",
-                    background: "var(--bg)",
-                    color: "var(--fg)",
-                    fontFamily: "'DM Mono', monospace",
+                    border: "4px solid #1b1c15",
+                    background: "#ffffff",
+                    color: "#1b1c15",
+                    fontFamily: "'Manrope', sans-serif",
+                    fontWeight: 600,
                     fontSize: 14,
                     outline: "none",
                     boxSizing: "border-box",
-                    transition: "border-color 0.2s ease",
+                    borderRadius: 0,
+                    transition: "background-color 0.2s ease",
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = "var(--teal)")}
-                  onBlur={(e) =>
-                    (e.target.style.borderColor = "var(--border-color)")
-                  }
+                  onFocus={(e) => (e.target.style.backgroundColor = "#e9e9dd")}
+                  onBlur={(e) => (e.target.style.backgroundColor = "#ffffff")}
                 />
               </div>
 
@@ -177,32 +183,35 @@ export default function ForgotPasswordPage() {
                 disabled={loading || !email.trim()}
                 style={{
                   width: "100%",
-                  padding: "12px",
-                  fontSize: 14,
-                  background: loading ? "var(--fg-muted)" : "#FFE630",
-                  color: "#0a0a0a",
+                  padding: "16px",
+                  fontSize: 15,
+                  background: loading ? "#e9e9dd" : "#1e51f6",
+                  color: loading ? "#1b1c15" : "#ffffff",
                   fontFamily: "'Space Grotesk', sans-serif",
-                  fontWeight: 700,
+                  fontWeight: 800,
                   textTransform: "uppercase",
-                  letterSpacing: "0.06em",
-                  border: "3px solid #0a0a0a",
-                  boxShadow: "3px 3px 0 #0a0a0a",
+                  letterSpacing: "0.02em",
+                  border: "4px solid #1b1c15",
+                  borderRadius: 0,
                   cursor: loading ? "not-allowed" : "pointer",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 8,
-                  transition: "all 0.2s ease",
+                  transition: "transform 0.15s ease",
+                  marginTop: 8,
                 }}
+                onMouseEnter={(e) => !loading && (e.currentTarget.style.transform = "translate(2px, 2px)")}
+                onMouseLeave={(e) => !loading && (e.currentTarget.style.transform = "translate(0px, 0px)")}
               >
                 {loading ? (
                   <>
-                    <Loader size={16} className="animate-spin" />
+                    <Loader size={18} className="animate-spin" />
                     Sending...
                   </>
                 ) : (
                   <>
-                    <Mail size={16} />
+                    <Mail size={18} strokeWidth={2.5} />
                     Send Reset Link
                   </>
                 )}
@@ -213,16 +222,18 @@ export default function ForgotPasswordPage() {
                 style={{
                   display: "block",
                   textAlign: "center",
-                  marginTop: 16,
-                  color: "var(--teal)",
+                  marginTop: 24,
+                  color: "#1b1c15",
                   textDecoration: "none",
-                  fontFamily: "'DM Mono', monospace",
-                  fontSize: 12,
-                  fontWeight: 600,
+                  fontFamily: "'Manrope', sans-serif",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.04em",
                   transition: "color 0.2s ease",
                 }}
-                onMouseEnter={(e) => (e.target.style.color = "var(--yellow)")}
-                onMouseLeave={(e) => (e.target.style.color = "var(--teal)")}
+                onMouseEnter={(e) => (e.target.style.color = "#1e51f6")}
+                onMouseLeave={(e) => (e.target.style.color = "#1b1c15")}
               >
                 ← Back to Login
               </Link>
@@ -234,33 +245,36 @@ export default function ForgotPasswordPage() {
           <div className="flex flex-col items-center justify-center py-8">
             <div
               style={{
-                background: "var(--teal)",
-                borderRadius: "50%",
+                background: "#ffffff",
+                border: "4px solid #1b1c15",
+                borderRadius: 0,
                 padding: 16,
                 marginBottom: 24,
               }}
             >
-              <CheckCircle2 size={48} color="#0a0a0a" />
+              <CheckCircle2 size={48} color="#1e51f6" strokeWidth={2.5} />
             </div>
             <h1
               style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontWeight: 700,
+                fontWeight: 800,
                 fontSize: "clamp(1.5rem, 3.5vw, 2rem)",
-                color: "var(--fg)",
+                color: "#1b1c15",
                 textAlign: "center",
                 marginBottom: 16,
+                letterSpacing: "-0.02em",
               }}
             >
               Check Your Email
             </h1>
             <p
               style={{
-                fontFamily: "'DM Mono', monospace",
+                fontFamily: "'Manrope', sans-serif",
                 fontSize: 14,
-                color: "var(--fg-muted)",
+                color: "#1b1c15",
+                fontWeight: 500,
                 textAlign: "center",
-                marginBottom: 24,
+                marginBottom: 32,
                 lineHeight: 1.6,
               }}
             >
@@ -270,19 +284,25 @@ export default function ForgotPasswordPage() {
             <Link
               to="/auth?mode=login"
               style={{
-                display: "inline-block",
-                padding: "12px 24px",
-                background: "#FFE630",
-                color: "#0a0a0a",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                padding: "16px",
+                background: "#fbfaee",
+                color: "#1b1c15",
                 textDecoration: "none",
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontWeight: 700,
-                fontSize: 14,
+                fontWeight: 800,
+                fontSize: 15,
                 textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                border: "3px solid #0a0a0a",
-                boxShadow: "3px 3px 0 #0a0a0a",
+                letterSpacing: "0.02em",
+                border: "4px solid #1b1c15",
+                borderRadius: 0,
+                transition: "transform 0.15s ease",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translate(2px, 2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translate(0px, 0px)")}
             >
               Back to Login
             </Link>
@@ -293,33 +313,36 @@ export default function ForgotPasswordPage() {
           <div className="flex flex-col items-center justify-center py-8">
             <div
               style={{
-                background: "var(--coral)",
-                borderRadius: "50%",
+                background: "#ffffff",
+                border: "4px solid #ba1a1a",
+                borderRadius: 0,
                 padding: 16,
                 marginBottom: 24,
               }}
             >
-              <AlertCircle size={48} color="#0a0a0a" />
+              <AlertCircle size={48} color="#ba1a1a" strokeWidth={2.5} />
             </div>
             <h1
               style={{
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontWeight: 700,
+                fontWeight: 800,
                 fontSize: "clamp(1.5rem, 3.5vw, 2rem)",
-                color: "var(--fg)",
+                color: "#1b1c15",
                 textAlign: "center",
                 marginBottom: 16,
+                letterSpacing: "-0.02em",
               }}
             >
               Error
             </h1>
             <p
               style={{
-                fontFamily: "'DM Mono', monospace",
+                fontFamily: "'Manrope', sans-serif",
                 fontSize: 14,
-                color: "var(--fg-muted)",
+                color: "#1b1c15",
+                fontWeight: 500,
                 textAlign: "center",
-                marginBottom: 24,
+                marginBottom: 32,
                 lineHeight: 1.6,
               }}
             >
@@ -333,20 +356,26 @@ export default function ForgotPasswordPage() {
                 setMessage("");
               }}
               style={{
-                display: "inline-block",
-                padding: "12px 24px",
-                background: "#FFE630",
-                color: "#0a0a0a",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                padding: "16px",
+                background: "#fbfaee",
+                color: "#1b1c15",
                 textDecoration: "none",
                 fontFamily: "'Space Grotesk', sans-serif",
-                fontWeight: 700,
-                fontSize: 14,
+                fontWeight: 800,
+                fontSize: 15,
                 textTransform: "uppercase",
-                letterSpacing: "0.06em",
-                border: "3px solid #0a0a0a",
-                boxShadow: "3px 3px 0 #0a0a0a",
+                letterSpacing: "0.02em",
+                border: "4px solid #1b1c15",
+                borderRadius: 0,
                 cursor: "pointer",
+                transition: "transform 0.15s ease",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.transform = "translate(2px, 2px)")}
+              onMouseLeave={(e) => (e.currentTarget.style.transform = "translate(0px, 0px)")}
             >
               Try Again
             </button>

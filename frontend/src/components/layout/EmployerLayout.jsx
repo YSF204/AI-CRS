@@ -14,7 +14,7 @@ export default function EmployerLayout() {
       <DashboardNav role="employer" />
       
       <main className="dashboard-shell" style={{ 
-        marginLeft: 'var(--sidebar-width, 5rem)',
+        marginLeft: 'var(--sidebar-width, 5.5rem)',
         minHeight: '100vh',
         transition: 'margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         padding: 'var(--spacing-8)',

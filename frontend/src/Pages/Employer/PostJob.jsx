@@ -160,7 +160,7 @@ export default function PostJob() {
                 />
               </div>
               <div>
-                <label style={LABEL}>Base Remuneration ($/YR) *</label>
+                <label style={LABEL}>Base Salary ($/YR) *</label>
                 <input 
                   style={INPUT} 
                   type="number" 
@@ -189,7 +189,7 @@ export default function PostJob() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32 }}>
               <div>
-                <label style={LABEL}>Workspace Configuration *</label>
+                <label style={LABEL}>Work Location *</label>
                 <select 
                   style={{ ...INPUT, cursor: 'pointer' }} 
                   value={form.workSite} 
@@ -203,7 +203,7 @@ export default function PostJob() {
                 </select>
               </div>
               <div>
-                <label style={LABEL}>Temporal Commitment *</label>
+                <label style={LABEL}>Job Type *</label>
                 <select 
                   style={{ ...INPUT, cursor: 'pointer' }} 
                   value={form.workDuration} 
@@ -218,7 +218,7 @@ export default function PostJob() {
                 </select>
               </div>
               <div>
-                <label style={LABEL}>Exp. Threshold (Y) *</label>
+                <label style={LABEL}>Years of Experience *</label>
                 <input 
                   style={INPUT} 
                   type="number" 
@@ -235,7 +235,7 @@ export default function PostJob() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
               <div>
-                <label style={LABEL}>Technical Competencies <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+                <label style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
                 <input 
                   style={INPUT} 
                   value={form.technicalSkills} 
@@ -246,7 +246,7 @@ export default function PostJob() {
                 />
               </div>
               <div>
-                <label style={LABEL}>Operational Traits <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+                <label style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
                 <input 
                   style={INPUT} 
                   value={form.softSkills} 

@@ -12,7 +12,7 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
   const forceFresh = searchParams.get("fresh") === "true";
   const isEdit = !!appId;
 
-  const [step, setStep] = useState("upload"); // upload, result
+  const [step, setStep] = useState("upload"); // upload, result, success
   const [cvFile, setCvFile] = useState(null);
   const [selectedCvId, setSelectedCvId] = useState("");
   const [cvs, setCvs] = useState([]);
@@ -184,6 +184,14 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
   };
 
   const handleSubmitApplication = async () => {
+    if (step === "result") {
+      setStep("success");
+      setTimeout(() => {
+        if (onCloseFn) onCloseFn();
+        else navigate("/employee/applications");
+      }, 1400);
+      return;
+    }
     return submitApplication({ skipAnalysis: false });
   };
 
@@ -236,16 +244,53 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
         return;
       }
 
-      const msg = isEdit
-        ? "✅ Application updated!"
-        : skipAnalysis
-          ? "✅ Application submitted instantly!"
-          : "✅ Application submitted successfully!";
-      showToastNotice(msg);
-      setTimeout(() => {
-        if (onCloseFn) onCloseFn();
-        else navigate("/employee/applications");
-      }, 2000);
+      if (skipAnalysis) {
+        // ── Instant submit: show success screen then close ────────────────
+        setStep('success');
+        setTimeout(() => {
+          if (onCloseFn) onCloseFn();
+          else navigate("/employee/applications");
+        }, 1400);
+
+      } else {
+        // ── Analyze submit: fetch full app and show AnalysisScreen ─────────
+        const returnedRaw = response?.data?.data?.application;
+        const topLevelPct = response?.data?.data?.matchPercentage;
+
+        let fullApp = null;
+        if (typeof returnedRaw === 'object' && returnedRaw !== null) {
+          fullApp = returnedRaw;                          // edit — full object
+        } else if (typeof returnedRaw === 'string') {
+          try {                                           // new — fetch by ID
+            const fetchRes = await api.get(`/applications/${returnedRaw}`);
+            fullApp = fetchRes.data?.data?.application || null;
+          } catch {
+            fullApp = { matchPercentage: topLevelPct };  // fallback
+          }
+        }
+
+        const pct = fullApp?.matchPercentage ?? topLevelPct ?? null;
+        if (pct != null) {
+          const md = fullApp?.matchDetails || {};
+          setMatchAnalysis({
+            matchPercentage: pct,
+            matchDetails: md,
+            technicalSkillsMatch: md.technicalSkillsMatch,
+            experienceMatch: md.experienceMatch,
+            softSkillsMatch: md.softSkillsMatch,
+            recruiter_summary: md.matchAnalysis || fullApp?.recruiter_summary || '',
+            strengths: fullApp?.strengths || [],
+            weaknesses: fullApp?.weaknesses || [],
+          });
+          setStep('result');
+        } else {
+          showToastNotice(isEdit ? "✅ Application updated!" : "✅ Application submitted!");
+          setTimeout(() => {
+            if (onCloseFn) onCloseFn();
+            else navigate("/employee/applications");
+          }, 2000);
+        }
+      }
     } catch (error) {
       const status = error?.response?.status;
       const message = String(

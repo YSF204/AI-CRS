@@ -7,6 +7,7 @@ import { useApplyJob } from "./hooks/useApplyJob";
 import MethodSelector from "./components/MethodSelector";
 import CvSelector from "./components/CvSelector";
 import PdfUploader from "./components/PdfUploader";
+import AnalysisScreen from "./components/AnalysisScreen";
 import ApplicationViewer from "../../../components/applications/ApplicationViewer";
 
 export default function ApplyJobModal({ jobId, appId, onClose }) {
@@ -187,6 +188,69 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
     );
   }
 
+  // ── Success screen (instant apply & after analysis) ──────────────────────
+  if (step === 'success') {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div style={{
+          background: "#ffffff",
+          border: "4px solid #1b1c15",
+          borderRadius: 0,
+          padding: "3rem 2.5rem",
+          display: "flex", flexDirection: "column", alignItems: "center",
+          gap: "1.25rem", maxWidth: 380, width: "100%",
+          boxShadow: "8px 8px 0px 0px #1b1c15",
+        }}>
+          <div style={{
+            width: 72, height: 72, borderRadius: 0,
+            background: "#ffffff", border: "4px solid #1b1c15",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#1e51f6", fontSize: "2.5rem", fontWeight: 900,
+          }}>
+            ✓
+          </div>
+          <h2 style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontWeight: 800, fontSize: "1.5rem",
+            color: "#1b1c15", margin: 0, textAlign: "center",
+            letterSpacing: "-0.02em", textTransform: "uppercase",
+          }}>
+            Applied
+          </h2>
+          <p style={{
+            fontFamily: "'Manrope', sans-serif",
+            fontSize: "14px", color: "#1b1c15", fontWeight: 500,
+            margin: 0, textAlign: "center", lineHeight: 1.5,
+          }}>
+            Your application for <strong>{job?.position}</strong> has been submitted.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Analysis result screen — shown immediately after "Analyze Before Applying"
+  if (step === 'result' && matchAnalysis) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md overflow-y-auto">
+        {toastPopup}
+        <div className="min-h-full flex items-start justify-center p-4 md:p-8">
+          <AnalysisScreen
+            job={job}
+            matchAnalysis={matchAnalysis}
+            setStep={setStep}
+            setMatchAnalysis={setMatchAnalysis}
+            setCvFile={setCvFile}
+            setSelectedCvId={setSelectedCvId}
+            handleSubmitApplication={handleInstantSubmitApplication}
+            submitting={submitting}
+            isEdit={isEdit}
+          />
+        </div>
+      </div>
+    );
+  }
+
   // Upload Screen
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 md:p-8 overflow-y-auto">
@@ -228,15 +292,42 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
           </div>
 
           {isEdit && (
-            <div className="flex items-center gap-3 mb-6">
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem", borderBottom: "4px solid var(--nm-ink)" }}>
               <button
-                className={`brutal-btn px-4 py-2 font-bold uppercase tracking-wider ${tab === "update" ? "bg-[var(--yellow)] text-black" : "bg-[var(--card-bg)] text-[var(--fg)]"}`}
+                style={{
+                  padding: "1rem 2rem",
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 900,
+                  fontSize: "14px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                  background: tab === "update" ? "var(--nm-ink)" : "var(--nm-bg)",
+                  color: tab === "update" ? "#ffffff" : "var(--nm-text-primary)",
+                  border: "4px solid var(--nm-ink)",
+                  borderBottom: "none",
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
                 onClick={() => setTab("update")}
               >
                 Update Details
               </button>
               <button
-                className={`brutal-btn px-4 py-2 font-bold uppercase tracking-wider ${tab === "view" ? "bg-[var(--teal)] text-black" : "bg-[var(--card-bg)] text-[var(--fg)]"}`}
+                style={{
+                  padding: "1rem 2rem",
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 900,
+                  fontSize: "14px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                  background: tab === "view" ? "var(--nm-primary)" : "var(--nm-bg)",
+                  color: tab === "view" ? "#ffffff" : "var(--nm-text-primary)",
+                  border: "4px solid var(--nm-ink)",
+                  borderBottom: "none",
+                  cursor: !loadedApplication ? "not-allowed" : "pointer",
+                  opacity: !loadedApplication ? 0.5 : 1,
+                  transition: "all 0.2s",
+                }}
                 onClick={() => setTab("view")}
                 disabled={!loadedApplication}
               >

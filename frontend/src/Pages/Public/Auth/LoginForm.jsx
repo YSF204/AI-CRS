@@ -19,12 +19,6 @@ export default function LoginForm({ setMode }) {
     e.preventDefault();
     setErrorMsg("");
 
-    // Only basic presence check — no format/strength validation on login
-    if (!email.trim() || !password.trim()) {
-      setErrorMsg("Invalid email or password");
-      return;
-    }
-
     try {
       const res = await api.post("/auth/login", { email, password });
       login(res.data.token, res.data.data.user);

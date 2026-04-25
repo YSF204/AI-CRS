@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { ClipboardList, Edit3, Loader, Search, ChevronLeft, ChevronRight, XCircle, CheckCircle2, Clock, Calendar, Building2, Filter } from "lucide-react";
+import { ClipboardList, Edit3, Loader, Search, ChevronLeft, ChevronRight, XCircle, CheckCircle2, Clock, Calendar, Building2, Filter, Trash2 } from "lucide-react";
 import DashboardNav from "../../components/shared/DashboardNav";
 import useFetch from "../../hooks/useFetch";
 import api from "../../services/api";
@@ -43,8 +43,11 @@ export default function Applications() {
   const sortOption = searchParams.get("sort") || "newest";
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
 
+  const [confirmDelete, setConfirmDelete] = useState(null); // holds the app to delete
   const [editJobId, setEditJobId] = useState(null);
   const [editAppId, setEditAppId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [localDeleted, setLocalDeleted] = useState(new Set());
 
   const handleEditApplication = (app) => {
     setEditJobId(app.jobId?._id || app.jobId);
@@ -54,6 +57,24 @@ export default function Applications() {
   const handleCloseModal = () => {
     setEditJobId(null);
     setEditAppId(null);
+  };
+
+  const handleDeleteApplication = (app) => {
+    setConfirmDelete(app);
+  };
+
+  const handleConfirmDelete = async () => {
+    const app = confirmDelete;
+    setConfirmDelete(null);
+    setDeletingId(app._id);
+    try {
+      await api.delete(`/applications/${app._id}`);
+      setLocalDeleted(prev => new Set([...prev, app._id]));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to delete application. Please try again.');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   // Update URL params
@@ -88,9 +109,9 @@ export default function Applications() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Filter and sort applications
+  // Filter and sort applications (excluding locally deleted)
   const filteredAndSortedApps = useMemo(() => {
-    let result = [...applications];
+    let result = [...applications].filter(app => !localDeleted.has(app._id));
 
     // Filter by status
     if (statusFilter && statusFilter !== "all") {
@@ -127,7 +148,7 @@ export default function Applications() {
     }
 
     return result;
-  }, [applications, statusFilter, searchQuery, sortOption]);
+  }, [applications, localDeleted, statusFilter, searchQuery, sortOption]);
 
   // Pagination
   const totalPages = Math.ceil(filteredAndSortedApps.length / ITEMS_PER_PAGE);
@@ -138,16 +159,17 @@ export default function Applications() {
 
   // Status counts
   const statusCounts = useMemo(() => {
-    const counts = { all: applications.length };
+    const visible = applications.filter(app => !localDeleted.has(app._id));
+    const counts = { all: visible.length };
     STATUS_OPTIONS.forEach(opt => {
       if (opt.value !== "all") {
-        counts[opt.value] = applications.filter(app =>
+        counts[opt.value] = visible.filter(app =>
           (app.status || "pending").toLowerCase() === opt.value.toLowerCase()
         ).length;
       }
     });
     return counts;
-  }, [applications]);
+  }, [applications, localDeleted]);
 
   const getStatusClass = (status) => {
     const s = (status || "pending").toLowerCase();
@@ -295,6 +317,9 @@ export default function Applications() {
           </div>
         </div>
 
+      {/* Body Content */}
+      <div className="app-body">
+
       {/* Error State */}
       {error && (
         <div className="app-error-state" role="alert">
@@ -355,7 +380,7 @@ export default function Applications() {
                         <div className="app-card-meta">
                           <span className="app-card-meta-item">
                             <Calendar size={12} aria-hidden="true" />
-                            {new Date(app.createdAt).toLocaleDateString()}
+                            {new Date(app.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                           </span>
                         </div>
                       </div>
@@ -383,6 +408,24 @@ export default function Applications() {
                             Locked
                           </button>
                         )}
+
+                        <button
+                          className="app-action-btn"
+                          onClick={() => handleDeleteApplication(app)}
+                          disabled={deletingId === app._id}
+                          aria-label={`Remove application for ${app.jobId?.position || "this position"}`}
+                          style={{
+                            background: 'var(--nm-error)',
+                            color: '#fff',
+                            borderColor: 'var(--nm-ink)',
+                            opacity: deletingId === app._id ? 0.6 : 1,
+                          }}
+                        >
+                          {deletingId === app._id
+                            ? <Loader size={14} className="animate-spin" aria-hidden="true" />
+                            : <Trash2 size={14} aria-hidden="true" />}
+                          {deletingId === app._id ? 'Removing...' : 'Remove'}
+                        </button>
                       </div>
                     </article>
                   </li>
@@ -445,7 +488,8 @@ export default function Applications() {
           )}
         </>
       )}
-      </div>
+      </div> {/* end app-body */}
+      </div> {/* end dashboard-shell */}
 
       {/* Edit Job Modal */}
       {editJobId && editAppId && (
@@ -454,6 +498,80 @@ export default function Applications() {
           appId={editAppId}
           onClose={handleCloseModal}
         />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {confirmDelete && (
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 100,
+            background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '1rem',
+          }}
+          onClick={() => setConfirmDelete(null)}
+        >
+          <div
+            style={{
+              background: 'var(--nm-surface)',
+              border: '4px solid var(--nm-ink)',
+              boxShadow: '8px 8px 0 var(--nm-ink)',
+              padding: '2rem',
+              maxWidth: '440px',
+              width: '100%',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Red accent bar */}
+            <div style={{ height: 6, background: 'var(--nm-error)', marginBottom: '1.5rem', marginLeft: '-2rem', marginRight: '-2rem', marginTop: '-2rem' }} />
+            <h2 style={{
+              fontFamily: 'var(--font-display)', fontWeight: 800,
+              fontSize: '1.3rem', textTransform: 'uppercase',
+              color: 'var(--nm-error)', letterSpacing: '-0.02em', marginBottom: '0.5rem',
+            }}>
+              Remove Application?
+            </h2>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.9rem', color: 'var(--nm-text-secondary)', marginBottom: '0.25rem' }}>
+              <strong style={{ color: 'var(--nm-text-primary)' }}>
+                {confirmDelete.jobId?.position || 'This position'}
+              </strong>
+            </p>
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--nm-text-secondary)', marginBottom: '1.5rem' }}>
+              {confirmDelete.employerId?.company?.name && `at ${confirmDelete.employerId.company.name} · `}
+              This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button
+                onClick={handleConfirmDelete}
+                style={{
+                  flex: 1, padding: '0.75rem 1rem',
+                  background: 'var(--nm-error)', color: '#fff',
+                  border: '4px solid var(--nm-ink)',
+                  boxShadow: '4px 4px 0 var(--nm-ink)',
+                  fontFamily: 'var(--font-display)', fontWeight: 800,
+                  fontSize: '0.85rem', textTransform: 'uppercase',
+                  letterSpacing: '0.05em', cursor: 'pointer',
+                }}
+              >
+                Yes, Remove
+              </button>
+              <button
+                onClick={() => setConfirmDelete(null)}
+                style={{
+                  flex: 1, padding: '0.75rem 1rem',
+                  background: 'var(--nm-surface)', color: 'var(--nm-text-primary)',
+                  border: '4px solid var(--nm-ink)',
+                  boxShadow: '4px 4px 0 var(--nm-ink)',
+                  fontFamily: 'var(--font-display)', fontWeight: 800,
+                  fontSize: '0.85rem', textTransform: 'uppercase',
+                  letterSpacing: '0.05em', cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
