@@ -30,7 +30,7 @@ export default function ActionBar({
     if (diff < 60) return "Just now";
     if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
-    return date.toLocaleDateString();
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   };
 
   return (

@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import { signupSchema } from "../../../schema/auth.schema";
 import useFormValidation from "../../../hooks/useFormValidation";
 import Stepper from "./components/Stepper";
 import ErrorBanner from "./components/ErrorBanner";
@@ -65,7 +64,7 @@ export default function ClassicSignupForm() {
     age: parseInt(form.age) || 0,
   };
   const { errors, touched, touch, touchAll } = useFormValidation(
-    signupSchema,
+    null,
     validationData,
   );
 
@@ -161,28 +160,19 @@ export default function ClassicSignupForm() {
   const handleComplete = async () => {
     setErrorMsg("");
     try {
-      const parsed = signupSchema.safeParse(validationData);
-      if (!parsed.success) {
-        const firstIssue = parsed.error.issues[0];
-        setErrorMsg(firstIssue?.message || "Validation failed");
-        console.log("Validation errors:", parsed.error.issues);
-        return;
-      }
-
-      const d = parsed.data;
       const body = {
-        firstName: d.firstName,
-        lastName: d.lastName,
-        email: d.email,
-        password: d.password,
-        passwordConfirm: d.passwordConfirm,
-        gender: d.gender,
-        role: d.role,
-        age: d.age,
-        telephone: d.telephone ? [d.telephone] : [],
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        password: form.password,
+        passwordConfirm: form.passwordConfirm,
+        gender: form.gender,
+        role: role.toUpperCase(),
+        age: parseInt(form.age) || 0,
+        telephone: form.telephone ? [form.telephone] : [],
       };
 
-      if (d.role === "EMPLOYER") {
+      if (role.toUpperCase() === "EMPLOYER") {
         body.company = {
           name: form.companyName,
           license: form.companyLicense,

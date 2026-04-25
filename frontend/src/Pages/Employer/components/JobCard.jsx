@@ -220,7 +220,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
             marginTop: 4
           }}
         >
-          <Users size={18} strokeWidth={3} /> Intelligence Scan
+          <Users size={18} strokeWidth={3} /> Review Listing
         </button>
         
         <button

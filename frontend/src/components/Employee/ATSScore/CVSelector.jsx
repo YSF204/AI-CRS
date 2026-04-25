@@ -70,8 +70,8 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
               placeholder="Search CV names..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="jd-input w-[240px] h-[44px]"
-              style={{ paddingLeft: "40px" }}
+              className="jd-input h-[44px]"
+              style={{ paddingLeft: "40px", width: "280px" }}
             />
             <Search
               size={16}
@@ -88,7 +88,8 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
-            className="jd-select h-[44px] min-w-[140px]"
+            className="jd-select h-[44px]"
+            style={{ width: "135px" }}
           >
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>

@@ -207,7 +207,7 @@ export default function JobApplications() {
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em'
                 }}>
-                  INTAKE: {new Date(app.createdAt).toLocaleDateString()}
+                  INTAKE: {new Date(app.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                 </div>
               </div>
             ))}
@@ -232,13 +232,13 @@ export default function JobApplications() {
             style={{ 
               background: "var(--nm-bg)", 
               width: "100%", 
-              maxW: "1200px", 
+              maxWidth: "1200px", 
               maxHeight: "90vh", 
               overflowY: "auto", 
               position: "relative", 
               borderWidth: "6px", 
               boxShadow: "20px 20px 0 #000", 
-              padding: "3rem",
+              padding: "0 3rem 3rem 3rem",
               borderRadius: '0px'
             }}
           >
@@ -247,12 +247,37 @@ export default function JobApplications() {
               top: 0, 
               zIndex: 10, 
               display: "flex", 
-              justifyContent: "flex-end", 
+              justifyContent: "space-between", 
+              alignItems: "center",
               marginBottom: "2rem", 
               background: "var(--nm-bg)", 
-              paddingBottom: "1.5rem", 
+              padding: "1.5rem 3rem", 
+              margin: "0 -3rem",
               borderBottom: "4px solid var(--nm-ink)" 
             }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <span style={{ 
+                  fontFamily: 'var(--font-display)', 
+                  fontWeight: 900, 
+                  fontSize: 18, 
+                  color: 'var(--nm-text-primary)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em'
+                }}>
+                  {selected.applicantInfo?.fullName || "ENTITY UNIDENTIFIED"}
+                </span>
+                <span style={{
+                  background: selected.matchPercentage > 80 ? 'var(--nm-success)' : 'var(--nm-warning)',
+                  color: '#000',
+                  padding: '4px 8px',
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 900,
+                  fontSize: 14,
+                  border: '3px solid var(--nm-ink)',
+                }}>
+                  {selected.matchPercentage ?? "—"}% MATCH
+                </span>
+              </div>
               <button
                 onClick={() => setSelected(null)}
                 className="nm-btn"
@@ -267,7 +292,7 @@ export default function JobApplications() {
                   letterSpacing: '0.1em'
                 }}
               >
-                CLOSE DOSSIER
+                CLOSE
               </button>
             </div>
             <ApplicationViewer application={selected} />

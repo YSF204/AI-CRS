@@ -5,37 +5,55 @@ import { Clock, Building2, CheckCircle, Mail } from 'lucide-react';
 export default function PendingActivation() {
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-6"
-      style={{ background: 'var(--bg)' }}
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 'clamp(1rem, 4%, 3rem)',
+        background: '#fbfaee',
+      }}
     >
-      {/* Decorative elements */}
-      <div className="hidden lg:block" style={{ position: 'fixed', bottom: '10%', left: '5%', width: 60, height: 60, background: '#FFE630', border: '3px solid #0a0a0a', transform: 'rotate(12deg)', opacity: 0.5 }} />
-      <div className="hidden lg:block" style={{ position: 'fixed', top: '15%', right: '8%', width: 40, height: 80, background: 'var(--coral)', border: '3px solid #0a0a0a', transform: 'rotate(-8deg)', opacity: 0.4 }} />
-
       <div
-        className="w-full max-w-lg"
         style={{
-          background: 'var(--card-bg)',
-          border: '3px solid var(--border-color)',
-          boxShadow: '8px 8px 0 var(--shadow-color)',
-          padding: 'clamp(2rem, 5%, 3rem)',
+          width: '100%',
+          maxWidth: 560,
+          background: '#ffffff',
+          border: '4px solid #1b1c15',
+          boxShadow: '8px 8px 0px 0px #1b1c15',
+          padding: 'clamp(2rem, 5%, 3.5rem)',
+          borderRadius: 0,
         }}
       >
         {/* Icon header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div style={{ background: '#FFE630', border: '3px solid #0a0a0a', padding: '10px', display: 'inline-flex' }}>
-            <Clock size={28} color="#0a0a0a" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+          <div style={{ background: '#1e51f6', border: '4px solid #1b1c15', padding: '12px', display: 'inline-flex' }}>
+            <Clock size={32} color="#ffffff" strokeWidth={2.5} />
           </div>
           <div>
             <p
-              className="uppercase tracking-widest text-xs font-bold"
-              style={{ fontFamily: "'DM Mono', monospace", color: 'var(--fg-muted)' }}
+              style={{
+                fontFamily: "'Manrope', sans-serif",
+                fontSize: 12,
+                fontWeight: 800,
+                color: '#1b1c15',
+                textTransform: 'uppercase',
+                letterSpacing: '0.15em',
+                marginBottom: 4
+              }}
             >
               Registration Complete
             </p>
             <h1
-              className="font-bold"
-              style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(1.4rem, 3vw, 1.9rem)', color: 'var(--fg)', letterSpacing: '-0.03em' }}
+              style={{
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontSize: 'clamp(1.5rem, 3.5vw, 2.2rem)',
+                fontWeight: 800,
+                color: '#1b1c15',
+                letterSpacing: '-0.02em',
+                margin: 0,
+                lineHeight: 1.1
+              }}
             >
               Account Pending Review
             </h1>
@@ -44,31 +62,65 @@ export default function PendingActivation() {
 
         {/* Status badge */}
         <div
-          className="flex items-center gap-2 mb-6 px-4 py-3"
-          style={{ background: '#FFF3E0', border: '2px solid #FFB300', fontFamily: "'DM Mono', monospace", fontSize: 13 }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            marginBottom: 32,
+            padding: '12px 16px',
+            background: '#fbfaee',
+            border: '4px solid #1b1c15',
+            fontFamily: "'Manrope', sans-serif",
+            fontSize: 13,
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
+          }}
         >
-          <Building2 size={16} color="#FF8F00" />
-          <span style={{ color: '#7F4500', fontWeight: 700 }}>EMPLOYER ACCOUNT — AWAITING ADMIN APPROVAL</span>
+          <Building2 size={18} color="#1b1c15" strokeWidth={2.5} />
+          <span style={{ color: '#1b1c15' }}>Employer Account — Awaiting Approval</span>
         </div>
 
         {/* Explanation */}
-        <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 14, color: 'var(--fg-muted)', lineHeight: 1.7, marginBottom: 24 }}>
-          Your employer account has been created and submitted to our team for verification. This process typically takes <strong style={{ color: 'var(--fg)' }}>1–2 business days</strong>.
+        <p style={{
+          fontFamily: "'Manrope', sans-serif",
+          fontSize: 15,
+          color: '#1b1c15',
+          lineHeight: 1.6,
+          fontWeight: 500,
+          marginBottom: 32
+        }}>
+          Your employer account has been created and submitted to our team for verification. This process typically takes <strong style={{ fontWeight: 800 }}>1–2 business days</strong>.
         </p>
 
         {/* What happens next */}
-        <div style={{ borderTop: '2px solid var(--border-color)', paddingTop: 20, marginBottom: 28 }}>
-          <p className="font-bold uppercase tracking-wider text-sm mb-4" style={{ fontFamily: "'Space Grotesk', sans-serif", color: 'var(--fg)' }}>
-            What happens next?
+        <div style={{ borderTop: '4px solid #1b1c15', paddingTop: 32, marginBottom: 40 }}>
+          <p style={{
+            fontFamily: "'Space Grotesk', sans-serif",
+            fontSize: 14,
+            fontWeight: 800,
+            color: '#1b1c15',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            marginBottom: 20
+          }}>
+            What Happens Next?
           </p>
           {[
             { icon: CheckCircle, text: 'Our admin team reviews your company details and license.' },
             { icon: Mail, text: 'You will receive an email notification once your account is approved.' },
-            { icon: Building2, text: 'After approval, you can log in and start posting jobs.' },
+            { icon: Building2, text: 'After approval, you can log in and deploy your talent pipelines.' },
           ].map(({ icon: Icon, text }, i) => (
-            <div key={i} className="flex items-start gap-3 mb-4">
-              <Icon size={18} style={{ color: 'var(--teal)', flexShrink: 0, marginTop: 2 }} />
-              <p style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: 'var(--fg-muted)', lineHeight: 1.6 }}>
+            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 16 }}>
+              <Icon size={20} color="#1e51f6" strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 2 }} />
+              <p style={{
+                fontFamily: "'Manrope', sans-serif",
+                fontSize: 14,
+                color: '#1b1c15',
+                fontWeight: 600,
+                lineHeight: 1.5,
+                margin: 0
+              }}>
                 {text}
               </p>
             </div>
@@ -76,36 +128,54 @@ export default function PendingActivation() {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 flex-wrap">
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <Link
             to="/"
-            className="flex-1"
             style={{
-              display: 'flex', justifyContent: 'center', alignItems: 'center',
-              padding: '12px 20px',
+              flex: 1,
+              minWidth: 140,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: '16px 20px',
               fontFamily: "'Space Grotesk', sans-serif",
-              fontWeight: 700, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.08em',
+              fontWeight: 800,
+              fontSize: 14,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
               textDecoration: 'none',
-              background: '#FFE630', color: '#0a0a0a',
-              border: '3px solid #0a0a0a', boxShadow: '4px 4px 0 #0a0a0a',
-              transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+              background: '#1e51f6',
+              color: '#ffffff',
+              border: '4px solid #1b1c15',
+              transition: 'transform 0.15s ease',
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translate(2px, 2px)'; e.currentTarget.style.boxShadow = '2px 2px 0 #0a0a0a'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '4px 4px 0 #0a0a0a'; }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'translate(2px, 2px)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'translate(0px, 0px)'}
           >
             ← Back to Home
           </Link>
           <Link
             to="/auth?mode=login"
             style={{
-              display: 'flex', justifyContent: 'center', alignItems: 'center',
-              padding: '12px 20px',
+              flex: 1,
+              minWidth: 140,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              padding: '16px 20px',
               fontFamily: "'Space Grotesk', sans-serif",
-              fontWeight: 700, fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.08em',
+              fontWeight: 800,
+              fontSize: 14,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
               textDecoration: 'none',
-              background: 'transparent', color: 'var(--fg)',
-              border: '3px solid var(--border-color)', boxShadow: '4px 4px 0 var(--shadow-color)',
+              background: '#fbfaee',
+              color: '#1b1c15',
+              border: '4px solid #1b1c15',
+              transition: 'transform 0.15s ease',
             }}
+            onMouseEnter={e => e.currentTarget.style.transform = 'translate(2px, 2px)'}
+            onMouseLeave={e => e.currentTarget.style.transform = 'translate(0px, 0px)'}
           >
             Login Instead
           </Link>

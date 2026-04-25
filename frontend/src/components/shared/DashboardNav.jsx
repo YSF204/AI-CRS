@@ -49,7 +49,7 @@ export default function DashboardNav({ role = 'employee' }) {
     } else {
       document.body.classList.remove('sidebar-open');
       // Force CSS variable update for immediate effect
-      document.documentElement.style.setProperty('--sidebar-width', '5rem');
+      document.documentElement.style.setProperty('--sidebar-width', '5.5rem');
     }
 
     return () => {

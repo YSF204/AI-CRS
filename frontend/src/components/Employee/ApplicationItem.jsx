@@ -74,7 +74,7 @@ export default function ApplicationItem({ app, isSelected, onClick }) {
           {app.company || app.employerId?.company?.name || 'Unknown Company'}
         </p>
         <p className="font-mono text-xs mt-1" style={{ color: isSelected ? 'var(--color-primary)' : 'var(--color-text-tertiary)' }}>
-          {app.date || new Date(app.createdAt || Date.now()).toLocaleDateString()}
+          {app.date || new Date(app.createdAt || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
         </p>
       </div>
 

@@ -387,7 +387,7 @@ export default function UserManagement() {
                           fontSize: 'var(--text-sm)',
                           color: 'var(--nm-text-primary)'
                         }}>
-                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                          {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
                         </div>
                       </td>
                       <td>

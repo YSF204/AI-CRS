@@ -218,10 +218,13 @@ body.sidebar-open .jd-sidebar-brand-text {
 
 .jd-sidebar-link:hover {
   border-color: var(--nm-ink);
-  background: var(--nm-bg);
+  background: var(--nm-surface-high);
   color: var(--nm-text-primary);
-  box-shadow: 4px 4px 0 var(--nm-ink);
-  transform: translate(-2px, -2px);
+  width: 52px;
+}
+
+body.sidebar-open .jd-sidebar-link:hover {
+  width: 100%;
 }
 
 .jd-sidebar-link[data-active="true"] {
@@ -229,6 +232,11 @@ body.sidebar-open .jd-sidebar-brand-text {
   background: var(--nm-primary);
   color: #fff;
   box-shadow: 4px 4px 0 var(--nm-ink);
+  width: 56px;
+}
+
+body.sidebar-open .jd-sidebar-link[data-active="true"] {
+  width: 100%;
 }
 
 .jd-sidebar-link-icon {

@@ -729,7 +729,7 @@ export default function AdminDash() {
                 }}>
                   <div style={{
                     display: 'flex',
-                    alignItems: 'flex-start',
+                    alignItems: 'center',
                     justifyContent: 'space-between',
                     marginBottom: 'var(--spacing-5)',
                     gap: 'var(--spacing-4)'
@@ -778,6 +778,10 @@ export default function AdminDash() {
 
                   {!pendingEmployers || pendingEmployers.pendingEmployers.length === 0 ? (
                     <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       padding: 'var(--spacing-8)',
                       textAlign: 'center',
                       color: 'var(--nm-text-secondary)'

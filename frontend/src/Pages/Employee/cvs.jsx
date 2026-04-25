@@ -155,7 +155,7 @@ export default function CVs() {
                 placeholder="Search resumes..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="jd-input w-[240px] h-[44px]"
+                className="jd-input w-[320px] h-[44px]"
                 style={{ paddingLeft: "40px" }}
               />
               <Search
@@ -173,7 +173,8 @@ export default function CVs() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="jd-select h-[44px] min-w-[140px]"
+              className="jd-select h-[44px]"
+              style={{ width: "100px" }}
             >
               <option value="newest">Newest</option>
               <option value="oldest">Oldest</option>

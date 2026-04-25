@@ -12,19 +12,21 @@ export default function PdfUploader({
 }) {
   return (
     <>
-      <div className="brutal-card bg-[var(--card-bg)] p-6">
-        <h2 className="font-['Space_Grotesk'] font-bold text-sm uppercase tracking-wider mb-4">
+      <div style={{ padding: "1.5rem", background: "var(--nm-surface)", border: "4px solid var(--nm-ink)", boxShadow: "6px 6px 0 var(--nm-ink)", marginBottom: "1.5rem", borderRadius: "0px" }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "14px", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem", color: "var(--nm-text-primary)" }}>
           Upload Your CV (PDF)
         </h2>
         <div
-          className="border-2 border-dashed border-[var(--border-color)] p-8 text-center cursor-pointer hover:border-[var(--yellow)] transition-colors"
           onClick={() => document.getElementById("cvFile")?.click()}
+          style={{ border: "2px dashed var(--nm-ink)", padding: "2rem", textAlign: "center", cursor: "pointer", background: "var(--nm-bg)", transition: "all 0.2s" }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = "var(--nm-primary)"}
+          onMouseLeave={e => e.currentTarget.style.borderColor = "var(--nm-ink)"}
         >
-          <Upload size={32} className="mx-auto mb-3 text-[var(--fg-muted)]" />
-          <p className="font-mono text-sm font-bold mb-1">
+          <Upload size={32} color="var(--nm-ink)" style={{ margin: "0 auto 0.75rem auto" }} />
+          <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", fontWeight: 700, color: "var(--nm-text-primary)", marginBottom: "4px" }}>
             {cvFile ? cvFile.name : "Click to upload or drag and drop"}
           </p>
-          <p className="font-mono text-xs text-[var(--fg-muted)]">
+          <p style={{ fontFamily: "var(--font-body)", fontSize: "12px", color: "var(--nm-text-secondary)" }}>
             PDF only, max 5MB
           </p>
         </div>
@@ -33,27 +35,37 @@ export default function PdfUploader({
           type="file"
           accept=".pdf"
           onChange={handleFileUpload}
-          className="hidden"
+          style={{ display: "none" }}
         />
       </div>
 
-      <div className="brutal-card bg-[rgba(78, 205, 196, 0.1)] border-4 border-[var(--teal)] p-6">
-        <p className="font-mono text-sm text-[var(--fg-muted)]">
-          Choose whether to submit instantly with the uploaded PDF or analyze it first.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-4 mt-6">
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         <button
           onClick={handleInstantSubmitApplication}
           disabled={!cvFile || submitting || (isEdit && !formHasChanged)}
-          className="flex-1 brutal-btn px-4 py-3 font-bold uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
-          style={{ background: "var(--teal)", color: "#0a0a0a" }}
-          title={
-            isEdit && !formHasChanged
-              ? "No changes to submit"
-              : "Apply instantly with the uploaded PDF"
-          }
+          title={isEdit && !formHasChanged ? "No changes to submit" : "Apply instantly"}
+          style={{
+            background: "var(--nm-primary)",
+            color: "#ffffff",
+            padding: "16px",
+            border: "4px solid var(--nm-ink)",
+            boxShadow: "6px 6px 0 var(--nm-ink)",
+            fontFamily: "var(--font-display)",
+            fontWeight: 900,
+            fontSize: "14px",
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+            cursor: (!cvFile || submitting || (isEdit && !formHasChanged)) ? "not-allowed" : "pointer",
+            opacity: (!cvFile || submitting || (isEdit && !formHasChanged)) ? 0.6 : 1,
+            transition: "transform 0.1s"
+          }}
+          onMouseDown={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.transform = "translate(4px, 4px)"; e.currentTarget.style.boxShadow = "2px 2px 0 var(--nm-ink)"; } }}
+          onMouseUp={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "6px 6px 0 var(--nm-ink)"; } }}
+          onMouseLeave={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "6px 6px 0 var(--nm-ink)"; } }}
         >
           {submitting ? (
             <>
@@ -67,13 +79,29 @@ export default function PdfUploader({
         <button
           onClick={handleSubmitApplication}
           disabled={!cvFile || submitting || (isEdit && !formHasChanged)}
-          className="flex-1 brutal-btn px-4 py-3 font-bold uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
-          style={{ background: "var(--yellow)", color: "#0a0a0a" }}
-          title={
-            isEdit && !formHasChanged
-              ? "No changes to submit"
-              : "Analyze before applying"
-          }
+          title={isEdit && !formHasChanged ? "No changes to submit" : "Analyze before applying"}
+          style={{
+            background: "var(--nm-bg)",
+            color: "var(--nm-text-primary)",
+            padding: "16px",
+            border: "4px solid var(--nm-ink)",
+            boxShadow: "6px 6px 0 var(--nm-ink)",
+            fontFamily: "var(--font-display)",
+            fontWeight: 900,
+            fontSize: "14px",
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+            cursor: (!cvFile || submitting || (isEdit && !formHasChanged)) ? "not-allowed" : "pointer",
+            opacity: (!cvFile || submitting || (isEdit && !formHasChanged)) ? 0.6 : 1,
+            transition: "transform 0.1s"
+          }}
+          onMouseDown={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.transform = "translate(4px, 4px)"; e.currentTarget.style.boxShadow = "2px 2px 0 var(--nm-ink)"; } }}
+          onMouseUp={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "6px 6px 0 var(--nm-ink)"; } }}
+          onMouseLeave={e => { if(!e.currentTarget.disabled) { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "6px 6px 0 var(--nm-ink)"; } }}
         >
           Analyze Before Applying
         </button>

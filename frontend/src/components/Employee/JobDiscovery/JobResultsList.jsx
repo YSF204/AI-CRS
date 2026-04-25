@@ -29,7 +29,7 @@ const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loa
         const isSelected = job.id === selectedJobId;
         const salary = job.raw?.salary
           ? `$${job.raw.salary.toLocaleString()}`
-          : "NOT_SPECIFIED";
+          : "Not listed";
 
         return (
           <button
@@ -54,7 +54,7 @@ const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loa
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
                        <div className={`w-1.5 h-1.5 ${isSelected ? 'bg-[var(--nm-primary)]' : 'bg-[var(--nm-ink)]'}`} />
-                       <span className="font-mono text-[9px] font-black uppercase tracking-widest text-[var(--nm-text-tertiary)]">Job_Listing #{index + 1}</span>
+                       <span className="font-mono text-[9px] font-black uppercase tracking-widest text-[var(--nm-text-tertiary)]">Job {index + 1}</span>
                     </div>
                     <h3 className="font-[var(--font-display)] text-xl font-black uppercase tracking-tight text-[var(--nm-text-primary)] leading-none mb-1 group-hover:text-[var(--nm-primary)] transition-colors">
                       {job.title}
@@ -97,7 +97,7 @@ const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loa
 
                 {job.raw?.salary && (
                   <div className="pt-4 border-t-2 border-[var(--nm-ink)] border-dashed flex items-center gap-2">
-                    <span className="font-mono text-[10px] font-black text-[var(--nm-text-tertiary)] uppercase">Compensation_Package:</span>
+                    <span className="font-mono text-[10px] font-black text-[var(--nm-text-tertiary)] uppercase">Salary:</span>
                     <span className="font-mono text-[11px] font-black text-[var(--nm-text-primary)]">{salary}</span>
                   </div>
                 )}

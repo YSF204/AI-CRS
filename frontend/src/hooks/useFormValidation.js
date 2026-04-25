@@ -16,6 +16,7 @@ export default function useFormValidation(schema, data) {
 
   // Real-time errors derived from current data
   const errors = useMemo(() => {
+    if (!schema) return {};
     const result = schema.safeParse(data);
     if (result.success) return {};
     const flat = result.error.flatten().fieldErrors;
