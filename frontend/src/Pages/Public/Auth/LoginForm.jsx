@@ -2,8 +2,6 @@ import { useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
-import { loginSchema } from "../../../schema/auth.schema";
-import useFormValidation from "../../../hooks/useFormValidation";
 import AuthInput from "./components/AuthInput";
 import ErrorBanner from "./components/ErrorBanner";
 import api from "../../../services/api";
@@ -17,18 +15,13 @@ export default function LoginForm({ setMode }) {
   const [errorMsg, setErrorMsg] = useState("");
   const [showForgotLink, setShowForgotLink] = useState(false);
 
-  const { errors, touched, touch, touchAll } = useFormValidation(loginSchema, {
-    email,
-    password,
-  });
-
   const handleLogin = async (e) => {
     e.preventDefault();
-    touchAll(["email", "password"]);
     setErrorMsg("");
 
-    if (Object.keys(errors).length > 0) {
-      setErrorMsg(Object.values(errors)[0]);
+    // Only basic presence check — no format/strength validation on login
+    if (!email.trim() || !password.trim()) {
+      setErrorMsg("Invalid email or password");
       return;
     }
 
@@ -86,10 +79,7 @@ export default function LoginForm({ setMode }) {
         placeholder="you@example.com"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        onFocus={touch("email")}
-        onBlur={touch("email")}
         required
-        error={touched.email ? errors.email : ""}
       />
       <AuthInput
         label="Password"
@@ -99,10 +89,7 @@ export default function LoginForm({ setMode }) {
         placeholder="••••••••"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        onFocus={touch("password")}
-        onBlur={touch("password")}
         required
-        error={touched.password ? errors.password : ""}
       />
 
       <div style={{ textAlign: "right", marginBottom: 12 }}>

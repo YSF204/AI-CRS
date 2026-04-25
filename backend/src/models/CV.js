@@ -114,10 +114,20 @@ const cvSchema = new mongoose.Schema(
         },
       },
     ],
-    language: {
-      type: [String],
-      default: [],
-    },
+    language: [
+      {
+        name: {
+          type: String,
+          trim: true,
+          required: true,
+        },
+        level: {
+          type: String,
+          trim: true,
+          default: "",
+        },
+      },
+    ],
     softSkills: {
       type: [String],
       default: [],

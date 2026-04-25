@@ -1,6 +1,13 @@
 import React, { useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileText, Plus, Search, UploadCloud, Edit, Trash2 } from "lucide-react";
+import {
+  FileText,
+  Plus,
+  Search,
+  UploadCloud,
+  Edit,
+  Trash2,
+} from "lucide-react";
 import DashboardNav from "../../components/shared/DashboardNav";
 import CVPreviewCard from "../../components/Employee/ATSScore/CVPreviewCard";
 import api from "../../services/api";
@@ -32,15 +39,24 @@ export default function CVs() {
     let list = [...cvs];
     if (query) {
       const lowerQ = query.toLowerCase();
-      list = list.filter((cv) =>
-        (cv.jobTitle || "").toLowerCase().includes(lowerQ) ||
-        (cv.fullName || "").toLowerCase().includes(lowerQ)
+      list = list.filter(
+        (cv) =>
+          (cv.jobTitle || "").toLowerCase().includes(lowerQ) ||
+          (cv.fullName || "").toLowerCase().includes(lowerQ),
       );
     }
     if (sortBy === "newest") {
-      list.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+      list.sort(
+        (a, b) =>
+          new Date(b.updatedAt || b.createdAt) -
+          new Date(a.updatedAt || a.createdAt),
+      );
     } else if (sortBy === "oldest") {
-      list.sort((a, b) => new Date(a.updatedAt || a.createdAt) - new Date(b.updatedAt || b.createdAt));
+      list.sort(
+        (a, b) =>
+          new Date(a.updatedAt || a.createdAt) -
+          new Date(b.updatedAt || b.createdAt),
+      );
     }
     return list;
   }, [cvs, query, sortBy]);
@@ -130,23 +146,34 @@ export default function CVs() {
         </div>
 
         {/* Toolbar */}
-        <div className="jd-surface-stack flex flex-col sm:flex-row items-center justify-between gap-4 p-4 mb-8">
+        <div className="jd-surface-stack flex items-center justify-between gap-4 p-4 mb-8">
           <h2 className="jd-section-title mb-0">Saved CVs ({cvs.length})</h2>
-          <div className="flex w-full sm:w-auto gap-3">
-            <div className="relative flex-grow sm:max-w-xs flex items-center">
-              <Search size={16} className="absolute left-3 text-[var(--nm-text-tertiary)]" />
+          <div className="flex gap-3 items-center">
+            <div className="relative h-[44px]">
               <input
                 type="text"
                 placeholder="Search resumes..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="jd-input pl-10 h-10 w-full"
+                className="jd-input w-[240px] h-[44px]"
+                style={{ paddingLeft: "40px" }}
+              />
+              <Search
+                size={16}
+                style={{
+                  position: "absolute",
+                  left: "12px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  pointerEvents: "none",
+                }}
+                className="text-[var(--nm-text-tertiary)]"
               />
             </div>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="jd-select h-10 min-w-[140px]"
+              className="jd-select h-[44px] min-w-[140px]"
             >
               <option value="newest">Newest</option>
               <option value="oldest">Oldest</option>
@@ -157,7 +184,9 @@ export default function CVs() {
         {(error || fetchError) && (
           <div className="mb-8 jd-surface-stack border-[var(--nm-error)]">
             <p className="font-mono text-sm text-[var(--nm-error)] m-0 font-bold uppercase py-1">
-              {error || fetchError?.response?.data?.message || "Operation failed."}
+              {error ||
+                fetchError?.response?.data?.message ||
+                "Operation failed."}
             </p>
           </div>
         )}
@@ -165,8 +194,11 @@ export default function CVs() {
         {/* CV Grid */}
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="jd-panel h-[400px] animate-pulse bg-[var(--nm-surface-low)]" />
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="jd-panel h-[400px] animate-pulse bg-[var(--nm-surface-low)]"
+              />
             ))}
           </div>
         ) : (
@@ -177,18 +209,24 @@ export default function CVs() {
                   cv={{ ...cv, buttonText: "EDIT RESUME" }}
                   onAnalyze={() => handleEdit(cv._id)}
                 />
-                
+
                 {/* Float Actions */}
                 <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                   <button
-                    onClick={(e) => { e.stopPropagation(); handleEdit(cv._id); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(cv._id);
+                    }}
                     className="w-8 h-8 flex items-center justify-center bg-[var(--nm-primary)] text-white border-4 border-[var(--nm-ink)] hover:translate-x-[2px] hover:translate-y-[2px] transition-transform"
                     title="Edit CV"
                   >
                     <Edit size={14} />
                   </button>
                   <button
-                    onClick={(e) => { e.stopPropagation(); setDeleteTarget(cv._id); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeleteTarget(cv._id);
+                    }}
                     className="w-8 h-8 flex items-center justify-center bg-[var(--nm-error)] text-white border-4 border-[var(--nm-ink)] hover:translate-x-[2px] hover:translate-y-[2px] transition-transform"
                     title="Delete CV"
                   >
@@ -214,22 +252,86 @@ export default function CVs() {
 
       {/* Confirmation Modal */}
       {deleteTarget && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyItems: "center", justifyContent: "center" }}>
-          <div className="nm-card" style={{ background: "var(--nm-surface)", padding: "32px", maxWidth: "400px", width: "90%", border: "4px solid var(--nm-ink)", boxShadow: "8px 8px 0 var(--nm-ink)", borderRadius: "0px" }}>
-            <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "20px", textTransform: "uppercase", marginBottom: "12px", color: "var(--nm-text-primary)" }}>Confirm Deletion</h3>
-            <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", marginBottom: "24px", color: "var(--nm-text-secondary)" }}>Are you sure you want to permanently delete this CV? This action cannot be undone.</p>
-            <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
-              <button 
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(0,0,0,0.6)",
+            display: "flex",
+            alignItems: "center",
+            justifyItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            className="nm-card"
+            style={{
+              background: "var(--nm-surface)",
+              padding: "32px",
+              maxWidth: "400px",
+              width: "90%",
+              border: "4px solid var(--nm-ink)",
+              boxShadow: "8px 8px 0 var(--nm-ink)",
+              borderRadius: "0px",
+            }}
+          >
+            <h3
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 900,
+                fontSize: "20px",
+                textTransform: "uppercase",
+                marginBottom: "12px",
+                color: "var(--nm-text-primary)",
+              }}
+            >
+              Confirm Deletion
+            </h3>
+            <p
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "14px",
+                marginBottom: "24px",
+                color: "var(--nm-text-secondary)",
+              }}
+            >
+              Are you sure you want to permanently delete this CV? This action
+              cannot be undone.
+            </p>
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                justifyContent: "flex-end",
+              }}
+            >
+              <button
                 onClick={() => setDeleteTarget(null)}
                 className="nm-btn"
-                style={{ padding: "10px 16px", background: "var(--nm-surface-high)", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "12px", textTransform: "uppercase" }}
+                style={{
+                  padding: "10px 16px",
+                  background: "var(--nm-surface-high)",
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 800,
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                }}
               >
                 Cancel
               </button>
-              <button 
+              <button
                 onClick={handleDelete}
                 className="nm-btn"
-                style={{ padding: "10px 16px", background: "var(--nm-error)", color: "#fff", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "12px", textTransform: "uppercase" }}
+                style={{
+                  padding: "10px 16px",
+                  background: "var(--nm-error)",
+                  color: "#fff",
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 800,
+                  fontSize: "12px",
+                  textTransform: "uppercase",
+                }}
               >
                 Purge CV
               </button>

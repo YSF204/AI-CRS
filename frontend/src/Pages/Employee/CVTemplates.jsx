@@ -1,19 +1,22 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Sparkles, X, ArrowRight, Layers, CheckCircle2 } from 'lucide-react';
-import DashboardNav from '../../components/shared/DashboardNav';
-import { TEMPLATES } from '../../Features/CVManagement/index.js';
-import { MOCK_CV_DATA, MOCK_USER_NAME } from '../../Features/CVManagement/mockCvData.js';
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Sparkles, X, ArrowRight, Layers, CheckCircle2 } from "lucide-react";
+import DashboardNav from "../../components/shared/DashboardNav";
+import { TEMPLATES } from "../../Features/CVManagement/index.js";
+import {
+  MOCK_CV_DATA,
+  MOCK_USER_NAME,
+} from "../../Features/CVManagement/mockCvData.js";
 
 // ─── Tag accent colours ───────────────────────────────────────────────────────
 const TAG_COLORS = {
-  Popular: { bg: '#facc15', text: '#0a0a0a' },
-  Clean: { bg: '#a7f3d0', text: '#0a0a0a' },
-  Premium: { bg: '#2563eb', text: '#ffffff' },
-  Corporate: { bg: '#14b8a6', text: '#0a0a0a' },
-  Creative: { bg: '#f97316', text: '#0a0a0a' },
-  Formal: { bg: '#c4b89a', text: '#0a0a0a' },
-  Elegant: { bg: '#a0a0b0', text: '#0a0a0a' },
+  Popular: { bg: "#facc15", text: "#0a0a0a" },
+  Clean: { bg: "#a7f3d0", text: "#0a0a0a" },
+  Premium: { bg: "#2563eb", text: "#ffffff" },
+  Corporate: { bg: "#14b8a6", text: "#0a0a0a" },
+  Creative: { bg: "#f97316", text: "#0a0a0a" },
+  Formal: { bg: "#c4b89a", text: "#0a0a0a" },
+  Elegant: { bg: "#a0a0b0", text: "#0a0a0a" },
 };
 
 const A4_WIDTH_PX = 794;
@@ -57,7 +60,7 @@ function TemplatePreview({ template }) {
       ref={viewportRef}
       className="ats-preview-viewport"
       style={{
-        aspectRatio: '0.81',
+        aspectRatio: "0.81",
       }}
     >
       <div
@@ -66,14 +69,11 @@ function TemplatePreview({ template }) {
           width: `${A4_WIDTH_PX}px`,
           height: `${A4_HEIGHT_PX}px`,
           transform: `translate(-50%, -50%) scale(${scale})`,
-          pointerEvents: 'none',
-          userSelect: 'none',
+          pointerEvents: "none",
+          userSelect: "none",
         }}
       >
-        <TemplateComponent
-          userName={MOCK_USER_NAME}
-          cvData={MOCK_CV_DATA}
-        />
+        <TemplateComponent userName={MOCK_USER_NAME} cvData={MOCK_CV_DATA} />
       </div>
     </div>
   );
@@ -81,71 +81,70 @@ function TemplatePreview({ template }) {
 
 // ─── Individual template card ─────────────────────────────────────────────────
 function TemplateCard({ template, isSelected, onSelect }) {
-  const tagStyle = TAG_COLORS[template.tag] || { bg: 'var(--card-bg)', text: 'var(--fg)' };
+  const tagStyle = TAG_COLORS[template.tag] || {
+    bg: "var(--card-bg)",
+    text: "var(--fg)",
+  };
 
   return (
     <div
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && onSelect(template)}
+      onKeyDown={(e) => e.key === "Enter" && onSelect(template)}
       onClick={() => onSelect(template)}
       className="ats-preview-card cursor-pointer"
       style={{
-        borderColor: isSelected ? template.accent : 'var(--border-color)',
+        borderColor: isSelected ? template.accent : "var(--border-color)",
         boxShadow: isSelected
           ? `6px 6px 0 ${template.accent}`
-          : '4px 4px 0 var(--nm-ink)',
-        transform: isSelected ? 'translate(-2px, -2px)' : undefined,
-        transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',
-        outline: 'none',
+          : "4px 4px 0 var(--nm-ink)",
+        transform: isSelected ? "translate(-2px, -2px)" : undefined,
+        transition:
+          "transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease",
+        outline: "none",
       }}
     >
-      <div style={{ position: 'relative' }}>
+      <div style={{ position: "relative" }}>
         <TemplatePreview template={template} />
 
         {isSelected && (
           <div
             style={{
-              position: 'absolute',
+              position: "absolute",
               inset: 0,
               background: `${template.accent}22`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             <CheckCircle2
               size={48}
-              style={{ color: template.accent, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}
+              style={{
+                color: template.accent,
+                filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))",
+              }}
             />
           </div>
         )}
       </div>
 
       <div className="ats-card-content">
-        <div className="ats-card-header">
-          <h3 className="ats-card-title">
+        <div
+          className="ats-card-header"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <h3
+            className="ats-card-title"
+            style={{ textAlign: "center", marginBottom: 0 }}
+          >
             {template.name}
           </h3>
-          <div className="ats-card-meta">
-            <span className="flex items-center gap-1.5">
-              <Sparkles size={14} /> {template.description}
-            </span>
-            <span
-              className="ml-auto"
-              style={{
-                background: tagStyle.bg,
-                color: tagStyle.text,
-                padding: '0.2rem 0.45rem',
-                border: '2px solid var(--nm-ink)',
-                fontFamily: "'DM Mono', monospace",
-                fontSize: '0.65rem',
-                lineHeight: 1.1,
-              }}
-            >
-              #{template.id}
-            </span>
-          </div>
         </div>
       </div>
     </div>
@@ -154,8 +153,8 @@ function TemplateCard({ template, isSelected, onSelect }) {
 
 // ─── Name / Create Modal — wide two-panel: A4 preview left, form right ─────────
 function CreateModal({ template, onClose, onCreate, loading }) {
-  const [title, setTitle] = useState('');
-  const [error, setError] = useState('');
+  const [title, setTitle] = useState("");
+  const [error, setError] = useState("");
   const ModalPreviewComponent = template.component;
 
   const ZOOM = 0.72;
@@ -163,7 +162,7 @@ function CreateModal({ template, onClose, onCreate, loading }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim()) {
-      setError('Please enter a title for your CV.');
+      setError("Please enter a title for your CV.");
       return;
     }
     onCreate(title.trim());
@@ -171,71 +170,99 @@ function CreateModal({ template, onClose, onCreate, loading }) {
 
   // Close on Escape
   React.useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
+    const handler = (e) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
   return (
     <div
       style={{
-        position: 'fixed',
+        position: "fixed",
         inset: 0,
-        background: 'rgba(10,10,10,0.72)',
-        backdropFilter: 'blur(6px)',
+        background: "rgba(10,10,10,0.72)",
+        backdropFilter: "blur(6px)",
         zIndex: 1000,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '1rem',
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "1rem",
       }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
         className="brutal-card"
         style={{
-          width: '80vw',
-          height: '96vh',
-          display: 'flex',
-          flexDirection: 'row',
-          overflow: 'hidden',
-          background: 'var(--bg)',
+          width: "80vw",
+          height: "96vh",
+          display: "flex",
+          flexDirection: "row",
+          overflow: "hidden",
+          background: "var(--bg)",
         }}
       >
         {/* ── LEFT: A4 scrollable preview ────────────────────────────────── */}
         <div
           style={{
-            flex: '1 1 0',
+            flex: "1 1 0",
             minWidth: 0,
-            background: '#b8b4ac',
-            borderRight: '3px solid var(--border-color)',
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
+            background: "#b8b4ac",
+            borderRight: "3px solid var(--border-color)",
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
           }}
         >
           {/* Top label bar */}
           <div
             style={{
-              padding: '9px 16px',
-              borderBottom: '2px solid var(--border-color)',
-              background: 'var(--nav-bg)',
-              display: 'flex',
-              alignItems: 'center',
+              padding: "9px 16px",
+              borderBottom: "2px solid var(--border-color)",
+              background: "var(--nav-bg)",
+              display: "flex",
+              alignItems: "center",
               gap: 8,
               flexShrink: 0,
             }}
           >
             {/* Traffic-light dots for "document viewer" feel */}
-            <div style={{ display: 'flex', gap: 5 }}>
-              {['#ff5f57', '#febc2e', '#28c840'].map((c) => (
-                <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c, border: '1.5px solid rgba(0,0,0,0.18)' }} />
+            <div style={{ display: "flex", gap: 5 }}>
+              {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
+                <div
+                  key={c}
+                  style={{
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    background: c,
+                    border: "1.5px solid rgba(0,0,0,0.18)",
+                  }}
+                />
               ))}
             </div>
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.58rem', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--fg-muted)', marginLeft: 6 }}>
+            <span
+              style={{
+                fontFamily: "'DM Mono', monospace",
+                fontSize: "0.58rem",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: "var(--fg-muted)",
+                marginLeft: 6,
+              }}
+            >
               Live Preview — {template.name}
             </span>
-            <span style={{ marginLeft: 'auto', fontFamily: "'DM Mono', monospace", fontSize: '0.58rem', color: 'var(--fg-muted)', letterSpacing: '0.06em' }}>
+            <span
+              style={{
+                marginLeft: "auto",
+                fontFamily: "'DM Mono', monospace",
+                fontSize: "0.58rem",
+                color: "var(--fg-muted)",
+                letterSpacing: "0.06em",
+              }}
+            >
               A4 · {Math.round(ZOOM * 100)}%
             </span>
           </div>
@@ -250,11 +277,11 @@ function CreateModal({ template, onClose, onCreate, loading }) {
           <div
             style={{
               flex: 1,
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '20px 24px',
+              overflow: "hidden",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "20px 24px",
             }}
           >
             <div
@@ -263,10 +290,11 @@ function CreateModal({ template, onClose, onCreate, loading }) {
                 width: 794,
                 minHeight: 1123,
                 flexShrink: 0,
-                background: '#fff',
-                boxShadow: '0 6px 32px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.10)',
-                pointerEvents: 'none',
-                userSelect: 'none',
+                background: "#fff",
+                boxShadow:
+                  "0 6px 32px rgba(0,0,0,0.28), 0 1px 4px rgba(0,0,0,0.10)",
+                pointerEvents: "none",
+                userSelect: "none",
               }}
             >
               <ModalPreviewComponent
@@ -282,27 +310,52 @@ function CreateModal({ template, onClose, onCreate, loading }) {
           style={{
             width: 300,
             flexShrink: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            padding: '1.6rem',
-            gap: '1rem',
-            overflowY: 'auto',
+            display: "flex",
+            flexDirection: "column",
+            padding: "1.6rem",
+            gap: "1rem",
+            overflowY: "auto",
           }}
         >
           {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: 8,
+            }}
+          >
             <div>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--fg-muted)', marginBottom: '0.3rem' }}>
+              <div
+                style={{
+                  fontFamily: "'DM Mono', monospace",
+                  fontSize: "0.6rem",
+                  letterSpacing: "0.15em",
+                  textTransform: "uppercase",
+                  color: "var(--fg-muted)",
+                  marginBottom: "0.3rem",
+                }}
+              >
                 Using template
               </div>
-              <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, fontSize: '1.2rem', margin: 0, color: 'var(--fg)', lineHeight: 1.2 }}>
+              <h2
+                style={{
+                  fontFamily: "'Space Grotesk', sans-serif",
+                  fontWeight: 800,
+                  fontSize: "1.2rem",
+                  margin: 0,
+                  color: "var(--fg)",
+                  lineHeight: 1.2,
+                }}
+              >
                 {template.name}
               </h2>
             </div>
             <button
               onClick={onClose}
               className="brutal-btn-outline"
-              style={{ padding: '0.35rem', minHeight: 'unset', flexShrink: 0 }}
+              style={{ padding: "0.35rem", minHeight: "unset", flexShrink: 0 }}
               aria-label="Close"
             >
               <X size={15} />
@@ -312,32 +365,47 @@ function CreateModal({ template, onClose, onCreate, loading }) {
           {/* Tag badge */}
           <span
             style={{
-              display: 'inline-block',
-              width: 'fit-content',
+              display: "inline-block",
+              width: "fit-content",
               fontFamily: "'Space Grotesk', sans-serif",
-              fontSize: '0.6rem',
+              fontSize: "0.6rem",
               fontWeight: 800,
-              letterSpacing: '0.12em',
-              textTransform: 'uppercase',
-              padding: '3px 10px',
-              border: '2px solid #0a0a0a',
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              padding: "3px 10px",
+              border: "2px solid #0a0a0a",
               background: template.accent,
-              color: '#fff',
+              color: "#fff",
             }}
           >
             {template.tag || `Template ${template.id}`}
           </span>
 
-          <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.7rem', color: 'var(--fg-muted)', lineHeight: 1.6, margin: 0 }}>
+          <p
+            style={{
+              fontFamily: "'DM Mono', monospace",
+              fontSize: "0.7rem",
+              color: "var(--fg-muted)",
+              lineHeight: 1.6,
+              margin: 0,
+            }}
+          >
             {template.description}
           </p>
 
-          <div style={{ borderTop: '2px solid var(--border-color)' }} />
+          <div style={{ borderTop: "2px solid var(--border-color)" }} />
 
           {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          <form
+            onSubmit={handleSubmit}
+            style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}
+          >
             <div>
-              <label className="form-label" htmlFor="cv-title-input" style={{ fontSize: '0.7rem' }}>
+              <label
+                className="form-label"
+                htmlFor="cv-title-input"
+                style={{ fontSize: "0.7rem" }}
+              >
                 CV / Job Title
               </label>
               <input
@@ -346,27 +414,49 @@ function CreateModal({ template, onClose, onCreate, loading }) {
                 className="form-field"
                 placeholder="e.g. Frontend Developer…"
                 value={title}
-                onChange={(e) => { setTitle(e.target.value); if (error) setError(''); }}
+                onChange={(e) => {
+                  setTitle(e.target.value);
+                  if (error) setError("");
+                }}
                 autoFocus
                 disabled={loading}
                 style={{ minHeight: 46 }}
               />
               {error && (
-                <p style={{ fontFamily: "'DM Mono', monospace", fontSize: '0.66rem', color: '#f97316', marginTop: '0.3rem' }}>
+                <p
+                  style={{
+                    fontFamily: "'DM Mono', monospace",
+                    fontSize: "0.66rem",
+                    color: "#f97316",
+                    marginTop: "0.3rem",
+                  }}
+                >
                   {error}
                 </p>
               )}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.5rem",
+              }}
+            >
               <button
                 id="create-cv-submit-btn"
                 type="submit"
                 className="brutal-btn w-full flex items-center justify-center gap-2"
-                style={{ background: '#facc15', color: '#0a0a0a' }}
+                style={{ background: "#facc15", color: "#0a0a0a" }}
                 disabled={loading}
               >
-                {loading ? 'Creating…' : <><ArrowRight size={14} /> Create CV</>}
+                {loading ? (
+                  "Creating…"
+                ) : (
+                  <>
+                    <ArrowRight size={14} /> Create CV
+                  </>
+                )}
               </button>
               <button
                 type="button"
@@ -390,7 +480,7 @@ export default function CVTemplates() {
   const [selected, setSelected] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [apiError, setApiError] = useState('');
+  const [apiError, setApiError] = useState("");
 
   const handleSelectTemplate = (template) => {
     setSelected(template);
@@ -400,13 +490,13 @@ export default function CVTemplates() {
   const handleCreate = async (jobTitle) => {
     if (!selected) return;
     setLoading(true);
-    setApiError('');
+    setApiError("");
     try {
-      navigate('/employee/cv-editor/new', { 
-        state: { jobTitle, templateId: selected.id } 
+      navigate("/employee/cv-editor/new", {
+        state: { jobTitle, templateId: selected.id },
       });
     } catch (err) {
-      setApiError('Unable to route to CV editor. Please try again.');
+      setApiError("Unable to route to CV editor. Please try again.");
       setLoading(false);
     }
   };
@@ -419,9 +509,7 @@ export default function CVTemplates() {
 
       <div className="dashboard-shell py-6">
         {/* ── Page header ── */}
-        <div
-          className="mb-10"
-        >
+        <div className="mb-10">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
               {/* Eyebrow label */}
@@ -430,31 +518,32 @@ export default function CVTemplates() {
                 style={{
                   fontFamily: "'Space Grotesk', sans-serif",
                   fontWeight: 800,
-                  fontSize: 'clamp(1.8rem, 4vw, 2.6rem)',
-                  letterSpacing: '-0.02em',
-                  textTransform: 'uppercase',
+                  fontSize: "clamp(1.8rem, 4vw, 2.6rem)",
+                  letterSpacing: "-0.02em",
+                  textTransform: "uppercase",
                   margin: 0,
                 }}
               >
-                <Sparkles size={28} style={{ color: '#facc15' }} />
+                <Sparkles size={28} style={{ color: "#facc15" }} />
                 CV Templates
               </h1>
               <p
                 style={{
                   fontFamily: "'DM Mono', monospace",
-                  fontSize: '0.78rem',
-                  color: 'var(--fg-muted)',
-                  marginTop: '0.5rem',
+                  fontSize: "0.78rem",
+                  color: "var(--fg-muted)",
+                  marginTop: "0.5rem",
                 }}
               >
-                {TEMPLATES.length} professionally designed templates — click one to get started.
+                {TEMPLATES.length} professionally designed templates — click one
+                to get started.
               </p>
             </div>
 
             {/* Stats pill */}
             <div
               className="stat-pill"
-              style={{ gap: '0.5rem', flexShrink: 0, alignSelf: 'flex-start' }}
+              style={{ gap: "0.5rem", flexShrink: 0, alignSelf: "flex-start" }}
             >
               <Layers size={14} />
               <span>{TEMPLATES.length} Templates</span>
@@ -465,9 +554,10 @@ export default function CVTemplates() {
           <div
             style={{
               height: 4,
-              background: 'repeating-linear-gradient(90deg, #facc15 0, #facc15 24px, transparent 24px, transparent 32px)',
-              marginTop: '1.5rem',
-              border: '2px solid var(--border-color)',
+              background:
+                "repeating-linear-gradient(90deg, #facc15 0, #facc15 24px, transparent 24px, transparent 32px)",
+              marginTop: "1.5rem",
+              border: "2px solid var(--border-color)",
             }}
           />
         </div>
@@ -476,7 +566,12 @@ export default function CVTemplates() {
         {apiError && (
           <div
             className="brutal-card mb-6 p-4"
-            style={{ background: '#f97316', color: '#0a0a0a', fontFamily: "'DM Mono', monospace", fontSize: '0.8rem' }}
+            style={{
+              background: "#f97316",
+              color: "#0a0a0a",
+              fontFamily: "'DM Mono', monospace",
+              fontSize: "0.8rem",
+            }}
           >
             {apiError}
           </div>
@@ -485,7 +580,9 @@ export default function CVTemplates() {
         {/* ── Templates grid ── */}
         <div
           className="grid gap-6"
-          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}
+          style={{
+            gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
+          }}
         >
           {TEMPLATES.map((template, i) => (
             <div
@@ -506,9 +603,9 @@ export default function CVTemplates() {
           className="mt-10 text-center"
           style={{
             fontFamily: "'DM Mono', monospace",
-            fontSize: '0.72rem',
-            color: 'var(--fg-muted)',
-            letterSpacing: '0.08em',
+            fontSize: "0.72rem",
+            color: "var(--fg-muted)",
+            letterSpacing: "0.08em",
           }}
         >
           Click any template to preview and create your CV →
@@ -521,7 +618,7 @@ export default function CVTemplates() {
           template={selected}
           onClose={() => {
             setModalOpen(false);
-            setApiError('');
+            setApiError("");
           }}
           onCreate={handleCreate}
           loading={loading}

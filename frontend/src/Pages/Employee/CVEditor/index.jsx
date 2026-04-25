@@ -57,53 +57,59 @@ export default function CVEditor() {
     fetchSuggestions,
     fetchSingleSummarySuggestion,
     handleSuggestionSelect,
-  } = useCVForm(showToast, id !== "new" ? async (formData) => {
-    // Auto-save function
-    try {
-      const visibleSections = {};
-      activeSections.forEach((k) => {
-        visibleSections[k] = true;
-      });
+  } = useCVForm(
+    showToast,
+    id !== "new"
+      ? async (formData) => {
+          // Auto-save function
+          try {
+            const visibleSections = {};
+            activeSections.forEach((k) => {
+              visibleSections[k] = true;
+            });
 
-      const payload = {
-        ...formData,
-        experience: formData.experience.map((e) => ({ ...e })),
-        education: formData.education.map((e) => ({ ...e })),
-        customSections: formData.customSections
-          .filter(
-            (s) => s.title || s.items.some((it) => it.name || it.description),
-          )
-          .map((s) => ({
-            title: s.title,
-            sectionType: s.sectionType || "other",
-            items: s.items
-              .filter(
-                (it) =>
-                  it.name ||
-                  it.description ||
-                  it.durationFrom ||
-                  it.durationTo ||
-                  it.link,
-              )
-              .map((it) => ({
-                name: it.name || "",
-                description: it.description,
-                durationFrom: it.durationFrom || "",
-                durationTo: it.durationTo || "",
-                link: it.link,
-              })),
-          })),
-        profileImage: formData.profileImage,
-        templateId: cv?.templateId || 1,
-        layout: { sectionOrder: [...activeSections], visibleSections },
-      };
+            const payload = {
+              ...formData,
+              experience: formData.experience.map((e) => ({ ...e })),
+              education: formData.education.map((e) => ({ ...e })),
+              customSections: formData.customSections
+                .filter(
+                  (s) =>
+                    s.title || s.items.some((it) => it.name || it.description),
+                )
+                .map((s) => ({
+                  title: s.title,
+                  sectionType: s.sectionType || "other",
+                  items: s.items
+                    .filter(
+                      (it) =>
+                        it.name ||
+                        it.description ||
+                        it.durationFrom ||
+                        it.durationTo ||
+                        it.link,
+                    )
+                    .map((it) => ({
+                      name: it.name || "",
+                      description: it.description,
+                      durationFrom: it.durationFrom || "",
+                      durationTo: it.durationTo || "",
+                      link: it.link,
+                    })),
+                })),
+              profileImage: formData.profileImage,
+              templateId: cv?.templateId || 1,
+              layout: { sectionOrder: [...activeSections], visibleSections },
+            };
 
-      await api.patch(`/cvs/${id}`, payload);
-    } catch (error) {
-      console.error("Auto-save failed:", error);
-      throw error;
-    }
-  } : null);
+            await api.patch(`/cvs/${id}`, payload);
+          } catch (error) {
+            console.error("Auto-save failed:", error);
+            throw error;
+          }
+        }
+      : null,
+  );
 
   const userName =
     form.fullName?.trim() ||
@@ -118,7 +124,11 @@ export default function CVEditor() {
   );
 
   const isComplete = () => {
-    return form.fullName?.trim() && form.jobTitle?.trim() && form.contact?.email?.trim();
+    return (
+      form.fullName?.trim() &&
+      form.jobTitle?.trim() &&
+      form.contact?.email?.trim()
+    );
   };
 
   const handleBack = () => {
@@ -261,6 +271,7 @@ export default function CVEditor() {
   }, [id]);
 
   // ── Save ──────────────────────────────────────────────────────────────────────
+ // ── Save ──────────────────────────────────────────────────────────────────────
   const handleAnalyze = async () => {
     const cached = sessionStorage.getItem(`cv_analysis_${id}`);
     if (cached) {
@@ -274,13 +285,74 @@ export default function CVEditor() {
       const filtered = filteredFormData();
       const flat = {};
 
-      if (filtered.summary) flat.summary = filtered.summary;
-      if (filtered.jobTitle) flat.jobTitle = filtered.jobTitle;
-      filtered.experience?.forEach((exp, i) => { if (exp.summary) flat[`experience_${i}_summary`] = exp.summary; });
-      filtered.education?.forEach((edu, i) => { if (edu.summary) flat[`education_${i}_summary`] = edu.summary; });
+      // Basic info
+      if (filtered.summary !== undefined) flat.summary = filtered.summary || "";
+      if (filtered.jobTitle !== undefined) flat.jobTitle = filtered.jobTitle || "";
+
+      // Contact information
+      if (filtered.contact) {
+        flat.contact_email = filtered.contact.email || "";
+        flat.contact_phone = filtered.contact.phone || "";
+        flat.contact_linkedin = filtered.contact.linkedin || "";
+        flat.contact_github = filtered.contact.github || "";
+        flat.contact_website = filtered.contact.website || "";
+      }
+
+      // Address
+      if (filtered.address) {
+        flat.address_city = filtered.address.city || "";
+        flat.address_street = filtered.address.street || "";
+        flat.address_country = filtered.address.country || "";
+      }
+
+      // Experience — full details, not just summary
+      filtered.experience?.forEach((exp, i) => {
+        flat[`experience_${i}_position`] = exp.position || "";
+        flat[`experience_${i}_institutionName`] = exp.institutionName || "";
+        flat[`experience_${i}_durationFrom`] = exp.durationFrom || "";
+        flat[`experience_${i}_durationTo`] = exp.durationTo || "";
+        flat[`experience_${i}_summary`] = exp.summary || "";
+      });
+
+      // Education — full details
+      filtered.education?.forEach((edu, i) => {
+        flat[`education_${i}_certification`] = edu.certification || "";
+        flat[`education_${i}_institutionName`] = edu.institutionName || "";
+        flat[`education_${i}_durationFrom`] = edu.durationFrom || "";
+        flat[`education_${i}_durationTo`] = edu.durationTo || "";
+        flat[`education_${i}_summary`] = edu.summary || "";
+      });
+
+      // Skills — flatten arrays into the object
+      if (Array.isArray(filtered.technicalSkills)) {
+        filtered.technicalSkills.forEach((skill, i) => {
+          flat[`technicalSkills_${i}`] = skill || "";
+        });
+      }
+      if (Array.isArray(filtered.softSkills)) {
+        filtered.softSkills.forEach((skill, i) => {
+          flat[`softSkills_${i}`] = skill || "";
+        });
+      }
+
+      // Languages — handle both string and object formats
+      if (Array.isArray(filtered.language)) {
+        filtered.language.forEach((lang, i) => {
+          if (typeof lang === "string") {
+            flat[`language_${i}`] = lang;
+          } else if (lang && typeof lang === "object") {
+            flat[`language_${i}_name`] = lang.name || "";
+            flat[`language_${i}_level`] = lang.level || "";
+          }
+        });
+      }
+
+      // Custom sections
       filtered.customSections?.forEach((sec, sIdx) => {
+        flat[`customSections_${sIdx}_title`] = sec.title || "";
         sec.items?.forEach((item, iIdx) => {
-          if (item.description) flat[`customSections_${sIdx}_items_${iIdx}_description`] = item.description;
+          flat[`customSections_${sIdx}_items_${iIdx}_description`] =
+            item.description || "";
         });
       });
 
@@ -314,17 +386,23 @@ export default function CVEditor() {
       const filtered = filteredFormData();
       const flat = {};
 
-      if (sectionKey === "summary" && filtered.summary) flat.summary = filtered.summary;
+      if (sectionKey === "summary" && filtered.summary !== undefined)
+        flat.summary = filtered.summary || "";
       if (sectionKey === "experience") {
-        filtered.experience?.forEach((exp, i) => { if (exp.summary) flat[`experience_${i}_summary`] = exp.summary; });
+        filtered.experience?.forEach((exp, i) => {
+          flat[`experience_${i}_summary`] = exp.summary || "";
+        });
       }
       if (sectionKey === "education") {
-        filtered.education?.forEach((edu, i) => { if (edu.summary) flat[`education_${i}_summary`] = edu.summary; });
+        filtered.education?.forEach((edu, i) => {
+          flat[`education_${i}_summary`] = edu.summary || "";
+        });
       }
       if (sectionKey === "customSections") {
         filtered.customSections?.forEach((sec, sIdx) => {
           sec.items?.forEach((item, iIdx) => {
-            if (item.description) flat[`customSections_${sIdx}_items_${iIdx}_description`] = item.description;
+            flat[`customSections_${sIdx}_items_${iIdx}_description`] =
+              item.description || "";
           });
         });
       }
@@ -368,33 +446,40 @@ export default function CVEditor() {
       next.customSections = next.customSections ? [...next.customSections] : [];
 
       Object.entries(updatesToApply).forEach(([key, value]) => {
-        if (key === 'summary') next.summary = value;
-        else if (key === 'jobTitle') next.jobTitle = value;
-        else if (key.startsWith('experience_')) {
-          const parts = key.split('_'); // [experience, 0, summary]
+        if (key === "summary") next.summary = value;
+        else if (key === "jobTitle") next.jobTitle = value;
+        else if (key.startsWith("experience_")) {
+          const parts = key.split("_"); // [experience, 0, summary]
           const idx = parseInt(parts[1], 10);
           if (next.experience[idx]) {
-            next.experience[idx] = { ...next.experience[idx], [parts[2]]: value };
+            next.experience[idx] = {
+              ...next.experience[idx],
+              [parts[2]]: value,
+            };
           }
-        }
-        else if (key.startsWith('education_')) {
-          const parts = key.split('_');
+        } else if (key.startsWith("education_")) {
+          const parts = key.split("_");
           const idx = parseInt(parts[1], 10);
           if (next.education[idx]) {
             next.education[idx] = { ...next.education[idx], [parts[2]]: value };
           }
-        }
-        else if (key.startsWith('customSections_')) {
+        } else if (key.startsWith("customSections_")) {
           // customSections_0_items_0_description
-          const parts = key.split('_');
+          const parts = key.split("_");
           const sIdx = parseInt(parts[1], 10);
           const iIdx = parseInt(parts[3], 10);
-          if (next.customSections[sIdx] && next.customSections[sIdx].items && next.customSections[sIdx].items[iIdx]) {
+          if (
+            next.customSections[sIdx] &&
+            next.customSections[sIdx].items &&
+            next.customSections[sIdx].items[iIdx]
+          ) {
             next.customSections[sIdx] = { ...next.customSections[sIdx] };
-            next.customSections[sIdx].items = [...next.customSections[sIdx].items];
+            next.customSections[sIdx].items = [
+              ...next.customSections[sIdx].items,
+            ];
             next.customSections[sIdx].items[iIdx] = {
               ...next.customSections[sIdx].items[iIdx],
-              description: value
+              description: value,
             };
           }
         }
@@ -412,7 +497,10 @@ export default function CVEditor() {
 
   const handleSave = async () => {
     if (id === "new" && !isComplete()) {
-      showToast("error", "Please fill required fields (Full Name, Job Title, Email).");
+      showToast(
+        "error",
+        "Please complete all required fields before saving your CV.",
+      );
       return;
     }
 
@@ -460,7 +548,9 @@ export default function CVEditor() {
       if (id === "new") {
         const res = await api.post(`/cvs`, payload);
         showToast("success", "CV created!");
-        navigate(`/employee/cv-editor/${res.data.data.cv._id}`, { replace: true });
+        navigate(`/employee/cv-editor/${res.data.data.cv._id}`, {
+          replace: true,
+        });
       } else {
         await api.patch(`/cvs/${id}`, payload);
         showToast("success", "CV saved!");
@@ -475,10 +565,8 @@ export default function CVEditor() {
   // ── Section toggles ──────────────────────────────────────────────────────────
   const toggleSection = (key) =>
     setActiveSections((p) => {
-      const normalize = (str) => String(str).toLowerCase().replace(/\s+/g, '');
-      const normalizedKey = normalize(key);
-      const exists = p.some((k) => normalize(k) === normalizedKey);
-      return exists ? p.filter((k) => normalize(k) !== normalizedKey) : [...p, key];
+      const exists = p.includes(key);
+      return exists ? p.filter((k) => k !== key) : [...p, key];
     });
   const toggleCollapse = (key) =>
     setCollapsedSections((p) => ({ ...p, [key]: !p[key] }));
@@ -631,23 +719,27 @@ export default function CVEditor() {
   // ── Loading ───────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div style={{
-        height: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'var(--nm-bg)',
-        color: 'var(--nm-text-primary)',
-        fontFamily: 'var(--font-body)'
-      }}>
-        <span style={{
-          fontFamily: 'var(--font-body)',
-          fontSize: 'var(--text-sm)',
-          fontWeight: 600,
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          color: 'var(--nm-text-secondary)'
-        }}>
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "var(--nm-bg)",
+          color: "var(--nm-text-primary)",
+          fontFamily: "var(--font-body)",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "var(--text-sm)",
+            fontWeight: 600,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            color: "var(--nm-text-secondary)",
+          }}
+        >
           LOADING CV…
         </span>
       </div>
@@ -656,21 +748,26 @@ export default function CVEditor() {
 
   // ─────────────────────────────────────────────────────────────────────────────
   return (
-    <div style={{
-      height: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden',
-      backgroundColor: 'var(--nm-bg)',
-      color: 'var(--nm-text-primary)',
-      fontFamily: 'var(--font-body)'
-    }}>
+    <div
+      style={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        backgroundColor: "var(--nm-bg)",
+        color: "var(--nm-text-primary)",
+        fontFamily: "var(--font-body)",
+      }}
+    >
       {/* ── Nav ── */}
       <div className="flex-shrink-0 dashboard-nav-area">
         <DashboardNav role="employee" />
       </div>
 
-      <div className="dashboard-shell cv-editor-shell flex flex-1 min-h-0 flex-col" style={{ padding: 0, paddingRight: 0 }}>
+      <div
+        className="dashboard-shell cv-editor-shell flex flex-1 min-h-0 flex-col"
+        style={{ padding: 0, paddingRight: 0 }}
+      >
         {/* ── Action bar ── */}
         <ActionBar
           form={form}
@@ -731,10 +828,7 @@ export default function CVEditor() {
           </div>
 
           {/* ══ RIGHT: live preview ══ */}
-          <div
-            ref={previewRef}
-            className="cv-editor-preview"
-          >
+          <div ref={previewRef} className="cv-editor-preview">
             <LivePreview
               formData={filteredFormData()}
               userName={userName}
@@ -830,7 +924,7 @@ export default function CVEditor() {
                   fontFamily: "var(--font-display)",
                   fontWeight: 900,
                   fontSize: 12,
-                  textTransform: "uppercase"
+                  textTransform: "uppercase",
                 }}
               >
                 Abort
@@ -862,24 +956,38 @@ export default function CVEditor() {
                     gap: "16px",
                     padding: "24px",
                     border: "4px solid var(--nm-ink)",
-                    background: cv?.templateId === tmpl.id ? "var(--nm-primary)" : "var(--nm-surface)",
-                    boxShadow: cv?.templateId === tmpl.id ? "none" : "6px 6px 0 var(--nm-ink)",
-                    transform: cv?.templateId === tmpl.id ? "translate(4px, 4px)" : "none",
-                    cursor: saving || cv?.templateId === tmpl.id ? "not-allowed" : "pointer",
+                    background:
+                      cv?.templateId === tmpl.id
+                        ? "var(--nm-primary)"
+                        : "var(--nm-surface)",
+                    boxShadow:
+                      cv?.templateId === tmpl.id
+                        ? "none"
+                        : "6px 6px 0 var(--nm-ink)",
+                    transform:
+                      cv?.templateId === tmpl.id
+                        ? "translate(4px, 4px)"
+                        : "none",
+                    cursor:
+                      saving || cv?.templateId === tmpl.id
+                        ? "not-allowed"
+                        : "pointer",
                     opacity: saving ? 0.5 : 1,
                     transition: "all 0.2s ease",
                   }}
                 >
-                  <div style={{
-                    width: "100%",
-                    height: "140px",
-                    background: "var(--nm-bg)",
-                    border: "3px solid var(--nm-ink)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "40px"
-                  }}>
+                  <div
+                    style={{
+                      width: "100%",
+                      height: "140px",
+                      background: "var(--nm-bg)",
+                      border: "3px solid var(--nm-ink)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "40px",
+                    }}
+                  >
                     {tmpl.id === 1 ? "📄" : tmpl.id === 5 ? "👤" : "📝"}
                   </div>
                   <span
@@ -889,7 +997,10 @@ export default function CVEditor() {
                       fontSize: "14px",
                       textTransform: "uppercase",
                       letterSpacing: "0.05em",
-                      color: cv?.templateId === tmpl.id ? "#fff" : "var(--nm-text-primary)",
+                      color:
+                        cv?.templateId === tmpl.id
+                          ? "#fff"
+                          : "var(--nm-text-primary)",
                     }}
                   >
                     {tmpl.name}
@@ -903,13 +1014,39 @@ export default function CVEditor() {
 
       {/* ── Exit Prompt Modal ── */}
       {showExitPrompt && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(0,0,0,0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <div className="brutal-card bg-[var(--card-bg)] p-6 max-w-sm w-full mx-4 flex flex-col gap-4">
-            <h3 className="font-['Space_Grotesk'] font-bold text-lg">Unsaved CV</h3>
-            <p className="font-mono text-sm">You haven't filled all the required fields (Full Name, Job Title, Email). Do you want to cancel the creation or complete it?</p>
+            <h3 className="font-['Space_Grotesk'] font-bold text-lg">
+              Unsaved CV
+            </h3>
+            <p className="font-mono text-sm">
+              Your CV is incomplete. Do you want to cancel the creation or
+              continue editing?
+            </p>
             <div className="flex gap-3 justify-end mt-2">
-              <button disabled={saving} onClick={() => navigate("/employee/cvs")} className="brutal-btn-outline px-4 py-2">Cancel Creation</button>
-              <button onClick={() => setShowExitPrompt(false)} className="brutal-btn px-4 py-2 bg-[var(--yellow)] text-[#0a0a0a]">Complete Fields</button>
+              <button
+                disabled={saving}
+                onClick={() => navigate("/employee/cvs")}
+                className="brutal-btn-outline px-4 py-2"
+              >
+                Cancel Creation
+              </button>
+              <button
+                onClick={() => setShowExitPrompt(false)}
+                className="brutal-btn px-4 py-2 bg-[var(--yellow)] text-[#0a0a0a]"
+              >
+                Continue Editing
+              </button>
             </div>
           </div>
         </div>

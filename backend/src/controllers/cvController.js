@@ -76,7 +76,13 @@ export const createCV = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const getMyCVs = catchAsync(async (req, res) => {
-  const cvs = await CV.find({ userId: req.user._id }).sort({ createdAt: -1 });
+  const cvs = await CV.find({ userId: req.user._id }).sort({ createdAt: -1 }).lean();
+
+  // Attach latest ATS score to each CV
+  for (let cv of cvs) {
+    const analysis = await CVAnalysis.findOne({ CVId: cv._id }).sort({ createdAt: -1 });
+    cv.atsScore = analysis ? analysis.atsScore : null;
+  }
 
   res.status(200).json({
     success: true,
@@ -506,7 +512,7 @@ export const analyzeSection = catchAsync(async (req, res, next) => {
     );
   }
 
-  const issues = parsed.issues || [];
+ const issues = parsed.issues || [];
   const atsScore = parsed.atsScore || null;
   const atsFeedback = parsed.atsFeedback || "";
 
@@ -517,6 +523,11 @@ export const analyzeSection = catchAsync(async (req, res, next) => {
       issues,
       atsScore,
       atsFeedback,
+      // Pass through all fields from AI for fullCv analysis
+      isEmpty: parsed.isEmpty || false,
+      overallScore: parsed.overallScore ?? null,
+      sections: parsed.sections || null,
+      generalAdvice: parsed.generalAdvice || null,
     },
   });
 });

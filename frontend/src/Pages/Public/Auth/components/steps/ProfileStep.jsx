@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Step } from "../Stepper";
 import AuthInput from "../AuthInput";
 import GenderSelect from "../GenderSelect";
@@ -12,7 +13,9 @@ const heading = {
   letterSpacing: '-0.02em',
 };
 
-export default function ProfileStep({ form, setForm, field, errors = {} }) {
+export default function ProfileStep({ form, setForm, field, errors = {}, onPhoneValidityChange }) {
+  const [phoneError, setPhoneError] = useState("");
+
   const handleAgeChange = (e) => {
     const val = e.target.value;
     // Allow only digits
@@ -21,11 +24,35 @@ export default function ProfileStep({ form, setForm, field, errors = {} }) {
   };
 
   const handleTelChange = (e) => {
-    const val = e.target.value;
-    // Allow only digits, max 10
-    if (val !== '' && !/^\d*$/.test(val)) return;
+    // Strip non-numeric characters immediately
+    const val = e.target.value.replace(/\D/g, '');
+    // Max 10 digits
     if (val.length > 10) return;
     setForm((prev) => ({ ...prev, telephone: val }));
+
+    // Clear error if they reach exactly 10 digits
+    if (val.length === 10) {
+      setPhoneError("");
+      onPhoneValidityChange?.(true);
+    } else if (val.length > 0) {
+      // Show error in real time if they have typed something but not 10
+      onPhoneValidityChange?.(false);
+    }
+  };
+
+  const handleTelBlur = () => {
+    const val = form.telephone || "";
+    if (val.length > 0 && val.length !== 10) {
+      setPhoneError("Phone number must be exactly 10 digits");
+      onPhoneValidityChange?.(false);
+    } else if (val.length === 10) {
+      setPhoneError("");
+      onPhoneValidityChange?.(true);
+    } else {
+      // Empty is okay (optional field)
+      setPhoneError("");
+      onPhoneValidityChange?.(true);
+    }
   };
 
   return (
@@ -64,8 +91,8 @@ export default function ProfileStep({ form, setForm, field, errors = {} }) {
         value={form.telephone}
         onChange={handleTelChange}
         onFocus={() => {}}
-        onBlur={() => {}}
-        error={errors.telephone || ''}
+        onBlur={handleTelBlur}
+        error={phoneError || errors.telephone || ''}
       />
     </Step>
   );

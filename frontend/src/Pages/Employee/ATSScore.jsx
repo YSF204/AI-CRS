@@ -50,13 +50,20 @@ export default function ATSScore() {
     setError("");
   };
 
+  // Calculate Average Score from CVs that have an atsScore
+  const scoredCvs = cvs.filter(cv => cv.atsScore != null);
+  const averageScore = scoredCvs.length > 0 
+    ? Math.round(scoredCvs.reduce((acc, cv) => acc + cv.atsScore, 0) / scoredCvs.length) + "%"
+    : "N/A";
+
   const stats = [
     { label: "Total CVs", value: cvs.length, color: "var(--nm-primary)" },
-    { label: "Average Score", value: "—", color: "var(--nm-warning)" },
+    { label: "Average Score", value: averageScore, color: "var(--nm-warning)" },
     {
       label: "Latest Analysis",
       value: atsResult ? "Complete" : "—",
       color: "var(--nm-success)",
+      isBadge: !!atsResult,
     },
   ];
 
@@ -93,12 +100,31 @@ export default function ATSScore() {
                     className="jd-stat-card ats-score-stat-card"
                   >
                     <p className="jd-stat-label">{stat.label}</p>
-                    <p
-                      className="jd-stat-value overflow-hidden text-overflow-ellipsis whitespace-nowrap"
-                      style={{ color: stat.color }}
-                    >
-                      {stat.value}
-                    </p>
+                    {stat.isBadge ? (
+                      <p
+                        className="jd-stat-value uppercase"
+                        style={{
+                          color: "#fff",
+                          background: stat.color,
+                          whiteSpace: "nowrap",
+                          width: "fit-content",
+                          minWidth: "max-content",
+                          padding: "4px 12px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {stat.value}
+                      </p>
+                    ) : (
+                      <p
+                        className="jd-stat-value overflow-hidden text-overflow-ellipsis whitespace-nowrap"
+                        style={{ color: stat.color }}
+                      >
+                        {stat.value}
+                      </p>
+                    )}
                   </div>
                 ))}
               </div>

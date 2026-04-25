@@ -1,5 +1,12 @@
 import React from "react";
-import { GripVertical, ChevronDown, X, Plus, Trash2, Sparkles } from "lucide-react";
+import {
+  GripVertical,
+  ChevronDown,
+  X,
+  Plus,
+  Trash2,
+  Sparkles,
+} from "lucide-react";
 import {
   getSectionMeta,
   inpCls,
@@ -14,6 +21,7 @@ import Field from "./Field";
 import RepeatableItem from "./RepeatableItem";
 import AddBtn from "./AddBtn";
 import SummarySection from "./SectionCardSummary.jsx";
+import LanguageSection from "./sections/LanguageSection.jsx";
 
 export default function SectionCard({
   sectionKey,
@@ -298,10 +306,7 @@ export default function SectionCard({
       case "softSkills":
         return (
           <div>
-            <Field
-              label="Soft Skills"
-              hint="press Enter or comma to add"
-            >
+            <Field label="Soft Skills" hint="press Enter or comma to add">
               <TagInput
                 value={form.softSkills}
                 onChange={set("softSkills")}
@@ -312,15 +317,7 @@ export default function SectionCard({
         );
 
       case "language":
-        return (
-          <Field label="Languages" hint="press Enter or comma to add">
-            <TagInput
-              value={form.language}
-              onChange={set("language")}
-              placeholder="English, Arabic, French..."
-            />
-          </Field>
-        );
+        return <LanguageSection form={form} handlers={handlers} />;
 
       case "customSections":
         return (
@@ -355,9 +352,10 @@ export default function SectionCard({
                       value={section.sectionType || "other"}
                       onChange={(e) => {
                         const newSections = [...form.customSections];
-                        const selectedType = CUSTOM_SECTION_TYPES.find(
-                          (t) => t.value === e.target.value,
-                        ) || CUSTOM_SECTION_TYPES[2];
+                        const selectedType =
+                          CUSTOM_SECTION_TYPES.find(
+                            (t) => t.value === e.target.value,
+                          ) || CUSTOM_SECTION_TYPES[2];
                         newSections[si].sectionType = e.target.value;
                         // Auto-set title to defaultTitle for projects and hobbies
                         if (selectedType?.defaultTitle) {
@@ -429,12 +427,18 @@ export default function SectionCard({
                                 className={inpCls}
                                 value={item.name}
                                 onChange={(e) =>
-                                  updateCustomItem(si, ii, "name", e.target.value)
+                                  updateCustomItem(
+                                    si,
+                                    ii,
+                                    "name",
+                                    e.target.value,
+                                  )
                                 }
                                 placeholder={
                                   sectionTypeConfig.value === "projects"
                                     ? "Project name"
-                                    : sectionTypeConfig.value === "certifications"
+                                    : sectionTypeConfig.value ===
+                                        "certifications"
                                       ? "Certification name"
                                       : sectionTypeConfig.value === "hobbies"
                                         ? "Hobby name"
@@ -456,7 +460,7 @@ export default function SectionCard({
                                       si,
                                       ii,
                                       "durationFrom",
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   placeholder="2022-01"
@@ -472,7 +476,7 @@ export default function SectionCard({
                                       si,
                                       ii,
                                       "durationTo",
-                                      e.target.value
+                                      e.target.value,
                                     )
                                   }
                                   placeholder="2024-12"
@@ -495,7 +499,12 @@ export default function SectionCard({
                                 className={inpCls}
                                 value={item.link}
                                 onChange={(e) =>
-                                  updateCustomItem(si, ii, "link", e.target.value)
+                                  updateCustomItem(
+                                    si,
+                                    ii,
+                                    "link",
+                                    e.target.value,
+                                  )
                                 }
                                 placeholder="https://..."
                               />
@@ -511,18 +520,18 @@ export default function SectionCard({
                               }
                             >
                               <textarea
-                              className={`${txtCls} min-h-[56px]`}
-                              value={item.description}
-                              onChange={(e) =>
-                                updateCustomItem(
-                                  si,
-                                  ii,
-                                  "description",
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Brief description..."
-                            />
+                                className={`${txtCls} min-h-[56px]`}
+                                value={item.description}
+                                onChange={(e) =>
+                                  updateCustomItem(
+                                    si,
+                                    ii,
+                                    "description",
+                                    e.target.value,
+                                  )
+                                }
+                                placeholder="Brief description..."
+                              />
                             </Field>
                           )}
 
@@ -545,9 +554,7 @@ export default function SectionCard({
                       className="flex items-center justify-center gap-1.5 w-full py-2 border-2 border-dashed border-[var(--border-color)] text-[var(--fg-muted)] font-mono text-[10px] font-bold uppercase tracking-wider hover:border-[var(--fg)] hover:text-[var(--fg)] transition-colors"
                     >
                       <Plus size={11} /> Add{" "}
-                      {sectionTypeConfig.label === "Hobbies"
-                        ? "Hobby"
-                        : "Item"}
+                      {sectionTypeConfig.label === "Hobbies" ? "Hobby" : "Item"}
                     </button>
                   </div>
                 </div>
@@ -565,17 +572,24 @@ export default function SectionCard({
 
       default:
         return null;
-    };
+    }
   };
 
   return (
-    <div className="nm-card" style={{ padding: 0, overflow: 'hidden' }}>
+    <div className="nm-card" style={{ padding: 0, overflow: "hidden" }}>
       {/* Card header */}
       <div
         className="flex items-center gap-3 px-5 py-4 border-b-4 border-[var(--nm-ink)]"
         style={{ background: meta.accent }}
       >
-        <div style={{ cursor: "grab", opacity: 0.6, display: 'flex', alignItems: 'center' }}>
+        <div
+          style={{
+            cursor: "grab",
+            opacity: 0.6,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
           <GripVertical size={18} color={meta.textColor} strokeWidth={2.5} />
         </div>
         <Icon size={18} style={{ color: meta.textColor }} strokeWidth={2.5} />
@@ -585,7 +599,7 @@ export default function SectionCard({
         >
           {meta.label}
         </span>
-        
+
         <div className="flex items-center gap-2">
           {/* Analyze */}
           <button
@@ -602,8 +616,8 @@ export default function SectionCard({
               background: "rgba(0,0,0,0.1)",
               borderColor: meta.textColor,
               color: meta.textColor,
-              fontSize: '10px',
-              borderWidth: '2px'
+              fontSize: "10px",
+              borderWidth: "2px",
             }}
           >
             <Sparkles size={12} strokeWidth={3} /> REVIEW
@@ -620,7 +634,7 @@ export default function SectionCard({
               background: "rgba(0,0,0,0.1)",
               borderColor: meta.textColor,
               color: meta.textColor,
-              borderWidth: '2px'
+              borderWidth: "2px",
             }}
           >
             <ChevronDown
@@ -643,8 +657,8 @@ export default function SectionCard({
               background: "rgba(0,0,0,0.1)",
               borderColor: meta.textColor,
               color: meta.textColor,
-              fontSize: '10px',
-              borderWidth: '2px'
+              fontSize: "10px",
+              borderWidth: "2px",
             }}
           >
             <X size={12} strokeWidth={3} /> REMOVE
@@ -658,7 +672,7 @@ export default function SectionCard({
           maxHeight: collapsed ? 0 : 4000,
           overflow: "hidden",
           transition: "max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-          background: 'var(--nm-bg)'
+          background: "var(--nm-bg)",
         }}
       >
         <div className="p-6">{formBody()}</div>
