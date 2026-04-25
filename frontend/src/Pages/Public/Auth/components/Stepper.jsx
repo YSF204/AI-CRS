@@ -1,5 +1,5 @@
-import { useState, Children, useRef, useLayoutEffect, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, Children, useRef, useLayoutEffect, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 /* ─── Step wrapper (just renders children) ─── */
 export function Step({ children }) {
@@ -13,17 +13,17 @@ export default function Stepper({
   onStepChange,
   onFinalStepCompleted,
   onNextAttempt,
-  backButtonText = 'Previous',
-  nextButtonText = 'Next',
+  backButtonText = "Previous",
+  nextButtonText = "Next",
   canProceed,
-  advanceRef,      // optional ref — caller can call advanceRef.current() to go next
+  advanceRef, // optional ref — caller can call advanceRef.current() to go next
 }) {
   const steps = Children.toArray(children);
   const total = steps.length;
   const [current, setCurrent] = useState(initialStep - 1);
   const [direction, setDirection] = useState(1);
   const contentRef = useRef(null);
-  const [contentHeight, setContentHeight] = useState('auto');
+  const [contentHeight, setContentHeight] = useState("auto");
 
   // Expose advance() to parent via advanceRef
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function Stepper({
   const handleNextBtnClick = () => {
     onNextAttempt?.(current);
     if (isNextDisabled) return;
-    
+
     if (current < total - 1) {
       setDirection(1);
       const next = current + 1;
@@ -72,64 +72,74 @@ export default function Stepper({
   };
 
   return (
-    <div style={{ width: '100%' }}>
+    <div style={{ width: "100%" }}>
       {/* Progress bar */}
       <div
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '1rem',
-          marginBottom: '2.5rem',
+          display: "flex",
+          alignItems: "center",
+          gap: "1rem",
+          marginBottom: "2.5rem",
         }}
       >
         {/* Step indicators */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
+        <div
+          style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}
+        >
           {steps.map((_, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', flex: i < total - 1 ? 1 : 0 }}>
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                flex: i < total - 1 ? 1 : 0,
+              }}
+            >
               <div
                 style={{
                   width: 36,
                   height: 36,
-                  border: '4px solid var(--nm-ink)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontFamily: 'var(--font-display)',
+                  border: "4px solid var(--nm-ink)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "var(--font-display)",
                   fontWeight: 800,
                   fontSize: 14,
                   flexShrink: 0,
-                  background: i <= current ? 'var(--nm-primary)' : 'var(--nm-bg)',
-                  color: i <= current ? '#fff' : 'var(--nm-text-tertiary)',
-                  boxShadow: i === current ? '4px 4px 0 var(--nm-ink)' : 'none',
-                  transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                  borderRadius: '0px',
+                  background:
+                    i <= current ? "var(--nm-primary)" : "var(--nm-bg)",
+                  color: i <= current ? "#fff" : "var(--nm-text-tertiary)",
+                  boxShadow: i === current ? "4px 4px 0 var(--nm-ink)" : "none",
+                  transition: "all 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
+                  borderRadius: "0px",
                 }}
               >
-                {i < current ? '✓' : i + 1}
+                {i < current ? "✓" : i + 1}
               </div>
               {i < total - 1 && (
                 <div
                   style={{
                     flex: 1,
                     height: 4,
-                    background: 'var(--nm-ink)',
+                    background: "var(--nm-ink)",
                     opacity: 0.1,
                     marginLeft: 6,
                     marginRight: 6,
-                    position: 'relative',
-                    overflow: 'hidden',
+                    position: "relative",
+                    overflow: "hidden",
                   }}
                 >
                   <motion.div
                     style={{
-                      position: 'absolute',
+                      position: "absolute",
                       top: 0,
                       left: 0,
-                      height: '100%',
-                      background: 'var(--nm-primary)',
+                      height: "100%",
+                      background: "var(--nm-primary)",
                     }}
-                    animate={{ width: i < current ? '100%' : '0%' }}
-                    transition={{ duration: 0.4, ease: 'easeInOut' }}
+                    animate={{ width: i < current ? "100%" : "0%" }}
+                    transition={{ duration: 0.4, ease: "easeInOut" }}
                   />
                 </div>
               )}
@@ -140,12 +150,12 @@ export default function Stepper({
         {/* Progress label */}
         <div
           style={{
-            fontFamily: 'var(--font-display)',
+            fontFamily: "var(--font-display)",
             fontSize: 12,
             fontWeight: 800,
-            color: 'var(--nm-text-tertiary)',
+            color: "var(--nm-text-tertiary)",
             flexShrink: 0,
-            letterSpacing: '0.1em',
+            letterSpacing: "0.1em",
           }}
         >
           {current + 1} / {total}
@@ -156,10 +166,10 @@ export default function Stepper({
       <div
         ref={contentRef}
         style={{
-          position: 'relative',
-          overflow: 'hidden',
-          minHeight: contentHeight !== 'auto' ? contentHeight : undefined,
-          transition: 'min-height 0.3s ease',
+          position: "relative",
+          overflow: "hidden",
+          minHeight: contentHeight !== "auto" ? contentHeight : undefined,
+          transition: "min-height 0.3s ease",
         }}
       >
         <AnimatePresence mode="wait" initial={false}>
@@ -168,7 +178,7 @@ export default function Stepper({
             initial={{ x: direction > 0 ? 30 : -30, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: direction > 0 ? -30 : 30, opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
           >
             {steps[current]}
           </motion.div>
@@ -178,9 +188,9 @@ export default function Stepper({
       {/* Navigation buttons */}
       <div
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          marginTop: '2.5rem',
+          display: "flex",
+          justifyContent: "space-between",
+          marginTop: "2.5rem",
           gap: 16,
         }}
       >
@@ -190,12 +200,12 @@ export default function Stepper({
           className="nm-btn"
           style={{
             flex: 1,
-            padding: '14px',
+            padding: "14px",
             fontSize: 13,
-            background: 'var(--nm-surface)',
-            color: 'var(--nm-text-primary)',
-            opacity: current === 0 ? 0 : 1,
-            pointerEvents: current === 0 ? 'none' : 'auto',
+            background: "var(--nm-surface)",
+            color: "var(--nm-text-primary)",
+            opacity: current === 0 ? 0.5 : 1,
+            pointerEvents: current === 0 ? "none" : "auto",
           }}
         >
           {backButtonText}
@@ -205,15 +215,15 @@ export default function Stepper({
           className="nm-btn"
           style={{
             flex: 2,
-            padding: '14px',
+            padding: "14px",
             fontSize: 14,
-            background: 'var(--nm-primary)',
-            color: '#fff',
+            background: "var(--nm-primary)",
+            color: "#fff",
             opacity: isNextDisabled ? 0.4 : 1,
-            cursor: isNextDisabled ? 'not-allowed' : 'pointer',
+            cursor: isNextDisabled ? "not-allowed" : "pointer",
           }}
         >
-          {current === total - 1 ? 'Complete Registration' : nextButtonText}
+          {current === total - 1 ? "Complete Registration" : nextButtonText}
         </button>
       </div>
     </div>

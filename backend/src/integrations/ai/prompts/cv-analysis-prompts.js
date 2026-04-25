@@ -100,8 +100,36 @@ Scoring Criteria:
   /**
    * Analyze specific CV section or Full CV
    */
-  ANALYZE_SECTION: (section, sectionData) => `
-Please analyze this CV data and identify any poorly written parts.
+  ANALYZE_SECTION: (section, sectionData) => {
+    if (section === "fullCv") {
+      return `You are a professional CV coach. Analyze the CV provided and do the following:
+
+1) Check each section — Contact Information, Summary, Work Experience, Education, Technical Skills, Soft Skills, Languages. For any section that is EMPTY or has fewer than 2 meaningful entries, flag it as NEEDS ATTENTION and tell the user exactly what to add.
+
+2) For sections that have content, provide 2–3 specific, actionable improvement suggestions tailored to the job title provided.
+
+3) Calculate an overall completeness score: deduct 10–15 points for each empty major section. A fully empty CV must score below 20%.
+
+4) Return your response as valid JSON ONLY with no markdown, no fences, no preamble, in this exact structure:
+{
+  "overallScore": number,
+  "sections": [
+    {
+      "name": "Contact Information",
+      "status": "Good" | "Needs Attention" | "Empty",
+      "suggestions": ["suggestion1", "suggestion2", "suggestion3"]
+    }
+  ],
+  "generalAdvice": ["advice1", "advice2", "advice3"]
+}
+
+CV Data:
+${JSON.stringify(sectionData, null, 2)}`;
+    }
+
+    // For individual sections, use the original prompt
+    return `
+Please analyze this CV data and identify any missing, poorly written, or incomplete parts.
 
 Data provided as a flattened dictionary (Key = Field ID, Value = Text Content):
 ${JSON.stringify(sectionData, null, 2)}
@@ -111,25 +139,27 @@ CRITICAL INSTRUCTIONS:
 2. DO NOT wrap the response in markdown code blocks (\`\`\`json).
 3. DO NOT include any conversational text, preamble, or explanations.
 4. Output must start exactly with { and end exactly with }.
-5. If the provided data dictionary is completely empty or contains no meaningful text, you MUST return an empty issues array [] and state that there is no text to review. DO NOT fabricate issues for non-existent text.
+5. IMPORTANT: If a field is completely empty, missing, or contains no meaningful text, you MUST flag it as an issue. Set the 'reason' to "CRITICAL: This field is empty and must be filled out for a complete CV." and provide a placeholder or suggestion in 'improvedText'. DO NOT say "Great job" or return an empty issues array for empty fields.
 
 Return exactly this JSON structure:
 {
   "atsScore": 0-100,
-  "atsFeedback": "1 sentence summarizing an overall ATS score review",
+  "atsFeedback": "1 sentence summarizing an overall ATS score review. If fields are empty, give a low score.",
   "issues": [
     {
       "fieldId": "the exact key from the provided JSON",
-      "originalText": "The exact poorly written text snippet",
-      "reason": "1 sentence explaining why this is bad",
-      "improvedText": "A professional, ready-to-use rewritten version of the text"
+      "originalText": "The exact poorly written text snippet, or an empty string if missing",
+      "reason": "1 sentence explaining why this is bad or missing",
+      "improvedText": "A professional, ready-to-use rewritten version of the text or a strong suggestion"
     }
   ]
 }
 
 Focus strictly on:
-- Rewriting informal language into professional terminology
-- Enhancing impact and achievements
-- Correcting spelling and grammar
-- Only return issues for fields that actually need improvement. If the text is good, do not return an issue for it.`,
+- Flagging empty or missing fields as CRITICAL issues.
+- Rewriting informal language into professional terminology.
+- Enhancing impact and achievements.
+- Correcting spelling and grammar.
+- Only return issues for fields that actually need improvement or are missing. If the text is professional and complete, do not return an issue for it.`;
+  },
 };

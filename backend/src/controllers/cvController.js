@@ -76,7 +76,13 @@ export const createCV = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const getMyCVs = catchAsync(async (req, res) => {
-  const cvs = await CV.find({ userId: req.user._id }).sort({ createdAt: -1 });
+  const cvs = await CV.find({ userId: req.user._id }).sort({ createdAt: -1 }).lean();
+
+  // Attach latest ATS score to each CV
+  for (let cv of cvs) {
+    const analysis = await CVAnalysis.findOne({ CVId: cv._id }).sort({ createdAt: -1 });
+    cv.atsScore = analysis ? analysis.atsScore : null;
+  }
 
   res.status(200).json({
     success: true,

@@ -56,6 +56,10 @@ export default function ClassicSignupForm() {
   const [form, setForm] = useState(EMPTY_FORM);
   const advanceRef = useRef(null);
 
+  // Track phone and email duplicate validity from child components
+  const [phoneValid, setPhoneValid] = useState(true);
+  const [emailDuplicate, setEmailDuplicate] = useState(false);
+
   const validationData = {
     ...form,
     role: role.toUpperCase(),
@@ -109,10 +113,15 @@ export default function ClassicSignupForm() {
           form.email.trim() &&
           !errors.firstName &&
           !errors.lastName &&
-          !errors.email
+          !errors.email &&
+          !emailDuplicate
         );
-      case 2:
-        return !!(form.gender && form.age && !errors.age);
+      case 2: {
+        // Phone: if they typed something, it must be exactly 10 digits
+        const telVal = form.telephone || "";
+        const telOk = telVal.length === 0 || telVal.length === 10;
+        return !!(form.gender && form.age && !errors.age && telOk && phoneValid);
+      }
       case 3:
         return !!(
           form.password.length >= 6 &&
@@ -130,6 +139,22 @@ export default function ClassicSignupForm() {
   // Clicking a role card saves role AND immediately jumps to next step
   const handleRoleSelect = (r) => {
     setRole(r);
+    // Reset ALL role-specific fields when switching roles (FIX 3)
+    setForm((prev) => ({
+      ...prev,
+      gender: "",
+      age: "",
+      telephone: "",
+      companyName: "",
+      companyLicense: "",
+      contactEmail: "",
+      website: "",
+      branchName: "",
+      branchCity: "",
+      branchStreet: "",
+    }));
+    setPhoneValid(true);
+    setEmailDuplicate(false);
     setTimeout(() => advanceRef.current?.(), 0); // defer so state update is committed first
   };
 
@@ -196,8 +221,18 @@ export default function ClassicSignupForm() {
 
   const steps = [
     <RoleStep key="role" role={role} onSelectRole={handleRoleSelect} />,
-    <PersonalStep key="personal" field={field} />,
-    <ProfileStep key="profile" form={form} setForm={setForm} field={field} />,
+    <PersonalStep
+      key="personal"
+      field={field}
+      onEmailDuplicateStatus={(isDuplicate) => setEmailDuplicate(isDuplicate)}
+    />,
+    <ProfileStep
+      key="profile"
+      form={form}
+      setForm={setForm}
+      field={field}
+      onPhoneValidityChange={(isValid) => setPhoneValid(isValid)}
+    />,
     <SecurityStep key="security" field={field} />,
     ...(role === "EMPLOYER"
       ? [<CompanyStep key="company" field={field} />]

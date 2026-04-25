@@ -656,3 +656,22 @@ export const resendVerificationEmail = catchAsync(async (req, res, next) => {
     message: "Verification email sent. Please check your inbox.",
   });
 });
+
+// ================================== //
+//   CHECK IF EMAIL ALREADY EXISTS    //
+// ================================== //
+
+export const checkEmail = catchAsync(async (req, res, next) => {
+  const { email } = req.query;
+
+  if (!email) {
+    return next(new AppError("Email query parameter is required", 400));
+  }
+
+  const existingUser = await User.findOne({ email: email.toLowerCase() });
+
+  res.status(200).json({
+    success: true,
+    exists: !!existingUser,
+  });
+});

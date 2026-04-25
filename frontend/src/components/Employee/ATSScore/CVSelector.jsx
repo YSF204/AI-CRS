@@ -14,16 +14,25 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
     let list = [...cvList];
     if (query) {
       const lowerQ = query.toLowerCase();
-      list = list.filter((cv) =>
-        (cv.jobTitle || "").toLowerCase().includes(lowerQ) ||
-        (cv.fullName || "").toLowerCase().includes(lowerQ)
+      list = list.filter(
+        (cv) =>
+          (cv.jobTitle || "").toLowerCase().includes(lowerQ) ||
+          (cv.fullName || "").toLowerCase().includes(lowerQ),
       );
     }
 
     if (sortBy === "newest") {
-      list.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+      list.sort(
+        (a, b) =>
+          new Date(b.updatedAt || b.createdAt) -
+          new Date(a.updatedAt || a.createdAt),
+      );
     } else if (sortBy === "oldest") {
-      list.sort((a, b) => new Date(a.updatedAt || a.createdAt) - new Date(b.updatedAt || b.createdAt));
+      list.sort(
+        (a, b) =>
+          new Date(a.updatedAt || a.createdAt) -
+          new Date(b.updatedAt || b.createdAt),
+      );
     }
 
     return list;
@@ -35,7 +44,8 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
     return (
       <div className="jd-surface-stack p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
         <p className="font-mono text-[var(--nm-text-tertiary)] mb-6">
-          No CVs found. Create your first CV to unlock ATS optimization insights.
+          No CVs found. Create your first CV to unlock ATS optimization
+          insights.
         </p>
         <a
           href="/employee/cv-templates"
@@ -51,40 +61,51 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
   return (
     <div className="ats-gallery-root space-y-6">
       {/* ATS Gallery Toolbar */}
-      <div className="jd-surface-stack ats-toolbar flex flex-col sm:flex-row items-center justify-between gap-4 p-4">
-        <h2 className="jd-section-title mb-0 w-full sm:w-auto">Select a CV to Analyze</h2>
-        <div className="flex w-full sm:w-auto gap-3 flex-wrap sm:flex-nowrap">
-          <div className="input-with-icon-wrapper flex-grow max-w-sm relative flex items-center">
-            <Search size={16} className="absolute left-3 text-[var(--nm-text-tertiary)]" />
+      <div className="jd-surface-stack ats-toolbar flex items-center justify-between gap-4 p-4">
+        <h2 className="jd-section-title mb-0">Select a CV to Analyze</h2>
+        <div className="flex gap-3 items-center">
+          <div className="relative h-[44px]">
             <input
               type="text"
               placeholder="Search CV names..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="jd-input pl-10 h-10 w-full"
+              className="jd-input w-[240px] h-[44px]"
+              style={{ paddingLeft: "40px" }}
+            />
+            <Search
+              size={16}
+              style={{
+                position: "absolute",
+                left: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                pointerEvents: "none",
+              }}
+              className="text-[var(--nm-text-tertiary)]"
             />
           </div>
-          <div className="flex-shrink-0 relative">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="jd-select h-10 w-full min-w-[140px]"
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-            </select>
-          </div>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="jd-select h-[44px] min-w-[140px]"
+          >
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+          </select>
         </div>
       </div>
 
       {/* Grid of CVs */}
       {filteredCvs.length > 0 ? (
         <div className="ats-gallery-grid">
-          {filteredCvs.map(cv => (
+          {filteredCvs.map((cv) => (
             <CVPreviewCard
               key={cv._id}
               cv={cv}
-              loading={analyzingId === cv._id || (loading && analyzingId == null)}
+              loading={
+                analyzingId === cv._id || (loading && analyzingId == null)
+              }
               onAnalyze={onAnalyze}
             />
           ))}
