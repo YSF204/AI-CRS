@@ -152,20 +152,21 @@ export default function CVs() {
             <div className="relative h-[44px]">
               <input
                 type="text"
-                placeholder="Search resumes..."
+                placeholder="Search resumes by job title or name..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="jd-input w-[240px] h-[44px]"
-                style={{ paddingLeft: "40px" }}
+                className="jd-input w-[520px] h-[44px]"
+                style={{ paddingLeft: "60px" }}
               />
               <Search
-                size={16}
+                size={18}
                 style={{
                   position: "absolute",
-                  left: "12px",
+                  left: "20px",
                   top: "50%",
                   transform: "translateY(-50%)",
                   pointerEvents: "none",
+                  zIndex: 10,
                 }}
                 className="text-[var(--nm-text-tertiary)]"
               />
@@ -173,7 +174,8 @@ export default function CVs() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="jd-select h-[44px] min-w-[140px]"
+              className="jd-select h-[44px]"
+              style={{ width: "100px" }}
             >
               <option value="newest">Newest</option>
               <option value="oldest">Oldest</option>

@@ -1,6 +1,6 @@
 import React from "react";
 
-const ExecutiveResumeTemplate = ({ userName = "", cvData }) => {
+const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
 
   const fmtDuration = (from, to) => {
@@ -8,6 +8,15 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData }) => {
     if (from) return from;
     if (to) return to;
     return "";
+  };
+
+  const getHighlightStyle = (...fieldIds) => {
+    if (!highlights) return {};
+    for (const id of fieldIds) {
+      if (highlights[id] === 'warning') return { outline: '3px dashed #ff5f57', outlineOffset: '2px', backgroundColor: 'rgba(255, 95, 87, 0.05)', borderRadius: '2px' };
+      if (highlights[id] === 'suggestion') return { outline: '3px dashed #0a84ff', outlineOffset: '2px', backgroundColor: 'rgba(10, 132, 255, 0.05)', borderRadius: '2px' };
+    }
+    return {};
   };
 
   const contactItems = [];
@@ -63,7 +72,7 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData }) => {
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary" className="break-inside-avoid">
+            <section key="summary" className="break-inside-avoid" style={getHighlightStyle('summary')}>
               <SectionHeader title="Professional Summary" />
               <p className="text-xs md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words text-justify">
                 {cvData.summary}
@@ -78,7 +87,7 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData }) => {
                   {cvData.experience.map((exp, index) => {
                     const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                     return (
-                      <div key={index} className="break-inside-avoid">
+                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
                         <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
                           <div>
                             <h3 className="text-[13px] font-bold text-gray-800">
@@ -113,7 +122,7 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData }) => {
                   {cvData.education.map((edu, index) => {
                     const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                     return (
-                      <div key={index} className="break-inside-avoid">
+                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}>
                         <h3 className="text-[13px] font-bold text-gray-800 mb-0.5">
                           {edu.certification}
                         </h3>
@@ -130,7 +139,7 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData }) => {
             ) : null,
           technicalSkills:
             cvData.technicalSkills?.length > 0 ? (
-              <section key="technicalSkills" className="break-inside-avoid">
+              <section key="technicalSkills" className="break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
                 <SectionHeader title="Technical Skills" />
                 <p className="text-xs md:text-sm text-gray-800">
                   {cvData.technicalSkills.join(", ")}
@@ -139,7 +148,7 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData }) => {
             ) : null,
           softSkills:
             cvData.softSkills?.length > 0 ? (
-              <section key="softSkills" className="break-inside-avoid">
+              <section key="softSkills" className="break-inside-avoid" style={getHighlightStyle('softSkills')}>
                 <SectionHeader title="Soft Skills" />
                 <p className="text-xs md:text-sm text-gray-800">
                   {cvData.softSkills.join(", ")}
@@ -148,7 +157,7 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData }) => {
             ) : null,
           language:
             cvData.language?.length > 0 ? (
-              <section key="language" className="break-inside-avoid">
+              <section key="language" className="break-inside-avoid" style={getHighlightStyle('language')}>
                 <SectionHeader title="Languages" />
                 <p className="text-xs md:text-sm text-gray-800">
                   {cvData.language

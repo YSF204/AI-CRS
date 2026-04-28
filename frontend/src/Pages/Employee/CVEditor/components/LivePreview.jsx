@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getTemplateById } from '../../../../Features/CVManagement/index.js';
 
-const MemoizedTemplate = React.memo(({ Component, userName, formData }) => {
+const MemoizedTemplate = React.memo(({ Component, userName, formData, highlights }) => {
   if (!Component) return null;
-  return <Component userName={userName} cvData={formData} />;
+  return <Component userName={userName} cvData={formData} highlights={highlights} />;
 });
 
 // ── A4 page constants ──
@@ -13,11 +13,11 @@ const FOOTER_ZONE = 60;  // dead space at bottom of every page
 const HEADER_ZONE = 70;  // dead space at top of page 2+
 const PUSH_BUFFER = 60;  // extra safety buffer when pushing content
 
-export default function LivePreview({ formData, userName, templateId }) {
+export default function LivePreview({ formData, userName, templateId, highlights, zoom: zoomProp }) {
   const template = getTemplateById(templateId);
   const TemplateComponent = template?.component;
 
-  const ZOOM = 0.52;
+  const ZOOM = zoomProp || 0.52;
 
   const contentRef = useRef(null);
   const [pages, setPages] = useState(1);
@@ -204,7 +204,7 @@ export default function LivePreview({ formData, userName, templateId }) {
               userSelect: 'none',
               minHeight: `${totalHeight}px`,
             }}>
-              <MemoizedTemplate Component={TemplateComponent} userName={userName} formData={formData} />
+              <MemoizedTemplate Component={TemplateComponent} userName={userName} formData={formData} highlights={highlights} />
             </div>
           </div>
         </div>

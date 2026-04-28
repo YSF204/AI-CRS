@@ -1,6 +1,6 @@
 import React from "react";
 
-const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData }) => {
+const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlights = {} }) => {
   if (!cvData) return null;
 
   const fmtDuration = (from, to) => {
@@ -8,6 +8,15 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData }) => {
     if (from) return from;
     if (to) return to;
     return "";
+  };
+
+  const getHighlightStyle = (...fieldIds) => {
+    if (!highlights) return {};
+    for (const id of fieldIds) {
+      if (highlights[id] === 'warning') return { outline: '3px dashed #ff5f57', outlineOffset: '2px', backgroundColor: 'rgba(255, 95, 87, 0.05)', borderRadius: '2px' };
+      if (highlights[id] === 'suggestion') return { outline: '3px dashed #0a84ff', outlineOffset: '2px', backgroundColor: 'rgba(10, 132, 255, 0.05)', borderRadius: '2px' };
+    }
+    return {};
   };
 
   const contactItems = [];
@@ -77,7 +86,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData }) => {
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary" className="break-inside-avoid">
+            <section key="summary" className="break-inside-avoid" style={getHighlightStyle('summary')}>
               <SectionHeader title="Summary" />
               <p className="text-xs md:text-sm text-gray-800 leading-relaxed text-justify whitespace-pre-wrap break-words">
                 {cvData.summary}
@@ -92,7 +101,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData }) => {
                   {cvData.experience.map((exp, index) => {
                     const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                     return (
-                      <div key={index} className="break-inside-avoid">
+                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
                         <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
                           <h3 className="text-[13px] font-bold text-gray-900">
                             {exp.position}
@@ -125,7 +134,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData }) => {
                   {cvData.education.map((edu, index) => {
                     const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                     return (
-                      <div key={index} className="break-inside-avoid">
+                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}>
                         <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
                           <h3 className="text-[13px] font-bold text-gray-900">
                             {edu.certification}
@@ -154,7 +163,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData }) => {
             ) : null,
           technicalSkills:
             cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
-              <section key="technicalSkills" className="break-inside-avoid">
+              <section key="technicalSkills" className="break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
                 <SectionHeader title="Technical Skills" />
                 <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-xs md:text-sm text-gray-700">
                   {cvData.technicalSkills.map((skill, index) => (
@@ -165,7 +174,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData }) => {
             ) : null,
           softSkills:
             cvData.softSkills && cvData.softSkills.length > 0 ? (
-              <section key="softSkills" className="break-inside-avoid">
+              <section key="softSkills" className="break-inside-avoid" style={getHighlightStyle('softSkills')}>
                 <SectionHeader title="Soft Skills" />
                 <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-xs md:text-sm text-gray-700">
                   {cvData.softSkills.map((skill, index) => (
@@ -176,7 +185,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData }) => {
             ) : null,
           language:
             cvData.language && cvData.language.length > 0 ? (
-              <section key="language" className="break-inside-avoid">
+              <section key="language" className="break-inside-avoid" style={getHighlightStyle('language')}>
                 <SectionHeader title="Languages" />
                 <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-xs md:text-sm text-gray-700">
                   {cvData.language.map((item, index) => {

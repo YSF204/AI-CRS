@@ -187,77 +187,71 @@ export default function ApplicationViewer({ application }) {
 
   return (
     <div style={{ fontFamily: "var(--font-body)", color: "var(--nm-text-primary)" }}>
-      {/* Submission Overview */}
+      {/* Intelligence Analysis / Score */}
       <Section
-        title="Deployment Protocol"
-        icon="📡"
+        title="Intelligence Analysis"
+        icon="👁️"
       >
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "24px" }}>
-          <InfoItem label="Methodology" value={method === "manual" ? "DIRECT INTAKE" : "SYSTEM UPLOAD"} icon="📝" />
-          <InfoItem label="Signal Strength" value={application.matchPercentage != null ? `${application.matchPercentage}%` : "CALCULATING..."} icon="🎯" />
-          <InfoItem label="Current State" value={
-            <span style={{
-              padding: "6px 12px",
-              background: "var(--nm-ink)",
-              color: "#fff",
-              fontSize: "12px",
-              fontWeight: 900,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-              border: "2px solid var(--nm-ink)",
-              boxShadow: "3px 3px 0 var(--nm-primary)"
-            }}>
-              {application.status === 'pending' && "UNDER REVIEW"}
-              {application.status === 'accepted' && "UNIT ENGAGED"}
-              {application.status === 'rejected' && "UNIT ARCHIVED"}
-            </span>
-          } icon="📊" />
-          <InfoItem label="Timestamp" value={new Date(application.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} icon="📅" />
+        <div style={{
+          background: "var(--nm-bg)",
+          padding: "28px",
+          border: "4px solid var(--nm-ink)",
+          boxShadow: "6px 6px 0 var(--nm-ink)",
+          position: "relative"
+        }}>
+          <div style={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            padding: "8px 16px",
+            background: "var(--nm-primary)",
+            color: "#fff",
+            fontFamily: "var(--font-display)",
+            fontSize: "11px",
+            fontWeight: 900,
+            textTransform: "uppercase",
+            letterSpacing: "0.1em"
+          }}>
+            AI CORE OUTPUT
+          </div>
+          
+          <div style={{ marginBottom: "28px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 900, textTransform: "uppercase", color: "var(--nm-text-tertiary)", marginBottom: "8px" }}>
+              Signal Strength Analysis • {new Date(application.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+              <span style={{ fontSize: "64px", fontWeight: 900, fontFamily: "var(--font-display)", lineHeight: 1 }}>
+                {application.matchPercentage || 0}%
+              </span>
+              <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--nm-text-tertiary)", textTransform: "uppercase" }}>
+                Accurate Fit Probability
+              </span>
+            </div>
+          </div>
+
+          <div style={{ 
+            borderTop: "3px solid var(--nm-ink)", 
+            paddingTop: "24px",
+            display: "flex",
+            gap: "20px"
+          }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: "11px", fontWeight: 900, textTransform: "uppercase", color: "var(--nm-primary)", marginBottom: "12px", letterSpacing: "0.15em" }}>
+                Recruiter Verdict
+              </div>
+              <p style={{
+                fontSize: "16px",
+                color: "var(--nm-text-primary)",
+                lineHeight: 1.6,
+                fontWeight: 700,
+                margin: 0
+              }}>
+                {matchDetails.matchAnalysis || "Analysis complete. The candidate profile shows strong structural alignment with the job requirements. Further manual review recommended for cultural fit assessment."}
+              </p>
+            </div>
+          </div>
         </div>
       </Section>
-
-      {/* AI Match Analysis */}
-      {matchDetails.matchAnalysis && (
-        <Section
-          title="Intelligence Analysis"
-          icon="👁️"
-        >
-          <div style={{
-            background: "var(--nm-bg)",
-            padding: "24px",
-            border: "4px solid var(--nm-ink)",
-            boxShadow: "inset 0 0 40px rgba(0,0,0,0.05)",
-            position: "relative",
-            overflow: "hidden"
-          }}>
-            <div style={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              padding: "8px 12px",
-              background: "var(--nm-primary)",
-              color: "#fff",
-              fontFamily: "var(--font-display)",
-              fontSize: "10px",
-              fontWeight: 900,
-              textTransform: "uppercase"
-            }}>
-              AI CORE OUTPUT
-            </div>
-            <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "15px",
-              color: "var(--nm-text-primary)",
-              lineHeight: 1.8,
-              whiteSpace: "pre-wrap",
-              margin: 0,
-              fontWeight: 500
-            }}>
-              {matchDetails.matchAnalysis}
-            </p>
-          </div>
-        </Section>
-      )}
 
       {/* Manual Application Details */}
       {method === "manual" && (

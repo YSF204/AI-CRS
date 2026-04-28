@@ -453,7 +453,7 @@ export default function Jobs() {
             </div>
           </section>
 
-          <aside className="min-h-[420px]">
+          <aside className="sticky top-10 min-h-[420px] max-h-[calc(100vh-120px)] overflow-hidden">
             <JobDetailsPanel job={selectedJob} onApply={handleApply} onClose={() => setSelectedJobId(null)} />
           </aside>
         </div>

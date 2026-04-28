@@ -12,7 +12,7 @@ import Applications from "./Pages/Employee/applications";
 import CVs from "./Pages/Employee/cvs";
 import CVTemplates from "./Pages/Employee/CVTemplates";
 import CVEditor from "./Pages/Employee/CVEditor";
-import EmployeeDash from "./Pages/Employee/EmployeeDash";
+
 import Jobs from "./Pages/Employee/jobs";
 import JobDetails from "./Pages/Employee/JobDetails";
 import ApplyJob from "./Pages/Employee/ApplyJob";

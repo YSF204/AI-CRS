@@ -13,6 +13,7 @@ import EditorContent from "./components/EditorContent";
 import LivePreview from "./components/LivePreview";
 import PreviewModal from "./components/PreviewModal";
 import AnalysisModal from "./components/AnalysisModal";
+import SkillGapModal from "./components/SkillGapModal";
 
 export default function CVEditor() {
   const { id } = useParams();
@@ -34,6 +35,7 @@ export default function CVEditor() {
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [showSkillGap, setShowSkillGap] = useState(false);
   const [dragOverKey, setDragOverKey] = useState(null);
   const dragItemRef = useRef(null);
   const previewRef = useRef(null);
@@ -321,6 +323,26 @@ export default function CVEditor() {
     } finally {
       setAnalyzing(false);
     }
+  };
+
+  const handleSkillGapAnalysis = async ({ targetRole, additionalInfo }) => {
+    const filtered = filteredFormData();
+    const res = await api.post("/cvs/skill-gap", {
+      cvData: {
+        fullName: filtered.fullName || "",
+        jobTitle: filtered.jobTitle || "",
+        summary: filtered.summary || "",
+        technicalSkills: filtered.technicalSkills || [],
+        softSkills: filtered.softSkills || [],
+        language: filtered.language || [],
+        experience: filtered.experience || [],
+        education: filtered.education || [],
+        customSections: filtered.customSections || [],
+      },
+      targetRole,
+      additionalInfo,
+    });
+    return res.data?.data;
   };
 
   const handleAnalyzeSection = async (sectionKey) => {
@@ -709,7 +731,7 @@ export default function CVEditor() {
 
       <div
         className="dashboard-shell cv-editor-shell flex flex-1 min-h-0 flex-col"
-        style={{ padding: 0, paddingRight: 0 }}
+        style={{ padding: 0, paddingRight: 0, overflow: "visible" }}
       >
         {/* ── Action bar ── */}
         <ActionBar
@@ -722,6 +744,7 @@ export default function CVEditor() {
           atsScore={analysisResult?.atsScore}
           onSave={handleSave}
           onAnalyze={handleAnalyze}
+          onSkillGap={() => setShowSkillGap(true)}
           onPreview={() => setShowPreview(true)}
           onDownloadPdf={handleDownloadPdf}
           onChangeTemplate={() => setShowTemplateSelector(true)}
@@ -732,7 +755,7 @@ export default function CVEditor() {
         <Toast toast={toast} />
 
         {/* ── 3-column content ── */}
-        <div className="cv-editor-layout">
+        <div className="cv-editor-layout" style={{ position: 'relative', zIndex: 1 }}>
           {/* ══ SIDEBAR ══ */}
           <Sidebar
             sidebarOpen={sidebarOpen}
@@ -797,8 +820,18 @@ export default function CVEditor() {
         show={showAnalysis}
         analysis={analysisResult}
         currentData={form}
+        userName={user?.firstName || "Candidate"}
+        templateId={form.templateId || cv?.templateId || 1}
         onClose={() => setShowAnalysis(false)}
         onApply={handleApplyAnalysis}
+      />
+
+      {/* ── Skill Gap Modal ── */}
+      <SkillGapModal
+        show={showSkillGap}
+        cvData={filteredFormData()}
+        onClose={() => setShowSkillGap(false)}
+        onAnalyze={handleSkillGapAnalysis}
       />
 
       {/* ── Template Selector Modal ── */}

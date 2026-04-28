@@ -1447,6 +1447,11 @@
   transition: transform var(--transition-base), background var(--transition-base), box-shadow var(--transition-base);
 }
 
+.jd-input::placeholder {
+  color: var(--nm-text-tertiary);
+  opacity: 1;
+}
+
 .jd-input:focus,
 .jd-select:focus {
   background: var(--nm-surface-high);

@@ -10,6 +10,7 @@ import {
   getCVAnalyses,
   downloadPDF,
   analyzeSection,
+  skillGapAnalysis,
 } from "../controllers/cvController.js";
 import { authenticate } from "../middleware/Auth.js";
 import { isEmployee } from "../middleware/roleCheck.js";
@@ -42,5 +43,8 @@ cvRouter.post("/:id/recommend-jobs", recommendJobs);
 
 // CV Section Analysis
 cvRouter.post("/analyze-section", analyzeSection);
+
+// Skill Gap Analysis
+cvRouter.post("/skill-gap", skillGapAnalysis);
 
 export default cvRouter;

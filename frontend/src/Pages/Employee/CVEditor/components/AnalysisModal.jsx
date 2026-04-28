@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from "react";
-import { X, CheckCircle2, AlertCircle, Sparkles } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { X, CheckCircle2, AlertCircle, Sparkles, Wand2 } from "lucide-react";
+import LivePreview from "./LivePreview";
 
 export default function AnalysisModal({
   show,
   analysis,
   currentData,
+  userName,
+  templateId,
   onClose,
   onApply,
 }) {
   const [selectedUpdates, setSelectedUpdates] = useState({});
+  const [showImprovements, setShowImprovements] = useState(false);
 
   useEffect(() => {
     if (analysis?.issues) {
@@ -20,34 +24,57 @@ export default function AnalysisModal({
     }
   }, [analysis]);
 
+  const highlights = useMemo(() => {
+    if (!analysis?.issues) return {};
+    const h = {};
+    analysis.issues.forEach(issue => {
+      // If the AI has a suggestion to apply, it's a 'suggestion' (blue/purple).
+      // Otherwise it just needs attention ('warning' -> orange).
+      if (issue.improvedText) {
+        h[issue.fieldId] = 'suggestion';
+      } else {
+        h[issue.fieldId] = 'warning';
+      }
+    });
+    return h;
+  }, [analysis]);
+
   if (!show || !analysis) return null;
 
-  const isNewFormat = !!analysis.sections;
-  const sectionLabel =
-    analysis.section === "fullCv" ? "Full CV" : analysis.section;
+  const isEmptyCV = analysis.isEmpty === true;
+  const hasImprovements = analysis.issues && analysis.issues.length > 0;
 
-  // Determine color based on score
   const getScoreColor = (score) => {
     if (score < 40)
-      return { bg: "#fee2e2", text: "#b91c1c", border: "#fca5a5" };
+      return { bg: "var(--nm-error-surface)", text: "var(--nm-error)" };
     if (score < 70)
-      return { bg: "#fef3c7", text: "#92400e", border: "#fcd34d" };
-    return { bg: "#dcfce7", text: "#166534", border: "#86efac" };
+      return { bg: "var(--nm-warning-surface)", text: "var(--nm-warning)" };
+    return { bg: "var(--nm-success-surface)", text: "var(--nm-success)" };
   };
 
-  const scoreColor = getScoreColor(
-    analysis.overallScore ?? analysis.atsScore ?? 0,
-  );
+  const scoreColor = getScoreColor(analysis.overallScore ?? 0);
 
   const handleCheckboxChange = (fieldId, checked) => {
     setSelectedUpdates((prev) => ({ ...prev, [fieldId]: checked }));
   };
 
-  const handleApply = () => {
+  const handleApplyAll = () => {
     const updatesToApply = {};
     if (analysis.issues) {
       analysis.issues.forEach((issue) => {
-        if (selectedUpdates[issue.fieldId]) {
+        if (issue.improvedText) {
+          updatesToApply[issue.fieldId] = issue.improvedText;
+        }
+      });
+    }
+    onApply(updatesToApply);
+  };
+
+  const handleApplySelected = () => {
+    const updatesToApply = {};
+    if (analysis.issues) {
+      analysis.issues.forEach((issue) => {
+        if (selectedUpdates[issue.fieldId] && issue.improvedText) {
           updatesToApply[issue.fieldId] = issue.improvedText;
         }
       });
@@ -59,7 +86,7 @@ export default function AnalysisModal({
     return id
       .split("_")
       .map((word) =>
-        word === "0" || word === "1" || word === "2"
+        /^\d+$/.test(word)
           ? `#${parseInt(word) + 1}`
           : word.charAt(0).toUpperCase() + word.slice(1),
       )
@@ -67,59 +94,120 @@ export default function AnalysisModal({
       .replace("Items", "Item");
   };
 
+  // ── Reusable Styles ────────────────────────────────────────────────
+  const headingStyle = {
+    fontFamily: "'Space Grotesk', sans-serif",
+    fontWeight: 800,
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "var(--nm-text-primary)",
+    margin: 0,
+  };
+
+  const cardStyle = {
+    background: "var(--nm-surface)",
+    border: "4px solid var(--nm-ink)",
+    boxShadow: "6px 6px 0 var(--nm-ink)",
+    borderRadius: "0px",
+    padding: "20px",
+  };
+
+  const pillStyle = (bg, color) => ({
+    background: bg,
+    color: color,
+    padding: "6px 14px",
+    border: `3px solid ${color}`,
+    fontFamily: "'Space Grotesk', sans-serif",
+    fontWeight: 700,
+    fontSize: "0.75rem",
+    letterSpacing: "0.1em",
+    textTransform: "uppercase",
+    borderRadius: "0px",
+  });
+
   return (
     <div
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(10,10,10,0.18)",
-        backdropFilter: "blur(8px)",
+        background: "rgba(0,0,0,0.4)",
+        backdropFilter: "blur(4px)",
         zIndex: 9200,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "24px",
+        padding: "20px",
       }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      onClick={onClose}
     >
       <div
         style={{
           width: "100%",
-          maxWidth: "780px",
-          maxHeight: "85vh",
-          overflowY: "auto",
-          background: "#f8f7f2",
-          borderRadius: "20px",
-          boxShadow: "0 22px 70px rgba(0,0,0,0.18)",
+          maxWidth: "1400px",
+          height: "90vh",
+          background: "var(--nm-bg)",
+          border: "4px solid var(--nm-ink)",
+          boxShadow: "12px 12px 0 var(--nm-ink)",
+          display: "flex",
+          flexDirection: "row",
+          overflow: "hidden",
+          position: "relative",
         }}
+        onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ padding: "24px" }}>
+        {/* ── Left Panel (Analysis Details) ── */}
+        <div
+          style={{
+            width: "35%",
+            height: "100%",
+            overflowY: "auto",
+            borderRight: "4px solid var(--nm-ink)",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+        <div style={{ padding: "28px" }}>
+          {/* ── Header ─────────────────────────────────────────────── */}
           <div
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
               gap: "16px",
-              marginBottom: "18px",
+              marginBottom: "24px",
+              paddingBottom: "16px",
+              borderBottom: "4px solid var(--nm-ink)",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <Sparkles size={24} color="#0a0a0a" />
+            <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  background: "var(--nm-primary)",
+                  border: "4px solid var(--nm-ink)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}
+              >
+                <Sparkles size={22} color="#fff" strokeWidth={2.5} />
+              </div>
               <div>
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: "1.35rem",
-                    fontFamily: "'Space Grotesk', sans-serif",
-                    fontWeight: 900,
-                    letterSpacing: "0.08em",
-                  }}
-                >
+                <h2 style={{ ...headingStyle, fontSize: "1.4rem" }}>
                   CV Analysis
                 </h2>
-                <p style={{ margin: 0, color: "#4b4b4b", fontSize: "0.95rem" }}>
+                <p
+                  style={{
+                    margin: 0,
+                    color: "var(--nm-text-secondary)",
+                    fontSize: "0.85rem",
+                    fontFamily: "Manrope, sans-serif",
+                    fontWeight: 500,
+                    marginTop: 2,
+                  }}
+                >
                   Professional review of your CV
                 </p>
               </div>
@@ -127,391 +215,435 @@ export default function AnalysisModal({
             <button
               onClick={onClose}
               style={{
-                background: "transparent",
-                border: "none",
+                background: "var(--nm-surface)",
+                border: "4px solid var(--nm-ink)",
                 cursor: "pointer",
                 padding: "8px",
+                width: 40,
+                height: 40,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "3px 3px 0 var(--nm-ink)",
+                borderRadius: "0px",
               }}
             >
-              <X size={18} />
+              <X size={18} strokeWidth={2.5} />
             </button>
           </div>
 
-          {/* New structured format */}
-          {isNewFormat && (
-            <div style={{ display: "grid", gap: "18px" }}>
-              {/* Overall Score */}
+          {/* ── Empty CV Warning ───────────────────────────────────── */}
+          {isEmptyCV && (
+            <div style={{ display: "grid", gap: "16px" }}>
               <div
                 style={{
-                  padding: "20px",
-                  background: scoreColor.bg,
-                  border: `2px solid ${scoreColor.border}`,
-                  borderRadius: "16px",
-                  textAlign: "center",
+                  ...cardStyle,
+                  background: "var(--nm-warning-surface)",
+                  borderColor: "var(--nm-warning)",
+                  boxShadow: "6px 6px 0 var(--nm-warning)",
                 }}
               >
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: "0.9rem",
-                    color: scoreColor.text,
-                    fontWeight: 600,
-                  }}
-                >
-                  Overall Completeness Score
-                </p>
-                <p
-                  style={{
-                    margin: "8px 0 0 0",
-                    fontSize: "2.5rem",
-                    fontWeight: 900,
-                    color: scoreColor.text,
-                    fontFamily: "'Space Grotesk', sans-serif",
-                  }}
-                >
-                  {analysis.overallScore}%
-                </p>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "14px" }}>
+                  <AlertCircle size={28} color="var(--nm-warning)" strokeWidth={2.5} style={{ flexShrink: 0, marginTop: 2 }} />
+                  <div>
+                    <h3 style={{ ...headingStyle, fontSize: "1.1rem", marginBottom: "10px", color: "var(--nm-warning)" }}>
+                      Your CV needs more content
+                    </h3>
+                    <p style={{
+                      margin: 0,
+                      color: "var(--nm-text-primary)",
+                      lineHeight: 1.7,
+                      fontSize: "0.95rem",
+                      fontFamily: "Manrope, sans-serif",
+                      fontWeight: 500,
+                    }}>
+                      Your CV does not contain enough information to perform a meaningful analysis. Please complete your CV by adding relevant sections such as experience, education, skills, and a professional summary before requesting an evaluation.
+                    </p>
+                  </div>
+                </div>
               </div>
 
+              {analysis.generalAdvice && analysis.generalAdvice.length > 0 && (
+                <div style={cardStyle}>
+                  <h4 style={{ ...headingStyle, fontSize: "0.9rem", marginBottom: "14px" }}>
+                    What to add:
+                  </h4>
+                  <ul style={{
+                    margin: 0,
+                    paddingLeft: "20px",
+                    fontSize: "0.9rem",
+                    color: "var(--nm-text-primary)",
+                    lineHeight: 1.8,
+                    fontFamily: "Manrope, sans-serif",
+                    fontWeight: 500,
+                  }}>
+                    {analysis.generalAdvice.map((advice, idx) => (
+                      <li key={idx} style={{ marginBottom: "6px" }}>{advice}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: "8px" }}>
+                <BrutalButton onClick={onClose} variant="secondary">Close</BrutalButton>
+              </div>
+            </div>
+          )}
+
+          {/* ── Normal Analysis View ───────────────────────────────── */}
+          {!isEmptyCV && (
+            <div style={{ display: "grid", gap: "16px" }}>
+              {/* Score Card */}
+              {analysis.overallScore != null && (
+                <div
+                  style={{
+                    ...cardStyle,
+                    background: scoreColor.bg,
+                    borderColor: scoreColor.text,
+                    boxShadow: `6px 6px 0 ${scoreColor.text}`,
+                    textAlign: "center",
+                    padding: "28px 20px",
+                  }}
+                >
+                  <p style={{ ...headingStyle, fontSize: "0.85rem", color: scoreColor.text }}>
+                    Overall Completeness Score
+                  </p>
+                  <p style={{
+                    margin: "12px 0 0 0",
+                    fontSize: "3.5rem",
+                    fontWeight: 800,
+                    color: scoreColor.text,
+                    fontFamily: "'Space Grotesk', sans-serif",
+                    lineHeight: 1,
+                    letterSpacing: "-0.02em",
+                  }}>
+                    {analysis.overallScore}%
+                  </p>
+                </div>
+              )}
+
+              {/* Quick Apply Banner — shown when there are improvements */}
+              {hasImprovements && (
+                <div
+                  style={{
+                    ...cardStyle,
+                    background: "var(--nm-primary)",
+                    borderColor: "var(--nm-ink)",
+                    boxShadow: "6px 6px 0 var(--nm-ink)",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
+                    <Wand2 size={26} color="#fff" strokeWidth={2.5} style={{ flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 200 }}>
+                      <h3 style={{ ...headingStyle, fontSize: "0.95rem", color: "#fff", marginBottom: 4 }}>
+                        AI-Powered Improvements Available
+                      </h3>
+                      <p style={{
+                        margin: 0,
+                        color: "rgba(255,255,255,0.9)",
+                        fontSize: "0.85rem",
+                        fontFamily: "Manrope, sans-serif",
+                        fontWeight: 500,
+                      }}>
+                        {analysis.issues.length} suggested improvement{analysis.issues.length > 1 ? "s" : ""} ready to apply.
+                      </p>
+                    </div>
+                    <BrutalButton onClick={handleApplyAll} variant="white">
+                      <Wand2 size={16} strokeWidth={2.5} />
+                      Apply All
+                    </BrutalButton>
+                  </div>
+                </div>
+              )}
+
               {/* Sections */}
-              <div style={{ display: "grid", gap: "12px" }}>
-                {analysis.sections?.map((section, idx) => {
-                  const isGood = section.status === "Good";
-                  const isEmpty = section.status === "Empty";
-                  const needsAttention = section.status === "Needs Attention";
+              {analysis.sections && (
+                <div style={{ display: "grid", gap: "12px" }}>
+                  {analysis.sections.map((section, idx) => {
+                    const isGood = section.status === "Good";
+                    const isEmpty = section.status === "Empty";
 
-                  const statusColor = isEmpty
-                    ? "#dc2626"
-                    : needsAttention
-                      ? "#f97316"
-                      : "#16a34a";
-                  const statusBg = isEmpty
-                    ? "#fee2e2"
-                    : needsAttention
-                      ? "#fef3c7"
-                      : "#dcfce7";
+                    const statusBg = isEmpty
+                      ? "var(--nm-error-surface)"
+                      : isGood
+                        ? "var(--nm-success-surface)"
+                        : "var(--nm-warning-surface)";
+                    const statusColor = isEmpty
+                      ? "var(--nm-error)"
+                      : isGood
+                        ? "var(--nm-success)"
+                        : "var(--nm-warning)";
 
-                  return (
-                    <div
-                      key={idx}
-                      style={{
-                        border: "1px solid #e5e7eb",
-                        borderRadius: "12px",
-                        padding: "16px",
-                        background: "#ffffff",
-                      }}
-                    >
-                      <div
-                        style={{
+                    return (
+                      <div key={idx} style={cardStyle}>
+                        <div style={{
                           display: "flex",
                           alignItems: "center",
-                          gap: "10px",
-                          marginBottom: "12px",
-                        }}
-                      >
-                        {isEmpty ? (
-                          <AlertCircle size={20} color={statusColor} />
-                        ) : isGood ? (
-                          <CheckCircle2 size={20} color={statusColor} />
-                        ) : (
-                          <AlertCircle size={20} color={statusColor} />
-                        )}
-                        <h4
-                          style={{
-                            margin: 0,
-                            fontSize: "1rem",
-                            fontWeight: 700,
-                            color: "#0a0a0a",
-                          }}
-                        >
-                          {section.name}
-                        </h4>
-                        <span
-                          style={{
-                            marginLeft: "auto",
-                            background: statusBg,
-                            color: statusColor,
-                            padding: "4px 12px",
-                            borderRadius: "20px",
-                            fontSize: "0.85rem",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {section.status}
-                        </span>
-                      </div>
+                          gap: "12px",
+                          marginBottom: section.suggestions?.length ? "14px" : 0,
+                        }}>
+                          {isGood ? (
+                            <CheckCircle2 size={22} color={statusColor} strokeWidth={2.5} />
+                          ) : (
+                            <AlertCircle size={22} color={statusColor} strokeWidth={2.5} />
+                          )}
+                          <h4 style={{ ...headingStyle, fontSize: "0.95rem", flex: 1 }}>
+                            {section.name}
+                          </h4>
+                          <span style={pillStyle(statusBg, statusColor)}>
+                            {section.status}
+                          </span>
+                        </div>
 
-                      {section.suggestions &&
-                        section.suggestions.length > 0 && (
-                          <ul
-                            style={{
-                              margin: 0,
-                              paddingLeft: "24px",
-                              fontSize: "0.9rem",
-                              color: "#4b4b4b",
-                              lineHeight: "1.6",
-                            }}
-                          >
+                        {section.suggestions && section.suggestions.length > 0 && (
+                          <ul style={{
+                            margin: 0,
+                            paddingLeft: "24px",
+                            fontSize: "0.9rem",
+                            color: "var(--nm-text-primary)",
+                            lineHeight: 1.7,
+                            fontFamily: "Manrope, sans-serif",
+                            fontWeight: 500,
+                          }}>
                             {section.suggestions.map((suggestion, sidx) => (
-                              <li key={sidx} style={{ marginBottom: "8px" }}>
-                                {suggestion}
-                              </li>
+                              <li key={sidx} style={{ marginBottom: "6px" }}>{suggestion}</li>
                             ))}
                           </ul>
                         )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Detailed Improvements (Expandable) */}
+              {hasImprovements && (
+                <div style={cardStyle}>
+                  <button
+                    onClick={() => setShowImprovements(!showImprovements)}
+                    style={{
+                      width: "100%",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: 0,
+                    }}
+                  >
+                    <h4 style={{ ...headingStyle, fontSize: "0.95rem" }}>
+                      {showImprovements ? "▼ " : "▶ "}
+                      Review Improvements Individually ({analysis.issues.length})
+                    </h4>
+                  </button>
+
+                  {showImprovements && (
+                    <div style={{ marginTop: "16px", display: "grid", gap: "14px" }}>
+                      {analysis.issues.map((issue) => (
+                        <div
+                          key={issue.fieldId}
+                          style={{
+                            background: "var(--nm-surface-low)",
+                            border: "3px solid var(--nm-ink)",
+                            padding: "14px",
+                          }}
+                        >
+                          <label style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "10px",
+                            cursor: "pointer",
+                            marginBottom: "12px",
+                          }}>
+                            <input
+                              type="checkbox"
+                              checked={selectedUpdates[issue.fieldId] || false}
+                              onChange={(e) => handleCheckboxChange(issue.fieldId, e.target.checked)}
+                              style={{
+                                width: "18px",
+                                height: "18px",
+                                cursor: "pointer",
+                                accentColor: "var(--nm-primary)",
+                              }}
+                            />
+                            <strong style={{
+                              fontSize: "0.85rem",
+                              fontFamily: "'Space Grotesk', sans-serif",
+                              fontWeight: 700,
+                              textTransform: "uppercase",
+                              letterSpacing: "0.05em",
+                            }}>
+                              {formatFieldId(issue.fieldId)}
+                            </strong>
+                          </label>
+
+                          <div style={{ display: "grid", gap: "10px", paddingLeft: "28px" }}>
+                            <p style={{
+                              fontSize: "0.85rem",
+                              color: "var(--nm-error)",
+                              margin: 0,
+                              padding: "8px 10px",
+                              background: "var(--nm-error-surface)",
+                              border: "2px solid var(--nm-error)",
+                              fontFamily: "Manrope, sans-serif",
+                              fontWeight: 500,
+                            }}>
+                              <strong>Issue: </strong> {issue.reason}
+                            </p>
+                            {issue.originalText && (
+                              <p style={{
+                                fontSize: "0.85rem",
+                                color: "var(--nm-text-secondary)",
+                                margin: 0,
+                                padding: "8px 10px",
+                                background: "var(--nm-bg)",
+                                border: "2px solid var(--nm-text-tertiary)",
+                                fontFamily: "Manrope, sans-serif",
+                              }}>
+                                <strong>Current: </strong>
+                                <span style={{ textDecoration: "line-through" }}>
+                                  {issue.originalText.length > 150
+                                    ? issue.originalText.slice(0, 150) + "..."
+                                    : issue.originalText}
+                                </span>
+                              </p>
+                            )}
+                            <p style={{
+                              fontSize: "0.9rem",
+                              color: "var(--nm-success)",
+                              margin: 0,
+                              padding: "10px 12px",
+                              background: "var(--nm-success-surface)",
+                              border: "2px solid var(--nm-success)",
+                              fontFamily: "Manrope, sans-serif",
+                              fontWeight: 500,
+                              lineHeight: 1.6,
+                            }}>
+                              <strong>Suggested: </strong> {issue.improvedText}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+
+                      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "8px" }}>
+                        <BrutalButton onClick={handleApplySelected} variant="primary">
+                          <CheckCircle2 size={16} strokeWidth={2.5} />
+                          Apply Selected
+                        </BrutalButton>
+                      </div>
                     </div>
-                  );
-                })}
-              </div>
+                  )}
+                </div>
+              )}
 
               {/* General Advice */}
               {analysis.generalAdvice && analysis.generalAdvice.length > 0 && (
                 <div
                   style={{
-                    padding: "16px",
-                    background: "#f0f9ff",
-                    border: "1px solid rgba(0,123,255,0.18)",
-                    borderRadius: "12px",
+                    ...cardStyle,
+                    background: "var(--nm-surface-low)",
                   }}
                 >
-                  <h4
-                    style={{
-                      margin: "0 0 12px 0",
-                      fontSize: "0.95rem",
-                      fontWeight: 700,
-                      color: "#0c2d6b",
-                    }}
-                  >
+                  <h4 style={{ ...headingStyle, fontSize: "0.9rem", marginBottom: "14px" }}>
                     General Recommendations
                   </h4>
-                  <ol
-                    style={{
-                      margin: 0,
-                      paddingLeft: "20px",
-                      fontSize: "0.9rem",
-                      color: "#4b4b4b",
-                      lineHeight: "1.6",
-                    }}
-                  >
+                  <ol style={{
+                    margin: 0,
+                    paddingLeft: "20px",
+                    fontSize: "0.9rem",
+                    color: "var(--nm-text-primary)",
+                    lineHeight: 1.7,
+                    fontFamily: "Manrope, sans-serif",
+                    fontWeight: 500,
+                  }}>
                     {analysis.generalAdvice.map((advice, idx) => (
-                      <li key={idx} style={{ marginBottom: "8px" }}>
-                        {advice}
-                      </li>
+                      <li key={idx} style={{ marginBottom: "8px" }}>{advice}</li>
                     ))}
                   </ol>
                 </div>
               )}
-            </div>
-          )}
 
-          {/* Old format - for backward compatibility */}
-          {!isNewFormat && (
-            <div style={{ display: "grid", gap: "18px" }}>
-              {!analysis.issues || analysis.issues.length === 0 ? (
-                <div
-                  style={{
-                    padding: "18px",
-                    background: "#ffffff",
-                    borderRadius: "16px",
-                    border: "1px solid rgba(0,0,0,0.08)",
-                  }}
-                >
-                  <p style={{ margin: 0, color: "#333", lineHeight: 1.8 }}>
-                    Great job! No specific issues were found. Your CV looks
-                    well-structured and professionally written.
-                  </p>
-                </div>
-              ) : (
-                <div
-                  style={{
-                    padding: "18px",
-                    background: "#f0f9ff",
-                    borderRadius: "16px",
-                    border: "1px solid rgba(0,123,255,0.18)",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                      marginBottom: "16px",
-                    }}
-                  >
-                    <h3
-                      style={{
-                        margin: 0,
-                        fontSize: "1.05rem",
-                        fontWeight: 700,
-                      }}
-                    >
-                      Actionable Improvements
-                    </h3>
-                    {analysis.atsScore != null && (
-                      <span
-                        style={{
-                          background:
-                            analysis.atsScore >= 80
-                              ? "#166534"
-                              : analysis.atsScore >= 60
-                                ? "#ca8a04"
-                                : "#b91c1c",
-                          color: "#fff",
-                          padding: "4px 10px",
-                          borderRadius: "12px",
-                          fontSize: "0.85rem",
-                          fontWeight: 700,
-                        }}
-                      >
-                        ATS: {analysis.atsScore}%
-                      </span>
-                    )}
-                  </div>
-                  {analysis.atsFeedback && (
-                    <p
-                      style={{
-                        margin: "0 0 16px 0",
-                        fontSize: "0.95rem",
-                        color: "#333",
-                        background: "#fff",
-                        padding: "12px",
-                        borderRadius: "8px",
-                        border: "1px solid #ddd",
-                      }}
-                    >
-                      {analysis.atsFeedback}
-                    </p>
-                  )}
-                  <div style={{ display: "grid", gap: "16px" }}>
-                    {analysis.issues.map((issue) => (
-                      <div
-                        key={issue.fieldId}
-                        style={{
-                          border: "1px solid #ddd",
-                          padding: "16px",
-                          borderRadius: "12px",
-                          background: "#fff",
-                        }}
-                      >
-                        <label
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "10px",
-                            cursor: "pointer",
-                            marginBottom: "10px",
-                          }}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedUpdates[issue.fieldId] || false}
-                            onChange={(e) =>
-                              handleCheckboxChange(
-                                issue.fieldId,
-                                e.target.checked,
-                              )
-                            }
-                            style={{
-                              width: "18px",
-                              height: "18px",
-                              cursor: "pointer",
-                              accentColor: "#ffe630",
-                            }}
-                          />
-                          <strong style={{ fontSize: "0.95rem" }}>
-                            {formatFieldId(issue.fieldId)}
-                          </strong>
-                        </label>
-
-                        <div
-                          style={{
-                            display: "grid",
-                            gap: "12px",
-                            paddingLeft: "28px",
-                          }}
-                        >
-                          <p
-                            style={{
-                              fontSize: "0.9rem",
-                              color: "#b91c1c",
-                              margin: 0,
-                              padding: "8px",
-                              background: "#fef2f2",
-                              borderRadius: "6px",
-                            }}
-                          >
-                            <strong>Needs Work:</strong> {issue.reason}
-                          </p>
-                          <p
-                            style={{
-                              fontSize: "0.9rem",
-                              color: "#666",
-                              margin: 0,
-                            }}
-                          >
-                            <del>{issue.originalText}</del>
-                          </p>
-                          <p
-                            style={{
-                              fontSize: "0.95rem",
-                              color: "#166534",
-                              margin: 0,
-                              padding: "8px",
-                              background: "#f0fdf4",
-                              borderRadius: "6px",
-                            }}
-                          >
-                            <strong>Suggested:</strong> {issue.improvedText}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: "12px",
-                  flexWrap: "wrap",
-                  justifyContent: "flex-end",
-                  paddingTop: "10px",
-                  borderTop: "1px solid rgba(0,0,0,0.08)",
-                }}
-              >
-                {analysis.issues && analysis.issues.length > 0 && (
-                  <button
-                    onClick={handleApply}
-                    className="brutal-btn px-5 py-3"
-                    style={{
-                      background: "#ffe630",
-                      color: "#0a0a0a",
-                      border: "2px solid #0a0a0a",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <CheckCircle2 size={16} /> Apply Selected Changes
-                  </button>
-                )}
-                <button
-                  onClick={onClose}
-                  className="brutal-btn px-5 py-3"
-                  style={{
-                    background: "#ffffff",
-                    color: "#0a0a0a",
-                    border: "1px solid rgba(0,0,0,0.12)",
-                  }}
-                >
-                  Close
-                </button>
+              {/* Footer */}
+              <div style={{
+                display: "flex",
+                gap: "12px",
+                flexWrap: "wrap",
+                justifyContent: "flex-end",
+                paddingTop: "12px",
+                borderTop: "4px solid var(--nm-ink)",
+              }}>
+                <BrutalButton onClick={onClose} variant="secondary">Close</BrutalButton>
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* ── Right Panel (CV Preview) ── */}
+      <div
+        style={{
+          width: "65%",
+          height: "100%",
+          background: "var(--nm-surface-high)",
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <LivePreview
+          formData={currentData}
+          userName={userName}
+          templateId={templateId}
+          highlights={highlights}
+          zoom={0.72}
+        />
+      </div>
     </div>
+  </div>
+  );
+}
+
+// ── Reusable Brutal Button ───────────────────────────────────────────
+function BrutalButton({ onClick, variant = "primary", children }) {
+  const variants = {
+    primary: { bg: "var(--nm-primary)", color: "#fff", border: "var(--nm-ink)" },
+    secondary: { bg: "var(--nm-surface)", color: "var(--nm-text-primary)", border: "var(--nm-ink)" },
+    white: { bg: "#fff", color: "var(--nm-ink)", border: "var(--nm-ink)" },
+  };
+  const v = variants[variant];
+
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        padding: "12px 20px",
+        background: v.bg,
+        color: v.color,
+        border: `4px solid ${v.border}`,
+        boxShadow: `4px 4px 0 ${v.border}`,
+        fontFamily: "'Space Grotesk', sans-serif",
+        fontWeight: 700,
+        fontSize: "0.85rem",
+        textTransform: "uppercase",
+        letterSpacing: "0.08em",
+        cursor: "pointer",
+        borderRadius: "0px",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "8px",
+        transition: "transform 0.15s ease, box-shadow 0.15s ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translate(-2px, -2px)";
+        e.currentTarget.style.boxShadow = `6px 6px 0 ${v.border}`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translate(0, 0)";
+        e.currentTarget.style.boxShadow = `4px 4px 0 ${v.border}`;
+      }}
+    >
+      {children}
+    </button>
   );
 }

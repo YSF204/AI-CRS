@@ -1,6 +1,6 @@
 import React from "react";
 
-const FederalResumeTemplate = ({ userName = "", cvData }) => {
+const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
 
   const fmtDuration = (from, to) => {
@@ -8,6 +8,15 @@ const FederalResumeTemplate = ({ userName = "", cvData }) => {
     if (from) return from;
     if (to) return to;
     return "";
+  };
+
+  const getHighlightStyle = (...fieldIds) => {
+    if (!highlights) return {};
+    for (const id of fieldIds) {
+      if (highlights[id] === 'warning') return { outline: '3px dashed #ff5f57', outlineOffset: '2px', backgroundColor: 'rgba(255, 95, 87, 0.05)', borderRadius: '2px' };
+      if (highlights[id] === 'suggestion') return { outline: '3px dashed #0a84ff', outlineOffset: '2px', backgroundColor: 'rgba(10, 132, 255, 0.05)', borderRadius: '2px' };
+    }
+    return {};
   };
 
   const contactItems = [];
@@ -113,7 +122,7 @@ const FederalResumeTemplate = ({ userName = "", cvData }) => {
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary" className="break-inside-avoid mb-5">
+            <section key="summary" className="break-inside-avoid mb-5" style={getHighlightStyle('summary')}>
               <SectionHeader title="Professional Statement" />
               <div className="text-xs md:text-[13px] text-gray-800 leading-relaxed text-justify whitespace-pre-wrap break-words">
                 {cvData.summary}
@@ -128,7 +137,7 @@ const FederalResumeTemplate = ({ userName = "", cvData }) => {
                   {cvData.experience.map((exp, index) => {
                     const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                     return (
-                      <div key={index} className="break-inside-avoid">
+                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
                         <div className="flex justify-between items-baseline text-xs md:text-[13px] text-gray-900 mb-1">
                           <div>
                             <span className="font-bold">{exp.position}</span>
@@ -164,6 +173,7 @@ const FederalResumeTemplate = ({ userName = "", cvData }) => {
                       <div
                         key={index}
                         className="text-xs md:text-[13px] break-inside-avoid"
+                        style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}
                       >
                         <div className="font-bold text-gray-900">
                           {edu.certification}
@@ -188,6 +198,7 @@ const FederalResumeTemplate = ({ userName = "", cvData }) => {
               <section
                 key="technicalSkills"
                 className="break-inside-avoid mb-5"
+                style={getHighlightStyle('technicalSkills')}
               >
                 <SectionHeader title="Technical Skills" />
                 <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
@@ -199,7 +210,7 @@ const FederalResumeTemplate = ({ userName = "", cvData }) => {
             ) : null,
           softSkills:
             cvData.softSkills?.length > 0 ? (
-              <section key="softSkills" className="break-inside-avoid mb-5">
+              <section key="softSkills" className="break-inside-avoid mb-5" style={getHighlightStyle('softSkills')}>
                 <SectionHeader title="Soft Skills" />
                 <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
                   {cvData.softSkills.map((skill, index) => (
@@ -210,7 +221,7 @@ const FederalResumeTemplate = ({ userName = "", cvData }) => {
             ) : null,
           language:
             cvData.language?.length > 0 ? (
-              <section key="language" className="break-inside-avoid mb-5">
+              <section key="language" className="break-inside-avoid mb-5" style={getHighlightStyle('language')}>
                 <SectionHeader title="Languages" />
                 <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
                   {cvData.language.map((item, index) => {

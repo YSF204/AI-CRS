@@ -1,6 +1,6 @@
 import React from "react";
 
-const CenteredFormalTemplate = ({ userName = "", cvData }) => {
+const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
 
   const fmtDuration = (from, to) => {
@@ -8,6 +8,15 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
     if (from) return from;
     if (to) return to;
     return "";
+  };
+
+  const getHighlightStyle = (...fieldIds) => {
+    if (!highlights) return {};
+    for (const id of fieldIds) {
+      if (highlights[id] === 'warning') return { outline: '3px dashed #ff5f57', outlineOffset: '2px', backgroundColor: 'rgba(255, 95, 87, 0.05)', borderRadius: '2px' };
+      if (highlights[id] === 'suggestion') return { outline: '3px dashed #0a84ff', outlineOffset: '2px', backgroundColor: 'rgba(10, 132, 255, 0.05)', borderRadius: '2px' };
+    }
+    return {};
   };
 
   const contactItems = [];
@@ -71,7 +80,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary" className="break-inside-avoid">
+            <section key="summary" className="break-inside-avoid" style={getHighlightStyle('summary')}>
               <SectionHeader title="Career Summary" />
               <p className="text-xs md:text-sm text-gray-800 leading-[1.6] text-justify whitespace-pre-wrap break-words">
                 {cvData.summary}
@@ -80,7 +89,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
           ) : null,
           technicalSkills:
             cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
-              <section key="technicalSkills" className="break-inside-avoid">
+              <section key="technicalSkills" className="break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
                 <SectionHeader title="Technical Strengths" />
                 <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-1 gap-x-2 pl-4 text-xs md:text-sm text-gray-800 list-disc">
                   {cvData.technicalSkills.map((skill, index) => (
@@ -93,7 +102,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
             ) : null,
           softSkills:
             cvData.softSkills && cvData.softSkills.length > 0 ? (
-              <section key="softSkills" className="break-inside-avoid">
+              <section key="softSkills" className="break-inside-avoid" style={getHighlightStyle('softSkills')}>
                 <SectionHeader title="Core Competencies" />
                 <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-1 gap-x-2 pl-4 text-xs md:text-sm text-gray-800 list-disc">
                   {cvData.softSkills.map((skill, index) => (
@@ -106,7 +115,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
             ) : null,
           language:
             cvData.language && cvData.language.length > 0 ? (
-              <section key="language" className="break-inside-avoid">
+              <section key="language" className="break-inside-avoid" style={getHighlightStyle('language')}>
                 <SectionHeader title="Languages" />
                 <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-1 gap-x-2 pl-4 text-xs md:text-sm text-gray-800 list-disc">
                   {cvData.language.map((item, index) => {
@@ -131,7 +140,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
                   {cvData.experience.map((exp, index) => {
                     const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                     return (
-                      <div key={index} className="break-inside-avoid">
+                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
                         <div className="text-xs md:text-sm text-gray-800 mb-1.5">
                           <span className="font-bold">{exp.position}</span>
                           {exp.institutionName && (
@@ -158,7 +167,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData }) => {
                   {cvData.education.map((edu, index) => {
                     const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                     return (
-                      <div key={index} className="break-inside-avoid">
+                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}>
                         <div className="text-xs md:text-sm text-gray-800 mb-1.5">
                           <span className="font-bold">{edu.certification}</span>
                           {edu.institutionName && (

@@ -1,6 +1,6 @@
 import React from "react";
 
-const ResumeTemplate = ({ userName, cvData }) => {
+const ResumeTemplate = ({ userName, cvData, highlights = {} }) => {
   if (!cvData) return null;
 
   const fmtDuration = (from, to) => {
@@ -10,11 +10,21 @@ const ResumeTemplate = ({ userName, cvData }) => {
     return "";
   };
 
+  const getHighlightStyle = (...fieldIds) => {
+    if (!highlights) return {};
+    for (const id of fieldIds) {
+      if (highlights[id] === 'warning') return { outline: '3px dashed #ff5f57', outlineOffset: '2px', backgroundColor: 'rgba(255, 95, 87, 0.05)', borderRadius: '2px' };
+      if (highlights[id] === 'suggestion') return { outline: '3px dashed #0a84ff', outlineOffset: '2px', backgroundColor: 'rgba(10, 132, 255, 0.05)', borderRadius: '2px' };
+    }
+    return {};
+  };
+
   const sectionBlocks = {
     summary: cvData.summary ? (
       <section
         key="summary"
         className="break-inside-avoid mb-3 border-b-2 border-gray-200 pb-2"
+        style={getHighlightStyle('summary')}
       >
         <h3 className="text-[15px] font-bold uppercase tracking-wider text-gray-900 mb-2.5">
           About Me
@@ -38,7 +48,7 @@ const ResumeTemplate = ({ userName, cvData }) => {
             {cvData.education.map((edu, index) => {
               const dur = fmtDuration(edu.durationFrom, edu.durationTo);
               return (
-                <div key={index} className="break-inside-avoid">
+                <div key={index} className="break-inside-avoid" style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}>
                   <p className="text-xs md:text-sm text-gray-500 mb-0.5">
                     {edu.institutionName}
                     {dur ? ` | ${dur}` : ""}
@@ -71,7 +81,7 @@ const ResumeTemplate = ({ userName, cvData }) => {
             {cvData.experience.map((exp, index) => {
               const dur = fmtDuration(exp.durationFrom, exp.durationTo);
               return (
-                <div key={index} className="break-inside-avoid">
+                <div key={index} className="break-inside-avoid" style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
                   <p className="text-xs md:text-sm text-gray-500 mb-0.5">
                     {exp.institutionName}
                     {dur ? ` | ${dur}` : ""}
@@ -93,7 +103,7 @@ const ResumeTemplate = ({ userName, cvData }) => {
 
     technicalSkills:
       cvData.technicalSkills?.length > 0 ? (
-        <section key="technicalSkills" className="break-inside-avoid mb-3">
+        <section key="technicalSkills" className="break-inside-avoid mb-3" style={getHighlightStyle('technicalSkills')}>
           <h3 className="text-[15px] font-bold uppercase tracking-wider text-gray-900 mb-2.5">
             Technical Skills
           </h3>
@@ -109,7 +119,7 @@ const ResumeTemplate = ({ userName, cvData }) => {
 
     softSkills:
       cvData.softSkills?.length > 0 ? (
-        <section key="softSkills" className="break-inside-avoid mb-3">
+        <section key="softSkills" className="break-inside-avoid mb-3" style={getHighlightStyle('softSkills')}>
           <h3 className="text-[15px] font-bold uppercase tracking-wider text-gray-900 mb-2.5">
             Soft Skills
           </h3>
@@ -125,7 +135,7 @@ const ResumeTemplate = ({ userName, cvData }) => {
 
     language:
       cvData.language?.length > 0 ? (
-        <section key="language" className="break-inside-avoid mb-3">
+        <section key="language" className="break-inside-avoid mb-3" style={getHighlightStyle('language')}>
           <h3 className="text-[15px] font-bold uppercase tracking-wider text-gray-900 mb-2.5">
             Languages
           </h3>

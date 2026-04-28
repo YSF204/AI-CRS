@@ -1,11 +1,6 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, Save, Eye, Download, Layers, Sparkles, Clock } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { ArrowLeft, Save, Eye, Download, Layers, Sparkles, Clock, ChevronDown, Brain, Target } from "lucide-react";
 
-/**
- * ActionBar - Displays action buttons and auto-save status
- * Single Responsibility: Render action bar with save status
- */
 export default function ActionBar({
   form,
   saving,
@@ -14,18 +9,32 @@ export default function ActionBar({
   analyzing,
   downloadingPdf,
   onSave,
-  onPreview,
   onAnalyze,
+  onSkillGap,
+  onPreview,
   onDownloadPdf,
   onChangeTemplate,
   onBack,
   atsScore,
 }) {
-  // Format last saved time
+  const [aiMenuOpen, setAiMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!aiMenuOpen) return;
+    const handleClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setAiMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [aiMenuOpen]);
+
   const formatLastSaved = (date) => {
     if (!date) return null;
     const now = new Date();
-    const diff = Math.floor((now - date) / 1000); // seconds
+    const diff = Math.floor((now - date) / 1000);
 
     if (diff < 60) return "Just now";
     if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
@@ -33,18 +42,19 @@ export default function ActionBar({
     return date.toLocaleDateString();
   };
 
+  const btnStyle = {
+    padding: "8px 16px",
+    minHeight: "40px",
+    fontSize: "12px",
+    background: "var(--nm-surface-high)"
+  };
+
   return (
-    <div className="flex-shrink-0 flex items-center gap-4 px-6 py-4 border-b-4 border-[var(--nm-ink)] bg-[var(--nm-surface)]">
-      <button
-        onClick={onBack}
-        className="nm-btn"
-        style={{
-          padding: "8px 16px",
-          minHeight: "40px",
-          fontSize: "12px",
-          background: "var(--nm-surface-high)"
-        }}
-      >
+    <div 
+      className="flex-shrink-0 flex items-center gap-4 px-6 py-4 border-b-4 border-[var(--nm-ink)] bg-[var(--nm-surface)] relative" 
+      style={{ zIndex: 9999 }}
+    >
+      <button onClick={onBack} className="nm-btn" style={btnStyle}>
         <ArrowLeft size={14} strokeWidth={3} /> Back
       </button>
       <div className="flex-1">
@@ -56,7 +66,6 @@ export default function ActionBar({
         </div>
       </div>
 
-      {/* Auto-save status */}
       <div className="flex items-center gap-4 mr-4 flex-wrap">
         {atsScore !== undefined && atsScore !== null && (
           <div className="nm-chip nm-chip-primary" style={{ padding: "6px 12px", fontSize: "11px" }}>
@@ -70,53 +79,115 @@ export default function ActionBar({
       </div>
 
       <div className="flex items-center gap-3">
-        <button
-          onClick={onAnalyze}
-          disabled={analyzing}
-          className="nm-btn"
-          style={{
-            padding: "8px 16px",
-            minHeight: "40px",
-            fontSize: "12px",
-            background: "var(--nm-surface-high)"
-          }}
-        >
-          <Sparkles size={14} strokeWidth={2.5} /> {analyzing ? "ANALYZING..." : "ANALYZE"}
-        </button>
-        <button
-          onClick={onChangeTemplate}
-          className="nm-btn"
-          style={{
-            padding: "8px 16px",
-            minHeight: "40px",
-            fontSize: "12px",
-            background: "var(--nm-surface-high)"
-          }}
-        >
+        <div className="relative" style={{ zIndex: 9999 }} ref={menuRef}>
+          <button
+            onClick={() => setAiMenuOpen((v) => !v)}
+            disabled={analyzing}
+            className="nm-btn flex items-center gap-2"
+            style={btnStyle}
+          >
+            <Sparkles size={14} strokeWidth={2.5} />
+            <span>AI TOOLS</span>
+            <ChevronDown
+              size={14}
+              strokeWidth={2.5}
+              style={{
+                transition: "transform 0.2s ease",
+                transform: aiMenuOpen ? "rotate(180deg)" : "rotate(0deg)",
+              }}
+            />
+          </button>
+
+          <div
+            style={{
+              position: "absolute",
+              top: "calc(100% + 6px)",
+              right: 0,
+              minWidth: "220px",
+              background: "var(--nm-bg)",
+              border: "4px solid var(--nm-ink)",
+              boxShadow: "6px 6px 0 var(--nm-ink)",
+              zIndex: 10000,
+              overflow: "hidden",
+              transformOrigin: "top right",
+              transform: aiMenuOpen ? "scaleY(1) translateY(0)" : "scaleY(0) translateY(-4px)",
+              opacity: aiMenuOpen ? 1 : 0,
+              transition: "transform 0.18s cubic-bezier(0.2, 0, 0, 1), opacity 0.15s ease",
+            }}
+          >
+            <button
+              onClick={() => { setAiMenuOpen(false); onAnalyze(); }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                width: "100%",
+                padding: "12px 16px",
+                background: "transparent",
+                border: "none",
+                borderBottom: "3px solid var(--nm-ink)",
+                cursor: "pointer",
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: 700,
+                fontSize: "0.8rem",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                color: "var(--nm-text-primary)",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--nm-surface-high)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            >
+              <Brain size={16} strokeWidth={2.5} />
+              <div style={{ textAlign: "left" }}>
+                <div>CV Analysis</div>
+                <div style={{ fontSize: "0.65rem", fontWeight: 500, color: "var(--nm-text-tertiary)", textTransform: "none" }}>
+                  Review & improve your CV
+                </div>
+              </div>
+            </button>
+            <button
+              onClick={() => { setAiMenuOpen(false); onSkillGap(); }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                width: "100%",
+                padding: "12px 16px",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "'Space Grotesk', sans-serif",
+                fontWeight: 700,
+                fontSize: "0.8rem",
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+                color: "var(--nm-text-primary)",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--nm-surface-high)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            >
+              <Target size={16} strokeWidth={2.5} />
+              <div style={{ textAlign: "left" }}>
+                <div>Skill Gap Analysis</div>
+                <div style={{ fontSize: "0.65rem", fontWeight: 500, color: "var(--nm-text-tertiary)", textTransform: "none" }}>
+                  Find missing skills for a role
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <button onClick={onChangeTemplate} className="nm-btn" style={btnStyle}>
           <Layers size={14} strokeWidth={2.5} /> TEMPLATE
         </button>
-        <button
-          onClick={onPreview}
-          className="nm-btn"
-          style={{
-            padding: "8px 16px",
-            minHeight: "40px",
-            fontSize: "12px",
-            background: "var(--nm-surface-high)"
-          }}
-        >
+        <button onClick={onPreview} className="nm-btn" style={btnStyle}>
           <Eye size={14} strokeWidth={2.5} /> PREVIEW
         </button>
         <button
           onClick={onDownloadPdf}
           disabled={downloadingPdf}
           className="nm-btn"
-          style={{
-            padding: "8px 16px",
-            minHeight: "40px",
-            fontSize: "12px",
-            background: "var(--nm-surface-high)"
-          }}
+          style={btnStyle}
         >
           <Download size={14} strokeWidth={2.5} /> {downloadingPdf ? "EXPORTING..." : "PDF"}
         </button>
@@ -124,12 +195,7 @@ export default function ActionBar({
           onClick={onSave}
           disabled={saving}
           className="nm-btn nm-btn-primary"
-          style={{
-            padding: "8px 24px",
-            minHeight: "40px",
-            fontSize: "12px",
-            boxShadow: "4px 4px 0 var(--nm-ink)"
-          }}
+          style={{ padding: "8px 24px", minHeight: "40px", fontSize: "12px", boxShadow: "4px 4px 0 var(--nm-ink)" }}
         >
           <Save size={14} strokeWidth={2.5} /> {saving ? "WRITING..." : "SAVE CV"}
         </button>

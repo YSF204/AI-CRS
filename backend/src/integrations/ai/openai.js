@@ -5,6 +5,7 @@ import {
   CV_ANALYSIS_PROMPTS,
   JOB_MATCHING_PROMPTS,
   ATS_SCORE_PROMPTS,
+  SKILL_GAP_PROMPTS,
 } from "./prompts/index.js";
 
 let client;
@@ -275,6 +276,32 @@ If NO candidates match, return: []`,
 };
 
 // ==========================================
+// SKILL GAP ANALYSIS
+// ==========================================
+
+export const analyzeSkillGap = async ({ cvData, targetRole, additionalInfo }) => {
+  const response = await getClient().chat.completions.create({
+    model: "gpt-4o-mini",
+    temperature: 0.3,
+    response_format: { type: "json_object" },
+    messages: [
+      {
+        role: "user",
+        content: SKILL_GAP_PROMPTS.ANALYZE_SKILL_GAP({ cvData, targetRole, additionalInfo }),
+      },
+    ],
+  });
+
+  const raw = response.choices[0].message.content;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    console.error("[Skill Gap] Failed to parse JSON:", raw.substring(0, 300));
+    throw new Error("AI returned invalid JSON for skill gap analysis");
+  }
+};
+
+// ==========================================
 // SYSTEM PROMPT GETTERS
 // ==========================================
 
@@ -313,6 +340,7 @@ export default {
   analyzeCVSection,
   analyzeApplicationCV,
   analyzeATSScore,
+  analyzeSkillGap,
 
   // Job Matching
   matchCandidatesToJob,

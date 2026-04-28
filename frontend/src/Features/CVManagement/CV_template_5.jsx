@@ -1,6 +1,6 @@
 import React from "react";
 
-const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData }) => {
+const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highlights = {} }) => {
   if (!cvData) return null;
 
   const fmtDuration = (from, to) => {
@@ -8,6 +8,15 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData }) => {
     if (from) return from;
     if (to) return to;
     return "";
+  };
+
+  const getHighlightStyle = (...fieldIds) => {
+    if (!highlights) return {};
+    for (const id of fieldIds) {
+      if (highlights[id] === 'warning') return { outline: '3px dashed #ff5f57', outlineOffset: '2px', backgroundColor: 'rgba(255, 95, 87, 0.05)', borderRadius: '2px' };
+      if (highlights[id] === 'suggestion') return { outline: '3px dashed #0a84ff', outlineOffset: '2px', backgroundColor: 'rgba(10, 132, 255, 0.05)', borderRadius: '2px' };
+    }
+    return {};
   };
 
   const displayImage = cvData.profileImage || profileImage || null;
@@ -31,8 +40,9 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData }) => {
     title,
     description,
     isLast,
+    highlightStyle = {},
   }) => (
-    <div className="flex relative break-inside-avoid">
+    <div className="flex relative break-inside-avoid" style={highlightStyle}>
       <div className="w-[30%] pr-5 text-left pt-0.5">
         <div className="text-gray-800 font-medium text-xs md:text-[13px] uppercase tracking-wide">
           {leftText1}
@@ -106,7 +116,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData }) => {
 
         {/* ABOUT ME */}
         {cvData.summary && (
-          <div className="mb-6">
+          <div className="mb-6" style={getHighlightStyle('summary')}>
             <h3 className="uppercase text-xs md:text-sm font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               About Me
             </h3>
@@ -155,7 +165,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData }) => {
 
         {/* TECHNICAL SKILLS — simple tags, no fake bars */}
         {cvData.technicalSkills && cvData.technicalSkills.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-6" style={getHighlightStyle('technicalSkills')}>
             <h3 className="uppercase text-xs md:text-sm font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               Technical Skills
             </h3>
@@ -174,7 +184,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData }) => {
 
         {/* SOFT SKILLS */}
         {cvData.softSkills && cvData.softSkills.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-6" style={getHighlightStyle('softSkills')}>
             <h3 className="uppercase text-xs md:text-sm font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               Soft Skills
             </h3>
@@ -193,7 +203,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData }) => {
 
         {/* LANGUAGES — simple tags, no fake bars */}
         {cvData.language && cvData.language.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-6" style={getHighlightStyle('language')}>
             <h3 className="uppercase text-xs md:text-sm font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               Languages
             </h3>
@@ -340,6 +350,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData }) => {
                           title={exp.position}
                           description={exp.summary}
                           isLast={index === cvData.experience.length - 1}
+                          highlightStyle={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}
                         />
                       );
                     })}
@@ -364,6 +375,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData }) => {
                           title={edu.certification}
                           description={edu.summary}
                           isLast={index === cvData.education.length - 1}
+                          highlightStyle={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}
                         />
                       );
                     })}

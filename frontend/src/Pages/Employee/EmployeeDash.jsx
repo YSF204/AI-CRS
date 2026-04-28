@@ -74,30 +74,6 @@ export default function EmployeeDash() {
 
     const profileCompletion = Math.round((completedScore / totalWeight) * 100);
 
-    // Debug: Log user data and profile completion
-    console.log('User data:', user);
-    console.log('Profile completion calculation:', {
-      completedScore,
-      totalWeight,
-      profileCompletion,
-      fieldDetails: profileFields.map(({ field, weight, check }) => {
-        const fieldValue = user?.[field];
-        let isCompleted = false;
-        if (check) {
-          isCompleted = check(fieldValue);
-        } else {
-          isCompleted = fieldValue && fieldValue.toString().trim().length > 0;
-        }
-        return {
-          field,
-          value: fieldValue,
-          isCompleted,
-          weight
-        };
-      })
-    });
-
-    // Calculate application trend (compare with recent applications)
     const oneWeekAgo = new Date();
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     const recentApplications = applications.filter(app =>

@@ -5,6 +5,7 @@ import {
   analyzeCVFromFile,
   analyzeCVFromDatabase,
   analyzeCVSection,
+  analyzeSkillGap,
 } from "../integrations/ai/openai.js";
 import CV from "../models/CV.js";
 import CVAnalysis from "../models/CVAnalysis.js";
@@ -524,5 +525,28 @@ export const analyzeSection = catchAsync(async (req, res, next) => {
       atsScore,
       atsFeedback,
     },
+  });
+});
+
+export const skillGapAnalysis = catchAsync(async (req, res, next) => {
+  const { cvData, targetRole, additionalInfo } = req.body;
+
+  if (!targetRole || !targetRole.trim()) {
+    return next(new AppError("Target role is required", 400));
+  }
+
+  if (!cvData) {
+    return next(new AppError("CV data is required", 400));
+  }
+
+  const result = await analyzeSkillGap({
+    cvData,
+    targetRole: targetRole.trim(),
+    additionalInfo: additionalInfo || "",
+  });
+
+  res.status(200).json({
+    success: true,
+    data: result,
   });
 });

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Calendar, Zap, LayoutTemplate } from 'lucide-react';
+import { Calendar, Zap, LayoutTemplate, Loader2 } from 'lucide-react';
 import { getTemplateById } from '../../../Features/CVManagement/index.js';
 
 const A4_WIDTH_PX = 794;
@@ -44,7 +44,7 @@ const normalizeCvForTemplate = (cv) => ({
   },
 });
 
-export default function CVPreviewCard({ cv, loading, onAnalyze }) {
+export default function CVPreviewCard({ cv, loading, analyzingId, onAnalyze }) {
   const viewportRef = useRef(null);
   const [scale, setScale] = useState(0.28);
   const createdDate = new Date(cv.updatedAt || cv.createdAt).toLocaleDateString();
@@ -124,13 +124,17 @@ export default function CVPreviewCard({ cv, loading, onAnalyze }) {
           className="jd-btn jd-btn-primary w-full"
           aria-live="polite"
         >
-          {loading ? (
+          {analyzingId === cv._id ? (
             <span className="flex items-center justify-center gap-2">
-              <Zap size={16} className="animate-pulse" /> Processing...
+              <Loader2 size={16} className="animate-spin" /> Analyzing...
+            </span>
+          ) : loading ? (
+            <span className="flex items-center justify-center gap-2 opacity-60">
+              <Zap size={16} /> Analyze This CV
             </span>
           ) : (
             <span className="flex items-center justify-center gap-2">
-              <Zap size={16} /> {cv.buttonText || "Analyze This CV"}
+              <Zap size={16} /> Analyze This CV
             </span>
           )}
         </button>

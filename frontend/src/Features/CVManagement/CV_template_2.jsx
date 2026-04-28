@@ -1,6 +1,6 @@
 import React from "react";
 
-const MinimalResumeTemplate = ({ userName = "", cvData }) => {
+const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
 
   const fmtDuration = (from, to) => {
@@ -8,6 +8,15 @@ const MinimalResumeTemplate = ({ userName = "", cvData }) => {
     if (from) return from;
     if (to) return to;
     return "";
+  };
+
+  const getHighlightStyle = (...fieldIds) => {
+    if (!highlights) return {};
+    for (const id of fieldIds) {
+      if (highlights[id] === 'warning') return { outline: '3px dashed #ff5f57', outlineOffset: '2px', backgroundColor: 'rgba(255, 95, 87, 0.05)', borderRadius: '2px' };
+      if (highlights[id] === 'suggestion') return { outline: '3px dashed #0a84ff', outlineOffset: '2px', backgroundColor: 'rgba(10, 132, 255, 0.05)', borderRadius: '2px' };
+    }
+    return {};
   };
 
   // Helper to neatly format contact info with the pipe separator " | "
@@ -64,7 +73,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData }) => {
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary" className="break-inside-avoid mb-6">
+            <section key="summary" className="break-inside-avoid mb-6" style={getHighlightStyle('summary')}>
               <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-gray-900 mb-1">
                 Objective
               </h3>
@@ -85,7 +94,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData }) => {
                   {cvData.education.map((edu, index) => {
                     const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                     return (
-                      <div key={index} className="break-inside-avoid">
+                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}>
                         <p className="text-[13.5px] md:text-sm text-gray-900">
                           <span className="font-semibold">
                             {edu.certification}
@@ -117,7 +126,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData }) => {
                   {cvData.experience.map((exp, index) => {
                     const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                     return (
-                      <div key={index} className="break-inside-avoid">
+                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
                         <p className="text-[13.5px] md:text-sm text-gray-900">
                           <span className="font-semibold">
                             {exp.institutionName}
@@ -143,6 +152,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData }) => {
               <section
                 key="technicalSkills"
                 className="break-inside-avoid mb-6"
+                style={getHighlightStyle('technicalSkills')}
               >
                 <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-gray-900 mb-1">
                   Technical Skills
@@ -155,7 +165,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData }) => {
             ) : null,
           softSkills:
             cvData.softSkills?.length > 0 ? (
-              <section key="softSkills" className="break-inside-avoid mb-6">
+              <section key="softSkills" className="break-inside-avoid mb-6" style={getHighlightStyle('softSkills')}>
                 <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-gray-900 mb-1">
                   Soft Skills
                 </h3>
@@ -167,7 +177,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData }) => {
             ) : null,
           language:
             cvData.language?.length > 0 ? (
-              <section key="language" className="break-inside-avoid mb-6">
+              <section key="language" className="break-inside-avoid mb-6" style={getHighlightStyle('language')}>
                 <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-gray-900 mb-1">
                   Languages
                 </h3>

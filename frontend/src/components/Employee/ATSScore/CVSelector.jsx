@@ -61,38 +61,41 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
   return (
     <div className="ats-gallery-root space-y-6">
       {/* ATS Gallery Toolbar */}
-      <div className="jd-surface-stack ats-toolbar flex items-center justify-between gap-4 p-4">
-        <h2 className="jd-section-title mb-0">Select a CV to Analyze</h2>
-        <div className="flex gap-3 items-center">
-          <div className="relative h-[44px]">
+      <div className="jd-surface-stack ats-toolbar flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 p-6">
+        <div>
+          <h2 className="jd-section-title mb-1 tracking-tight">Select a CV to Analyze</h2>
+          <p className="text-sm text-[var(--nm-text-secondary)] font-medium font-mono uppercase tracking-wider">
+            {filteredCvs.length} CV{filteredCvs.length !== 1 ? 's' : ''} available
+          </p>
+        </div>
+
+        <div className="flex flex-row items-center gap-4 w-full lg:w-auto">
+          <div className="relative group flex-1 md:flex-initial">
+            <Search
+              size={18}
+              className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--nm-text-tertiary)] group-focus-within:text-[var(--nm-primary)] transition-colors z-10"
+            />
             <input
               type="text"
-              placeholder="Search CV names..."
+              placeholder="Search CVs by name or job title..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="jd-input w-[240px] h-[44px]"
-              style={{ paddingLeft: "40px" }}
-            />
-            <Search
-              size={16}
-              style={{
-                position: "absolute",
-                left: "12px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                pointerEvents: "none",
-              }}
-              className="text-[var(--nm-text-tertiary)]"
+              className="jd-input w-full md:w-[520px]"
+              style={{ paddingLeft: '60px' }}
             />
           </div>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="jd-select h-[44px] min-w-[140px]"
-          >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-          </select>
+          <div className="relative w-[160px] flex-shrink-0">
+             <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="jd-select"
+              style={{ paddingRight: '44px' }}
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+            </select>
+            <Filter size={14} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--nm-text-tertiary)]" />
+          </div>
         </div>
       </div>
 
@@ -103,16 +106,20 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
             <CVPreviewCard
               key={cv._id}
               cv={cv}
-              loading={
-                analyzingId === cv._id || (loading && analyzingId == null)
-              }
+              loading={loading}
+              analyzingId={analyzingId}
               onAnalyze={onAnalyze}
             />
           ))}
         </div>
       ) : (
-        <div className="jd-surface-stack p-8 text-center text-[var(--nm-text-tertiary)]">
-          No CVs match your search criteria.
+        <div className="jd-surface-stack p-12 text-center flex flex-col items-center">
+          <div className="w-12 h-12 rounded-full bg-[var(--nm-surface-low)] flex items-center justify-center mb-4 border-2 border-[var(--nm-ink)]">
+            <Search size={20} className="text-[var(--nm-text-tertiary)]" />
+          </div>
+          <p className="font-mono text-sm uppercase tracking-widest text-[var(--nm-text-tertiary)]">
+            No CVs match your search
+          </p>
         </div>
       )}
     </div>
