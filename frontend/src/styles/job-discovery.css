@@ -1,0 +1,270 @@
+/* ═════════════════════════════════════════════════════════════════════
+   JOB DISCOVERY — Neo Minimal Style
+   ═════════════════════════════════════════════════════════════════════ */
+
+.jd-shell {
+  position: relative;
+}
+
+.jd-hero {
+  background: var(--nm-surface);
+  border: 4px solid var(--nm-ink);
+  border-radius: 0px;
+  padding: clamp(var(--spacing-5), 2.5vw, var(--spacing-8));
+  box-shadow: 4px 4px 0 var(--nm-ink);
+}
+
+.jd-hero-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  border: 4px solid var(--nm-ink);
+  background: var(--nm-primary);
+  color: #fff;
+  border-radius: 0px;
+  padding: var(--spacing-1) var(--spacing-3);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.jd-hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 3.5vw, 3.5rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  text-transform: uppercase;
+  max-width: 15ch;
+  color: var(--nm-text-primary);
+}
+
+.jd-hero-copy {
+  max-width: 60ch;
+  font-family: var(--font-body);
+  color: var(--nm-text-secondary);
+  font-size: 1rem;
+}
+
+.jd-meta-grid {
+  display: grid;
+  gap: var(--spacing-4);
+}
+
+@media (min-width: 640px) {
+  .jd-meta-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.jd-stat-card {
+  background: var(--nm-surface);
+  border: 4px solid var(--nm-ink);
+  border-radius: 0px;
+  padding: var(--spacing-4);
+  box-shadow: 4px 4px 0 var(--nm-ink);
+}
+
+.jd-stat-label {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--nm-text-tertiary);
+}
+
+.jd-stat-value {
+  margin-top: var(--spacing-1);
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.jd-section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--nm-text-tertiary);
+  margin-bottom: var(--spacing-3);
+}
+
+.jd-surface-stack {
+  background: var(--nm-surface-high);
+  border: 4px solid var(--nm-ink);
+  border-radius: 0px;
+  padding: var(--spacing-4);
+}
+
+.jd-segment-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-3);
+}
+
+.jd-segment-button {
+  min-height: 48px;
+  border: 4px solid var(--nm-ink);
+  border-radius: 0px;
+  background: var(--nm-surface);
+  color: var(--nm-text-primary);
+  padding: var(--spacing-3) var(--spacing-4);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  transition: transform var(--transition-base), background var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.jd-segment-button:hover,
+.jd-segment-button:focus-visible {
+  transform: translate(2px, 2px);
+  box-shadow: -2px -2px 0 var(--nm-ink);
+}
+
+.jd-segment-button[data-active="true"] {
+  background: var(--nm-primary);
+  color: #fff;
+  box-shadow: 2px 2px 0 var(--nm-ink);
+}
+
+.jd-panel {
+  background: var(--nm-surface);
+  border: 4px solid var(--nm-ink);
+  border-radius: 0px;
+  padding: var(--spacing-5);
+  box-shadow: 4px 4px 0 var(--nm-ink);
+}
+
+.jd-card {
+  border: 4px solid var(--nm-ink);
+  border-radius: 0px;
+  background: var(--nm-surface);
+  padding: var(--spacing-4) var(--spacing-5);
+  transition: transform var(--transition-base), background var(--transition-base), box-shadow var(--transition-base);
+}
+
+.jd-card:hover {
+  background: var(--nm-surface-low);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--nm-ink);
+}
+
+.jd-detail-panel {
+  border: 4px solid var(--nm-ink);
+  border-radius: 0px;
+  background: var(--nm-surface);
+  padding: var(--spacing-5);
+  box-shadow: 4px 4px 0 var(--nm-ink);
+}
+
+.jd-input,
+.jd-select {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 0px;
+  border: 4px solid var(--nm-ink);
+  background: var(--nm-surface);
+  color: var(--nm-text-primary);
+  padding: var(--spacing-3) var(--spacing-4);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  outline: none;
+  transition: transform var(--transition-base), background var(--transition-base), box-shadow var(--transition-base);
+}
+
+.jd-input::placeholder {
+  color: var(--nm-text-tertiary);
+  opacity: 1;
+}
+
+.jd-input:focus,
+.jd-select:focus {
+  background: var(--nm-surface-high);
+  box-shadow: 2px 2px 0 var(--nm-ink);
+}
+
+.jd-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  min-height: 48px;
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: 0px;
+  border: 4px solid var(--nm-ink);
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: transform var(--transition-base), background var(--transition-base), color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.jd-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--nm-ink);
+}
+
+.jd-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.jd-btn-primary {
+  background: var(--nm-primary);
+  color: #fff;
+}
+
+.jd-btn-secondary {
+  background: var(--nm-surface);
+  color: var(--nm-text-primary);
+}
+
+.jd-btn-ghost {
+  background: var(--nm-surface-high);
+  color: var(--nm-text-secondary);
+}
+
+.jd-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0px;
+  padding: var(--spacing-1) var(--spacing-2);
+  border: 4px solid var(--nm-ink);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.jd-badge-primary {
+  background: var(--accent-light);
+  color: var(--nm-primary);
+}
+
+@keyframes jdPulse {
+  0% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 0.5;
+  }
+}
+

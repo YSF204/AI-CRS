@@ -1,0 +1,17 @@
+@layer utilities {
+
+  .nm-card {
+    background: var(--card-bg);
+    border: 4px solid var(--nm-ink);
+    border-radius: 0px;
+    padding: var(--spacing-6);
+    transition: transform var(--transition-base);
+    box-sizing: border-box;
+  }
+
+  .nm-card:hover {
+    transform: translate(4px, 4px);
+    box-shadow: -4px -4px 0 var(--nm-ink);
+  }
+}
+

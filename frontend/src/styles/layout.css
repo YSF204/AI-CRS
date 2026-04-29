@@ -1,0 +1,214 @@
+@layer utilities {
+
+  /* ═════════════════════════════════════════════════════════════════════
+     SIDEBAR LAYOUT GLOBALS
+     ═════════════════════════════════════════════════════════════════════ */
+
+  :root {
+    --sidebar-w-closed: 5rem;
+    /* 80px */
+    --sidebar-w-open: 16rem;
+    /* 256px */
+    --sidebar-width: var(--sidebar-w-closed);
+  }
+
+  body.sidebar-open {
+    --sidebar-width: var(--sidebar-w-open);
+  }
+
+  /* Force immediate update when sidebar state changes */
+  body.sidebar-open .dashboard-shell,
+  body.sidebar-open .admin-page {
+    --sidebar-width: var(--sidebar-w-open);
+  }
+
+  /* ===== DASHBOARD SHELL ===== */
+  .dashboard-shell {
+    width: calc(100% - var(--sidebar-width));
+    margin-left: var(--sidebar-width);
+    padding: var(--spacing-4);
+    box-sizing: border-box;
+    transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    min-height: 100vh;
+    position: relative;
+    will-change: margin-left, width;
+  }
+
+  @media (min-width: 768px) {
+    .dashboard-shell {
+      padding: var(--spacing-6);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .dashboard-shell {
+      padding: var(--spacing-8);
+    }
+  }
+
+  /* Mobile: sidebar is hidden/overlay, so shell takes full width */
+  @media (max-width: 767px) {
+    .dashboard-shell {
+      width: 100%;
+      margin-left: 0;
+      padding: var(--spacing-4);
+    }
+  }
+
+  /* Special handling for CV Editor */
+  .dashboard-shell.cv-editor-shell {
+    padding: var(--spacing-4);
+  }
+
+  @media (min-width: 768px) {
+    .dashboard-shell.cv-editor-shell {
+      padding: var(--spacing-6);
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .dashboard-shell.cv-editor-shell {
+      padding-right: 0;
+    }
+  }
+
+  /* ===== CV EDITOR SPECIFIC ===== */
+  .cv-editor-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    min-height: 0;
+    width: 100%;
+  }
+
+  .cv-editor-center {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: var(--nm-bg);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(27, 28, 21, 0.15) transparent;
+  }
+
+  .cv-editor-preview {
+    width: 520px;
+    flex-shrink: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-3);
+    padding-left: 0;
+    border-left: 4px solid var(--nm-ink);
+    transition: width 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+  }
+
+  .cv-editor-sidebar {
+    flex-shrink: 0;
+    border-right: 4px solid var(--nm-ink);
+    background-color: var(--nm-surface);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+  }
+
+  @media (max-width: 1279px) {
+    .cv-editor-preview {
+      width: 0;
+      padding: 0;
+      border-left: none;
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .cv-editor-sidebar {
+      position: absolute;
+      height: 100%;
+      z-index: 40;
+      box-shadow: 4px 0 0 var(--nm-ink);
+    }
+  }
+
+  /* ===== DASHBOARD NAV AREA ===== */
+  .dashboard-nav-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   GLOBAL SPACING FIXES FOR NEW SIDEBAR
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* Ensure sidebar and dashboard shell work together correctly */
+body {
+  margin-left: 0;
+  transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-x: hidden;
+}
+
+/* Force content to respond to sidebar width changes */
+.dashboard-shell,
+.admin-page > .dashboard-shell {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+}
+
+
+/* Ensure no elements are positioned absolutely over the sidebar */
+.dashboard-shell > * {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Fix for any grid or flex layouts that might overflow */
+.dashboard-shell > * > * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure tables and lists don't cause overflow */
+.admin-table,
+.admin-pagination,
+.admin-filter-bar {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+/* Fix for any elements that might have absolute positioning */
+.admin-header,
+.admin-filter-bar,
+.admin-panel,
+.admin-pagination,
+.admin-modal {
+  position: relative;
+  z-index: 10;
+}
+
+/* Ensure modal has higher z-index than sidebar */
+.admin-modal {
+  z-index: 1000;
+}
+
+/* Fix for any table or list elements */
+.admin-table,
+.admin-pagination {
+  width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+

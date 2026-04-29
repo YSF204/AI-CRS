@@ -1,36 +1,37 @@
 import { createBrowserRouter, Link, Navigate } from "react-router-dom";
-import ProtectedRoute from "./components/Auth/ProtectedRoute";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import RootLayout from "./components/layout/RootLayout";
 import RouteError from "./components/layout/RouteError";
-import AdminDash from "./Pages/Admin/AdminDash";
-import AdminProfile from "./Pages/Admin/AdminProfile";
-import UserDelete from "./Pages/Admin/UserDelete";
-import UserManagement from "./Pages/Admin/UserManagement";
-import UserProfile from "./Pages/Admin/UserProfile";
-import DynamicRoot from "./Pages/DynamicRoot";
-import Applications from "./Pages/Employee/applications";
-import CVs from "./Pages/Employee/cvs";
-import CVTemplates from "./Pages/Employee/CVTemplates";
-import CVEditor from "./Pages/Employee/CVEditor";
+import AdminDash from "./pages/admin/dashboard";
+import AdminProfile from "./pages/admin/admin-profile";
+import UserDelete from "./pages/admin/UserDelete";
+import UserManagement from "./pages/admin/user-management";
+import UserProfile from "./pages/admin/user-profile";
+import DynamicRoot from "./pages/DynamicRoot";
+import Applications from "./pages/employee/applications";
+import CVs from "./pages/employee/cvs";
+import CVTemplates from "./pages/employee/cv-templates";
+import CVEditor from "./pages/employee/cv-editor";
 
-import Jobs from "./Pages/Employee/jobs";
-import JobDetails from "./Pages/Employee/JobDetails";
-import ApplyJob from "./Pages/Employee/ApplyJob";
-import FindJobByCV from "./Pages/Employee/FindJobByCV";
-import ATSScore from "./Pages/Employee/ATSScore";
-import Profile from "./Pages/Employee/Profile";
-import CompanyProfile from "./Pages/Employer/CompanyProfile";
-import EditJob from "./Pages/Employer/EditJob";
-import EmployerDash from "./Pages/Employer/EmployerDash";
-import FindTalent from "./Pages/Employer/FindTalent";
-import ManageJobs from "./Pages/Employer/ManageJobs";
-import JobApplications from "./Pages/Employer/JobApplications";
-import PendingActivation from "./Pages/Employer/PendingActivation";
-import PostJob from "./Pages/Employer/PostJob";
-import AuthPage from "./Pages/Public/Auth/AuthPage";
-import VerifyEmailPage from "./Pages/Public/Auth/VerifyEmailPage";
-import ForgotPasswordPage from "./Pages/Public/Auth/ForgotPasswordPage";
-import ResetPasswordPage from "./Pages/Public/Auth/ResetPasswordPage";
+import Jobs from "./pages/employee/jobs";
+import JobDetails from "./pages/employee/JobDetails";
+import ApplyJob from "./pages/employee/apply-job";
+import FindJobByCV from "./pages/employee/find-job-by-cv";
+import ATSScore from "./pages/employee/ATSScore";
+import EmployeeDash from "./pages/employee/dashboard";
+import Profile from "./pages/employee/Profile";
+import CompanyProfile from "./pages/employer/company-profile";
+import EditJob from "./pages/employer/edit-job";
+import EmployerDash from "./pages/employer/EmployerDash";
+import FindTalent from "./pages/employer/find-talent";
+import ManageJobs from "./pages/employer/ManageJobs";
+import JobApplications from "./pages/employer/job-applications";
+import PendingActivation from "./pages/employer/PendingActivation";
+import PostJob from "./pages/employer/post-job";
+import AuthPage from "./pages/public/auth/AuthPage";
+import VerifyEmailPage from "./pages/public/auth/VerifyEmailPage";
+import ForgotPasswordPage from "./pages/public/auth/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/public/auth/ResetPasswordPage";
 
 function NotFound() {
   return (
@@ -137,6 +138,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
             <Navigate to="/employee/cvs" replace />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/employee/dashboard",
+        element: (
+          <ProtectedRoute allowedRoles={["EMPLOYEE"]}>
+            <EmployeeDash />
           </ProtectedRoute>
         ),
       },
