@@ -181,7 +181,7 @@ export default function Applications() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--nm-bg)] text-black">
+    <div className="min-h-screen bg-[var(--nm-bg)] text-[var(--nm-text-primary)]">
       <div className="dashboard-nav-area">
         <DashboardNav role="employee" />
       </div>
@@ -197,8 +197,8 @@ export default function Applications() {
                 }
                 className={`px-4 py-2 text-xs font-bold uppercase tracking-tight border-2 transition-all ${
                   statusFilter === opt.value
-                    ? "bg-black text-white border-black"
-                    : "bg-white text-black border-black/10 hover:border-black"
+                    ? "bg-[var(--nm-ink)] text-white border-[var(--nm-ink)]"
+                    : "bg-[var(--nm-surface)] text-[var(--nm-text-primary)] border-[var(--nm-ink)]/10 hover:border-[var(--nm-ink)]"
                 }`}
               >
                 {opt.label} ({statusCounts[opt.value] || 0})
@@ -210,21 +210,21 @@ export default function Applications() {
             <div className="relative w-full xl:w-[460px]">
               <Search
                 size={18}
-                className="absolute left-5 top-1/2 -translate-y-1/2 text-black/40 z-10"
+                className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--nm-text-tertiary)] z-10"
               />
               <input
                 type="text"
                 placeholder="Search applications..."
                 value={searchQuery}
                 onChange={(e) => updateParam("search", e.target.value)}
-                className="jd-input w-full"
+                className="jd-input w-full bg-[var(--nm-surface)] text-[var(--nm-text-primary)] border-[var(--nm-ink)]"
                 style={{ paddingLeft: "56px", height: "48px" }}
               />
             </div>
             <select
               value={sortOption}
               onChange={(e) => updateParam("sort", e.target.value)}
-              className="jd-select w-full sm:w-44"
+              className="jd-select w-full sm:w-44 bg-[var(--nm-surface)] text-[var(--nm-text-primary)] border-[var(--nm-ink)]"
               style={{ height: "48px" }}
             >
               {SORT_OPTIONS.map((opt) => (
@@ -273,7 +273,7 @@ export default function Applications() {
           onClick={() => setConfirmDelete(null)}
         >
           <div
-            className="jd-panel bg-white max-w-md w-full p-8 shadow-[12px_12px_0_var(--nm-error)]"
+            className="jd-panel bg-[var(--nm-surface)] max-w-md w-full p-8 shadow-[12px_12px_0_var(--nm-error)]"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 text-[var(--nm-error)] mb-6">
@@ -282,9 +282,9 @@ export default function Applications() {
                 Confirm Deletion
               </h2>
             </div>
-            <p className="font-bold text-black/60 leading-relaxed mb-8">
+            <p className="font-bold text-[var(--nm-text-secondary)] leading-relaxed mb-8">
               Are you sure you want to remove your application for{" "}
-              <span className="text-black">
+              <span className="text-[var(--nm-text-primary)]">
                 {confirmDelete.jobId?.position}
               </span>
               ? This action is permanent and cannot be reversed.
@@ -292,13 +292,13 @@ export default function Applications() {
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={handleConfirmDelete}
-                className="py-4 bg-[var(--nm-error)] text-white font-black uppercase tracking-widest border-2 border-black shadow-[4px_4px_0_black] hover:shadow-none transition-all"
+                className="py-4 bg-[var(--nm-error)] text-white font-black uppercase tracking-widest border-2 border-[var(--nm-ink)] shadow-[4px_4px_0_var(--nm-ink)] hover:shadow-none transition-all"
               >
                 Delete
               </button>
               <button
                 onClick={() => setConfirmDelete(null)}
-                className="py-4 bg-white text-black font-black uppercase tracking-widest border-2 border-black hover:bg-black hover:text-white transition-all"
+                className="py-4 bg-[var(--nm-surface)] text-[var(--nm-text-primary)] font-black uppercase tracking-widest border-2 border-[var(--nm-ink)] hover:bg-[var(--nm-ink)] hover:text-white transition-all"
               >
                 Cancel
               </button>
