@@ -26,6 +26,20 @@ const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loa
   return (
     <div className="space-y-6 pb-12">
       {jobs.map((job, index) => {
+        if (job.isSeparator) {
+          return (
+            <div key={`sep-${index}`} className="py-8 flex items-center gap-6">
+              <div className="h-1 flex-1 bg-[var(--nm-ink)] opacity-10" />
+              <div className="px-6 py-2 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface-low)] shadow-[4px_4px_0_var(--nm-ink)]">
+                <span className="font-black text-xs uppercase tracking-[0.2em] text-[var(--nm-text-tertiary)]">
+                  External Fits
+                </span>
+              </div>
+              <div className="h-1 flex-1 bg-[var(--nm-ink)] opacity-10" />
+            </div>
+          );
+        }
+
         const isSelected = job.id === selectedJobId;
         const salary = job.raw?.salary
           ? `$${job.raw.salary.toLocaleString()}`
@@ -59,7 +73,7 @@ const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loa
                       {job.company}
                     </p>
                   </div>
-                  {job.match !== undefined && job.match !== null && (
+                  {job.match !== undefined && job.match !== null && !job.isExternal && (
                     <div
                       className={`px-3 py-1 border-4 border-[var(--nm-ink)] font-black text-xs uppercase tracking-tighter
                         ${job.match >= 80

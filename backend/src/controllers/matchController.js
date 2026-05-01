@@ -5,6 +5,7 @@ import Job from "../models/Job.js";
 import { calculateMatchPercentage } from "../services/matching/matchingService.js";
 import { buildNormalizedProfile } from "../utils/profileNormalizer.js";
 import { matchCVToJobs } from "../integrations/ai/openai.js";
+import { getExternalJobs } from "../services/jobs/queries/getExternalJobs.js";
 
 const withTimeout = (promise, ms) =>
   Promise.race([
@@ -103,6 +104,64 @@ const normalizeAiMatches = (parsedMatches, jobs) => {
     .filter(Boolean);
 };
 
+/**
+ * Matches external jobs based on title keywords and CV profile
+ */
+const matchExternalJobs = (cv, externalJobs, normalizedProfile) => {
+  const cvRoles = new Set([
+    ...(cv.experience || []).map((e) => e.position.toLowerCase()),
+    ...(cv.education || []).map((e) => e.certification.toLowerCase()),
+  ]);
+  const cvSkills = new Set([
+    ...(cv.technicalSkills || []).map((s) => s.toLowerCase()),
+    ...(normalizedProfile?.technicalSkills || []).map((s) => s.toLowerCase()),
+  ]);
+
+  return externalJobs
+    .map((job) => {
+      const title = job.title.toLowerCase();
+      
+      // Simple keyword matching: does the title overlap with CV roles or skills?
+      let score = 0;
+      const matchedKeywords = [];
+
+      cvRoles.forEach(role => {
+        if (title.includes(role)) {
+          score += 40;
+          matchedKeywords.push(role);
+        }
+      });
+
+      cvSkills.forEach(skill => {
+        if (title.includes(skill)) {
+          score += 20;
+          matchedKeywords.push(skill);
+        }
+      });
+
+      // Cap at 95% since we don't have deep info
+      score = Math.min(95, score);
+
+      if (score < 20) return null; // Too weak
+
+      return {
+        jobId: job.id, // This is the URL for external jobs
+        position: job.title,
+        company: job.company,
+        location: job.location,
+        workSite: job.location,
+        matchScore: score,
+        skillsMatched: matchedKeywords.slice(0, 5),
+        reasoning: `Matched based on title alignment with your experience: ${matchedKeywords.slice(0, 3).join(", ")}.`,
+        isExternal: true,
+        externalUrl: job.externalUrl,
+        sourceName: job.sourceName,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.matchScore - a.matchScore);
+};
+
 export const recommendJobs = catchAsync(async (req, res, next) => {
   const { id: cvId } = req.params;
   const cv = await CV.findById(cvId);
@@ -147,21 +206,20 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
     ) || []),
   ].join("\n");
 
-  const jobs = await Job.find({ status: "OPEN" });
+  // Fetch both internal and external jobs
+  const [jobs, externalJobs] = await Promise.all([
+    Job.find({ status: "OPEN" }),
+    getExternalJobs(),
+  ]);
 
-  if (!jobs.length) {
+  if (!jobs.length && !externalJobs.length) {
     return next(new AppError("No jobs found", 404));
   }
 
-  console.log(`[recommendJobs] CV=${cvId}, Analyzing ${jobs.length} open jobs`);
+  console.log(`[recommendJobs] CV=${cvId}, Analyzing ${jobs.length} internal and ${externalJobs.length} external jobs`);
 
-  // Fast pre-ranking to reduce prompt size and model latency.
-  // We only send the top candidates to AI, then still return normalized matches.
+  // --- INTERNAL MATCHING ---
   const localRanked = buildLocalJobRecommendations(cv, jobs, normalizedProfile);
-  console.log(
-    `[recommendJobs] Local ranking: ${localRanked.length} jobs scored, top score=${localRanked[0]?.matchScore || 0}`,
-  );
-
   const candidateIds = new Set(localRanked.slice(0, 35).map((j) => j.jobId));
   const candidateJobs = jobs.filter((job) =>
     candidateIds.has(job._id.toString()),
@@ -186,67 +244,59 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
   let usedAiMatching = false;
 
   try {
-    console.log(
-      `[recommendJobs] Calling AI matching with ${aiInputJobs.length} jobs...`,
-    );
     const match = await withTimeout(matchCVToJobs(cvText, jobsText), 25000);
-
-    // FIX #7: matchCVToJobs now returns parsed JSON directly, not a string
     let aiResult = Array.isArray(match) ? match : match;
 
     if (Array.isArray(aiResult)) {
-      console.log(`[recommendJobs] AI returned ${aiResult.length} matches`);
       parsed = normalizeAiMatches(aiResult, aiInputJobs);
       usedAiMatching = true;
-    } else if (aiResult?.error) {
-      console.warn(`[recommendJobs] AI error response: ${aiResult.message}`);
-      parsed = localRanked;
     } else {
-      console.warn(
-        `[recommendJobs] Unexpected AI response format, using local ranking`,
-      );
       parsed = localRanked;
     }
   } catch (error) {
-    console.warn(
-      `[recommendJobs] AI recommendation failed (${error.message}), falling back to local scoring`,
-    );
+    console.warn(`[recommendJobs] AI matching failed: ${error.message}`);
     parsed = localRanked;
   }
 
-  // Build final job list with combined scoring
-  let filteredJobs = parsed.map((jobMatch) => {
+  // Calculate final internal scores
+  let internalMatches = parsed.map((jobMatch) => {
     const job = jobs.find((j) => j._id.toString() === jobMatch.jobId);
     if (!job) return jobMatch;
-
     const matchResult = calculateMatchPercentage(normalizedProfile, job);
-
     return {
       ...jobMatch,
-      canonicalPercentage: matchResult.percentage,
-      // Use AI score if available, otherwise use local semantic match
       matchScore: Math.max(jobMatch.matchScore || 0, matchResult.percentage),
       breakdown: matchResult.breakdown,
     };
   });
 
-  // Sort by match score descending
-  filteredJobs = filteredJobs.sort(
-    (a, b) => (b.matchScore || 0) - (a.matchScore || 0),
-  );
+  // --- EXTERNAL MATCHING ---
+  const externalMatches = matchExternalJobs(cv, externalJobs, normalizedProfile);
 
-  // Always return at least some results (top 20 by score) to avoid "NO STRONG MATCHES" message
-  // Even partial matches are valuable; 0% is rare since local scorer almost always finds something
-  if (filteredJobs.length > 0) {
-    filteredJobs = filteredJobs.slice(0, 20);
-  }
+  // --- COMBINE AND DEDUPLICATE ---
+  const internalSeen = new Set();
+  const dedupedInternal = internalMatches.filter(m => {
+    if (internalSeen.has(m.jobId)) return false;
+    internalSeen.add(m.jobId);
+    return true;
+  }).sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
 
-  console.log(
-    `[recommendJobs] Returning ${filteredJobs.length} jobs to user, used AI=${usedAiMatching}`,
-  );
+  const externalSeen = new Set();
+  const dedupedExternal = externalMatches.filter(m => {
+    // Deduplicate by URL
+    if (externalSeen.has(m.externalUrl)) return false;
+    externalSeen.add(m.externalUrl);
+    return true;
+  }).sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0));
+
+  console.log(`[recommendJobs] Returning ${dedupedInternal.length} internal and ${dedupedExternal.length} external results`);
 
   res.status(200).json({
     success: true,
-    data: { match: filteredJobs },
+    data: { 
+      match: dedupedInternal, // Keep 'match' for backward compatibility
+      internalMatches: dedupedInternal,
+      externalMatches: dedupedExternal
+    },
   });
 });

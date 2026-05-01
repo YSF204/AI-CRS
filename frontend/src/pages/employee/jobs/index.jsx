@@ -48,6 +48,9 @@ const normalizeCvMatch = (item, index) => {
     skillsMissing: item.skillsMissing || item.missing_skills || [],
     type: item.workDuration ? toRoleType(item.workDuration) : "Open",
     posted: item.createdAt ? getRelativeTime(item.createdAt) : "Recently",
+    externalUrl: item.externalUrl || "",
+    sourceName: item.sourceName || "",
+    isExternal: !!item.isExternal,
     raw: item,
   };
 };
@@ -259,13 +262,17 @@ export default function Jobs() {
 
     try {
       const res = await api.post(`/cvs/${selectedCvId}/recommend-jobs`);
-      const match = res.data?.data?.match;
-      const normalized = (Array.isArray(match) ? match : [match])
-        .filter(Boolean)
-        .map(normalizeCvMatch)
-        .sort((a, b) => (b.match || 0) - (a.match || 0));
-      setCvJobs(normalized);
-      setSelectedJobId(normalized[0]?.id || null);
+      const internal = (res.data?.data?.internalMatches || []).map(normalizeCvMatch);
+      const external = (res.data?.data?.externalMatches || []).map(normalizeCvMatch);
+      
+      const combined = [...internal];
+      if (internal.length > 0 && external.length > 0) {
+        combined.push({ isSeparator: true });
+      }
+      combined.push(...external);
+
+      setCvJobs(combined);
+      setSelectedJobId(internal[0]?.id || external[0]?.id || null);
     } catch (err) {
       setCvError(err?.response?.data?.message || "Unable to match jobs with selected CV.");
     } finally {
@@ -294,13 +301,17 @@ export default function Jobs() {
       setSelectedCvId(createdCv._id);
 
       const matchRes = await api.post(`/cvs/${createdCv._id}/recommend-jobs`);
-      const match = matchRes.data?.data?.match;
-      const normalized = (Array.isArray(match) ? match : [match])
-        .filter(Boolean)
-        .map(normalizeCvMatch)
-        .sort((a, b) => (b.match || 0) - (a.match || 0));
-      setCvJobs(normalized);
-      setSelectedJobId(normalized[0]?.id || null);
+      const internal = (matchRes.data?.data?.internalMatches || []).map(normalizeCvMatch);
+      const external = (matchRes.data?.data?.externalMatches || []).map(normalizeCvMatch);
+      
+      const combined = [...internal];
+      if (internal.length > 0 && external.length > 0) {
+        combined.push({ isSeparator: true });
+      }
+      combined.push(...external);
+
+      setCvJobs(combined);
+      setSelectedJobId(internal[0]?.id || external[0]?.id || null);
     } catch (err) {
       setCvError(err?.response?.data?.message || err?.message || "Unable to upload CV and match jobs.");
     } finally {

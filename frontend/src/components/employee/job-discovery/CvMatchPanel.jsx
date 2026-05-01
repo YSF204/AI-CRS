@@ -40,9 +40,9 @@ const CvMatchPanel = ({
           <Sparkles size={20} strokeWidth={2.5} />
         </div>
         <div>
-          <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase">AI_MATCHING_ENGINE</p>
+          <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase">AI Matching</p>
           <h2 className="font-[var(--font-display)] text-xl font-black uppercase tracking-tighter text-[var(--nm-text-primary)] leading-tight">
-            Sync CV Analysis
+            Find Jobs by CV
           </h2>
         </div>
       </div>
@@ -51,7 +51,7 @@ const CvMatchPanel = ({
         <div className="mb-6 p-4 bg-[var(--nm-error-surface)] border-4 border-[var(--nm-error)]">
           <div className="flex items-center gap-2 mb-1">
              <div className="w-2 h-2 bg-[var(--nm-error)]" />
-             <span className="font-mono text-[10px] font-black uppercase text-[var(--nm-error)]">System_Error</span>
+             <span className="font-mono text-[10px] font-black uppercase text-[var(--nm-error)]">Error</span>
           </div>
           <p className="text-sm text-[var(--nm-text-primary)] font-[var(--font-body)] font-bold">{error}</p>
         </div>
@@ -61,7 +61,7 @@ const CvMatchPanel = ({
         {hasCvs && (
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <span className="font-mono text-[10px] font-black text-[var(--nm-text-tertiary)] uppercase whitespace-nowrap">Local_Storage</span>
+              <span className="font-mono text-[10px] font-black text-[var(--nm-text-tertiary)] uppercase whitespace-nowrap">Your CVs</span>
               <div className="h-[2px] flex-1 bg-[var(--nm-ink)] opacity-10" />
             </div>
             
@@ -76,10 +76,10 @@ const CvMatchPanel = ({
                 disabled={loading || uploading}
                 className="jd-select w-full font-bold uppercase tracking-tight text-xs pr-10"
               >
-                <option value="">-- SELECT_ASSET --</option>
+                <option value="">-- Select a CV --</option>
                 {cvs.map((cv) => (
                   <option key={cv._id} value={cv._id}>
-                    {cv.jobTitle ? cv.jobTitle.toUpperCase() : `CV_REF_${cv._id.substring(0, 6).toUpperCase()}`}
+                    {cv.jobTitle ? cv.jobTitle.toUpperCase() : `My CV (${cv._id.substring(0, 6).toUpperCase()})`}
                   </option>
                 ))}
               </select>
@@ -91,7 +91,7 @@ const CvMatchPanel = ({
               disabled={!selectedCvId || loading || uploading}
               className="jd-btn jd-btn-primary w-full py-4 font-black shadow-[4px_4px_0_var(--nm-ink)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
             >
-              {loading ? "INITIALIZING_SYNC..." : "LAUNCH_SYNC_PROTOCOL"}
+              {loading ? "Matching..." : "Find Matches"}
             </button>
           </div>
         )}
@@ -104,7 +104,7 @@ const CvMatchPanel = ({
 
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <span className="font-mono text-[10px] font-black text-[var(--nm-text-tertiary)] uppercase whitespace-nowrap">External_Uplink</span>
+            <span className="font-mono text-[10px] font-black text-[var(--nm-text-tertiary)] uppercase whitespace-nowrap">Upload New</span>
             <div className="h-[2px] flex-1 bg-[var(--nm-ink)] opacity-10" />
           </div>
 
@@ -122,10 +122,10 @@ const CvMatchPanel = ({
             disabled={uploading || loading}
             className="jd-btn jd-btn-secondary w-full py-4 font-black border-dashed bg-transparent hover:bg-white shadow-[4px_4px_0_var(--nm-ink)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
           >
-            {uploading ? "UPLOADING_ASSET..." : "UPLOAD_PDF_STREAM"}
+            {uploading ? "Uploading..." : "Upload PDF CV"}
           </button>
           <p className="text-[10px] text-[var(--nm-text-tertiary)] font-[var(--font-body)] italic text-center">
-            Supported Format: PDF (MAX_SIZE: 5MB)
+            Supported Format: PDF (Max 5MB)
           </p>
         </div>
       </div>

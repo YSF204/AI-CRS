@@ -3,11 +3,11 @@ import { X } from "lucide-react";
 
 const JobResultsToolbar = ({ resultCount, sortBy, onSortChange, onClearFilters, hasActiveFilters }) => {
   const sortOptions = [
-    { value: "newest", label: "DATE_DESC" },
-    { value: "oldest", label: "DATE_ASC" },
-    { value: "salary_desc", label: "PAY_DESC" },
-    { value: "salary_asc", label: "PAY_ASC" },
-    { value: "relevance", label: "MATCH_SCORE" }
+    { value: "newest", label: "Newest" },
+    { value: "oldest", label: "Oldest" },
+    { value: "salary_desc", label: "Highest Salary" },
+    { value: "salary_asc", label: "Lowest Salary" },
+    { value: "relevance", label: "Relevance" }
   ];
 
   return (
@@ -22,7 +22,7 @@ const JobResultsToolbar = ({ resultCount, sortBy, onSortChange, onClearFilters, 
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <div className="flex-1 sm:flex-none relative">
           <label htmlFor="sort-jobs" className="sr-only">
-            Sort jobs by
+            Sort by
           </label>
           <select
             id="sort-jobs"
@@ -32,7 +32,7 @@ const JobResultsToolbar = ({ resultCount, sortBy, onSortChange, onClearFilters, 
           >
             {sortOptions.map((option) => (
               <option key={option.value} value={option.value}>
-                SORT_BY: {option.label}
+                {option.label}
               </option>
             ))}
           </select>
@@ -46,7 +46,7 @@ const JobResultsToolbar = ({ resultCount, sortBy, onSortChange, onClearFilters, 
             aria-label="Clear all filters"
           >
             <X size={12} strokeWidth={3} />
-            RESET_FILTERS
+            Clear Filters
           </button>
         )}
       </div>
