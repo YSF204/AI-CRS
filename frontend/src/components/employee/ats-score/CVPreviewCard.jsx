@@ -118,26 +118,28 @@ export default function CVPreviewCard({ cv, loading, analyzingId, onAnalyze }) {
           </div>
         </div>
 
-        <button
-          onClick={() => onAnalyze(cv._id)}
-          disabled={loading}
-          className="jd-btn jd-btn-primary w-full"
-          aria-live="polite"
-        >
-          {analyzingId === cv._id ? (
-            <span className="flex items-center justify-center gap-2">
-              <Loader2 size={16} className="animate-spin" /> Analyzing...
-            </span>
-          ) : loading ? (
-            <span className="flex items-center justify-center gap-2 opacity-60">
-              <Zap size={16} /> Analyze This CV
-            </span>
-          ) : (
-            <span className="flex items-center justify-center gap-2">
-              <Zap size={16} /> Analyze This CV
-            </span>
-          )}
-        </button>
+        {onAnalyze && (
+          <button
+            onClick={() => onAnalyze(cv._id)}
+            disabled={loading}
+            className="jd-btn jd-btn-primary w-full"
+            aria-live="polite"
+          >
+            {analyzingId === cv._id ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 size={16} className="animate-spin" /> Analyzing...
+              </span>
+            ) : loading ? (
+              <span className="flex items-center justify-center gap-2 opacity-60">
+                <Zap size={16} /> Analyze This CV
+              </span>
+            ) : (
+              <span className="flex items-center justify-center gap-2">
+                <Zap size={16} /> Analyze This CV
+              </span>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

@@ -243,7 +243,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
         <button
           type="submit"
           disabled={submitting}
-          className="brutal-btn inline-flex items-center gap-2 px-5 py-3 bg-[#1e51f6] text-white"
+          className="nm-btn nm-btn-primary"
         >
           {isCreate ? <UserPlus size={18} /> : null}
           {submitting
@@ -258,7 +258,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           <button
             type="button"
             onClick={() => navigate(`/admin/users/${userId}`)}
-            className="brutal-btn px-5 py-3 bg-[#3949ab] text-white"
+            className="nm-btn"
           >
             View Profile
           </button>

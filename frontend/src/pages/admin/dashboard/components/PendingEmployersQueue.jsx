@@ -61,7 +61,11 @@ export default function PendingEmployersQueue({ pendingEmployers, palette, navig
         <div style={{
           padding: 'var(--spacing-8)',
           textAlign: 'center',
-          color: 'var(--nm-text-secondary)'
+          color: 'var(--nm-text-secondary)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
           <Clock size={48} style={{ marginBottom: 'var(--spacing-4)', opacity: 0.5 }} />
           <p style={{

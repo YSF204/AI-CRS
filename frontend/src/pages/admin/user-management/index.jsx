@@ -216,7 +216,7 @@ export default function UserManagement() {
 
         {/* Messages */}
         {message && (
-          <div className="admin-alert success">
+          <div className="admin-toast" role="status" aria-live="polite">
             {message}
           </div>
         )}

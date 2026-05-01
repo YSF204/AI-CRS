@@ -53,18 +53,18 @@ export default function ATSResults({ result, onBack }) {
                 Analysis Summary
               </h2>
             </div>
-            <p className="text-base font-['Manrope'] font-bold text-black leading-relaxed">
+            <p className="text-base font-['Manrope'] font-bold text-[var(--nm-text-primary)] leading-relaxed">
               {summary}
             </p>
           </div>
 
           {/* Score Block */}
           <div
-            className="relative p-1 bg-black flex-shrink-0"
+            className="relative p-1 bg-[var(--nm-ink)] flex-shrink-0"
             style={{ boxShadow: '6px 6px 0 var(--nm-primary)' }}
           >
-            <div className="bg-white p-4 border-2 border-black flex flex-col items-center justify-center min-w-[140px]">
-              <div className="text-5xl font-bold font-['Space_Grotesk'] text-black leading-none mb-1">
+            <div className="bg-[var(--nm-surface)] p-4 border-2 border-[var(--nm-ink)] flex flex-col items-center justify-center min-w-[140px]">
+              <div className="text-5xl font-bold font-['Space_Grotesk'] text-[var(--nm-text-primary)] leading-none mb-1">
                 {overallScore}<span className="text-lg font-medium opacity-40">%</span>
               </div>
               <div className="text-[9px] font-mono font-bold px-2 py-0.5 bg-[var(--nm-primary)] text-white tracking-widest">
@@ -78,10 +78,10 @@ export default function ATSResults({ result, onBack }) {
       {/* Highlights Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Strengths */}
-        <div className="jd-panel p-6 bg-white border-l-[12px] border-l-[var(--nm-success)]">
+        <div className="jd-panel p-6 bg-[var(--nm-surface)] border-l-[12px] border-l-[var(--nm-success)]">
           <div className="flex items-center gap-2 mb-6">
             <CheckCircle2 size={18} className="text-[var(--nm-success)]" />
-            <h3 className="font-bold font-['Space_Grotesk'] text-sm tracking-widest text-black uppercase">
+            <h3 className="font-bold font-['Space_Grotesk'] text-sm tracking-widest text-[var(--nm-text-primary)] uppercase">
               Strengths
             </h3>
           </div>
@@ -89,17 +89,17 @@ export default function ATSResults({ result, onBack }) {
             {topStrengths.map((strength, idx) => (
               <li key={idx} className="font-['Manrope'] text-sm flex items-start gap-3 group">
                 <span className="text-[var(--nm-success)] font-bold opacity-40 mt-0.5 group-hover:opacity-100 transition-opacity">0{idx + 1}</span>
-                <span className="text-black font-semibold">{strength}</span>
+                <span className="text-[var(--nm-text-primary)] font-semibold">{strength}</span>
               </li>
             ))}
           </ul>
         </div>
 
         {/* Weaknesses */}
-        <div className="jd-panel p-6 bg-white border-l-[12px] border-l-[var(--nm-error)]">
+        <div className="jd-panel p-6 bg-[var(--nm-surface)] border-l-[12px] border-l-[var(--nm-error)]">
           <div className="flex items-center gap-2 mb-6">
             <AlertCircle size={18} className="text-[var(--nm-error)]" />
-            <h3 className="font-bold font-['Space_Grotesk'] text-sm tracking-widest text-black uppercase">
+            <h3 className="font-bold font-['Space_Grotesk'] text-sm tracking-widest text-[var(--nm-text-primary)] uppercase">
               Areas to Improve
             </h3>
           </div>
@@ -107,7 +107,7 @@ export default function ATSResults({ result, onBack }) {
             {topWeaknesses.map((weakness, idx) => (
               <li key={idx} className="font-['Manrope'] text-sm flex items-start gap-3 group">
                 <span className="text-[var(--nm-error)] font-bold opacity-40 mt-0.5 group-hover:opacity-100 transition-opacity">0{idx + 1}</span>
-                <span className="text-black font-semibold">{weakness}</span>
+                <span className="text-[var(--nm-text-primary)] font-semibold">{weakness}</span>
               </li>
             ))}
           </ul>
@@ -117,10 +117,10 @@ export default function ATSResults({ result, onBack }) {
       {/* Detailed Section Breakdown */}
       <div className="space-y-4">
         <div className="flex items-center justify-between px-2">
-          <h3 className="font-bold font-['Space_Grotesk'] text-lg tracking-tight uppercase text-black">
+          <h3 className="font-bold font-['Space_Grotesk'] text-lg tracking-tight uppercase text-[var(--nm-text-primary)]">
             Technical Breakdown
           </h3>
-          <span className="text-[10px] font-mono text-black font-bold uppercase tracking-widest">
+          <span className="text-[10px] font-mono text-[var(--nm-text-secondary)] font-bold uppercase tracking-widest">
             {Object.keys(sections).length} Sections Analyzed
           </span>
         </div>
@@ -135,7 +135,7 @@ export default function ATSResults({ result, onBack }) {
             return (
               <div
                 key={sectionKey}
-                className="jd-card bg-white group hover:border-[var(--nm-primary)] transition-colors"
+                className="jd-card bg-[var(--nm-surface)] group hover:border-[var(--nm-primary)] transition-colors"
               >
                 {/* Header */}
                 <div
@@ -144,13 +144,13 @@ export default function ATSResults({ result, onBack }) {
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <h4 className="font-bold font-['Space_Grotesk'] text-sm tracking-wider text-black uppercase">
+                      <h4 className="font-bold font-['Space_Grotesk'] text-sm tracking-wider text-[var(--nm-text-primary)] uppercase">
                         {sectionKey.replace(/([A-Z])/g, " $1").trim()}
                       </h4>
                       <div className="h-[2px] flex-1 bg-[var(--nm-surface-high)]" />
                     </div>
                     {/* Minimal Progress Line */}
-                    <div className="w-full bg-[var(--nm-surface-high)] h-[8px] relative overflow-hidden border border-black/5">
+                    <div className="w-full bg-[var(--nm-surface-high)] h-[8px] relative overflow-hidden border border-[var(--nm-ink)]/10">
                       <div
                         className="h-full bg-[var(--nm-primary)] transition-all duration-700 ease-out"
                         style={{ width: `${score}%` }}
@@ -159,20 +159,20 @@ export default function ATSResults({ result, onBack }) {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-right">
-                      <div className="text-2xl font-bold font-['Space_Grotesk'] text-black leading-none">
+                      <div className="text-2xl font-bold font-['Space_Grotesk'] text-[var(--nm-text-primary)] leading-none">
                         {score}%
                       </div>
-                      <div className="text-[10px] font-mono font-bold text-black uppercase tracking-tighter">
+                      <div className="text-[10px] font-mono font-bold text-[var(--nm-text-secondary)] uppercase tracking-tighter">
                         Accuracy
                       </div>
                     </div>
-                    {isExpanded ? <ChevronUp size={20} className="text-black" /> : <ChevronDown size={20} className="text-black" />}
+                    {isExpanded ? <ChevronUp size={20} className="text-[var(--nm-text-primary)]" /> : <ChevronDown size={20} className="text-[var(--nm-text-primary)]" />}
                   </div>
                 </div>
 
                 {/* Content */}
                 {isExpanded && (
-                  <div className="p-6 bg-[var(--nm-surface-low)] border-t-[4px] border-black">
+                  <div className="p-6 bg-[var(--nm-surface-low)] border-t-[4px] border-[var(--nm-ink)]">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       {strengths.length > 0 && (
                         <div>
@@ -181,7 +181,7 @@ export default function ATSResults({ result, onBack }) {
                           </p>
                           <ul className="space-y-2">
                             {strengths.map((s, i) => (
-                              <li key={i} className="text-sm font-['Manrope'] text-black font-medium pl-4 border-l-2 border-[var(--nm-success)]">{s}</li>
+                              <li key={i} className="text-sm font-['Manrope'] text-[var(--nm-text-primary)] font-medium pl-4 border-l-2 border-[var(--nm-success)]">{s}</li>
                             ))}
                           </ul>
                         </div>
@@ -193,7 +193,7 @@ export default function ATSResults({ result, onBack }) {
                           </p>
                           <ul className="space-y-2">
                             {weaknesses.map((w, i) => (
-                              <li key={i} className="text-sm font-['Manrope'] text-black font-medium pl-4 border-l-2 border-[var(--nm-error)]">{w}</li>
+                              <li key={i} className="text-sm font-['Manrope'] text-[var(--nm-text-primary)] font-medium pl-4 border-l-2 border-[var(--nm-error)]">{w}</li>
                             ))}
                           </ul>
                         </div>
@@ -209,18 +209,18 @@ export default function ATSResults({ result, onBack }) {
 
       {/* Suggestions Section */}
       {suggestions.length > 0 && (
-        <div className="jd-panel p-8 bg-white border-4 border-[var(--nm-primary)]">
+        <div className="jd-panel p-8 bg-[var(--nm-surface)] border-4 border-[var(--nm-primary)]">
           <div className="flex items-center gap-3 mb-8">
             <Lightbulb size={24} className="text-[var(--nm-primary)]" />
-            <h3 className="font-bold font-['Space_Grotesk'] text-xl tracking-tight text-black uppercase">
+            <h3 className="font-bold font-['Space_Grotesk'] text-xl tracking-tight text-[var(--nm-text-primary)] uppercase">
               Action Plan
             </h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {suggestions.map((suggestion, idx) => (
-              <div key={idx} className="p-5 border-2 border-black hover:bg-[var(--nm-surface-low)] transition-colors flex gap-4">
+              <div key={idx} className="p-5 border-2 border-[var(--nm-ink)] hover:bg-[var(--nm-surface-low)] transition-colors flex gap-4">
                 <span className="text-xl font-bold text-[var(--nm-primary)]">0{idx + 1}</span>
-                <p className="text-sm font-['Manrope'] font-bold leading-relaxed text-black">{suggestion}</p>
+                <p className="text-sm font-['Manrope'] font-bold leading-relaxed text-[var(--nm-text-primary)]">{suggestion}</p>
               </div>
             ))}
           </div>

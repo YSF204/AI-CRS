@@ -66,9 +66,38 @@ export default function useCVAnalysis({
       });
 
       if (response.data?.success && response.data?.data) {
-        const result = response.data.data;
-        setAnalysisResult(result);
-        sessionStorage.setItem(`cv_analysis_${id}`, JSON.stringify(result));
+        const analysisData = response.data.data;
+        let mergedResult = { ...analysisData };
+
+        if (id && id !== "new") {
+          try {
+            const atsResponse = await api.post("/applications/analyze-ats", {
+              cvId: id,
+            });
+            const atsData = atsResponse.data?.data;
+            const atsScore = atsData?.overallScore ?? null;
+            mergedResult = {
+              ...analysisData,
+              atsScore: atsScore ?? analysisData.overallScore ?? null,
+              overallScore: atsScore ?? analysisData.overallScore ?? null,
+              atsBreakdown: atsData || null,
+            };
+          } catch (atsError) {
+            console.error("ATS analysis failed:", atsError);
+            mergedResult = {
+              ...analysisData,
+              atsScore: analysisData.overallScore ?? null,
+            };
+          }
+        } else {
+          mergedResult = {
+            ...analysisData,
+            atsScore: analysisData.overallScore ?? null,
+          };
+        }
+
+        setAnalysisResult(mergedResult);
+        sessionStorage.setItem(`cv_analysis_${id}`, JSON.stringify(mergedResult));
         setShowAnalysis(true);
       } else {
         showToast("error", "Unable to generate analysis. Please try again.");

@@ -260,7 +260,7 @@ export default function UserProfile() {
                 <button
                   type="button"
                   onClick={() => navigate("/admin/users")}
-                  className="brutal-btn inline-flex items-center gap-2 px-4 py-2.5 bg-(--card-bg) text-(--fg)"
+                  className="nm-btn"
                 >
                   <ArrowLeft size={16} />
                   Back to list

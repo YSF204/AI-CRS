@@ -33,38 +33,42 @@ export default function FilterBar({ search, setSearch, setPage, roleFilter, setR
 
       <div className="admin-filter-group">
         <label className="admin-filter-label">Role</label>
-        <select
-          value={roleFilter}
-          onChange={(e) => {
-            setRoleFilter(e.target.value);
-            setPage(1);
-          }}
-          className="admin-filter-select"
-        >
-          {roles.map((role) => (
-            <option key={role} value={role}>
-              {role || "All Roles"}
-            </option>
-          ))}
-        </select>
+        <div className="admin-filter-select-wrap">
+          <select
+            value={roleFilter}
+            onChange={(e) => {
+              setRoleFilter(e.target.value);
+              setPage(1);
+            }}
+            className="admin-filter-select"
+          >
+            {roles.map((role) => (
+              <option key={role} value={role}>
+                {role || "All Roles"}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="admin-filter-group">
         <label className="admin-filter-label">Status</label>
-        <select
-          value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
-            setPage(1);
-          }}
-          className="admin-filter-select"
-        >
-          {statuses.map((status) => (
-            <option key={status} value={status}>
-              {status || "All Statuses"}
-            </option>
-          ))}
-        </select>
+        <div className="admin-filter-select-wrap">
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            className="admin-filter-select"
+          >
+            {statuses.map((status) => (
+              <option key={status} value={status}>
+                {status || "All Statuses"}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
     </div>
   );
