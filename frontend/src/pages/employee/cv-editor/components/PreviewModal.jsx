@@ -6,8 +6,8 @@ import { getTemplateById } from "../../../../features/cv-management/index.js";
 const A4_WIDTH = 794;
 const A4_HEIGHT = 1123;
 const FOOTER_ZONE = 60;
-const HEADER_ZONE = 60;
-const PUSH_BUFFER = 8;
+const HEADER_ZONE = 0;
+const PUSH_BUFFER = 30;
 
 export default function PreviewModal({
   show,
@@ -15,6 +15,7 @@ export default function PreviewModal({
   userName,
   getFilteredFormData,
   templateId,
+  highlights,
   downloadingPdf,
   onDownloadPdf,
 }) {
@@ -48,7 +49,7 @@ export default function PreviewModal({
     });
 
     // Reset
-    blocks.forEach((b) => { b.style.marginTop = ''; });
+    blocks.forEach((b) => { b.style.paddingTop = ''; });
     void container.offsetHeight;
 
     // Measure (no scale in modal)
@@ -89,7 +90,8 @@ export default function PreviewModal({
 
     // Apply
     for (const { element, margin } of margins) {
-      element.style.marginTop = `${margin}px`;
+      element.style.paddingTop = `${margin}px`;
+      element.setAttribute('data-pagination-margin', 'true');
     }
 
     void container.offsetHeight;
@@ -255,6 +257,7 @@ export default function PreviewModal({
                 <TemplateComponent
                   userName={userName}
                   cvData={getFilteredFormData()}
+                  highlights={highlights}
                 />
               ) : null}
             </div>

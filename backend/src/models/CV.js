@@ -115,7 +115,7 @@ const cvSchema = new mongoose.Schema(
       },
     ],
     language: {
-      type: [String],
+      type: [mongoose.Schema.Types.Mixed],
       default: [],
     },
     softSkills: {
@@ -170,7 +170,7 @@ const cvSchema = new mongoose.Schema(
     templateId: {
       type: Number,
       min: 1,
-      max: 7,
+      max: 10,
       default: 1,
     },
     profileImage: {

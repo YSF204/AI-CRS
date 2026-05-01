@@ -122,7 +122,6 @@ export default function GoogleSignupForm({ googleData, onClear }) {
       }
 
       const res = await api.post('/auth/google/complete-profile', body);
-      localStorage.removeItem('pendingGoogleRegistration');
       onClear?.();
 
       const { token, data } = res.data;
@@ -143,10 +142,45 @@ export default function GoogleSignupForm({ googleData, onClear }) {
   return (
     <>
       {/* Show which Google account is being used */}
-      <div style={{ marginBottom: 16, padding: '10px 14px', background: 'var(--bg)', border: '2px solid #4ECDC4', fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--fg-muted)' }}>
-        ✓ Signed in as <strong style={{ color: 'var(--fg)' }}>{googleData?.email || 'Google account'}</strong>{' '}
-        — complete your profile below.
+      <div style={{
+        marginBottom: 16,
+        padding: '12px 16px',
+        background: 'var(--nm-bg)',
+        border: '3px solid var(--nm-ink)',
+        boxShadow: '4px 4px 0 var(--nm-ink)',
+        fontFamily: 'var(--font-body)',
+        fontSize: 13,
+        color: 'var(--nm-text-secondary)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        gap: 12
+      }}>
+        <div>
+          ✓ Signed in as <strong style={{ color: 'var(--nm-text-primary)' }}>{googleData?.email || 'Google account'}</strong>
+          <br/>
+          <span style={{ fontSize: 11, opacity: 0.8 }}>Complete your profile to continue.</span>
+        </div>
+        <button
+          onClick={onClear}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '4px 8px',
+            color: 'var(--nm-primary)',
+            fontFamily: 'var(--font-display)',
+            fontWeight: 800,
+            fontSize: 11,
+            textTransform: 'uppercase',
+            cursor: 'pointer',
+            borderBottom: '2px solid var(--nm-primary)',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          Switch Account
+        </button>
       </div>
+
       <ErrorBanner message={errorMsg} />
       <Stepper
         initialStep={1}

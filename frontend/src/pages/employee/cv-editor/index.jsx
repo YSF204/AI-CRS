@@ -60,6 +60,7 @@ export default function CVEditor() {
     showAnalysis,
     setShowAnalysis,
     analysisResult,
+    highlights,
     analyzing,
     showSkillGap,
     setShowSkillGap,
@@ -186,6 +187,7 @@ export default function CVEditor() {
               formData={filteredFormData()}
               userName={userName}
               templateId={cv?.templateId || 1}
+              highlights={highlights}
             />
           </div>
         </div>
@@ -388,27 +390,28 @@ export default function CVEditor() {
             justifyContent: "center",
           }}
         >
-          <div className="brutal-card bg-[var(--card-bg)] p-6 max-w-sm w-full mx-4 flex flex-col gap-4">
-            <h3 className="font-['Space_Grotesk'] font-bold text-lg">
-              Unsaved CV
+          <div className="nm-card bg-[var(--nm-bg)] p-8 max-w-md w-full mx-4 flex flex-col gap-6">
+            <h3 className="font-[var(--font-display)] font-black text-xl uppercase tracking-tight">
+              ABORT SEQUENCE?
             </h3>
-            <p className="font-mono text-sm">
-              Your CV is incomplete. Do you want to cancel the creation or
-              continue editing?
+            <p className="font-mono text-xs text-[var(--nm-text-secondary)] uppercase font-bold leading-relaxed">
+              Your CV data has not been fully committed to the central database. 
+              Discarding now will result in permanent loss of progress.
             </p>
-            <div className="flex gap-3 justify-end mt-2">
+            <div className="flex flex-col gap-3 mt-2">
               <button
                 disabled={saving}
                 onClick={() => navigate("/employee/cvs")}
-                className="brutal-btn-outline px-4 py-2"
+                className="nm-btn w-full"
+                style={{ borderColor: 'var(--nm-error)', color: 'var(--nm-error)' }}
               >
-                Cancel Creation
+                DISCARD CHANGES
               </button>
               <button
                 onClick={() => setShowExitPrompt(false)}
-                className="brutal-btn px-4 py-2 bg-[var(--yellow)] text-[#0a0a0a]"
+                className="nm-btn nm-btn-primary w-full"
               >
-                Continue Editing
+                CONTINUE EDITING
               </button>
             </div>
           </div>

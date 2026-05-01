@@ -24,9 +24,9 @@ export default function SummarySection({
           rows={4}
         />
         <SuggestionBox
-          suggestions={suggestions?.["summary-single"]}
+          suggestions={suggestions?.["summary-single"] || []}
           onSelect={(val) => handleSuggestionSelect("summary-single", val)}
-          isLoading={isLoadingSuggestions["summary-single"]}
+          isLoading={isLoadingSuggestions?.["summary-single"] || false}
           single={true}
         />
       </div>

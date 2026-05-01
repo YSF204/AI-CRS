@@ -53,16 +53,14 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
         margin: "0 auto",
         boxSizing: "border-box",
         position: "relative",
-        padding: "10mm", // Reduced padding to fit more content
+        padding: "12mm", // Adjusted padding
       }}
     >
       <header className="text-center mb-3">
-        <h1 className="text-[24px] md:text-[30px] lg:text-[36px] font-bold uppercase tracking-wide text-gray-900 mb-1.5">
+        <h1 className="text-[26px] md:text-[30px] font-bold uppercase tracking-wide text-gray-900 mb-1.5">
           {userName}
         </h1>
-        <h2 className="text-sm md:text-base text-gray-600 mb-2">
-          {cvData.jobTitle}
-        </h2>
+
         <div className="border-y border-gray-300 py-1.5 mb-1">
           <div className="flex flex-wrap justify-center items-center gap-1 text-xs md:text-sm text-gray-700">
             {contactItems.map((item, index) => (
@@ -82,7 +80,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
           summary: cvData.summary ? (
             <section key="summary" className="break-inside-avoid" style={getHighlightStyle('summary')}>
               <SectionHeader title="Career Summary" />
-              <p className="text-xs md:text-sm text-gray-800 leading-[1.6] text-justify whitespace-pre-wrap break-words">
+              <p className="text-[13px] md:text-sm text-gray-800 leading-[1.6] text-left whitespace-pre-wrap break-words">
                 {cvData.summary}
               </p>
             </section>
@@ -134,22 +132,22 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
             ) : null,
           experience:
             cvData.experience && cvData.experience.length > 0 ? (
-              <section key="experience" className="break-inside-avoid">
+              <section key="experience" className="">
                 <SectionHeader title="Professional Experience" />
                 <div className="space-y-3 block">
                   {cvData.experience.map((exp, index) => {
                     const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                     return (
                       <div key={index} className="break-inside-avoid" style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
-                        <div className="text-xs md:text-sm text-gray-800 mb-1.5">
-                          <span className="font-bold">{exp.position}</span>
+                        <div className="text-[13px] md:text-sm text-gray-800 mb-1">
+                          <span className="font-bold text-gray-900">{exp.position}</span>
                           {exp.institutionName && (
                             <span> | {exp.institutionName}</span>
                           )}
                           {dur && <span> | {dur}</span>}
                         </div>
                         {exp.summary && (
-                          <div className="text-xs md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-3">
+                          <div className="text-[13px] md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-2 border-l-2 border-gray-200 pl-2">
                             {exp.summary}
                           </div>
                         )}
@@ -161,7 +159,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
             ) : null,
           education:
             cvData.education && cvData.education.length > 0 ? (
-              <section key="education" className="break-inside-avoid">
+              <section key="education" className="">
                 <SectionHeader title="Education" />
                 <div className="space-y-3 block">
                   {cvData.education.map((edu, index) => {
@@ -203,14 +201,18 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
             return cvData.customSections.map((section, sectionIndex) => (
               <section
                 key={`custom-${sectionIndex}`}
-                className="break-inside-avoid"
+                className=""
               >
                 <SectionHeader title={section.title} />
                 <div className="space-y-2.5 block">
                   {section.items.map((item, itemIndex) => {
                     const dur = fmtDuration(item.durationFrom, item.durationTo);
                     return (
-                      <div key={itemIndex} className="break-inside-avoid">
+                      <div 
+                        key={itemIndex} 
+                        className="break-inside-avoid"
+                        style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
+                      >
                         <div className="text-xs md:text-sm text-gray-800 mb-0.5">
                           <span className="font-bold">
                             {item.link ? (

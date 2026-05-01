@@ -102,26 +102,75 @@ Scoring Criteria:
    */
   ANALYZE_SECTION: (section, sectionData) => {
     if (section === "fullCv") {
-      return `You are a professional CV coach. Analyze the CV provided and do the following:
+      return `You are a professional CV coach and ATS expert. Analyze the CV data provided and do ALL of the following in one response:
 
-1) Check each section — Contact Information, Summary, Work Experience, Education, Technical Skills, Soft Skills, Languages. For any section that is EMPTY or has fewer than 2 meaningful entries, flag it as NEEDS ATTENTION and tell the user exactly what to add.
+1) Check each standard section — Contact Information, Summary, Work Experience, Education, Technical Skills, Soft Skills, Languages. Also check any custom sections present in the data (e.g. Certifications, Projects, Publications, Volunteer Work, etc.). Flag each section as "Empty", "Needs Attention", or "Good" with specific advice.
 
-2) For sections that have content, provide 2–3 specific, actionable improvement suggestions tailored to the job title provided.
+2) Calculate an overall completeness score (0–100). Deduct 10–15 points per empty major section. A fully empty CV must score below 20.
 
-3) Calculate an overall completeness score: deduct 10–15 points for each empty major section. A fully empty CV must score below 20%.
+3) Identify specific text fields that can be concretely improved. For each, provide a ready-to-use professional rewrite. Use ONLY these exact fieldId formats:
+   - "summary" for the professional summary
+   - "experience_0_summary", "experience_1_summary" etc. for experience descriptions (0-indexed)
+   - "education_0_summary", "education_1_summary" etc. for education descriptions (0-indexed)
+   - "customSections_0_items_0_description", "customSections_0_items_1_description" etc. for custom section item descriptions (both indices 0-indexed, first index = which custom section, second = which item within it)
 
-4) Return your response as valid JSON ONLY with no markdown, no fences, no preamble, in this exact structure:
+CRITICAL: Return ONLY valid JSON. NO markdown, NO code fences, NO preamble. Start with { end with }
+
+Return exactly this structure:
 {
-  "overallScore": number,
+  "overallScore": <number 0-100>,
   "sections": [
     {
       "name": "Contact Information",
-      "status": "Good" | "Needs Attention" | "Empty",
-      "suggestions": ["suggestion1", "suggestion2", "suggestion3"]
+      "status": "Good",
+      "suggestions": ["suggestion1"]
+    },
+    {
+      "name": "Summary",
+      "status": "Needs Attention",
+      "suggestions": ["suggestion1", "suggestion2"]
+    },
+    {
+      "name": "Work Experience",
+      "status": "Good",
+      "suggestions": []
+    },
+    {
+      "name": "Education",
+      "status": "Good",
+      "suggestions": []
+    },
+    {
+      "name": "Technical Skills",
+      "status": "Empty",
+      "suggestions": ["Add relevant technical skills"]
+    },
+    {
+      "name": "Soft Skills",
+      "status": "Good",
+      "suggestions": []
+    },
+    {
+      "name": "Languages",
+      "status": "Good",
+      "suggestions": []
     }
   ],
-  "generalAdvice": ["advice1", "advice2", "advice3"]
+  "generalAdvice": ["overall advice 1", "overall advice 2", "overall advice 3"],
+  "issues": [
+    {
+      "fieldId": "summary",
+      "originalText": "current text or empty string if missing",
+      "reason": "1 sentence explaining what is weak or missing",
+      "improvedText": "polished, professional, ready-to-use rewrite"
+    }
+  ]
 }
+
+Notes:
+- Include custom sections in the "sections" array using their actual title as the "name".
+- Only add entries to "issues" for fields with improvable or empty text. Skip fields that are already professional and complete.
+- For custom section items, use the correct 0-based indices matching the order they appear in the customSections array.
 
 CV Data:
 ${JSON.stringify(sectionData, null, 2)}`;

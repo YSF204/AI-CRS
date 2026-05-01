@@ -258,6 +258,7 @@ export default function useCVEditor() {
     showAnalysis,
     setShowAnalysis,
     analysisResult,
+    highlights,
     analyzing,
     showSkillGap,
     setShowSkillGap,
@@ -393,17 +394,57 @@ export default function useCVEditor() {
         return;
       }
 
-      const styles = Array.from(
-        document.querySelectorAll('style, link[rel="stylesheet"]'),
-      )
+      // Clone the element and strip analysis highlight styles so they
+      // don't appear in the PDF output.
+      const cleanedEl = (() => {
+        const clone = el.cloneNode(true);
+        // Strip analysis highlights
+        clone.querySelectorAll("[style]").forEach((node) => {
+          const s = node.style;
+          if (s.outline && s.outline.includes("dashed")) {
+            s.outline = "";
+            s.outlineOffset = "";
+            s.backgroundColor = "";
+            s.borderRadius = "";
+          }
+        });
+        clone.querySelectorAll(".break-inside-avoid").forEach((node) => {
+          node.classList.remove("break-inside-avoid");
+        });
+        return clone;
+      })();
+
+      // Only capture inline <style> tags — NOT external <link> tags.
+      // External links (Google Fonts, CDN) force Puppeteer to make network
+      // requests which causes the networkidle0 wait to balloon to 30+ seconds.
+      const styles = Array.from(document.querySelectorAll("style"))
         .map((s) => s.outerHTML)
         .join("\n");
 
-      const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8">${styles}<style>
+      const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8">
+        ${styles}<style>
+        /* ── Base reset ── */
         html, body { margin: 0; padding: 0; background: #fff !important; }
         * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
-        body > * { box-shadow: none !important; border: none !important; }
-      </style></head><body><div style="width:794px;margin:0 auto;background:#fff;">${el.innerHTML}</div></body></html>`;
+
+        /* ── PDF scroll performance: strip effects that PDF viewers render poorly ──
+           Box-shadows, backdrop-filters, animations and will-change hints force
+           PDF viewers to create separate compositor layers per element, causing
+           low-FPS scrolling. Removing them makes the PDF render as flat vectors. */
+        * {
+          box-shadow: none !important;
+          text-shadow: none !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          filter: none !important;
+          animation: none !important;
+          transition: none !important;
+          will-change: auto !important;
+        }
+
+        /* ── Strip analysis highlight outlines ── */
+        [style*="dashed"] { outline: none !important; background: transparent !important; }
+      </style></head><body><div style="width:794px;margin:0 auto;background:#fff;">${cleanedEl.innerHTML}</div></body></html>`;
       const res = await api.post(
         `/cvs/${id}/download-pdf`,
         { html: htmlContent },
@@ -537,6 +578,7 @@ export default function useCVEditor() {
     showAnalysis,
     setShowAnalysis,
     analysisResult,
+    highlights,
     analyzing,
     showSkillGap,
     setShowSkillGap,

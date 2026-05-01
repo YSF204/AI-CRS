@@ -32,8 +32,8 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
   if (cvData.contact?.github) contactItems.push(cvData.contact.github);
 
   const SectionHeader = ({ title }) => (
-    <div className="border-y-2 border-blue-400/60 py-1 mb-2.5 mt-5">
-      <h2 className="text-[13px] font-bold uppercase text-blue-600 tracking-wider">
+    <div className="border-y-[1.5px] border-blue-400/60 py-1 mb-2 mt-4">
+      <h2 className="text-[13px] md:text-[14px] font-bold uppercase text-blue-600 tracking-wider">
         {title}
       </h2>
     </div>
@@ -55,13 +55,10 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
     >
       <header className="flex justify-between items-start mb-3">
         <div className="flex-1 pr-4">
-          <h1 className="text-[26px] md:text-[30px] lg:text-[34px] font-extrabold text-blue-600 uppercase mb-1.5">
+          <h1 className="text-[26px] md:text-[30px] font-extrabold text-blue-600 uppercase mb-1">
             {userName}
           </h1>
-          <h2 className="text-base md:text-lg font-bold text-gray-900 uppercase mb-1.5 tracking-wide">
-            {cvData.jobTitle}
-          </h2>
-          <div className="flex flex-wrap items-center gap-1.5 text-xs md:text-sm text-gray-700">
+          <div className="flex flex-wrap items-center gap-1.5 text-[13px] md:text-[14px] text-gray-700">
             {contactItems.map((item, index) => (
               <React.Fragment key={index}>
                 <span>{item}</span>
@@ -88,14 +85,14 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
           summary: cvData.summary ? (
             <section key="summary" className="break-inside-avoid" style={getHighlightStyle('summary')}>
               <SectionHeader title="Summary" />
-              <p className="text-xs md:text-sm text-gray-800 leading-relaxed text-justify whitespace-pre-wrap break-words">
+              <p className="text-[13px] md:text-[14px] text-gray-800 leading-relaxed text-justify whitespace-pre-wrap break-words">
                 {cvData.summary}
               </p>
             </section>
           ) : null,
           experience:
             cvData.experience && cvData.experience.length > 0 ? (
-              <section key="experience" className="break-inside-avoid">
+              <section key="experience" className="">
                 <SectionHeader title="Professional Experience" />
                 <div className="space-y-3.5 block">
                   {cvData.experience.map((exp, index) => {
@@ -103,20 +100,20 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
                     return (
                       <div key={index} className="break-inside-avoid" style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
                         <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
-                          <h3 className="text-[13px] font-bold text-gray-900">
+                          <h3 className="text-[13.5px] md:text-[14px] font-bold text-gray-900">
                             {exp.position}
                             {exp.institutionName
                               ? `, ${exp.institutionName}`
                               : ""}
                           </h3>
                           {dur && (
-                            <div className="text-xs md:text-sm text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">
+                            <div className="text-[13px] md:text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">
                               {dur}
                             </div>
                           )}
                         </div>
                         {exp.summary && (
-                          <div className="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1">
+                          <div className="text-[13px] md:text-[14px] text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1">
                             {exp.summary}
                           </div>
                         )}
@@ -128,7 +125,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
             ) : null,
           education:
             cvData.education && cvData.education.length > 0 ? (
-              <section key="education" className="break-inside-avoid">
+              <section key="education" className="">
                 <SectionHeader title="Education" />
                 <div className="space-y-3.5 block">
                   {cvData.education.map((edu, index) => {
@@ -136,22 +133,22 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
                     return (
                       <div key={index} className="break-inside-avoid" style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}>
                         <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
-                          <h3 className="text-[13px] font-bold text-gray-900">
+                          <h3 className="text-[13.5px] md:text-[14px] font-bold text-gray-900">
                             {edu.certification}
                           </h3>
                           {dur && (
-                            <div className="text-xs md:text-sm text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">
+                            <div className="text-[13px] md:text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">
                               {dur}
                             </div>
                           )}
                         </div>
                         {edu.institutionName && (
-                          <p className="text-xs md:text-sm text-gray-800 mb-1">
+                          <p className="text-[13px] md:text-[14px] text-gray-800 mb-1">
                             {edu.institutionName}
                           </p>
                         )}
                         {edu.summary && (
-                          <div className="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3">
+                          <div className="text-[13px] md:text-[14px] text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3">
                             {edu.summary}
                           </div>
                         )}
@@ -165,7 +162,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
             cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
               <section key="technicalSkills" className="break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
                 <SectionHeader title="Technical Skills" />
-                <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-xs md:text-sm text-gray-700">
+                <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-[13px] md:text-[14px] text-gray-700">
                   {cvData.technicalSkills.map((skill, index) => (
                     <li key={index}>{skill}</li>
                   ))}
@@ -176,7 +173,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
             cvData.softSkills && cvData.softSkills.length > 0 ? (
               <section key="softSkills" className="break-inside-avoid" style={getHighlightStyle('softSkills')}>
                 <SectionHeader title="Soft Skills" />
-                <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-xs md:text-sm text-gray-700">
+                <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-[13px] md:text-[14px] text-gray-700">
                   {cvData.softSkills.map((skill, index) => (
                     <li key={index}>{skill}</li>
                   ))}
@@ -187,7 +184,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
             cvData.language && cvData.language.length > 0 ? (
               <section key="language" className="break-inside-avoid" style={getHighlightStyle('language')}>
                 <SectionHeader title="Languages" />
-                <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-xs md:text-sm text-gray-700">
+                <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-[13px] md:text-[14px] text-gray-700">
                   {cvData.language.map((item, index) => {
                     const displayText =
                       typeof item === "string"
@@ -215,7 +212,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
             return cvData.customSections.map((section, sectionIndex) => (
               <section
                 key={`custom-${sectionIndex}`}
-                className="break-inside-avoid"
+                className=""
               >
                 <SectionHeader title={section.title} />
                 <div className="space-y-2 block">
@@ -224,7 +221,8 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
                     return (
                       <div
                         key={itemIndex}
-                        className="text-xs md:text-sm text-gray-800 break-inside-avoid"
+                        className="text-[13px] md:text-[14px] text-gray-800 break-inside-avoid"
+                        style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
                       >
                         <span className="font-bold text-gray-900 mr-2">
                           •{" "}

@@ -48,16 +48,13 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
     >
       {/* HEADER SECTION */}
       <header className="text-center mb-2">
-        <h1 className="text-[28px] md:text-[34px] font-bold uppercase tracking-tight text-gray-900 mb-0">
+        <h1 className="text-[26px] md:text-[30px] font-bold uppercase tracking-tight text-gray-900 mb-0">
           {userName}
         </h1>
-        <h2 className="text-sm md:text-base uppercase tracking-[0.15em] text-gray-700">
-          {cvData.jobTitle}
-        </h2>
       </header>
 
       {/* CONTACT INFO */}
-      <div className="border-y-2 border-gray-300 py-0.5 mb-6">
+      <div className="border-y-[1.5px] border-gray-300 py-0.5 mb-4">
         <div className="flex flex-wrap justify-center items-center gap-1 text-[13px] md:text-sm text-gray-800">
           {contactItems.map((item, index) => (
             <React.Fragment key={index}>
@@ -73,11 +70,11 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary" className="break-inside-avoid mb-6" style={getHighlightStyle('summary')}>
-              <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-gray-900 mb-1">
+            <section key="summary" className="break-inside-avoid mb-4" style={getHighlightStyle('summary')}>
+              <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
                 Objective
               </h3>
-              <hr className="border-t-2 border-gray-300 mt-1 mb-3" />
+              <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
               <p className="text-[13.5px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
                 {cvData.summary}
               </p>
@@ -85,11 +82,11 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
           ) : null,
           education:
             cvData.education && cvData.education.length > 0 ? (
-              <section key="education" className="break-inside-avoid mb-6">
-                <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-gray-900 mb-1">
+              <section key="education" className="mb-4">
+                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
                   Education
                 </h3>
-                <hr className="border-t-2 border-gray-300 mt-1 mb-3" />
+                <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
                 <div className="space-y-4 block">
                   {cvData.education.map((edu, index) => {
                     const dur = fmtDuration(edu.durationFrom, edu.durationTo);
@@ -117,11 +114,11 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
             ) : null,
           experience:
             cvData.experience && cvData.experience.length > 0 ? (
-              <section key="experience" className="break-inside-avoid mb-6">
-                <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-gray-900 mb-1">
+              <section key="experience" className="mb-4">
+                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
                   Experience
                 </h3>
-                <hr className="border-t-2 border-gray-300 mt-1 mb-3" />
+                <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
                 <div className="space-y-4 block">
                   {cvData.experience.map((exp, index) => {
                     const dur = fmtDuration(exp.durationFrom, exp.durationTo);
@@ -151,13 +148,13 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
             cvData.technicalSkills?.length > 0 ? (
               <section
                 key="technicalSkills"
-                className="break-inside-avoid mb-6"
+                className="break-inside-avoid mb-4"
                 style={getHighlightStyle('technicalSkills')}
               >
-                <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-gray-900 mb-1">
+                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
                   Technical Skills
                 </h3>
-                <hr className="border-t-2 border-gray-300 mt-1 mb-3" />
+                <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
                 <p className="text-[13.5px] md:text-sm text-gray-800 leading-relaxed">
                   {cvData.technicalSkills.join(", ")}
                 </p>
@@ -165,11 +162,11 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
             ) : null,
           softSkills:
             cvData.softSkills?.length > 0 ? (
-              <section key="softSkills" className="break-inside-avoid mb-6" style={getHighlightStyle('softSkills')}>
-                <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-gray-900 mb-1">
+              <section key="softSkills" className="break-inside-avoid mb-4" style={getHighlightStyle('softSkills')}>
+                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
                   Soft Skills
                 </h3>
-                <hr className="border-t-2 border-gray-300 mt-1 mb-3" />
+                <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
                 <p className="text-[13.5px] md:text-sm text-gray-800 leading-relaxed">
                   {cvData.softSkills.join(", ")}
                 </p>
@@ -177,11 +174,11 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
             ) : null,
           language:
             cvData.language?.length > 0 ? (
-              <section key="language" className="break-inside-avoid mb-6" style={getHighlightStyle('language')}>
-                <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-gray-900 mb-1">
+              <section key="language" className="break-inside-avoid mb-4" style={getHighlightStyle('language')}>
+                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
                   Languages
                 </h3>
-                <hr className="border-t-2 border-gray-300 mt-1 mb-3" />
+                <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
                 <p className="text-[13.5px] md:text-sm text-gray-800 leading-relaxed">
                   {cvData.language
                     .map((item) =>
@@ -210,38 +207,46 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
             return cvData.customSections.map((section, sectionIndex) => (
               <section
                 key={`custom-${sectionIndex}`}
-                className="break-inside-avoid mb-6"
+                className="mb-4"
               >
-                <h3 className="text-sm md:text-base font-bold uppercase tracking-wider text-gray-900 mb-1">
+                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
                   {section.title}
                 </h3>
-                <hr className="border-t-2 border-gray-300 mt-1 mb-3" />
+                <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
                 <div className="space-y-4 block">
                   {section.items.map((item, itemIndex) => {
                     const dur = fmtDuration(item.durationFrom, item.durationTo);
                     return (
-                      <div key={itemIndex} className="break-inside-avoid">
-                        <p className="text-[13.5px] md:text-sm text-gray-900">
-                          {item.link ? (
-                            <a
-                              href={item.link}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="font-semibold text-blue-600 hover:underline"
-                            >
-                              {item.name}
-                            </a>
-                          ) : (
-                            <span className="font-semibold">{item.name}</span>
-                          )}
+                      <div 
+                        key={itemIndex} 
+                        className="break-inside-avoid"
+                        style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
+                      >
+                        <div className="flex justify-between items-baseline mb-0.5">
+                          <h3 className="text-[13px] font-bold text-gray-900">
+                            {item.link ? (
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline"
+                              >
+                                {item.name}
+                              </a>
+                            ) : (
+                              item.name
+                            )}
+                          </h3>
                           {dur && (
-                            <span className="text-gray-500">{` | ${dur}`}</span>
+                            <span className="text-xs md:text-sm text-gray-500">
+                              {dur}
+                            </span>
                           )}
-                        </p>
+                        </div>
                         {item.description && (
-                          <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                          <div className="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1">
                             {item.description}
-                          </p>
+                          </div>
                         )}
                       </div>
                     );

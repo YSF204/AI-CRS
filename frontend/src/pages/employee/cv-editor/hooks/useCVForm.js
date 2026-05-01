@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   DEFAULT_SECTION_ORDER,
   newCustomSection,
@@ -36,21 +36,24 @@ export default function useCVForm(showToast, autoSaveFunction = null) {
 
   // Auto-save refs
   const autoSaveTimerRef = useRef(null);
+  // Keep a ref to always have the latest form when the timer fires
+  const formRef = useRef(form);
+  useEffect(() => { formRef.current = form; }, [form]);
 
-  // Auto-save Functionality
+  // Auto-save Functionality — uses formRef so the timer always fires with latest state
   const triggerAutoSave = useCallback(() => {
     if (!autoSaveFunction) return;
 
-    // Clear existing timer
+    // Clear existing timer (debounce)
     if (autoSaveTimerRef.current) {
       clearTimeout(autoSaveTimerRef.current);
     }
 
-    // Set new timer to trigger auto-save after debounce
+    // Set new timer — reads formRef.current at fire time, not at schedule time
     autoSaveTimerRef.current = setTimeout(async () => {
       try {
         setIsSaving(true);
-        await autoSaveFunction(form);
+        await autoSaveFunction(formRef.current);
         setLastSavedAt(new Date());
         // Silent save - no toast notification
       } catch (error) {
@@ -59,8 +62,8 @@ export default function useCVForm(showToast, autoSaveFunction = null) {
       } finally {
         setIsSaving(false);
       }
-    }, 1000);
-  }, [autoSaveFunction, form]);
+    }, 1500);
+  }, [autoSaveFunction]); // no longer depends on `form` — uses ref instead
 
   // Simple field setters (non-debounced state, debounced save)
   const set = (key) => (val) => {
@@ -561,6 +564,11 @@ export default function useCVForm(showToast, autoSaveFunction = null) {
     removeCustomItem,
     updateCustomItem,
     updateField,
+    suggestions,
+    isLoadingSuggestions,
+    fetchSuggestions: debouncedFetchSuggestions,
+    fetchSingleSummarySuggestion,
+    handleSuggestionSelect,
   };
 
   return {

@@ -69,7 +69,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
           {title}
         </h4>
         {description && (
-          <div className="text-xs md:text-sm text-gray-600 leading-relaxed whitespace-pre-wrap break-words">
+          <div className="text-[13px] md:text-[13.5px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words">
             {description}
           </div>
         )}
@@ -116,8 +116,8 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
 
         {/* ABOUT ME */}
         {cvData.summary && (
-          <div className="mb-6" style={getHighlightStyle('summary')}>
-            <h3 className="uppercase text-xs md:text-sm font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
+          <div className="mb-4" style={getHighlightStyle('summary')}>
+            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               About Me
             </h3>
             <p className="text-xs md:text-[13px] leading-relaxed text-gray-300 whitespace-pre-wrap break-words">
@@ -128,8 +128,8 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
 
         {/* LINKS */}
         {(cvData.contact?.linkedin || cvData.contact?.github) && (
-          <div className="mb-6">
-            <h3 className="uppercase text-xs md:text-sm font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
+          <div className="mb-4">
+            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               Links
             </h3>
             <div className="flex flex-col gap-2.5 text-xs md:text-[13px]">
@@ -165,8 +165,8 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
 
         {/* TECHNICAL SKILLS — simple tags, no fake bars */}
         {cvData.technicalSkills && cvData.technicalSkills.length > 0 && (
-          <div className="mb-6" style={getHighlightStyle('technicalSkills')}>
-            <h3 className="uppercase text-xs md:text-sm font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
+          <div className="mb-4" style={getHighlightStyle('technicalSkills')}>
+            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               Technical Skills
             </h3>
             <div className="flex flex-wrap gap-1.5">
@@ -184,8 +184,8 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
 
         {/* SOFT SKILLS */}
         {cvData.softSkills && cvData.softSkills.length > 0 && (
-          <div className="mb-6" style={getHighlightStyle('softSkills')}>
-            <h3 className="uppercase text-xs md:text-sm font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
+          <div className="mb-4" style={getHighlightStyle('softSkills')}>
+            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               Soft Skills
             </h3>
             <div className="flex flex-wrap gap-1.5">
@@ -203,8 +203,8 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
 
         {/* LANGUAGES — simple tags, no fake bars */}
         {cvData.language && cvData.language.length > 0 && (
-          <div className="mb-6" style={getHighlightStyle('language')}>
-            <h3 className="uppercase text-xs md:text-sm font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
+          <div className="mb-4" style={getHighlightStyle('language')}>
+            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               Languages
             </h3>
             <div className="flex flex-wrap gap-1.5">
@@ -228,31 +228,38 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
 
         {/* SIDEBAR CUSTOM SECTIONS (Hobbies, References) */}
         {sidebarCustomSections.map((section, idx) => (
-          <div key={idx} className="mb-6">
-            <h3 className="uppercase text-xs md:text-sm font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
+          <div key={idx} className="mb-4">
+            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               {section.title}
             </h3>
             <div className="flex flex-col gap-2 text-xs md:text-[13px] text-gray-300">
-              {section.items.map((item, itemIdx) => (
-                <div key={itemIdx}>
-                  {section.title.toLowerCase() === "hobbies" ? (
-                    <span className="uppercase tracking-wider">
-                      • {item.name}
-                    </span>
-                  ) : (
-                    <>
-                      <div className="font-bold text-white uppercase">
-                        {item.name}
-                      </div>
-                      {item.description && (
-                        <div className="whitespace-pre-wrap break-words">
-                          {item.description}
+              {section.items.map((item, itemIdx) => {
+                const realSectionIdx = cvData.customSections.indexOf(section);
+                return (
+                  <div 
+                    key={itemIdx}
+                    style={getHighlightStyle(`customSections_${realSectionIdx}_items_${itemIdx}_description`)}
+                    className="p-1"
+                  >
+                    {section.title.toLowerCase() === "hobbies" ? (
+                      <span className="uppercase tracking-wider">
+                        • {item.name}
+                      </span>
+                    ) : (
+                      <>
+                        <div className="font-bold text-white uppercase">
+                          {item.name}
                         </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              ))}
+                        {item.description && (
+                          <div className="whitespace-pre-wrap break-words">
+                            {item.description}
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         ))}
@@ -268,18 +275,15 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
         }}
       >
         {/* HEADER AREA */}
-        <div className="flex justify-between items-start mb-8">
+        <div className="flex justify-between items-start mb-6">
           <div className="flex-1">
-            <h1 className="text-[32px] md:text-[36px] font-black uppercase text-gray-700 leading-none mb-2 tracking-tight">
+            <h1 className="text-[28px] md:text-[32px] font-black uppercase text-gray-700 leading-none mb-2 tracking-tight">
               {userName.split(" ").map((name, i) => (
                 <span key={i} className="block">
                   {name}
                 </span>
               ))}
             </h1>
-            <h2 className="text-xs md:text-[13px] font-bold uppercase tracking-[0.2em] text-gray-500">
-              {cvData.jobTitle}
-            </h2>
           </div>
           <div className="flex flex-col gap-1.5 text-[11px] md:text-[12px] text-gray-500 text-right">
             {(cvData.address?.street || cvData.address?.city) && (
@@ -334,7 +338,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
           const mainBlocks = {
             experience:
               cvData.experience && cvData.experience.length > 0 ? (
-                <div key="experience" className="break-inside-avoid mb-5">
+                <div key="experience" className="mb-5">
                   <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mb-5 border-b border-gray-400 pb-1">
                     Work Experience
                   </h3>
@@ -359,7 +363,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
               ) : null,
             education:
               cvData.education && cvData.education.length > 0 ? (
-                <div key="education" className="break-inside-avoid mb-5">
+                <div key="education" className="mb-5">
                   <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mb-5 border-b border-gray-400 pb-1">
                     Education
                   </h3>
@@ -396,7 +400,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
           return sectionOrder.map((key) => {
             if (key === "customSections" && mainCustomSections.length > 0) {
               return mainCustomSections.map((section, idx) => (
-                <div key={`custom-${idx}`} className="break-inside-avoid mb-5">
+                <div key={`custom-${idx}`} className="mb-5">
                   <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mb-5 border-b border-gray-400 pb-1">
                     {section.title}
                   </h3>
@@ -406,12 +410,16 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
                         item.durationFrom,
                         item.durationTo,
                       );
+                      // Find real index in original cvData.customSections array
+                      const realSectionIdx = cvData.customSections.indexOf(section);
+                      
                       return (
                         <TimelineItem
                           key={itemIdx}
                           leftText1={dur}
                           leftText2={""}
                           leftText3={""}
+                          highlightStyle={getHighlightStyle(`customSections_${realSectionIdx}_items_${itemIdx}_description`)}
                           title={
                             item.link ? (
                               <a

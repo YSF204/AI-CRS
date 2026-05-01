@@ -513,6 +513,35 @@ export const analyzeSection = catchAsync(async (req, res, next) => {
     );
   }
 
+  // ── fullCv: AI returns { overallScore, sections, generalAdvice }
+  if (section === "fullCv") {
+    const overallScore = parsed.overallScore ?? null;
+    const sections = parsed.sections || [];
+    const generalAdvice = parsed.generalAdvice || [];
+    const issues = parsed.issues || [];
+
+    // Mark as isEmpty when score is very low and most sections are flagged Empty
+    const emptyCount = sections.filter((s) => s.status === "Empty").length;
+    const isEmpty =
+      overallScore != null &&
+      overallScore < 25 &&
+      sections.length > 0 &&
+      emptyCount >= Math.floor(sections.length * 0.6);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        section,
+        overallScore,
+        sections,
+        generalAdvice,
+        issues,
+        isEmpty,
+      },
+    });
+  }
+
+  // ── Individual section: AI returns { atsScore, atsFeedback, issues }
   const issues = parsed.issues || [];
   const atsScore = parsed.atsScore || null;
   const atsFeedback = parsed.atsFeedback || "";

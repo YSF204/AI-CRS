@@ -57,12 +57,12 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
     );
 
   const SectionHeader = ({ title }) => (
-    <div className="my-4">
-      <hr className="border-t-2 border-gray-300 mb-1.5" />
-      <h2 className="text-center text-xs md:text-[13px] font-bold uppercase tracking-[0.15em] text-gray-800">
+    <div className="my-3">
+      <hr className="border-t-[1.5px] border-gray-300 mb-1" />
+      <h2 className="text-center text-[13px] md:text-sm font-bold uppercase tracking-[0.15em] text-gray-800">
         {title}
       </h2>
-      <hr className="border-t-2 border-gray-300 mt-1.5" />
+      <hr className="border-t-[1.5px] border-gray-300 mt-1" />
     </div>
   );
 
@@ -81,12 +81,10 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
       }}
     >
       <header className="text-center mb-4">
-        <h1 className="text-[32px] md:text-[38px] lg:text-[44px] font-light uppercase tracking-[0.3em] text-gray-800 mb-2.5 ml-[0.3em]">
+        <h1 className="text-[28px] md:text-[34px] font-semibold uppercase tracking-[0.2em] text-gray-800 mb-2">
           {userName}
         </h1>
-        <h2 className="text-xs md:text-sm font-bold uppercase tracking-[0.15em] text-gray-600 mb-3">
-          {cvData.jobTitle}
-        </h2>
+
         <div className="flex flex-wrap justify-center items-center gap-1.5 text-xs md:text-sm text-gray-800">
           {contactItems.map((item, index) => (
             <React.Fragment key={index}>
@@ -103,21 +101,21 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
       {cvData.customSections?.find(
         (sec) => sec.title.toLowerCase() === "federal details",
       ) && (
-        <div className="border-y-[2.5px] border-double border-gray-300 py-2 mb-5 text-center text-[11px] md:text-[12px] text-gray-800 leading-relaxed font-medium">
-          {cvData.customSections
-            .find((sec) => sec.title.toLowerCase() === "federal details")
-            .items.map((item, idx) => (
-              <span key={idx} className="mr-2 last:mr-0 whitespace-pre-line">
-                <strong>{item.name}:</strong> {item.description}
-                {idx <
-                  cvData.customSections.find(
-                    (sec) => sec.title.toLowerCase() === "federal details",
-                  ).items.length -
+          <div className="border-y-[2.5px] border-double border-gray-300 py-2 mb-5 text-center text-[11px] md:text-[12px] text-gray-800 leading-relaxed font-medium">
+            {cvData.customSections
+              .find((sec) => sec.title.toLowerCase() === "federal details")
+              .items.map((item, idx) => (
+                <span key={idx} className="mr-2 last:mr-0 whitespace-pre-line">
+                  <strong>{item.name}:</strong> {item.description}
+                  {idx <
+                    cvData.customSections.find(
+                      (sec) => sec.title.toLowerCase() === "federal details",
+                    ).items.length -
                     1 && " |"}
-              </span>
-            ))}
-        </div>
-      )}
+                </span>
+              ))}
+          </div>
+        )}
 
       {(() => {
         const sectionBlocks = {
@@ -131,14 +129,14 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
           ) : null,
           experience:
             cvData.experience && cvData.experience.length > 0 ? (
-              <section key="experience" className="break-inside-avoid mb-5">
+              <section key="experience" className="mb-5">
                 <SectionHeader title="Work Experiences" />
                 <div className="space-y-5 block">
                   {cvData.experience.map((exp, index) => {
                     const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                     return (
                       <div key={index} className="break-inside-avoid" style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
-                        <div className="flex justify-between items-baseline text-xs md:text-[13px] text-gray-900 mb-1">
+                        <div className="flex justify-between items-baseline text-[13px] md:text-sm text-gray-900 mb-1">
                           <div>
                             <span className="font-bold">{exp.position}</span>
                             {exp.institutionName && (
@@ -152,7 +150,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                           {dur && <div className="font-medium">{dur}</div>}
                         </div>
                         {exp.summary && (
-                          <div className="text-xs md:text-[13px] text-gray-700 leading-relaxed whitespace-pre-wrap break-words mt-1.5 text-justify">
+                          <div className="text-[13px] md:text-[13.5px] text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1.5 text-left">
                             {exp.summary}
                           </div>
                         )}
@@ -164,7 +162,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
             ) : null,
           education:
             cvData.education && cvData.education.length > 0 ? (
-              <section key="education" className="break-inside-avoid mb-5">
+              <section key="education" className="mb-5">
                 <SectionHeader title="Education" />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5">
                   {cvData.education.map((edu, index) => {
@@ -172,7 +170,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                     return (
                       <div
                         key={index}
-                        className="text-xs md:text-[13px] break-inside-avoid"
+                        className="text-[13px] md:text-sm break-inside-avoid"
                         style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}
                       >
                         <div className="font-bold text-gray-900">
@@ -259,7 +257,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                 return (
                   <section
                     key={`custom-${sectionIndex}`}
-                    className="break-inside-avoid mb-5"
+                    className="mb-5"
                   >
                     <SectionHeader title={section.title} />
                     <div
@@ -278,6 +276,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                           <div
                             key={itemIndex}
                             className="text-xs md:text-[13px] break-inside-avoid"
+                            style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
                           >
                             <div className="font-bold text-gray-900">
                               {item.link ? (

@@ -4,7 +4,7 @@ const stats = [
   { value: '500+', label: 'CVs Built', icon: '◆' },
   { value: '98%', label: 'ATS Pass Rate', icon: '◆' },
   { value: '4', label: 'Developers', icon: '◆' },
-  { value: '3', label: 'AI Models', icon: '◆' },
+  { value: '2', label: 'AI Models', icon: '◆' },
 ];
 
 export default function StatsSection() {

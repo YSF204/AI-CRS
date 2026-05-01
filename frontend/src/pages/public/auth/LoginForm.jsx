@@ -6,7 +6,7 @@ import AuthInput from "./components/AuthInput";
 import ErrorBanner from "./components/ErrorBanner";
 import api from "../../../services/api";
 
-export default function LoginForm({ setMode }) {
+export default function LoginForm({ setMode, setGoogleData }) {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -49,15 +49,10 @@ export default function LoginForm({ setMode }) {
       });
 
       if (res.status === 206 || res.data.requireProfileCompletion) {
-        localStorage.setItem(
-          "pendingGoogleRegistration",
-          JSON.stringify({
-            token: credentialResponse.credential,
-            ...res.data.googleData,
-          }),
-        );
-        // Notify SignupForm (which may already be mounted) to re-read the payload
-        window.dispatchEvent(new Event("googlePayloadReady"));
+        setGoogleData({
+          token: credentialResponse.credential,
+          ...res.data.googleData,
+        });
         setMode?.("signup");
         return;
       }

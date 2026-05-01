@@ -7,6 +7,7 @@ import SignupForm from './SignupForm';
 
 export default function AuthPage() {
   const [mode, setMode] = useState('login');
+  const [googleData, setGoogleData] = useState(null);
   const { theme, toggleTheme } = useTheme();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -19,6 +20,7 @@ export default function AuthPage() {
 
   const handleModeChange = (nextMode) => {
     setMode(nextMode);
+    setGoogleData(null); // Clear pending Google state when switching between Login/Signup
     setSearchParams({ mode: nextMode }, { replace: true });
   };
 
@@ -176,12 +178,13 @@ export default function AuthPage() {
 
         {/* Form content */}
         <div style={{ display: mode === 'login' ? 'block' : 'none' }}>
-          <LoginForm setMode={setMode} />
+          <LoginForm setMode={setMode} setGoogleData={setGoogleData} />
         </div>
         <div style={{ display: mode === 'signup' ? 'block' : 'none' }}>
-          <SignupForm setMode={setMode} />
+          <SignupForm setMode={setMode} googleData={googleData} setGoogleData={setGoogleData} />
         </div>
       </div>
+
 
       {/* Decorative elements - Neo Minimal style */}
       <div

@@ -45,58 +45,73 @@ export default function CVTemplates() {
               <h1
                 className="flex items-center gap-3"
                 style={{
-                  fontFamily: "'Space Grotesk', sans-serif",
-                  fontWeight: 800,
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 900,
                   fontSize: "clamp(1.8rem, 4vw, 2.6rem)",
                   letterSpacing: "-0.02em",
                   textTransform: "uppercase",
                   margin: 0,
                 }}
               >
-                <Sparkles size={28} style={{ color: "#facc15" }} />
+                <Sparkles size={28} style={{ color: "var(--nm-warning)" }} />
                 CV Templates
               </h1>
               <p
                 style={{
-                  fontFamily: "'DM Mono', monospace",
-                  fontSize: "0.78rem",
-                  color: "var(--fg-muted)",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.85rem",
+                  color: "var(--nm-text-tertiary)",
                   marginTop: "0.5rem",
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
                 }}
               >
-                {TEMPLATES.length} professionally designed templates — click one
-                to get started.
+                {TEMPLATES.length} Configuration Blueprints — Select Matrix to Initialize
               </p>
             </div>
 
             <div
               className="stat-pill"
-              style={{ gap: "0.5rem", flexShrink: 0, alignSelf: "flex-start" }}
+              style={{ 
+                gap: "0.5rem", 
+                flexShrink: 0, 
+                alignSelf: "flex-start",
+                border: '4px solid var(--nm-ink)',
+                padding: '8px 16px',
+                background: 'var(--nm-surface)',
+                fontFamily: 'var(--font-display)',
+                fontWeight: 900,
+                fontSize: '11px',
+                textTransform: 'uppercase'
+              }}
             >
-              <Layers size={14} />
-              <span>{TEMPLATES.length} Templates</span>
+              <Layers size={14} strokeWidth={2.5} />
+              <span>{TEMPLATES.length} Vectors</span>
             </div>
           </div>
 
           <div
             style={{
-              height: 4,
+              height: 8,
               background:
-                "repeating-linear-gradient(90deg, #facc15 0, #facc15 24px, transparent 24px, transparent 32px)",
+                "repeating-linear-gradient(90deg, var(--nm-primary) 0, var(--nm-primary) 24px, transparent 24px, transparent 32px)",
               marginTop: "1.5rem",
-              border: "2px solid var(--border-color)",
+              border: "4px solid var(--nm-ink)",
             }}
           />
         </div>
 
         {apiError && (
           <div
-            className="brutal-card mb-6 p-4"
+            className="nm-card mb-6 p-4"
             style={{
-              background: "#f97316",
-              color: "#0a0a0a",
-              fontFamily: "'DM Mono', monospace",
+              background: "var(--nm-error)",
+              color: "#fff",
+              fontFamily: "var(--font-display)",
+              fontWeight: 900,
               fontSize: "0.8rem",
+              textTransform: "uppercase",
             }}
           >
             {apiError}
@@ -104,7 +119,7 @@ export default function CVTemplates() {
         )}
 
         <div
-          className="grid gap-6"
+          className="grid gap-8"
           style={{
             gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
           }}
@@ -124,16 +139,19 @@ export default function CVTemplates() {
         </div>
 
         <div
-          className="mt-10 text-center"
+          className="mt-16 text-center"
           style={{
-            fontFamily: "'DM Mono', monospace",
-            fontSize: "0.72rem",
-            color: "var(--fg-muted)",
-            letterSpacing: "0.08em",
+            fontFamily: "var(--font-display)",
+            fontSize: "0.75rem",
+            color: "var(--nm-text-tertiary)",
+            letterSpacing: "0.15em",
+            fontWeight: 900,
+            textTransform: "uppercase",
           }}
         >
-          Click any template to preview and create your CV →
+          Initialize generation sequence by selecting a target blueprint
         </div>
+
       </div>
 
       {modalOpen && selected && (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import api from "../../../../services/api";
 
 export default function useCVAnalysis({
@@ -25,26 +25,43 @@ export default function useCVAnalysis({
     setAnalyzing(true);
     try {
       const filtered = filteredFormData();
-      const flat = {};
-      if (filtered.summary !== undefined) flat.summary = filtered.summary || "";
-      if (filtered.jobTitle !== undefined)
-        flat.jobTitle = filtered.jobTitle || "";
-      filtered.experience?.forEach((exp, i) => {
-        flat[`experience_${i}_summary`] = exp.summary || "";
-      });
-      filtered.education?.forEach((edu, i) => {
-        flat[`education_${i}_summary`] = edu.summary || "";
-      });
-      filtered.customSections?.forEach((sec, sIdx) => {
-        sec.items?.forEach((item, iIdx) => {
-          flat[`customSections_${sIdx}_items_${iIdx}_description`] =
-            item.description || "";
-        });
-      });
+
+      // Send the full structured CV data so the AI can evaluate every section
+      // (contact, skills, languages, etc.) — not just text fields.
+      const cvPayload = {
+        jobTitle: filtered.jobTitle || "",
+        summary: filtered.summary || "",
+        contact: filtered.contact || {},
+        address: filtered.address || {},
+        experience: (filtered.experience || []).map((exp) => ({
+          position: exp.position || "",
+          institutionName: exp.institutionName || "",
+          durationFrom: exp.durationFrom || "",
+          durationTo: exp.durationTo || "",
+          summary: exp.summary || "",
+        })),
+        education: (filtered.education || []).map((edu) => ({
+          institutionName: edu.institutionName || "",
+          certification: edu.certification || "",
+          durationFrom: edu.durationFrom || "",
+          durationTo: edu.durationTo || "",
+          summary: edu.summary || "",
+        })),
+        technicalSkills: filtered.technicalSkills || [],
+        softSkills: filtered.softSkills || [],
+        language: filtered.language || [],
+        customSections: (filtered.customSections || []).map((sec) => ({
+          title: sec.title || "",
+          items: (sec.items || []).map((it) => ({
+            name: it.name || "",
+            description: it.description || "",
+          })),
+        })),
+      };
 
       const response = await api.post("/cvs/analyze-section", {
         section: "fullCv",
-        data: flat,
+        data: cvPayload,
         fullName: userName,
       });
 
@@ -198,10 +215,24 @@ export default function useCVAnalysis({
     sessionStorage.removeItem(`cv_analysis_${id}`);
   };
 
+  const highlights = useMemo(() => {
+    if (!analysisResult?.issues) return {};
+    const h = {};
+    analysisResult.issues.forEach((issue) => {
+      if (issue.improvedText) {
+        h[issue.fieldId] = "suggestion";
+      } else {
+        h[issue.fieldId] = "warning";
+      }
+    });
+    return h;
+  }, [analysisResult]);
+
   return {
     showAnalysis,
     setShowAnalysis,
     analysisResult,
+    highlights,
     analyzing,
     showSkillGap,
     setShowSkillGap,

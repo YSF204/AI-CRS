@@ -21,7 +21,9 @@ const PREVIEW_PADDING = 12;
 
 function TemplatePreview({ template }) {
   const viewportRef = useRef(null);
+  const cvRef = useRef(null);
   const [scale, setScale] = useState(0.28);
+  const [innerScale, setInnerScale] = useState(1);
   const TemplateComponent = template.component;
 
   useEffect(() => {
@@ -50,12 +52,33 @@ function TemplatePreview({ template }) {
     };
   }, []);
 
+  // Measure the actual height of the rendered CV and shrink it if it exceeds A4 height
+  useEffect(() => {
+    if (cvRef.current) {
+      // Temporarily remove any scaling to measure natural height
+      const previousTransform = cvRef.current.style.transform;
+      cvRef.current.style.transform = 'none';
+      const actualHeight = cvRef.current.scrollHeight;
+      
+      if (actualHeight > A4_HEIGHT_PX) {
+        // Calculate how much we need to shrink to fit
+        const scaleToFit = A4_HEIGHT_PX / actualHeight;
+        setInnerScale(scaleToFit);
+      } else {
+        setInnerScale(1);
+      }
+      
+      cvRef.current.style.transform = previousTransform;
+    }
+  }, [template]);
+
   return (
     <div
       ref={viewportRef}
-      className="ats-preview-viewport"
+      className="ats-preview-viewport overflow-hidden"
       style={{
         aspectRatio: "0.81",
+        position: "relative",
       }}
     >
       <div
@@ -63,12 +86,26 @@ function TemplatePreview({ template }) {
         style={{
           width: `${A4_WIDTH_PX}px`,
           height: `${A4_HEIGHT_PX}px`,
+          position: "absolute",
+          top: "50%",
+          left: "50%",
           transform: `translate(-50%, -50%) scale(${scale})`,
           pointerEvents: "none",
           userSelect: "none",
+          overflow: "hidden", // Ensures the preview card never grows beyond A4 proportionally
+          backgroundColor: "#fff", // ensure white background for the card
         }}
       >
-        <TemplateComponent userName={MOCK_USER_NAME} cvData={MOCK_CV_DATA} />
+        <div 
+          ref={cvRef}
+          style={{ 
+            transform: `scale(${innerScale})`, 
+            transformOrigin: "top center",
+            width: "100%",
+          }}
+        >
+          <TemplateComponent userName={MOCK_USER_NAME} cvData={MOCK_CV_DATA} />
+        </div>
       </div>
     </div>
   );

@@ -10,8 +10,8 @@ const MemoizedTemplate = React.memo(({ Component, userName, formData, highlights
 const A4_WIDTH = 794;
 const A4_HEIGHT = 1123;
 const FOOTER_ZONE = 60;  // dead space at bottom of every page
-const HEADER_ZONE = 70;  // dead space at top of page 2+
-const PUSH_BUFFER = 60;  // extra safety buffer when pushing content
+const HEADER_ZONE = 0;   // dead space at top of page 2+
+const PUSH_BUFFER = 19;  // extra safety buffer when pushing content
 
 export default function LivePreview({ formData, userName, templateId, highlights, zoom: zoomProp }) {
   const template = getTemplateById(templateId);
@@ -54,7 +54,7 @@ export default function LivePreview({ formData, userName, templateId, highlights
     });
 
     // ① Reset all margins
-    blocks.forEach((b) => { b.style.marginTop = ''; });
+    blocks.forEach((b) => { b.style.paddingTop = ''; });
     void container.offsetHeight; // force reflow
 
     // ② Measure all in one pass
@@ -101,7 +101,8 @@ export default function LivePreview({ formData, userName, templateId, highlights
 
     // ④ Apply all margins
     for (const { element, margin } of margins) {
-      element.style.marginTop = `${margin}px`;
+      element.style.paddingTop = `${margin}px`;
+      element.setAttribute('data-pagination-margin', 'true');
     }
 
     // ⑤ Final page count

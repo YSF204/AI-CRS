@@ -1,6 +1,6 @@
 import React from "react";
 
-const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
+const ATSProvenTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
 
   const fmtDuration = (from, to) => {
@@ -20,28 +20,26 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => 
   };
 
   const contactItems = [];
-  if (cvData.address?.city || cvData.address?.street) {
-    const location = [cvData.address.city, cvData.address.street]
+  if (cvData.contact?.phone) contactItems.push(cvData.contact.phone);
+  if (cvData.contact?.email) contactItems.push(cvData.contact.email);
+  if (cvData.address?.street || cvData.address?.city) {
+    const location = [cvData.address.street, cvData.address.city]
       .filter(Boolean)
       .join(", ");
     if (location) contactItems.push(location);
   }
-  if (cvData.contact?.email) contactItems.push(cvData.contact.email);
-  if (cvData.contact?.phone) contactItems.push(cvData.contact.phone);
   if (cvData.contact?.linkedin) contactItems.push(cvData.contact.linkedin);
   if (cvData.contact?.github) contactItems.push(cvData.contact.github);
 
   const SectionHeader = ({ title }) => (
-    <div className="border-y-[1.5px] border-gray-300 py-1.5 mb-2 mt-4">
-      <h2 className="text-[13px] md:text-[14px] font-bold uppercase text-gray-800 tracking-wide">
-        {title}
-      </h2>
-    </div>
+    <h2 className="text-[15px] font-bold uppercase text-black mb-2 border-b-[1.5px] border-black pb-1 tracking-widest">
+      {title}
+    </h2>
   );
 
   return (
     <div
-      className="bg-white text-gray-900 font-sans"
+      className="bg-white text-black font-serif"
       style={{
         overflowWrap: "anywhere",
         wordBreak: "break-word",
@@ -50,19 +48,20 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => 
         margin: "0 auto",
         boxSizing: "border-box",
         position: "relative",
-        padding: "15mm", // Standard A4 professional margins
+        padding: "20mm", // Standard A4 margins
       }}
     >
-      <header className="text-center mb-4">
-        <h1 className="text-[26px] md:text-[30px] font-bold text-gray-800 mb-1">
+      <header className="text-center mb-6">
+        <h1 className="text-[36px] font-bold text-black leading-none mb-2">
           {userName}
         </h1>
-        <div className="flex flex-wrap justify-center items-center gap-1.5 text-[13px] md:text-[14px] text-gray-700">
+
+        <div className="flex flex-wrap justify-center items-center gap-1.5 text-[14px] text-black">
           {contactItems.map((item, index) => (
             <React.Fragment key={index}>
               <span>{item}</span>
               {index < contactItems.length - 1 && (
-                <span className="text-gray-400 text-xs px-1">•</span>
+                <span className="text-gray-400 mx-1">|</span>
               )}
             </React.Fragment>
           ))}
@@ -72,40 +71,50 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => 
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary" className="break-inside-avoid" style={getHighlightStyle('summary')}>
+            <section key="summary" className="break-inside-avoid mb-5" style={getHighlightStyle('summary')}>
               <SectionHeader title="Professional Summary" />
-              <p className="text-[13px] md:text-[14px] text-gray-800 leading-relaxed whitespace-pre-wrap break-words text-justify">
+              <p className="text-[14px] text-black leading-relaxed whitespace-pre-wrap break-words">
                 {cvData.summary}
               </p>
             </section>
           ) : null,
           experience:
             cvData.experience && cvData.experience.length > 0 ? (
-              <section key="experience" className="">
-                <SectionHeader title="Professional Experience" />
-                <div className="space-y-3.5 block">
+              <section key="experience" className="mb-5">
+                <SectionHeader title="Experience" />
+                <div className="space-y-4 block">
                   {cvData.experience.map((exp, index) => {
                     const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                     return (
                       <div key={index} className="break-inside-avoid" style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
-                        <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
-                          <div>
-                            <h3 className="text-[13.5px] md:text-[14px] font-bold text-gray-800">
-                              {exp.position}
-                            </h3>
-                            <p className="text-[13px] md:text-[14px] text-gray-800 font-medium">
-                              {exp.institutionName}
-                            </p>
-                          </div>
+                        <div className="flex justify-between items-baseline mb-0.5">
+                          <h3 className="text-[15px] font-bold text-black">
+                            {exp.position}
+                          </h3>
                           {dur && (
-                            <div className="text-[13px] md:text-[14px] text-gray-800 font-bold sm:text-right mt-1 sm:mt-0">
+                            <span className="text-[14px] text-black font-semibold">
                               {dur}
-                            </div>
+                            </span>
                           )}
                         </div>
+                        {exp.institutionName && (
+                          <div className="text-[14.5px] italic text-black mb-1">
+                            {exp.institutionName}
+                          </div>
+                        )}
                         {exp.summary && (
-                          <div className="text-[13px] md:text-[14px] text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1.5">
-                            {exp.summary}
+                          <div className="text-[14px] text-black leading-relaxed whitespace-pre-wrap break-words mt-1">
+                            {/* Standard ATS bullets format often best kept clean */}
+                            {exp.summary.split('\n').map((line, i) => {
+                              const trimmedLine = line.trim();
+                              if (!trimmedLine) return null;
+                              return (
+                                <div key={i} className="flex mb-1">
+                                  <span className="mr-2">•</span>
+                                  <span>{trimmedLine.replace(/^[-•]\s*/, '')}</span>
+                                </div>
+                              );
+                            })}
                           </div>
                         )}
                       </div>
@@ -116,21 +125,31 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => 
             ) : null,
           education:
             cvData.education && cvData.education.length > 0 ? (
-              <section key="education" className="">
+              <section key="education" className="mb-5">
                 <SectionHeader title="Education" />
-                <div className="space-y-3 block">
+                <div className="space-y-4 block">
                   {cvData.education.map((edu, index) => {
                     const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                     return (
                       <div key={index} className="break-inside-avoid" style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}>
-                        <h3 className="text-[13.5px] md:text-[14px] font-bold text-gray-800 mb-0.5">
+                        <div className="flex justify-between items-baseline mb-0.5">
+                          <h3 className="text-[15px] font-bold text-black">
+                            {edu.institutionName}
+                          </h3>
+                          {dur && (
+                            <span className="text-[14px] text-black font-semibold">
+                              {dur}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[14.5px] italic text-black">
                           {edu.certification}
-                        </h3>
-                        <p className="text-[13px] md:text-[14px] text-gray-800">
-                          {edu.institutionName}
-                          {edu.summary && ` • ${edu.summary}`}
-                          {dur && ` • ${dur}`}
-                        </p>
+                        </div>
+                        {edu.summary && (
+                          <div className="text-[14px] text-black mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                            {edu.summary}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -139,32 +158,32 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => 
             ) : null,
           technicalSkills:
             cvData.technicalSkills?.length > 0 ? (
-              <section key="technicalSkills" className="break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
+              <section key="technicalSkills" className="break-inside-avoid mb-5" style={getHighlightStyle('technicalSkills')}>
                 <SectionHeader title="Technical Skills" />
-                <p className="text-[13px] md:text-[14px] text-gray-800">
+                <p className="text-[14px] text-black leading-relaxed">
                   {cvData.technicalSkills.join(", ")}
                 </p>
               </section>
             ) : null,
           softSkills:
             cvData.softSkills?.length > 0 ? (
-              <section key="softSkills" className="break-inside-avoid" style={getHighlightStyle('softSkills')}>
+              <section key="softSkills" className="break-inside-avoid mb-5" style={getHighlightStyle('softSkills')}>
                 <SectionHeader title="Soft Skills" />
-                <p className="text-[13px] md:text-[14px] text-gray-800">
+                <p className="text-[14px] text-black leading-relaxed">
                   {cvData.softSkills.join(", ")}
                 </p>
               </section>
             ) : null,
           language:
             cvData.language?.length > 0 ? (
-              <section key="language" className="break-inside-avoid" style={getHighlightStyle('language')}>
+              <section key="language" className="break-inside-avoid mb-5" style={getHighlightStyle('language')}>
                 <SectionHeader title="Languages" />
-                <p className="text-[13px] md:text-[14px] text-gray-800">
+                <p className="text-[14px] text-black leading-relaxed">
                   {cvData.language
                     .map((item) =>
                       typeof item === "string"
                         ? item
-                        : `${item.name} — ${item.level}`,
+                        : `${item.name} (${item.level})`,
                     )
                     .join(", ")}
                 </p>
@@ -176,10 +195,10 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => 
           "summary",
           "experience",
           "education",
-          "customSections",
           "technicalSkills",
           "softSkills",
           "language",
+          "customSections",
         ];
 
         return sectionOrder.map((key) => {
@@ -187,10 +206,10 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => 
             return cvData.customSections.map((section, sectionIndex) => (
               <section
                 key={`custom-${sectionIndex}`}
-                className=""
+                className="mb-5"
               >
                 <SectionHeader title={section.title} />
-                <div className="space-y-3 block">
+                <div className="space-y-4 block">
                   {section.items.map((item, itemIndex) => {
                     const dur = fmtDuration(item.durationFrom, item.durationTo);
                     return (
@@ -199,14 +218,14 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => 
                         className="break-inside-avoid"
                         style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
                       >
-                        <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
-                          <h3 className="text-[13.5px] md:text-[14px] font-bold text-gray-800">
+                        <div className="flex justify-between items-baseline mb-0.5">
+                          <h3 className="text-[15px] font-bold text-black">
                             {item.link ? (
                               <a
                                 href={item.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline"
+                                className="hover:underline"
                               >
                                 {item.name}
                               </a>
@@ -215,13 +234,13 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => 
                             )}
                           </h3>
                           {dur && (
-                            <div className="text-[13px] md:text-[14px] text-gray-800 font-medium sm:text-right">
+                            <span className="text-[14px] text-black font-semibold">
                               {dur}
-                            </div>
+                            </span>
                           )}
                         </div>
                         {item.description && (
-                          <div className="text-[13px] md:text-[14px] text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
+                          <div className="text-[14px] text-black leading-relaxed whitespace-pre-wrap break-words mt-1">
                             {item.description}
                           </div>
                         )}
@@ -241,4 +260,4 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => 
   );
 };
 
-export default ExecutiveResumeTemplate;
+export default ATSProvenTemplate;

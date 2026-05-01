@@ -6,6 +6,9 @@ import CV_template_4 from './CV_template_4';
 import CV_template_5 from './CV_template_5';
 import CV_template_6 from './CV_template_6';
 import CV_template_7 from './CV_template_7';
+import CV_template_8 from './CV_template_8';
+import CV_template_9 from './CV_template_9';
+import CV_template_10 from './CV_template_10';
 
 export const TEMPLATES = [
   {
@@ -63,6 +66,30 @@ export const TEMPLATES = [
     accent: '#374151',
     tag: 'Elegant',
     component: CV_template_7,
+  },
+  {
+    id: 8,
+    name: 'ATS Proven (Harvard)',
+    description: 'Clean, serif, single-column layout optimized for Applicant Tracking Systems.',
+    accent: '#000000',
+    tag: 'ATS Optimized',
+    component: CV_template_8,
+  },
+  {
+    id: 9,
+    name: 'ATS Minimal',
+    description: 'Ultra-clean sans-serif single column. High readability and standard layout.',
+    accent: '#374151',
+    tag: 'ATS Optimized',
+    component: CV_template_9,
+  },
+  {
+    id: 10,
+    name: 'ATS Standard',
+    description: 'Traditional standard layout with bullet points. Perfect for corporate roles.',
+    accent: '#111827',
+    tag: 'ATS Optimized',
+    component: CV_template_10,
   },
 ];
 

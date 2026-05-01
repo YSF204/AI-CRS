@@ -194,11 +194,18 @@ export default function CreateModal({ template, onClose, onCreate, loading }) {
             </div>
             <button
               onClick={onClose}
-              className="brutal-btn-outline"
-              style={{ padding: "0.35rem", minHeight: "unset", flexShrink: 0 }}
+              className="nm-btn"
+              style={{
+                width: 36,
+                height: 36,
+                padding: 0,
+                minHeight: "unset",
+                flexShrink: 0,
+                background: "var(--nm-surface)",
+              }}
               aria-label="Close"
             >
-              <X size={15} />
+              <X size={18} strokeWidth={2.5} />
             </button>
           </div>
 
@@ -206,13 +213,13 @@ export default function CreateModal({ template, onClose, onCreate, loading }) {
             style={{
               display: "inline-block",
               width: "fit-content",
-              fontFamily: "'Space Grotesk', sans-serif",
+              fontFamily: "var(--font-display)",
               fontSize: "0.6rem",
               fontWeight: 800,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               padding: "3px 10px",
-              border: "2px solid #0a0a0a",
+              border: "3px solid var(--nm-ink)",
               background: template.accent,
               color: "#fff",
             }}
@@ -222,9 +229,9 @@ export default function CreateModal({ template, onClose, onCreate, loading }) {
 
           <p
             style={{
-              fontFamily: "'DM Mono', monospace",
-              fontSize: "0.7rem",
-              color: "var(--fg-muted)",
+              fontFamily: "var(--font-body)",
+              fontSize: "0.75rem",
+              color: "var(--nm-text-secondary)",
               lineHeight: 1.6,
               margin: 0,
             }}
@@ -232,24 +239,23 @@ export default function CreateModal({ template, onClose, onCreate, loading }) {
             {template.description}
           </p>
 
-          <div style={{ borderTop: "2px solid var(--border-color)" }} />
+          <div style={{ borderTop: "4px solid var(--nm-ink)", opacity: 0.1 }} />
 
           <form
             onSubmit={handleSubmit}
-            style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}
+            style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
           >
             <div>
               <label
-                className="form-label"
+                className="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--nm-text-tertiary)] mb-2 block"
                 htmlFor="cv-title-input"
-                style={{ fontSize: "0.7rem" }}
               >
                 CV / Job Title
               </label>
               <input
                 id="cv-title-input"
                 type="text"
-                className="form-field"
+                className="nm-input w-full"
                 placeholder="e.g. Frontend Developer…"
                 value={title}
                 onChange={(e) => {
@@ -258,15 +264,15 @@ export default function CreateModal({ template, onClose, onCreate, loading }) {
                 }}
                 autoFocus
                 disabled={loading}
-                style={{ minHeight: 46 }}
               />
               {error && (
                 <p
                   style={{
-                    fontFamily: "'DM Mono', monospace",
-                    fontSize: "0.66rem",
-                    color: "#f97316",
-                    marginTop: "0.3rem",
+                    fontFamily: "var(--font-body)",
+                    fontSize: "11px",
+                    color: "var(--nm-error)",
+                    marginTop: "0.5rem",
+                    fontWeight: 600,
                   }}
                 >
                   {error}
@@ -278,34 +284,35 @@ export default function CreateModal({ template, onClose, onCreate, loading }) {
               style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: "0.5rem",
+                gap: "0.75rem",
               }}
             >
               <button
                 id="create-cv-submit-btn"
                 type="submit"
-                className="brutal-btn w-full flex items-center justify-center gap-2"
-                style={{ background: "#facc15", color: "#0a0a0a" }}
+                className="nm-btn nm-btn-primary w-full"
                 disabled={loading}
               >
                 {loading ? (
-                  "Creating…"
+                  "CREATING…"
                 ) : (
                   <>
-                    <ArrowRight size={14} /> Create CV
+                    CREATE CV <ArrowRight size={16} strokeWidth={2.5} />
                   </>
                 )}
               </button>
               <button
                 type="button"
                 onClick={onClose}
-                className="brutal-btn-outline w-full"
+                className="nm-btn w-full"
+                style={{ background: "var(--nm-surface)" }}
                 disabled={loading}
               >
-                Cancel
+                CANCEL
               </button>
             </div>
           </form>
+
         </div>
       </div>
     </div>

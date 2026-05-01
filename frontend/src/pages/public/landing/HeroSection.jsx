@@ -107,19 +107,7 @@ export default function HeroSection() {
             Build My CV
             <ArrowRight size={18} strokeWidth={3} />
           </Link>
-          <a
-            href="#features"
-            className="nm-btn"
-            style={{
-              padding: '1rem 2.5rem',
-              fontSize: 'clamp(0.85rem, 1.1vw, 0.95rem)',
-              borderWidth: '4px',
-              background: 'var(--nm-surface)',
-              boxShadow: '4px 4px 0 var(--nm-ink)'
-            }}
-          >
-            See How It Works
-          </a>
+
         </div>
       </div>
 
