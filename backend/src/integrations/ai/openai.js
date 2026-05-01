@@ -33,7 +33,7 @@ export const analyzeCVFromFile = async (filePath, jobDescription = "") => {
   });
 
   const response = await getClient().responses.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-nano",
     input: [
       {
         role: "user",
@@ -62,7 +62,7 @@ export const analyzeCVFromFile = async (filePath, jobDescription = "") => {
  */
 export const analyzeCVFromDatabase = async (cvText, jobDescription = "") => {
   const response = await getClient().responses.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-nano",
     input: [
       {
         role: "user",
@@ -91,7 +91,7 @@ export const analyzeCVFromDatabase = async (cvText, jobDescription = "") => {
  */
 export const analyzeCVSection = async (section, sectionData) => {
   const response = await getClient().responses.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-nano",
     input: [
       {
         role: "user",
@@ -110,7 +110,7 @@ export const analyzeCVSection = async (section, sectionData) => {
  */
 export const analyzeATSScore = async (cvData) => {
   const response = await getClient().responses.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-nano",
     input: [
       {
         role: "user",
@@ -134,7 +134,7 @@ export const analyzeATSScore = async (cvData) => {
  */
 export const matchCandidatesToJob = async (jobPosting, candidates) => {
   const response = await getClient().responses.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-nano",
     input: [
       {
         role: "user",
@@ -158,7 +158,7 @@ export const matchCandidatesToJob = async (jobPosting, candidates) => {
 export const matchCVToJobs = async (candidateCV, jobs) => {
   // FIX #7: Use chat.completions.create with JSON mode instead of deprecated responses API
   const response = await getClient().chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-nano",
     temperature: 0.7,
     response_format: { type: "json_object" },
     messages: [
@@ -210,7 +210,7 @@ export const analyzeApplicationCV = async (filePath, jobDescription) => {
   });
 
   const response = await getClient().responses.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-nano",
     input: [
       {
         role: "user",
@@ -244,7 +244,7 @@ export const rankCandidates = async (
   candidates,
 ) => {
   const response = await getClient().responses.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-nano",
     input: [
       {
         role: "user",
@@ -281,7 +281,7 @@ If NO candidates match, return: []`,
 
 export const analyzeSkillGap = async ({ cvData, targetRole, additionalInfo }) => {
   const response = await getClient().chat.completions.create({
-    model: "gpt-4o-mini",
+    model: "gpt-5.4-nano",
     temperature: 0.3,
     response_format: { type: "json_object" },
     messages: [

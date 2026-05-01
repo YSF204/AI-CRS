@@ -15,7 +15,7 @@ const JobResultsToolbar = ({ resultCount, sortBy, onSortChange, onClearFilters, 
       <div className="flex items-center gap-3">
         <div className="w-2 h-2 bg-[var(--nm-primary)]" />
         <span className="font-mono text-[11px] font-black uppercase tracking-widest text-[var(--nm-text-primary)]">
-          {resultCount === 1 ? "001_OBJECT_LOADED" : `${String(resultCount).padStart(3, '0')}_OBJECTS_LOADED`}
+          {resultCount === 1 ? "1 job found" : `${resultCount} jobs found`}
         </span>
       </div>
 

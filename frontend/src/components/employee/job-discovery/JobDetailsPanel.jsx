@@ -33,14 +33,14 @@ const JobDetailsPanel = ({
   const sourceUrl = job.externalUrl || job.raw?.externalUrl || job.raw?.url || "";
 
   return (
-    <div className="jd-detail-panel h-full flex flex-col bg-[var(--nm-surface)] overflow-hidden">
+    <div className="h-full flex flex-col bg-[var(--nm-surface)] border-4 border-[var(--nm-ink)] shadow-[4px_4px_0_var(--nm-ink)] overflow-hidden">
       {/* Header Section */}
       <div className="p-6 border-b-4 border-[var(--nm-ink)] bg-[var(--nm-surface-low)] relative">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-3">
-               <div className="w-2 h-2 bg-[var(--nm-primary)] animate-pulse" />
-               <p className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--nm-text-tertiary)]">Protocol: JOB_DETAIL_VIEW</p>
+               <div className="w-2 h-2 bg-[var(--nm-primary)]" />
+               <p className="font-mono text-[10px] uppercase tracking-[0.2em] font-bold text-[var(--nm-text-tertiary)]">Job Details</p>
             </div>
             <h2 className="font-[var(--font-display)] text-3xl font-black uppercase tracking-tighter text-[var(--nm-text-primary)] leading-none mb-4">
               {job.title}
@@ -85,16 +85,12 @@ const JobDetailsPanel = ({
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-8 bg-[var(--nm-bg)]" style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--nm-ink) transparent' }}>
+      <div className="flex-1 overflow-y-auto p-6 pb-20 space-y-8 bg-[var(--nm-bg)] min-h-0" style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--nm-ink) transparent' }}>
         {job.raw?.description && (
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="h-0.5 flex-1 bg-[var(--nm-ink)]" />
-              <h3 className="font-[var(--font-display)] font-black text-xs uppercase tracking-widest text-[var(--nm-text-primary)]">
-                Mission Overview
-              </h3>
-              <div className="h-0.5 w-4 bg-[var(--nm-ink)]" />
-            </div>
+            <h3 className="font-[var(--font-display)] font-black text-[10px] uppercase tracking-[0.2em] text-[var(--nm-text-tertiary)] px-1">
+              About the role
+            </h3>
             <div className="p-6 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface)] shadow-[6px_6px_0_var(--nm-ink)]">
               <p className="text-sm text-[var(--nm-text-secondary)] leading-relaxed font-[var(--font-body)]">
                 {job.raw.description}
@@ -104,27 +100,23 @@ const JobDetailsPanel = ({
         )}
 
         <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="h-0.5 flex-1 bg-[var(--nm-ink)]" />
-            <h3 className="font-[var(--font-display)] font-black text-xs uppercase tracking-widest text-[var(--nm-text-primary)]">
-              Requirements Matrix
-            </h3>
-            <div className="h-0.5 w-4 bg-[var(--nm-ink)]" />
-          </div>
+          <h3 className="font-[var(--font-display)] font-black text-[10px] uppercase tracking-[0.2em] text-[var(--nm-text-tertiary)] px-1">
+            Requirements
+          </h3>
 
           <div className="grid grid-cols-1 gap-4">
             {job.raw?.yearsOfExperience !== undefined && (
               <div className="p-4 border-2 border-[var(--nm-ink)] bg-[var(--nm-surface-low)]">
-                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase mb-1">XP_REQUIRED</p>
+                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase mb-1">Experience</p>
                 <p className="font-[var(--font-display)] font-bold text-base text-[var(--nm-text-primary)] uppercase">
-                  {job.raw.yearsOfExperience}+ Standard Years
+                  {job.raw.yearsOfExperience}+ Years
                 </p>
               </div>
             )}
 
             {job.raw?.technicalSkills?.length > 0 && (
               <div className="p-4 border-2 border-[var(--nm-ink)] bg-[var(--nm-surface-low)]">
-                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase mb-2">Technical_Assets</p>
+                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase mb-2">Technical Skills</p>
                 <div className="flex flex-wrap gap-2">
                   {job.raw.technicalSkills.map((skill, i) => (
                     <span key={i} className="px-2 py-1 bg-[var(--nm-ink)] text-white font-mono text-[10px] font-bold uppercase">
@@ -137,7 +129,7 @@ const JobDetailsPanel = ({
 
             {job.raw?.softSkills?.length > 0 && (
               <div className="p-4 border-2 border-[var(--nm-ink)] bg-[var(--nm-surface-low)]">
-                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase mb-2">Behavioral_Vectors</p>
+                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase mb-2">Soft Skills</p>
                 <div className="flex flex-wrap gap-2">
                   {job.raw.softSkills.map((skill, i) => (
                     <span key={i} className="px-2 py-1 border border-[var(--nm-ink)] bg-white text-[var(--nm-ink)] font-mono text-[10px] font-bold uppercase">
@@ -151,21 +143,17 @@ const JobDetailsPanel = ({
         </div>
 
         <div className="space-y-4">
-           <div className="flex items-center gap-3">
-            <div className="h-0.5 flex-1 bg-[var(--nm-ink)]" />
-            <h3 className="font-[var(--font-display)] font-black text-xs uppercase tracking-widest text-[var(--nm-text-primary)]">
-              Operational Details
-            </h3>
-            <div className="h-0.5 w-4 bg-[var(--nm-ink)]" />
-          </div>
+          <h3 className="font-[var(--font-display)] font-black text-[10px] uppercase tracking-[0.2em] text-[var(--nm-text-tertiary)] px-1">
+            Additional Info
+          </h3>
           <div className="p-6 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface)] shadow-[6px_6px_0_var(--nm-ink)] space-y-4">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 flex items-center justify-center bg-[var(--nm-surface-low)] border-2 border-[var(--nm-ink)]">
                 <MapPin size={18} className="text-[var(--nm-primary)]" />
               </div>
               <div>
-                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase">Deployment_Zone</p>
-                <p className="font-[var(--font-display)] font-bold text-sm text-[var(--nm-text-primary)] uppercase">{job.raw?.workSite || job.location || "REMOTE_OPS"}</p>
+                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase">Location</p>
+                <p className="font-[var(--font-display)] font-bold text-sm text-[var(--nm-text-primary)] uppercase">{job.raw?.workSite || job.location || "Remote"}</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -173,8 +161,8 @@ const JobDetailsPanel = ({
                 <Briefcase size={18} className="text-[var(--nm-primary)]" />
               </div>
               <div>
-                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase">Contract_Duration</p>
-                <p className="font-[var(--font-display)] font-bold text-sm text-[var(--nm-text-primary)] uppercase">{job.raw?.workDuration || "PERMANENT_STATION"}</p>
+                <p className="font-mono text-[9px] font-black text-[var(--nm-text-tertiary)] uppercase">Type</p>
+                <p className="font-[var(--font-display)] font-bold text-sm text-[var(--nm-text-primary)] uppercase">{job.raw?.workDuration || "Permanent"}</p>
               </div>
             </div>
           </div>
@@ -188,7 +176,7 @@ const JobDetailsPanel = ({
           onClick={() => onApply(job)}
           className="jd-btn jd-btn-primary w-full py-6 text-base font-black shadow-[6px_6px_0_var(--nm-ink)] active:shadow-none active:translate-x-[6px] active:translate-y-[6px]"
         >
-          {sourceUrl ? "Initialize Source Uplink" : "Initialize Application"}
+          {sourceUrl ? "OPEN SITE" : "APPLY NOW"}
           <ChevronRight size={20} strokeWidth={3} />
         </button>
       </div>

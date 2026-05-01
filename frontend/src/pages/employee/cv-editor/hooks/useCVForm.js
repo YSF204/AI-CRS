@@ -25,7 +25,7 @@ const INITIAL_FORM = {
 // Base URL for API calls
 const API_BASE = "http://localhost:3001/api";
 
-export default function useCVForm(showToast, autoSaveFunction = null) {
+export default function useCVForm(showToast, autoSaveFunction = null, user = null) {
   const [form, setForm] = useState({ ...INITIAL_FORM });
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState(null);
@@ -400,37 +400,30 @@ export default function useCVForm(showToast, autoSaveFunction = null) {
   );
 
   // Fetch single summary suggestion (for manual trigger)
-  const fetchSingleSummarySuggestion = useCallback(
-    debounce(() => {
-      if (!form.jobTitle) return; // Require job title for meaningful suggestions
-      fetchSuggestions("summary-single", {
-        fullName: form.fullName || "",
-        jobTitle: form.jobTitle || "",
-        currentInput: form.summary || "",
-        experience: form.experience || [],
-        education: form.education || [],
-        technicalSkills: form.technicalSkills || [],
-        softSkills: form.softSkills || [],
-        language: form.language || [],
-        contact: form.contact || {},
-        address: form.address || {},
-        skills: [...form.technicalSkills, ...form.softSkills],
-      });
-    }, 1000),
-    [
-      form.fullName,
-      form.jobTitle,
-      form.summary,
-      form.experience,
-      form.education,
-      form.technicalSkills,
-      form.softSkills,
-      form.language,
-      form.contact,
-      form.address,
-      fetchSuggestions,
-    ],
-  );
+  const fetchSingleSummarySuggestion = useCallback(() => {
+    // We allow generation even without job title now, reading as much as possible
+    fetchSuggestions("summary-single", {
+      fullName: form.fullName || "",
+      jobTitle: form.jobTitle || "",
+      currentInput: form.summary || "",
+      experience: form.experience || [],
+      education: form.education || [],
+      technicalSkills: form.technicalSkills || [],
+      softSkills: form.softSkills || [],
+      language: form.language || [],
+      contact: form.contact || {},
+      address: form.address || {},
+      skills: [...form.technicalSkills, ...form.softSkills],
+      // Add user profile/account context
+      userAccount: user
+        ? {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+          }
+        : null,
+    });
+  }, [form, user, fetchSuggestions]);
 
   // Handle suggestion selection
   const handleSuggestionSelect = useCallback(

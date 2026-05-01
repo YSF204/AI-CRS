@@ -1,4 +1,5 @@
 import React from "react";
+import { Sparkles } from "lucide-react";
 import SuggestionBox from "./SuggestionBox";
 
 export default function SummarySection({
@@ -12,16 +13,45 @@ export default function SummarySection({
   const { setForm } = handlers;
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between items-center">
+        <label className="font-mono text-[11px] uppercase font-bold tracking-widest text-[var(--nm-text-primary)]">
+          Professional Narrative
+        </label>
+        <button
+          type="button"
+          onClick={() => fetchSingleSummarySuggestion()}
+          disabled={isLoadingSuggestions?.["summary-single"]}
+          className="nm-btn flex items-center gap-2"
+          style={{
+            padding: "6px 14px",
+            fontSize: "10px",
+            background: "var(--nm-primary)",
+            color: "#fff",
+            borderColor: "var(--nm-ink)",
+            borderWidth: "2px",
+            fontWeight: "900",
+            letterSpacing: "0.05em",
+          }}
+        >
+          {isLoadingSuggestions?.["summary-single"] ? (
+            <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full" />
+          ) : (
+            <Sparkles size={12} strokeWidth={3} />
+          )}
+          GENERATE WITH AI
+        </button>
+      </div>
+
       <div className="relative">
         <textarea
-          className="min-h-[100px] w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+          className="min-h-[120px] w-full p-4 nm-input font-sans text-sm leading-relaxed"
           value={form.summary}
           onChange={(e) => {
             setForm((f) => ({ ...f, summary: e.target.value }));
           }}
-          placeholder="Results-driven engineer with 3+ years..."
-          rows={4}
+          placeholder="Results-driven engineer with 3+ years experience in building high-performance systems..."
+          rows={5}
         />
         <SuggestionBox
           suggestions={suggestions?.["summary-single"] || []}

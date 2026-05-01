@@ -36,24 +36,22 @@ const getCachedOrFetchSuggestion = async (type, context) => {
   try {
     // Fetch new suggestion
     const prompt = buildSuggestionPrompt(type, context);
-    const response = await getClient().chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
+    const response = await getClient().responses.create({
+      model: 'gpt-5.4-nano',
+      input: [
         {
-          role: 'system',
+          role: "system",
           content: getSystemPromptForSuggestions(),
         },
         {
-          role: 'user',
+          role: "user",
           content: prompt,
-        },
+        }
       ],
-      max_tokens: 100, // Reduce from 150 to 100 for shorter responses
-      temperature: 0.5, // Lower from 0.7 to 0.5 for more concise, focused suggestions
     });
 
     // Clean the response - remove markdown code blocks and extra formatting
-    let suggestion = response.choices[0]?.message?.content?.trim() || '';
+    let suggestion = response.output_text?.trim() || '';
 
     // Remove markdown code blocks if present
     suggestion = suggestion.replace(/```json\s*/g, '');
@@ -100,26 +98,27 @@ IMPORTANT:
 Return ONLY a plain JSON array like: ["Senior Developer", "Full Stack Engineer", "Frontend Specialist"]`;
 
     case 'summary':
-      return `Generate a compelling professional summary for this position${currentInput ? ` that continues from: "${currentInput}"` : ''}.
+      return `Generate a professional, high-impact summary for a CV that stands out to recruiters. 
+Generate 2-3 variations that differ in tone (e.g., one results-driven, one visionary, one technical).
 
+Context:
 Name: ${fullName || 'Not specified'}
-Position: ${jobTitle || 'Not specified'}
-Experience: ${JSON.stringify(experience)}
-Skills: ${skills?.join(', ') || 'Not specified'}
+Target Position: ${jobTitle || 'Not specified'}
+Work Experience: ${JSON.stringify(experience)}
+Top Skills: ${skills?.join(', ') || 'Not specified'}
 Education: ${JSON.stringify(education) || 'Not specified'}
 Languages: ${language?.join(', ') || 'Not specified'}
-Contact: ${contact?.email ? contact.email : 'Not specified'}${contact?.phone ? `, ${contact.phone}` : ''}
-Location: ${address?.city ? address.city : 'Not specified'}${address?.street ? `, ${address.street}` : ''}
 
-${currentInput ? `User has started writing: "${currentInput}" - provide a natural continuation that flows seamlessly from this starting point. If the input is a complete thought, provide an alternative version.` : ''}
+${currentInput ? `The user has already started writing: "${currentInput}". Provide a natural, sophisticated continuation that completes the narrative brilliantly.` : ''}
 
-IMPORTANT:
-- Keep each summary under 120 characters (2-3 sentences max)
-- NO markdown code blocks - return plain JSON array only
-- Use strong action verbs and quantify results where possible
-- Be concise and impactful
+GUIDELINES:
+- Each summary should be 3-5 sentences long.
+- Use powerful action verbs and include specific metrics or achievements if found in the experience.
+- Focus on the "Unique Selling Proposition" of the candidate.
+- NO markdown code blocks - return ONLY a plain JSON array of strings.
+- Avoid generic cliches; be specific and professional.
 
-Return ONLY a plain JSON array like: ["Experienced developer with 3+ years building scalable web applications", "Results-driven professional with proven track record of delivering innovative solutions"]`;
+Return ONLY a plain JSON array like: ["Dynamic Software Engineer with 5+ years experience... [3-5 sentences]", "Visionary Technical Lead specializing in... [3-5 sentences]"]`;
 
     case 'experience_entry':
       return `Suggest 3-5 bullet points for this experience entry${currentInput ? ` continuing from: "${currentInput}"` : ''}.

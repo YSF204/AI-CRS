@@ -63,40 +63,25 @@ export default function useCVEditor() {
               customSections: formData.customSections
                 .filter(
                   (s) =>
-                    s.title || s.items.some((it) => it.name || it.description),
+                    s.title?.trim() || (s.items && s.items.length > 0),
                 )
                 .map((s) => ({
-                  title: s.title,
-                  sectionType: s.sectionType || "other",
-                  items: s.items
-                    .filter(
-                      (it) =>
-                        it.name ||
-                        it.description ||
-                        it.durationFrom ||
-                        it.durationTo ||
-                        it.link,
-                    )
-                    .map((it) => ({
-                      name: it.name || "",
-                      description: it.description,
-                      durationFrom: it.durationFrom || "",
-                      durationTo: it.durationTo || "",
-                      link: it.link,
-                    })),
+                  ...s,
+                  items: s.items.map((it) => ({ ...it })),
                 })),
-              profileImage: formData.profileImage,
-              templateId: cv?.templateId || 1,
-              layout: { sectionOrder: [...activeSections], visibleSections },
+              layout: {
+                sectionOrder: [...activeSections],
+                visibleSections,
+              },
             };
-
             await api.patch(`/cvs/${id}`, payload);
-          } catch (error) {
-            console.error("Auto-save failed:", error);
-            throw error;
+            setLastSavedAt(new Date());
+          } catch (err) {
+            console.error("Auto-save failed:", err);
           }
         }
       : null,
+    user,
   );
 
   const userName =

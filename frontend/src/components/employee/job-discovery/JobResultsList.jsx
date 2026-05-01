@@ -52,10 +52,6 @@ const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loa
               <div className="flex flex-col gap-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                       <div className={`w-1.5 h-1.5 ${isSelected ? 'bg-[var(--nm-primary)]' : 'bg-[var(--nm-ink)]'}`} />
-                       <span className="font-mono text-[9px] font-black uppercase tracking-widest text-[var(--nm-text-tertiary)]">Job_Listing #{index + 1}</span>
-                    </div>
                     <h3 className="font-[var(--font-display)] text-xl font-black uppercase tracking-tight text-[var(--nm-text-primary)] leading-none mb-1 group-hover:text-[var(--nm-primary)] transition-colors">
                       {job.title}
                     </h3>
@@ -93,14 +89,13 @@ const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loa
                       <span className="text-[10px] font-black uppercase tracking-wider">{job.posted.toUpperCase()}</span>
                     </div>
                   )}
+                  {job.raw?.salary && (
+                    <div className="flex items-center gap-2 text-[var(--nm-text-secondary)]">
+                      <DollarSign size={14} strokeWidth={2.5} className="text-[var(--nm-primary)]" />
+                      <span className="text-[11px] font-black uppercase tracking-wider">{salary}</span>
+                    </div>
+                  )}
                 </div>
-
-                {job.raw?.salary && (
-                  <div className="pt-4 border-t-2 border-[var(--nm-ink)] border-dashed flex items-center gap-2">
-                    <span className="font-mono text-[10px] font-black text-[var(--nm-text-tertiary)] uppercase">Compensation_Package:</span>
-                    <span className="font-mono text-[11px] font-black text-[var(--nm-text-primary)]">{salary}</span>
-                  </div>
-                )}
               </div>
             </div>
           </button>

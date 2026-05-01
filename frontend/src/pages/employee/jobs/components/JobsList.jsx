@@ -165,7 +165,7 @@ export default function JobsList({
         </div>
       </section>
 
-      <aside className="sticky top-10 min-h-[420px] max-h-[calc(100vh-120px)] overflow-hidden">
+      <aside className="sticky top-10 h-[calc(100vh-80px)] flex flex-col overflow-hidden">
         <JobDetailsPanel
           job={selectedJob}
           onApply={onApply}
