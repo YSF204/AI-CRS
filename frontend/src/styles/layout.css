@@ -143,6 +143,50 @@
     margin: 0;
     overflow: visible;
   }
+
+  /* ===== APPLICATIONS TWO-PANEL LAYOUT ===== */
+  .applications-two-panel {
+    display: flex;
+    gap: var(--spacing-6);
+    min-height: calc(100vh - 220px);
+  }
+
+  .applications-left-panel {
+    width: 35%;
+    flex-shrink: 0;
+    overflow-y: auto;
+    max-height: calc(100vh - 220px);
+    padding-right: var(--spacing-4);
+  }
+
+  .applications-right-panel {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    max-height: calc(100vh - 220px);
+    border-left: 4px solid var(--nm-ink);
+    padding-left: var(--spacing-6);
+  }
+
+  @media (max-width: 1023px) {
+    .applications-two-panel {
+      flex-direction: column;
+    }
+
+    .applications-left-panel {
+      width: 100%;
+      max-height: none;
+      padding-right: 0;
+    }
+
+    .applications-right-panel {
+      border-left: none;
+      padding-left: 0;
+      border-top: 4px solid var(--nm-ink);
+      padding-top: var(--spacing-6);
+      max-height: none;
+    }
+  }
 }
 
 /* ═════════════════════════════════════════════════════════════════════

@@ -1,6 +1,63 @@
 import React from 'react';
 
-export default function ApplicantCard({ app, onClick }) {
+export default function ApplicantCard({ app, onClick, compact }) {
+  if (compact) {
+    return (
+      <div
+        style={{
+          background: 'var(--nm-surface)',
+          border: '3px solid var(--nm-ink)',
+          padding: '12px 16px',
+          cursor: 'pointer',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 12,
+          transition: 'transform 0.15s ease, background 0.15s ease',
+        }}
+        onClick={onClick}
+        onMouseEnter={e => { e.currentTarget.style.transform = 'translate(-2px, -2px)'; e.currentTarget.style.boxShadow = '4px 4px 0 var(--nm-ink)'; }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
+      >
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontFamily: 'var(--font-display)',
+            fontWeight: 900,
+            fontSize: 14,
+            color: 'var(--nm-text-primary)',
+            textTransform: 'uppercase',
+            letterSpacing: '-0.01em',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}>
+            {app.applicantInfo?.fullName || 'Unidentified'}
+          </div>
+          <div style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 10,
+            fontWeight: 800,
+            color: 'var(--nm-text-tertiary)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+            marginTop: 2,
+          }}>
+            {app.applicantInfo?.email || '—'}
+          </div>
+        </div>
+        <div style={{
+          fontFamily: 'var(--font-display)',
+          fontWeight: 900,
+          fontSize: 18,
+          flexShrink: 0,
+          color: (app.matchPercentage || 0) > 80 ? 'var(--nm-success)' : 'var(--nm-warning)',
+        }}>
+          {app.matchPercentage ?? '—'}%
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="nm-card"
