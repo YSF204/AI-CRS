@@ -8,6 +8,7 @@ import { createAdminManagedUser } from "../services/admin/users/createAdminManag
 import { getAdminUserById } from "../services/admin/users/getAdminUserById.js";
 import { updateAdminManagedUser } from "../services/admin/users/updateAdminManagedUser.js";
 import { deactivateUserByAdmin } from "../services/admin/users/deactivateUserByAdmin.js";
+import { delCache } from "../utils/redisHelper.js";
 
 // ================================== //
 //        GET PLATFORM STATS          //
@@ -60,6 +61,8 @@ export const updateUserStatus = catchAsync(async (req, res, next) => {
     userId: id,
     accountStatus,
   });
+
+  await delCache(`user:me:${id}`);
 
   res.status(200).json({
     success: true,
@@ -117,6 +120,8 @@ export const updateUser = catchAsync(async (req, res, next) => {
     body: req.body,
   });
 
+  await delCache(`user:me:${req.params.id}`);
+
   res.status(200).json({
     success: true,
     message: "User updated successfully",
@@ -133,6 +138,8 @@ export const updateUser = catchAsync(async (req, res, next) => {
 
 export const deleteUser = catchAsync(async (req, res, next) => {
   await deactivateUserByAdmin({ userId: req.params.id });
+
+  await delCache(`user:me:${req.params.id}`);
 
   res.status(200).json({
     success: true,

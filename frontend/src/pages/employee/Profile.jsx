@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { User, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -15,7 +15,7 @@ import useFetch from '../../hooks/useFetch';
  * Responsible only for layout/composition and data passing.
  */
 export default function Profile() {
-  const { user, logout, updateUserState } = useAuth();
+  const { user, logout, updateUserState, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const { data: statsState = { cvs: 0, jobs: 0 } } = useFetch(async () => {
@@ -34,6 +34,10 @@ export default function Profile() {
     ]),
     [statsState, user?.role],
   );
+
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
 
   const handleSaveProfile = async (updatedData) => {
     setError('');

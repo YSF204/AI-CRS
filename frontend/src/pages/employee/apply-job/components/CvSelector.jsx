@@ -14,7 +14,7 @@ export default function CvSelector({
 }) {
   return (
     <>
-      <div className="brutal-card bg-[var(--card-bg)] p-6">
+      <div className="p-5 bg-[var(--nm-surface)] border-4 border-[var(--nm-ink)]">
         <h2 className="font-['Space_Grotesk'] font-bold text-sm uppercase tracking-wider mb-4">
           Select Your CV
         </h2>
@@ -25,7 +25,7 @@ export default function CvSelector({
               setSelectedCvId(e.target.value);
               setMatchAnalysis(null);
             }}
-            className="w-full border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)]"
+            className="w-full border-4 border-[var(--nm-ink)] bg-[var(--nm-bg)] text-[var(--nm-text-primary)] px-3 py-3 font-['Manrope'] text-sm outline-none focus:border-[var(--nm-primary)]"
           >
             <option value="">Select a CV...</option>
             {cvs.map((cv) => (
@@ -35,14 +35,14 @@ export default function CvSelector({
             ))}
           </select>
         ) : (
-          <p className="font-mono text-sm text-[var(--coral)]">
+          <p className="font-['Manrope'] text-sm text-[var(--nm-error)]">
             No CVs available. Create one first.
           </p>
         )}
       </div>
 
-      <div className="brutal-card bg-[rgba(78, 205, 196, 0.1)] border-4 border-[var(--teal)] p-6">
-        <p className="font-mono text-sm text-[var(--fg-muted)]">
+      <div className="p-5 bg-[var(--nm-surface-high)] border-4 border-[var(--nm-primary)]">
+        <p className="font-['Manrope'] text-sm text-[var(--nm-text-secondary)]">
           Choose whether to submit instantly with the selected CV or analyze it first.
         </p>
       </div>
@@ -51,8 +51,7 @@ export default function CvSelector({
         <button
           onClick={handleInstantSubmitApplication}
           disabled={!selectedCvId || submitting || (isEdit && !formHasChanged)}
-          className="flex-1 brutal-btn px-4 py-3 font-bold uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
-          style={{ background: "var(--teal)", color: "#0a0a0a" }}
+          className="jd-btn jd-btn-primary w-full py-4 font-black shadow-[4px_4px_0_var(--nm-ink)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
           title={
             isEdit && !formHasChanged
               ? "No changes to submit"
@@ -62,7 +61,7 @@ export default function CvSelector({
           {submitting ? (
             <>
               <Loader className="animate-spin" size={18} />
-              Applying instantly...
+              Applying...
             </>
           ) : (
             "Apply Instantly"
@@ -71,8 +70,7 @@ export default function CvSelector({
         <button
           onClick={handleSubmitApplication}
           disabled={!selectedCvId || submitting || (isEdit && !formHasChanged)}
-          className="flex-1 brutal-btn px-4 py-3 font-bold uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
-          style={{ background: "var(--yellow)", color: "#0a0a0a" }}
+          className="jd-btn jd-btn-secondary w-full py-4 font-black shadow-[4px_4px_0_var(--nm-ink)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
           title={
             isEdit && !formHasChanged
               ? "No changes to submit"

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { CheckCircle, AlertCircle } from "lucide-react";
 
 export default function Toast({ toast }) {
   const [isVisible, setIsVisible] = useState(true);
@@ -49,11 +48,6 @@ export default function Toast({ toast }) {
         animation: "toast-slide-in 350ms cubic-bezier(0.175, 0.885, 0.32, 1.275)",
       }}
     >
-      {isSuccess ? (
-        <CheckCircle size={22} strokeWidth={2.5} />
-      ) : (
-        <AlertCircle size={22} strokeWidth={2.5} />
-      )}
       <span style={{ flex: 1 }}>{toast.msg}</span>
       <style>{`
         @keyframes toast-slide-in {

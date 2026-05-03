@@ -7,6 +7,7 @@ import helmet from "helmet";
 import hpp from "hpp";
 import mongoSanitize from "express-mongo-sanitize";
 import connectDB from "./src/config/dbConnect.js";
+import { initRedis } from "./src/config/redis.js";
 
 const envPath = path.resolve(process.cwd(), ".env");
 dotenv.config({ path: envPath });
@@ -56,6 +57,7 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(mongoSanitize());
 app.use(hpp());
 
+
 app.use("/api", regularLimiter);
 app.use("/api/auth/login", regularLimiter);
 app.use("/api/auth/register", regularLimiter);
@@ -80,6 +82,7 @@ if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const startServer = async () => {
   await connectDB();
+  await initRedis();
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 };
 

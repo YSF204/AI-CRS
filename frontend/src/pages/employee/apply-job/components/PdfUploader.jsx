@@ -12,19 +12,19 @@ export default function PdfUploader({
 }) {
   return (
     <>
-      <div className="brutal-card bg-[var(--card-bg)] p-6">
+      <div className="p-5 bg-[var(--nm-surface)] border-4 border-[var(--nm-ink)]">
         <h2 className="font-['Space_Grotesk'] font-bold text-sm uppercase tracking-wider mb-4">
           Upload Your CV (PDF)
         </h2>
         <div
-          className="border-2 border-dashed border-[var(--border-color)] p-8 text-center cursor-pointer hover:border-[var(--yellow)] transition-colors"
+          className="border-4 border-dashed border-[var(--nm-ink)] p-8 text-center cursor-pointer hover:border-[var(--nm-primary)] transition-colors"
           onClick={() => document.getElementById("cvFile")?.click()}
         >
-          <Upload size={32} className="mx-auto mb-3 text-[var(--fg-muted)]" />
-          <p className="font-mono text-sm font-bold mb-1">
+          <Upload size={32} className="mx-auto mb-3 text-[var(--nm-text-secondary)]" />
+          <p className="font-['Space_Grotesk'] text-sm font-bold mb-1">
             {cvFile ? cvFile.name : "Click to upload or drag and drop"}
           </p>
-          <p className="font-mono text-xs text-[var(--fg-muted)]">
+          <p className="font-['Manrope'] text-xs text-[var(--nm-text-secondary)]">
             PDF only, max 5MB
           </p>
         </div>
@@ -37,8 +37,8 @@ export default function PdfUploader({
         />
       </div>
 
-      <div className="brutal-card bg-[rgba(78, 205, 196, 0.1)] border-4 border-[var(--teal)] p-6">
-        <p className="font-mono text-sm text-[var(--fg-muted)]">
+      <div className="p-5 bg-[var(--nm-surface-high)] border-4 border-[var(--nm-primary)]">
+        <p className="font-['Manrope'] text-sm text-[var(--nm-text-secondary)]">
           Choose whether to submit instantly with the uploaded PDF or analyze it first.
         </p>
       </div>
@@ -47,8 +47,7 @@ export default function PdfUploader({
         <button
           onClick={handleInstantSubmitApplication}
           disabled={!cvFile || submitting || (isEdit && !formHasChanged)}
-          className="flex-1 brutal-btn px-4 py-3 font-bold uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
-          style={{ background: "var(--teal)", color: "#0a0a0a" }}
+          className="jd-btn jd-btn-primary w-full py-4 font-black shadow-[4px_4px_0_var(--nm-ink)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
           title={
             isEdit && !formHasChanged
               ? "No changes to submit"
@@ -58,7 +57,7 @@ export default function PdfUploader({
           {submitting ? (
             <>
               <Loader className="animate-spin" size={18} />
-              Applying instantly...
+              Applying...
             </>
           ) : (
             "Apply Instantly"
@@ -67,8 +66,7 @@ export default function PdfUploader({
         <button
           onClick={handleSubmitApplication}
           disabled={!cvFile || submitting || (isEdit && !formHasChanged)}
-          className="flex-1 brutal-btn px-4 py-3 font-bold uppercase tracking-wider disabled:opacity-50 flex items-center justify-center gap-2"
-          style={{ background: "var(--yellow)", color: "#0a0a0a" }}
+          className="jd-btn jd-btn-secondary w-full py-4 font-black shadow-[4px_4px_0_var(--nm-ink)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
           title={
             isEdit && !formHasChanged
               ? "No changes to submit"

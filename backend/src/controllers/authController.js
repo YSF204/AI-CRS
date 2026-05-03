@@ -12,6 +12,16 @@ import Employer from "../models/Employer.js";
 import { sendEmail } from "../utils/email.js";
 import { generateToken } from "../utils/generateToken.js";
 import crypto from "crypto";
+import { getCacheJson, setCacheJson } from "../utils/redisHelper.js";
+import { get } from "http";
+import { success } from "zod";
+
+// ================================== //
+//       Redis                        //
+// ================================== //
+
+
+
 
 // ================================== //
 //       REGISTER NEW USER            //
@@ -296,15 +306,32 @@ export const login = catchAsync(async (req, res, next) => {
 // ================================== //
 
 export const getCurrentUser = catchAsync(async (req, res, next) => {
+  const cacheKey = `user:me:${req.user._id}`;
+  const cachedUser = await getCacheJson(cacheKey);
+
+  if (cachedUser) {
+    return res.status(200).json({
+      success: true,
+      data: {
+        user: cachedUser,
+        source: "cache",
+      },
+    });
+  }
+
   const user = await getCurrentUserProfile({ userId: req.user._id });
+
+  await setCacheJson(cacheKey, user, 3600);
 
   res.status(200).json({
     success: true,
     data: {
       user,
+      source: "database",
     },
   });
 });
+
 
 // ================================== //
 //       LOGOUT USER                  //
@@ -555,9 +582,8 @@ export const resendVerificationEmail = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   // Send verification email
-  const verificationURL = `${
-    process.env.FRONTEND_URL || "http://localhost:5173"
-  }/verify-email/${verificationToken}`;
+  const verificationURL = `${process.env.FRONTEND_URL || "http://localhost:5173"
+    }/verify-email/${verificationToken}`;
 
   const htmlMessage = `
 <!DOCTYPE html>

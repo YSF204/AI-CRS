@@ -7,6 +7,7 @@ import { requestAccountDeletion as requestDelete } from "../services/users/accou
 import { confirmAccountDeletion as confirmDeleteService } from "../services/users/account/confirmAccountDeletion.js";
 import multer from "multer";
 import path from "path";
+import { delCache } from "../utils/redisHelper.js";
 
 // ================================== //
 //  PROFILE PICTURE UPLOAD CONFIG     //
@@ -58,6 +59,8 @@ export const updateMe = catchAsync(async (req, res, next) => {
     body: req.body,
   });
 
+  await delCache(`user:me:${req.user.id}`);
+
   res.status(200).json({
     status: "success",
     data: {
@@ -106,6 +109,8 @@ export const uploadProfilePicture = catchAsync(async (req, res, next) => {
     { new: true, runValidators: false },
   );
 
+  await delCache(`user:me:${req.user._id}`);
+
   res.status(200).json({
     status: "success",
     data: {
@@ -114,3 +119,4 @@ export const uploadProfilePicture = catchAsync(async (req, res, next) => {
     },
   });
 });
+

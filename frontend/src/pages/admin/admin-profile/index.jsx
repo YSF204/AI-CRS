@@ -7,7 +7,7 @@ import api from '../../../services/api';
 import AdminProfileForm from './ProfileForm';
 
 export default function AdminProfile() {
-    const { user, updateUserState } = useAuth();
+    const { user, updateUserState, refreshUser } = useAuth();
     const { theme } = useTheme();
     const fileInputRef = useRef(null);
     const [uploading, setUploading] = useState(false);
@@ -22,6 +22,10 @@ export default function AdminProfile() {
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        refreshUser();
+    }, [refreshUser]);
 
     useEffect(() => {
         if (!user) return;
