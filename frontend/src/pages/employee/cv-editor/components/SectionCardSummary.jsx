@@ -10,7 +10,7 @@ export default function SummarySection({
   suggestions,
   handleSuggestionSelect,
 }) {
-  const { setForm } = handlers;
+  const { updateField } = handlers;
 
   return (
     <div className="flex flex-col gap-4">
@@ -48,7 +48,7 @@ export default function SummarySection({
           className="min-h-[120px] w-full p-4 nm-input font-sans text-sm leading-relaxed"
           value={form.summary}
           onChange={(e) => {
-            setForm((f) => ({ ...f, summary: e.target.value }));
+            handlers.updateField("summary", e.target.value);
           }}
           placeholder="Results-driven engineer with 3+ years experience in building high-performance systems..."
           rows={5}

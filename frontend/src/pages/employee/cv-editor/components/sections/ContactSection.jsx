@@ -24,7 +24,7 @@ export default function ContactSection({ form, handlers }) {
             type="email"
             value={form.contact?.email || ""}
             onChange={(e) =>
-              handlers.updateNestedField("contact", "email", e.target.value)
+              handlers.setContact("email")(e)
             }
             className="brutal-input w-full"
             placeholder="your.email@example.com"
@@ -40,7 +40,7 @@ export default function ContactSection({ form, handlers }) {
             type="tel"
             value={form.contact?.phone || ""}
             onChange={(e) =>
-              handlers.updateNestedField("contact", "phone", e.target.value)
+              handlers.setContact("phone")(e)
             }
             className="brutal-input w-full"
             placeholder="+1 (555) 123-4567"
@@ -56,7 +56,7 @@ export default function ContactSection({ form, handlers }) {
             type="url"
             value={form.contact?.linkedin || ""}
             onChange={(e) =>
-              handlers.updateNestedField("contact", "linkedin", e.target.value)
+              handlers.setContact("linkedin")(e)
             }
             className="brutal-input w-full"
             placeholder="https://linkedin.com/in/yourprofile"
@@ -72,7 +72,7 @@ export default function ContactSection({ form, handlers }) {
             type="url"
             value={form.contact?.github || ""}
             onChange={(e) =>
-              handlers.updateNestedField("contact", "github", e.target.value)
+              handlers.setContact("github")(e)
             }
             className="brutal-input w-full"
             placeholder="https://github.com/yourusername"

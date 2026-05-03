@@ -34,6 +34,7 @@ export default function ExperienceSection({ form, handlers }) {
         handlers.updateField("experience", [...experiences, currentItem]);
       }
       resetForm();
+      handlers.triggerAutoSave?.();
     }
   };
 
@@ -47,6 +48,7 @@ export default function ExperienceSection({ form, handlers }) {
       "experience",
       experiences.filter((_, i) => i !== index),
     );
+    handlers.triggerAutoSave?.();
   };
 
   return (

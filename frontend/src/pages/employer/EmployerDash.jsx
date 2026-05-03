@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { PlusCircle, Briefcase, CheckCircle2, MapPin, AlertCircle } from 'lucide-react';
+import { useMemo } from "react";
+import { PlusCircle, Briefcase, CheckCircle2, MapPin, AlertCircle } from "lucide-react";
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import api from '../../services/api';
 import useFetch from '../../hooks/useFetch';
+import useEmployerDash from '../../hooks/useEmployerDash';
 
 import DashboardNav from '../../components/shared/DashboardNav';
 import StatWidget from './components/StatWidget';
@@ -14,34 +14,19 @@ import ChartWidget from './components/ChartWidget';
 export default function EmployerDash() {
   const { user } = useAuth();
   const navigate = useNavigate();
-
-  // ── Data state ──────────────────────────────────────────────── //
-  const {
-    data: profile = null,
-    loading: profileLoading,
-    error: profileFetchError,
-  } = useFetch(async () => {
-    const res = await api.get('/employers');
-    return res.data?.data?.employer || null;
-  }, { initialData: null });
+  const { fetchAll } = useEmployerDash();
 
   const {
-    data: jobs = [],
-    loading: jobsLoading,
-  } = useFetch(async () => {
-    const res = await api.get('/jobs/employer/me');
-    return res.data?.data?.jobs || [];
-  }, { initialData: [], deps: [user?.id || user?._id] });
+    data: dashData,
+    loading,
+  } = useFetch(fetchAll, { initialData: { profile: null, jobs: [] } });
 
-  const profileError = Boolean(profileFetchError);
-
-  // ── Derived values ───────────────────────────────────────────── //
+  const { profile = null, jobs = [] } = dashData;
   const company = profile?.company;
-  const openJobs = jobs.filter((j) => j.status === 'OPEN').length;
-
+  const openJobs = useMemo(() => jobs.filter((j) => j.status === 'OPEN').length, [jobs]);
+  const profileError = loading ? false : !profile;
   const goPostJob = () => navigate('/employer/post-job');
 
-  // ── Layout ───────────────────────────────────────────────────── //
   return (
     <div style={{
       minHeight: '100vh',
@@ -55,7 +40,6 @@ export default function EmployerDash() {
       </div>
 
       <div className="dashboard-shell" style={{ padding: 'var(--spacing-8)' }}>
-        {/* Greeting + Post button */}
         <div style={{
           marginBottom: '3.5rem',
           display: 'flex',
@@ -74,7 +58,7 @@ export default function EmployerDash() {
               letterSpacing: '0.15em',
               marginBottom: '8px'
             }}>
-              {profileLoading ? 'Loading Profile...' : company?.name ?? 'Corporate Entity'}
+              {loading ? 'Loading Profile...' : company?.name ?? 'Corporate Entity'}
             </div>
             <h1 style={{
               fontFamily: 'var(--font-display)',
@@ -108,20 +92,18 @@ export default function EmployerDash() {
           </button>
         </div>
 
-        {/* Stat row */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
           gap: '1.5rem',
           marginBottom: '2.5rem'
         }}>
-          <StatWidget label="Live Listings"  value={jobsLoading ? '…' : openJobs}                              accent="var(--nm-warning)" icon={Briefcase}     />
-          <StatWidget label="History Total"    value={jobsLoading ? '…' : jobs.length}                           accent="var(--nm-primary)" icon={CheckCircle2}  />
-          <StatWidget label="Global Nodes"        value={profileLoading ? '…' : (company?.branches?.length ?? '0')} accent="var(--nm-error)" icon={MapPin}        />
-          <StatWidget label="Access Level"   value={profileLoading ? '…' : (company ? 'Verified' : 'Pending')} accent="#A78BFA" icon={AlertCircle}   />
+          <StatWidget label="Live Listings"  value={loading ? '…' : openJobs}                              accent="var(--nm-warning)" icon={Briefcase}     />
+          <StatWidget label="History Total"    value={loading ? '…' : jobs.length}                           accent="var(--nm-primary)" icon={CheckCircle2}  />
+          <StatWidget label="Global Nodes"        value={loading ? '…' : (company?.branches?.length ?? '0')} accent="var(--nm-error)" icon={MapPin}        />
+          <StatWidget label="Access Level"   value={loading ? '…' : (company ? 'Verified' : 'Pending')} accent="#A78BFA" icon={AlertCircle}   />
         </div>
 
-        {/* Main Bento Grid */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
@@ -130,16 +112,11 @@ export default function EmployerDash() {
         }}>
           <style>{`@media (min-width: 1024px) { .bento-grid { grid-template-columns: repeat(12, 1fr); } }`}</style>
           <div className="bento-grid" style={{ display: 'grid', gap: '1.5rem', alignItems: 'stretch' }}>
-
-            {/* Chart spans 8, Profile spans 4 */}
             <ChartWidget jobs={jobs} />
-            <CompanyProfileCard company={company} loading={profileLoading} error={profileError} />
-
-            {/* Pipeline spans 12 */}
-            <HiringPipelineCard totalJobs={jobs.length} openJobs={openJobs} loading={jobsLoading} />
+            <CompanyProfileCard company={company} loading={loading} error={profileError} />
+            <HiringPipelineCard totalJobs={jobs.length} openJobs={openJobs} loading={loading} />
           </div>
         </div>
-
       </div>
     </div>
   );

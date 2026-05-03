@@ -1,51 +1,72 @@
 import CV from "../../../models/CV.js";
 import CVAnalysis from "../../../models/CVAnalysis.js";
 import AppError from "../../../utils/appError.js";
-import { analyzeCVFromDatabase } from "../../../integrations/ai/openai.js";
+import { analyzeATSScore, analyzeCVSection as runSectionAnalysis } from "../../../integrations/ai/openai.js";
 import verifyCvOwnership from "../helpers/verifyCvOwnership.js";
 import parseAiJsonResponse from "../helpers/parseAiJsonResponse.js";
+import { normalizeATSScore } from "./normalizeScore.js";
 
 const toBulletText = (value) => (Array.isArray(value) ? value.join("\n• ") : value || "N/A");
 
-const formatCvAsText = (cv) =>
-    [
-        `Job Title: ${cv.jobTitle}`,
-        `Summary: ${cv.summary}`,
-        `Email: ${cv.contact?.email || "N/A"}`,
-        `Phone: ${cv.contact?.phone || "N/A"}`,
-        `Location: ${cv.address?.city || ""}, ${cv.address?.street || ""}`,
-        `Experience: ${cv.experience?.map((entry) => `${entry.position} at ${entry.institutionName} (${entry.duration}y) - ${entry.summary || ""}`).join(" | ") || "None"}`,
-        `Education: ${cv.education?.map((entry) => `${entry.certification} at ${entry.institutionName} (${entry.duration}y)`).join(" | ") || "None"}`,
-        `Technical Skills: ${cv.technicalSkills?.join(", ") || "None"}`,
-        `Soft Skills: ${cv.softSkills?.join(", ") || "None"}`,
-        `Languages: ${cv.language?.join(", ") || "None"}`,
-        ...(cv.customSections?.map(
-            (section) =>
-                `${section.title}: ${section.items?.map((item) => `${item.name}${item.description ? ` - ${item.description}` : ""}`).join(", ")}`,
-        ) || []),
-        `Layout: ${JSON.stringify(cv.layout)}`,
-    ].join("\n");
+export const buildCvDataForATS = (cv) => ({
+  fullName: cv.fullName || "",
+  jobTitle: cv.jobTitle || "",
+  summary: cv.summary || "",
+  contact: {
+    phone: cv.contact?.phone || "",
+    email: cv.contact?.email || "",
+    linkedin: cv.contact?.linkedin || "",
+    github: cv.contact?.github || "",
+  },
+  address: {
+    city: cv.address?.city || "",
+    street: cv.address?.street || "",
+  },
+  experience: (cv.experience || []).map((e) => ({
+    position: e.position || "",
+    institutionName: e.institutionName || "",
+    durationFrom: e.durationFrom || "",
+    durationTo: e.durationTo || "",
+    summary: e.summary || "",
+  })),
+  education: (cv.education || []).map((e) => ({
+    institutionName: e.institutionName || "",
+    certification: e.certification || "",
+    durationFrom: e.durationFrom || "",
+    durationTo: e.durationTo || "",
+    summary: e.summary || "",
+  })),
+  technicalSkills: cv.technicalSkills || [],
+  softSkills: cv.softSkills || [],
+  languages: cv.language || cv.languages || [],
+  certifications:
+    cv.customSections
+      ?.filter((s) => s.sectionType === "certifications")
+      .flatMap((s) => s.items.map((item) => item.name || "")) || [],
+});
+
+export const runUnifiedATSScoring = async (cv) => {
+  const cvData = buildCvDataForATS(cv);
+  const aiResult = await analyzeATSScore(cvData);
+  const raw = parseAiJsonResponse(aiResult);
+  return normalizeATSScore(raw);
+};
 
 export const analyzeSavedCv = async ({ cvId, userId, jobDescription }) => {
-    const cv = await CV.findById(cvId);
-    if (!cv) {
-        throw new AppError("CV not found", 404);
-    }
+  const cv = await CV.findById(cvId);
+  if (!cv) throw new AppError("CV not found", 404);
+  verifyCvOwnership(cv, userId);
 
-    verifyCvOwnership(cv, userId);
+  const normalized = await runUnifiedATSScoring(cv);
 
-    const aiResult = await analyzeCVFromDatabase(formatCvAsText(cv), jobDescription);
-    const parsed = parseAiJsonResponse(aiResult);
-    const analysisData = parsed.analysis || {};
-
-    return CVAnalysis.create({
-        userId,
-        CVId: cv._id,
-        atsScore: analysisData.score || 0,
-        strength: toBulletText(analysisData.strengths),
-        weakness: toBulletText(analysisData.weaknesses),
-        suggestion: toBulletText(analysisData.suggestions),
-    });
+  return CVAnalysis.create({
+    userId,
+    CVId: cv._id,
+    atsScore: normalized.overallScore,
+    strength: toBulletText(normalized.topStrengths),
+    weakness: toBulletText(normalized.topWeaknesses),
+    suggestion: toBulletText(normalized.improvementSuggestions),
+  });
 };
 
 export default analyzeSavedCv;

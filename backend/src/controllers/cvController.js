@@ -5,6 +5,7 @@ import {
   analyzeCVFromFile,
   analyzeCVFromDatabase,
   analyzeCVSection,
+  analyzeATSScore,
   analyzeSkillGap,
 } from "../integrations/ai/openai.js";
 import CV from "../models/CV.js";
@@ -15,6 +16,9 @@ import {
   calculateExperienceYears,
 } from "../utils/profileNormalizer.js";
 import { generateAIMatchAnalysis } from "../services/matching/matchingService.js";
+import { runUnifiedATSScoring, buildCvDataForATS } from "../services/cvs/analysis/analyzeSavedCv.js";
+import { normalizeEditorAnalysis, normalizeATSScore } from "../services/cvs/analysis/normalizeScore.js";
+import parseAiJsonResponse from "../services/cvs/helpers/parseAiJsonResponse.js";
 
 const verifyOwnership = (cv, userId) => {
   if (cv.userId.toString() !== userId.toString()) {
@@ -499,8 +503,6 @@ export const analyzeSection = catchAsync(async (req, res, next) => {
     return next(new AppError("Section and data are required", 400));
   }
 
-  // Generate AI analysis for the section using the specific section prompt
-  // data is expected to be a flattened object where keys are the field ids
   const aiAnalysis = await analyzeCVSection(section, data);
 
   let parsed;
@@ -513,35 +515,48 @@ export const analyzeSection = catchAsync(async (req, res, next) => {
     );
   }
 
-  // ── fullCv: AI returns { overallScore, sections, generalAdvice }
   if (section === "fullCv") {
-    const overallScore = parsed.overallScore ?? null;
-    const sections = parsed.sections || [];
-    const generalAdvice = parsed.generalAdvice || [];
-    const issues = parsed.issues || [];
+    const normalized = normalizeEditorAnalysis(parsed);
 
-    // Mark as isEmpty when score is very low and most sections are flagged Empty
-    const emptyCount = sections.filter((s) => s.status === "Empty").length;
+    let atsResult = null;
+    let overallScore = normalized.overallScore;
+
+    try {
+      const cvPayload = { ...data, fullName: fullName || data.fullName || "" };
+      const atsReadyData = buildCvDataForATS(cvPayload);
+      const aiAtsRaw = await analyzeATSScore(atsReadyData);
+      const atsParsed = parseAiJsonResponse(aiAtsRaw);
+      atsResult = normalizeATSScore(atsParsed);
+      overallScore = atsResult.overallScore;
+    } catch (atsErr) {
+      console.error("Unified ATS scoring failed in fullCv analysis:", atsErr.message);
+    }
+
+    const emptyCount = normalized.sections.filter((s) => s.status === "Empty").length;
     const isEmpty =
-      overallScore != null &&
       overallScore < 25 &&
-      sections.length > 0 &&
-      emptyCount >= Math.floor(sections.length * 0.6);
+      normalized.sections.length > 0 &&
+      emptyCount >= Math.floor(normalized.sections.length * 0.6);
 
     return res.status(200).json({
       success: true,
       data: {
         section,
         overallScore,
-        sections,
-        generalAdvice,
-        issues,
+        sections: normalized.sections,
+        topStrengths: atsResult ? atsResult.topStrengths : [],
+        topWeaknesses: atsResult ? atsResult.topWeaknesses : [],
+        improvementSuggestions: atsResult ? atsResult.improvementSuggestions : [],
+        summary: atsResult ? atsResult.summary : "",
+        generalAdvice: normalized.generalAdvice,
+        issues: normalized.issues,
         isEmpty,
+        atsBreakdown: atsResult,
+        cvUpdatedAt: new Date().toISOString(),
       },
     });
   }
 
-  // ── Individual section: AI returns { atsScore, atsFeedback, issues }
   const issues = parsed.issues || [];
   const atsScore = parsed.atsScore || null;
   const atsFeedback = parsed.atsFeedback || "";

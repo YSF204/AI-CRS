@@ -92,6 +92,7 @@ export const analyzeCVFromDatabase = async (cvText, jobDescription = "") => {
 export const analyzeCVSection = async (section, sectionData) => {
   const response = await getClient().responses.create({
     model: "gpt-5.4-nano",
+    temperature: 0,
     input: [
       {
         role: "user",
@@ -111,6 +112,7 @@ export const analyzeCVSection = async (section, sectionData) => {
 export const analyzeATSScore = async (cvData) => {
   const response = await getClient().responses.create({
     model: "gpt-5.4-nano",
+    temperature: 0,
     input: [
       {
         role: "user",

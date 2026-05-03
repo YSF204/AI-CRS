@@ -64,6 +64,7 @@ export default function CVEditor() {
     analyzing,
     showSkillGap,
     setShowSkillGap,
+    staleAnalysis,
     handleAnalyze,
     handleAnalyzeSection,
     handleApplyAnalysis,
@@ -208,6 +209,7 @@ export default function CVEditor() {
       <AnalysisModal
         show={showAnalysis}
         analysis={analysisResult}
+        stale={staleAnalysis}
         currentData={form}
         userName={user?.firstName || "Candidate"}
         templateId={form.templateId || cv?.templateId || 1}

@@ -34,6 +34,7 @@ export default function EducationSection({ form, handlers }) {
         handlers.updateField("education", [...education, currentItem]);
       }
       resetForm();
+      handlers.triggerAutoSave?.();
     }
   };
 
@@ -47,6 +48,7 @@ export default function EducationSection({ form, handlers }) {
       "education",
       education.filter((_, i) => i !== index),
     );
+    handlers.triggerAutoSave?.();
   };
 
   return (

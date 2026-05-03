@@ -1,7 +1,20 @@
 {
+  "name": "ai-crs-monorepo",
+  "version": "1.0.0",
+  "scripts": {
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:scraper": "python3 scraper/jobs_scraper.py --end-page 2",
+    "dev": "concurrently -n \"FRONT,BACK,SCRAP\" -c \"cyan,green,magenta\" \"npm run dev:frontend\" \"npm run dev:backend\" \"npm run dev:scraper\"",
+    "scrape": "python3 scraper/jobs_scraper.py",
+    "install:all": "npm install && npm install --prefix frontend && npm install --prefix backend"
+  },
   "dependencies": {
     "@google/genai": "^1.40.0",
     "dotenv": "^17.2.4",
     "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

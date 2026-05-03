@@ -4,7 +4,6 @@ import SectionCard from "./SectionCard";
 
 export default function EditorContent({
   form,
-  setForm,
   user,
   cv,
   activeSections,
@@ -68,7 +67,7 @@ export default function EditorContent({
             }
             value={form.fullName}
             onChange={(e) =>
-              setForm((f) => ({ ...f, fullName: e.target.value }))
+              handlers.updateField("fullName", e.target.value)
             }
           />
           <p className="font-mono text-[10px] text-[var(--nm-text-tertiary)] uppercase font-bold">

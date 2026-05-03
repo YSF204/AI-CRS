@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { X, Sparkles } from "lucide-react";
+import { X, Sparkles, AlertCircle } from "lucide-react";
 import LivePreview from "./LivePreview";
 import AnalysisResults from "./AnalysisResults";
 
 export default function AnalysisModal({
   show,
   analysis,
+  stale,
   currentData,
   userName,
   templateId,
@@ -163,6 +164,25 @@ export default function AnalysisModal({
                 <X size={18} strokeWidth={2.5} />
               </button>
             </div>
+
+            {stale && (
+              <div
+                style={{
+                  background: "var(--nm-warning-surface)",
+                  border: "3px solid var(--nm-warning)",
+                  padding: "12px 16px",
+                  marginBottom: "16px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                <AlertCircle size={18} color="var(--nm-warning)" strokeWidth={2.5} style={{ flexShrink: 0 }} />
+                <span style={{ fontSize: "0.85rem", fontFamily: "Manrope, sans-serif", fontWeight: 600, color: "var(--nm-warning)" }}>
+                  CV has changed since last analysis. Re-analyze for up-to-date results.
+                </span>
+              </div>
+            )}
 
             <AnalysisResults
               analysis={analysis}

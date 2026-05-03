@@ -15,9 +15,9 @@ import { getEmployerApplications as getEmployerApplicationsQuery } from "../serv
 import { getApplicationsByJob as getApplicationsByJobQuery } from "../services/applications/queries/getApplicationsByJob.js";
 import { getApplicationById as getApplicationByIdQuery } from "../services/applications/queries/getApplicationById.js";
 import {
-  analyzeATSScore,
   analyzeApplicationCV,
 } from "../integrations/ai/openai.js";
+import { runUnifiedATSScoring } from "../services/cvs/analysis/analyzeSavedCv.js";
 import {
   buildNormalizedProfile,
   extractApplicantInfoFromParsedCV,
@@ -83,12 +83,10 @@ export const analyzeAtsScore = catchAsync(async (req, res, next) => {
   const { cvId } = req.body;
   const userId = req.user._id;
 
-  // Validate required fields
   if (!cvId) {
     return next(new AppError("CV ID is required", 400));
   }
 
-  // Fetch the CV and verify ownership
   const cv = await CV.findById(cvId);
   if (!cv) {
     return next(new AppError("CV not found", 404));
@@ -98,92 +96,21 @@ export const analyzeAtsScore = catchAsync(async (req, res, next) => {
     return next(new AppError("You are not authorized to analyze this CV", 403));
   }
 
-  // Prepare CV data for ATS analysis
-  const cvData = {
-    fullName: cv.fullName || "",
-    jobTitle: cv.jobTitle || "",
-    summary: cv.summary || "",
-    contact: {
-      phone: cv.contact?.phone || "",
-      email: cv.contact?.email || "",
-      linkedin: cv.contact?.linkedin || "",
-      github: cv.contact?.github || "",
-    },
-    address: {
-      city: cv.address?.city || "",
-      street: cv.address?.street || "",
-    },
-    experience: cv.experience || [],
-    education: cv.education || [],
-    technicalSkills: cv.technicalSkills || [],
-    softSkills: cv.softSkills || [],
-    languages: cv.language || [],
-    certifications:
-      cv.customSections
-        ?.filter((s) => s.sectionType === "certifications")
-        .flatMap((s) => s.items.map((item) => item.name)) || [],
-  };
-
   try {
-    // Call AI to analyze ATS score
-    const aiResponse = await analyzeATSScore(cvData);
+    const normalized = await runUnifiedATSScoring(cv);
 
-    // Parse JSON with safety wrapper - strip markdown fences and retry once
-    let cleanedResponse = aiResponse;
-    const jsonMatch = aiResponse.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-    if (jsonMatch) {
-      cleanedResponse = jsonMatch[1].trim();
-      console.log("Stripped markdown fences from ATS score AI response");
-    }
-
-    let atsResult;
-    try {
-      atsResult = JSON.parse(cleanedResponse);
-      console.log("Successfully parsed ATS score JSON on first attempt");
-    } catch (e) {
-      console.error(
-        "Failed to parse ATS score JSON on first attempt:",
-        e.message,
-      );
-      console.error("Raw AI response was:", aiResponse.substring(0, 500));
-
-      // Retry: extract JSON from response
-      try {
-        const jsonStart = cleanedResponse.indexOf("{");
-        const jsonEnd = cleanedResponse.lastIndexOf("}");
-        if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-          const extractedJson = cleanedResponse.substring(
-            jsonStart,
-            jsonEnd + 1,
-          );
-          atsResult = JSON.parse(extractedJson);
-          console.log(
-            "Successfully parsed ATS score JSON on retry (extracted JSON substring)",
-          );
-        }
-      } catch (retryError) {
-        console.error(
-          "Failed to parse ATS score JSON on retry:",
-          retryError.message,
-        );
-        return next(
-          new AppError("Failed to analyze CV. Please try again later.", 500),
-        );
-      }
-    }
-
-    // Return ATS analysis result
     res.status(200).json({
       success: true,
-      data: atsResult,
+      data: {
+        ...normalized,
+        cvUpdatedAt: cv.updatedAt,
+        cvId: cv._id,
+      },
     });
   } catch (error) {
     console.error("ATS analysis error:", error);
     return next(
-      new AppError(
-        "Failed to analyze CV for ATS score. Please try again later.",
-        500,
-      ),
+      new AppError("Failed to analyze CV for ATS score. Please try again later.", 500),
     );
   }
 });

@@ -21,6 +21,7 @@ import LanguageSection from "./sections/LanguageSection.jsx";
 export default function SectionCardBody({ sectionKey, form, handlers }) {
   const {
     setForm,
+    triggerAutoSave,
     exp,
     edu,
     set,
@@ -341,6 +342,7 @@ export default function SectionCardBody({ sectionKey, form, handlers }) {
                         newSections[si].title = "";
                       }
                       setForm((f) => ({ ...f, customSections: newSections }));
+                      triggerAutoSave();
                     }}
                     placeholder={
                       section.sectionType === "other"

@@ -13,51 +13,70 @@ export default function useCVAnalysis({
   const [analysisResult, setAnalysisResult] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [showSkillGap, setShowSkillGap] = useState(false);
+  const [staleAnalysis, setStaleAnalysis] = useState(false);
+
+  const buildCvPayload = () => {
+    const filtered = filteredFormData();
+    return {
+      fullName: filtered.fullName || userName || "",
+      jobTitle: filtered.jobTitle || "",
+      summary: filtered.summary || "",
+      contact: {
+        phone: filtered.contact?.phone || "",
+        email: filtered.contact?.email || "",
+        linkedin: filtered.contact?.linkedin || "",
+        github: filtered.contact?.github || "",
+      },
+      address: {
+        city: filtered.address?.city || "",
+        street: filtered.address?.street || "",
+      },
+      experience: (filtered.experience || []).map((exp) => ({
+        position: exp.position || "",
+        institutionName: exp.institutionName || "",
+        durationFrom: exp.durationFrom || "",
+        durationTo: exp.durationTo || "",
+        summary: exp.summary || "",
+      })),
+      education: (filtered.education || []).map((edu) => ({
+        institutionName: edu.institutionName || "",
+        certification: edu.certification || "",
+        durationFrom: edu.durationFrom || "",
+        durationTo: edu.durationTo || "",
+        summary: edu.summary || "",
+      })),
+      technicalSkills: filtered.technicalSkills || [],
+      softSkills: filtered.softSkills || [],
+      language: filtered.language || [],
+      customSections: (filtered.customSections || []).map((sec) => ({
+        title: sec.title || "",
+        sectionType: sec.sectionType || "other",
+        items: (sec.items || []).map((it) => ({
+          name: it.name || "",
+          description: it.description || "",
+        })),
+      })),
+      cvId: id && id !== "new" ? id : undefined,
+    };
+  };
 
   const handleAnalyze = async () => {
     const cached = sessionStorage.getItem(`cv_analysis_${id}`);
     if (cached) {
-      setAnalysisResult(JSON.parse(cached));
+      const parsed = JSON.parse(cached);
+      const cvModified = form.updatedAt || form.createdAt;
+      const isStale = cvModified && parsed.cvUpdatedAt && new Date(cvModified) > new Date(parsed.cvUpdatedAt);
+      setStaleAnalysis(isStale);
+      setAnalysisResult(parsed);
       setShowAnalysis(true);
       return;
     }
 
+    setStaleAnalysis(false);
+
     setAnalyzing(true);
     try {
-      const filtered = filteredFormData();
-
-      // Send the full structured CV data so the AI can evaluate every section
-      // (contact, skills, languages, etc.) — not just text fields.
-      const cvPayload = {
-        jobTitle: filtered.jobTitle || "",
-        summary: filtered.summary || "",
-        contact: filtered.contact || {},
-        address: filtered.address || {},
-        experience: (filtered.experience || []).map((exp) => ({
-          position: exp.position || "",
-          institutionName: exp.institutionName || "",
-          durationFrom: exp.durationFrom || "",
-          durationTo: exp.durationTo || "",
-          summary: exp.summary || "",
-        })),
-        education: (filtered.education || []).map((edu) => ({
-          institutionName: edu.institutionName || "",
-          certification: edu.certification || "",
-          durationFrom: edu.durationFrom || "",
-          durationTo: edu.durationTo || "",
-          summary: edu.summary || "",
-        })),
-        technicalSkills: filtered.technicalSkills || [],
-        softSkills: filtered.softSkills || [],
-        language: filtered.language || [],
-        customSections: (filtered.customSections || []).map((sec) => ({
-          title: sec.title || "",
-          items: (sec.items || []).map((it) => ({
-            name: it.name || "",
-            description: it.description || "",
-          })),
-        })),
-      };
+      const cvPayload = buildCvPayload();
 
       const response = await api.post("/cvs/analyze-section", {
         section: "fullCv",
@@ -67,37 +86,17 @@ export default function useCVAnalysis({
 
       if (response.data?.success && response.data?.data) {
         const analysisData = response.data.data;
-        let mergedResult = { ...analysisData };
 
-        if (id && id !== "new") {
-          try {
-            const atsResponse = await api.post("/applications/analyze-ats", {
-              cvId: id,
-            });
-            const atsData = atsResponse.data?.data;
-            const atsScore = atsData?.overallScore ?? null;
-            mergedResult = {
-              ...analysisData,
-              atsScore: atsScore ?? analysisData.overallScore ?? null,
-              overallScore: atsScore ?? analysisData.overallScore ?? null,
-              atsBreakdown: atsData || null,
-            };
-          } catch (atsError) {
-            console.error("ATS analysis failed:", atsError);
-            mergedResult = {
-              ...analysisData,
-              atsScore: analysisData.overallScore ?? null,
-            };
-          }
-        } else {
-          mergedResult = {
-            ...analysisData,
-            atsScore: analysisData.overallScore ?? null,
-          };
-        }
+        const mergedResult = {
+          ...analysisData,
+          atsScore: analysisData.overallScore ?? null,
+          cvUpdatedAt: analysisData.cvUpdatedAt || new Date().toISOString(),
+          atsBreakdown: analysisData.atsBreakdown || null,
+        };
 
         setAnalysisResult(mergedResult);
         sessionStorage.setItem(`cv_analysis_${id}`, JSON.stringify(mergedResult));
+        setStaleAnalysis(false);
         setShowAnalysis(true);
       } else {
         showToast("error", "Unable to generate analysis. Please try again.");
@@ -240,7 +239,6 @@ export default function useCVAnalysis({
 
     showToast("success", "Selected changes applied to your CV.");
     setShowAnalysis(false);
-
     sessionStorage.removeItem(`cv_analysis_${id}`);
   };
 
@@ -265,6 +263,7 @@ export default function useCVAnalysis({
     analyzing,
     showSkillGap,
     setShowSkillGap,
+    staleAnalysis,
     handleAnalyze,
     handleAnalyzeSection,
     handleApplyAnalysis,
