@@ -17,6 +17,7 @@ import useEmployeeDash from "../../../hooks/useEmployeeDash";
 import { calcProfileCompletion } from "../../../utils/profileCompletion";
 import DashStatCards from "./components/DashStatCards";
 import RecentActivity from "./components/RecentActivity";
+import { SkStatCard, SkCard } from "../../../components/ui/Skeleton";
 
 export default function EmployeeDash() {
   const { user } = useAuth();
@@ -156,12 +157,21 @@ export default function EmployeeDash() {
           <DashboardNav role="employee" />
         </div>
         <div className="dashboard-shell py-8">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)]"></div>
-              <p className="mt-4 text-mono text-sm text-[var(--text-muted)]">
-                Loading your dashboard...
-              </p>
+          <section className="mb-8">
+            <SkCard style={{ padding: "var(--spacing-6)" }}>
+              <div style={{ display: "flex", gap: "var(--spacing-4)", alignItems: "center" }}>
+                <div className="sk" style={{ width: 48, height: 48, borderRadius: 0 }} />
+                <div style={{ display: "flex", flexDirection: "column", gap: 8, flex: 1 }}>
+                  <div className="sk" style={{ width: "60%", height: 12 }} />
+                  <div className="sk" style={{ width: "40%", height: 24 }} />
+                </div>
+              </div>
+            </SkCard>
+          </section>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(1, minmax(0, 1fr))", gap: "var(--spacing-4)" }}>
+            <style>{`@media(min-width:640px){.emp-dash-sk-grid{grid-template-columns:repeat(2,1fr)}}@media(min-width:1024px){.emp-dash-sk-grid{grid-template-columns:repeat(4,1fr)}}`}</style>
+            <div className="emp-dash-sk-grid" style={{ display: "grid", gap: "var(--spacing-4)" }}>
+              {[1, 2, 3, 4].map((i) => <SkStatCard key={i} />)}
             </div>
           </div>
         </div>
@@ -177,7 +187,7 @@ export default function EmployeeDash() {
 
       <div className="dashboard-shell py-8">
         <section className="mb-8">
-          <div className="workflow-card p-8 bg-[var(--card-bg)] flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="workflow-card p-6 sm:p-8 bg-[var(--card-bg)] flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="flex-1">
               <p className="text-mono text-xs uppercase tracking-widest text-[var(--color-text-secondary)] mb-2">
                 Welcome Back, {userName}

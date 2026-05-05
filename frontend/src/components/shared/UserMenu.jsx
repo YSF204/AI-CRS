@@ -25,10 +25,10 @@ export default function UserMenu({ profileHref = '/employee/profile' }) {
       {({ open }) => (
         <>
           <MenuButton
-            className="nav-user-button focus-ring"
+            className="nav-user-button focus-ring min-h-[44px]"
             aria-label="User menu"
           >
-            <span className="max-w-[180px] truncate">
+            <span className="max-w-[120px] sm:max-w-[180px] truncate">
               {fullName || 'My Account'}
             </span>
             <ChevronDown
@@ -43,16 +43,16 @@ export default function UserMenu({ profileHref = '/employee/profile' }) {
           <MenuItems
             anchor="bottom end"
             transition
-            className="user-menu-dropdown z-[200] mt-2 min-w-[280px] border border-[var(--border-strong)] shadow-[var(--shadow-md)] bg-[var(--card-bg)] rounded-xl overflow-hidden p-0 focus:outline-none origin-top-right transition duration-200 ease-out data-[closed]:opacity-0 data-[closed]:scale-95 data-[closed]:-translate-y-1"
+            className="user-menu-dropdown z-[200] mt-2 min-w-[240px] sm:min-w-[280px] max-w-[calc(100vw-2rem)] border-4 border-[var(--nm-ink)] shadow-[8px_8px_0_var(--nm-ink)] bg-[var(--nm-surface)] overflow-hidden p-0 focus:outline-none origin-top-right transition duration-200 ease-out data-[closed]:opacity-0 data-[closed]:scale-95 data-[closed]:-translate-y-1"
           >
             <div
-              className="px-4 py-4 border-b border-[var(--border-strong)]"
-              style={{ background: 'var(--surface-3)' }}
+              className="px-3 sm:px-4 py-4 border-b-4 border-[var(--nm-ink)]"
+              style={{ background: 'var(--nm-surface-high)' }}
             >
-              <p className="font-['Montserrat'] font-bold text-sm m-0" style={{ color: 'var(--text-primary)' }}>
+              <p className="font-['Space_Grotesk'] font-bold text-sm m-0 truncate" style={{ color: 'var(--nm-text-primary)' }}>
                 {fullName || 'My Account'}
               </p>
-              <p className="font-mono text-xs mt-1 break-all m-0" style={{ color: 'var(--text-secondary)' }}>
+              <p className="font-['DM_Mono'] text-xs mt-1 break-all m-0" style={{ color: 'var(--nm-text-secondary)' }}>
                 {user?.email || ''}
               </p>
             </div>
@@ -61,8 +61,8 @@ export default function UserMenu({ profileHref = '/employee/profile' }) {
               <MenuItem>
                 <Link
                   to={profileHref}
-                  className="flex items-center gap-3 px-4 py-3 rounded-md font-['Montserrat'] font-medium text-sm transition-colors duration-200 hover:bg-[var(--surface-4)] focus-ring"
-                  style={{ color: 'var(--text-primary)' }}
+                  className="flex items-center gap-3 px-3 sm:px-4 py-3 font-['Space_Grotesk'] font-medium text-sm transition-colors duration-200 hover:bg-[var(--nm-surface-high)] focus-ring min-h-[44px]"
+                  style={{ color: 'var(--nm-text-primary)' }}
                 >
                   <User size={16} />
                   My Profile
@@ -73,8 +73,8 @@ export default function UserMenu({ profileHref = '/employee/profile' }) {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-md font-['Montserrat'] font-medium text-sm transition-colors duration-200 hover:bg-[var(--color-danger-light)] focus-ring"
-                  style={{ color: 'var(--color-danger)' }}
+                  className="w-full flex items-center gap-3 px-3 sm:px-4 py-3 font-['Space_Grotesk'] font-medium text-sm transition-colors duration-200 hover:bg-[var(--nm-error-surface)] focus-ring min-h-[44px]"
+                  style={{ color: 'var(--nm-error)' }}
                 >
                   <LogOut size={16} />
                   Log Out

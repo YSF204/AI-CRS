@@ -1,19 +1,20 @@
 import React from "react";
 import { Clock, MapPin, DollarSign, Briefcase } from "lucide-react";
+import { SkCard, SkBox } from "../../ui/Skeleton";
 
 const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loading }) => {
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-4)" }}>
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="jd-card opacity-50">
-            <div className="h-6 w-3/4 mb-3 bg-[var(--nm-surface-high)] animate-pulse" />
-            <div className="h-4 w-1/2 mb-4 bg-[var(--nm-surface-high)] animate-pulse" />
-            <div className="flex gap-4">
-               <div className="h-4 w-20 bg-[var(--nm-surface-high)] animate-pulse" />
-               <div className="h-4 w-20 bg-[var(--nm-surface-high)] animate-pulse" />
+          <SkCard key={i} style={{ padding: "var(--spacing-4)" }}>
+            <SkBox w="75%" h={24} />
+            <SkBox w="50%" h={16} />
+            <div style={{ display: "flex", gap: "var(--spacing-3)" }}>
+              <SkBox w={80} h={16} />
+              <SkBox w={80} h={16} />
             </div>
-          </div>
+          </SkCard>
         ))}
       </div>
     );

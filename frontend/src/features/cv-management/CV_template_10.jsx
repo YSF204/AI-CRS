@@ -71,7 +71,7 @@ const StandardATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary" className="break-inside-avoid mb-5" style={getHighlightStyle('summary')}>
+            <section key="summary" className="cv-page-group break-inside-avoid mb-5" style={getHighlightStyle('summary')}>
               <SectionHeader title="Summary" />
               <p className="text-[13px] md:text-[14px] text-gray-800 leading-[1.6] whitespace-pre-wrap break-words">
                 {cvData.summary}
@@ -80,7 +80,7 @@ const StandardATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
           ) : null,
           experience:
             cvData.experience && cvData.experience.length > 0 ? (
-              <section key="experience" className="mb-5">
+              <section key="experience" className="cv-page-group mb-5">
                 <SectionHeader title="Professional Experience" />
                 <div className="space-y-5 block">
                   {cvData.experience.map((exp, index) => {
@@ -125,7 +125,7 @@ const StandardATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
             ) : null,
           education:
             cvData.education && cvData.education.length > 0 ? (
-              <section key="education" className="mb-5">
+              <section key="education" className="cv-page-group mb-5">
                 <SectionHeader title="Education" />
                 <div className="space-y-4 block">
                   {cvData.education.map((edu, index) => {
@@ -158,7 +158,7 @@ const StandardATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
             ) : null,
           technicalSkills:
             cvData.technicalSkills?.length > 0 ? (
-              <section key="technicalSkills" className="break-inside-avoid mb-5" style={getHighlightStyle('technicalSkills')}>
+              <section key="technicalSkills" className="cv-page-group break-inside-avoid mb-5" style={getHighlightStyle('technicalSkills')}>
                 <SectionHeader title="Technical Skills" />
                 <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[13px] md:text-[14px] text-gray-800">
                   {cvData.technicalSkills.map((skill, index) => (
@@ -172,7 +172,7 @@ const StandardATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
             ) : null,
           softSkills:
             cvData.softSkills?.length > 0 ? (
-              <section key="softSkills" className="break-inside-avoid mb-5" style={getHighlightStyle('softSkills')}>
+              <section key="softSkills" className="cv-page-group break-inside-avoid mb-5" style={getHighlightStyle('softSkills')}>
                 <SectionHeader title="Soft Skills" />
                 <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[13px] md:text-[14px] text-gray-800">
                   {cvData.softSkills.map((skill, index) => (
@@ -186,7 +186,7 @@ const StandardATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
             ) : null,
           language:
             cvData.language?.length > 0 ? (
-              <section key="language" className="break-inside-avoid mb-5" style={getHighlightStyle('language')}>
+              <section key="language" className="cv-page-group break-inside-avoid mb-5" style={getHighlightStyle('language')}>
                 <SectionHeader title="Languages" />
                 <ul className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[13px] md:text-[14px] text-gray-800">
                   {cvData.language.map((item, index) => {
@@ -221,15 +221,15 @@ const StandardATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
             return cvData.customSections.map((section, sectionIndex) => (
               <section
                 key={`custom-${sectionIndex}`}
-                className="mb-5"
+                className="cv-page-group mb-5"
               >
                 <SectionHeader title={section.title} />
                 <div className="space-y-4 block">
                   {section.items.map((item, itemIndex) => {
                     const dur = fmtDuration(item.durationFrom, item.durationTo);
                     return (
-                      <div 
-                        key={itemIndex} 
+                      <div
+                        key={itemIndex}
                         className="break-inside-avoid"
                         style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
                       >

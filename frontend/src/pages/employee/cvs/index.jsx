@@ -10,6 +10,7 @@ import DashboardNav from "../../../components/shared/DashboardNav";
 import api from "../../../services/api";
 import useFetch from "../../../hooks/useFetch";
 import CVCard from "./components/CVCard";
+import { SkCardGrid, SkCard, SkBox, SkText } from "../../../components/ui/Skeleton";
 
 export default function CVs() {
   const navigate = useNavigate();
@@ -193,14 +194,15 @@ export default function CVs() {
 
         {/* CV Grid */}
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="jd-panel h-[400px] animate-pulse bg-[var(--nm-surface-low)]"
-              />
-            ))}
-          </div>
+          <SkCardGrid count={3} height={400}>
+            <SkCard style={{ height: 400 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-3)", height: "100%" }}>
+                <div className="sk" style={{ flex: 1, minHeight: 200 }} />
+                <SkBox w="70%" h={20} />
+                <SkText lines={2} />
+              </div>
+            </SkCard>
+          </SkCardGrid>
         ) : (
           <div className="ats-gallery-grid">
             {filteredCvs.map((cv) => (

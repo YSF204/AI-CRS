@@ -8,7 +8,7 @@ export const ActionButton = React.forwardRef(({ variant = 'prism', size, childre
     <button
       ref={ref}
       className={cn(
-        "inline-flex items-center justify-center gap-2 border-4 border-[var(--nm-ink)] px-5 py-3 font-bold uppercase tracking-[0.12em] transition-all duration-200",
+        "inline-flex items-center justify-center gap-2 border-4 border-[var(--nm-ink)] px-4 sm:px-5 py-3 font-bold uppercase tracking-[0.12em] transition-all duration-200 min-h-[44px]",
         "disabled:cursor-not-allowed disabled:opacity-60",
         isAiGold
           ? "bg-[linear-gradient(135deg,#fef08a_0%,#f59e0b_55%,#d97706_100%)] text-[#1b1c15] shadow-[3px_3px_0_var(--nm-ink)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_var(--nm-ink)]"
@@ -17,8 +17,8 @@ export const ActionButton = React.forwardRef(({ variant = 'prism', size, childre
       )}
       {...props}
     >
-      {icon && <span className="inline-flex items-center">{icon}</span>}
-      {children}
+      {icon && <span className="inline-flex items-center shrink-0">{icon}</span>}
+      <span className="truncate">{children}</span>
     </button>
   );
 });

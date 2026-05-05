@@ -1,11 +1,11 @@
 import React from "react";
 import {
   ClipboardList,
-  Loader,
   ChevronLeft,
   ChevronRight,
   Building2,
 } from "lucide-react";
+import { SkCard, SkBox, SkText } from "../../../../components/ui/Skeleton";
 
 export default function ApplicationsList({
   paginatedApps,
@@ -20,14 +20,18 @@ export default function ApplicationsList({
   return (
     <div className="space-y-4">
       {loading ? (
-        <div className="jd-panel p-20 flex flex-col items-center justify-center gap-4 bg-[var(--nm-surface)]">
-          <Loader
-            className="animate-spin text-[var(--nm-primary)]"
-            size={32}
-          />
-          <p className="font-mono text-xs font-black uppercase tracking-widest text-[var(--nm-text-primary)]">
-            Loading Applications
-          </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-3)" }}>
+          {[1, 2, 3, 4].map((i) => (
+            <SkCard key={i} style={{ padding: "var(--spacing-4)" }}>
+              <div style={{ display: "flex", gap: "var(--spacing-3)", alignItems: "flex-start" }}>
+                <div style={{ flex: 1 }}>
+                  <SkBox w="60%" h={16} />
+                  <div style={{ marginTop: "var(--spacing-1)" }}><SkBox w="40%" h={12} /></div>
+                </div>
+                <SkBox w={64} h={24} />
+              </div>
+            </SkCard>
+          ))}
         </div>
       ) : paginatedApps.length === 0 ? (
         <div className="jd-panel p-20 text-center bg-[var(--nm-surface)] text-[var(--nm-text-primary)]">

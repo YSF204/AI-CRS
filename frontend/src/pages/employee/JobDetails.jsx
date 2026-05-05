@@ -12,6 +12,7 @@ import api from "../../services/api";
 import useFetch from "../../hooks/useFetch";
 import { getRelativeTime } from "../../utils/dateFormatter";
 import ApplyJobModal from "./apply-job";
+import { SkCard, SkBox, SkText } from "../../components/ui/Skeleton";
 
 const toRoleType = (value) => {
   if (value === "FULL_TIME") return "Full-time";
@@ -50,11 +51,24 @@ export default function JobDetails() {
           <DashboardNav role="employee" />
         </div>
         <div className="dashboard-shell py-6">
-          <div className="brutal-card p-8 bg-(--card-bg) text-center">
-            <p className="font-mono text-sm text-(--fg-muted)">
-              Loading job details...
-            </p>
-          </div>
+          <SkCard style={{ padding: "var(--spacing-8)" }}>
+            <div style={{ display: "flex", gap: "var(--spacing-4)", marginBottom: "var(--spacing-6)" }}>
+              <div style={{ flex: 1 }}>
+                <SkBox w="70%" h={32} />
+                <div style={{ marginTop: "var(--spacing-2)" }}><SkBox w="40%" h={18} /></div>
+              </div>
+              <SkBox w={80} h={32} />
+            </div>
+            <div style={{ display: "flex", gap: "var(--spacing-4)", marginBottom: "var(--spacing-6)" }}>
+              <SkBox w={100} h={16} />
+              <SkBox w={80} h={16} />
+              <SkBox w={90} h={16} />
+            </div>
+            <SkText lines={4} />
+            <div style={{ marginTop: "var(--spacing-6)" }}>
+              <SkBox w="100%" h={56} />
+            </div>
+          </SkCard>
         </div>
       </div>
     );
@@ -103,17 +117,17 @@ export default function JobDetails() {
         <div className="brutal-card bg-(--card-bg) p-8">
           {/* Header */}
           <div className="mb-8 pb-6 border-b-4 border-(--border-color)">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h1 className="text-3xl font-bold font-['Space_Grotesk'] uppercase tracking-tight text-(--fg) mb-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between mb-4 gap-4">
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-bold font-['Space_Grotesk'] uppercase tracking-tight text-(--fg) mb-2 break-words">
                   {job.position}
                 </h1>
-                <p className="font-mono text-lg text-(--fg-muted)">
+                <p className="font-mono text-base sm:text-lg text-(--fg-muted) truncate">
                   {job.employerId?.company?.name || "Company"}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="px-4 py-2 text-sm font-bold font-mono border-2 border-black bg-(--yellow) text-black uppercase">
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold font-mono border-2 border-black bg-(--yellow) text-black uppercase">
                   {toRoleType(job.workDuration)}
                 </span>
               </div>

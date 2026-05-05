@@ -41,20 +41,29 @@ function PageLoader() {
   return (
     <div
       style={{
-        height: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        minHeight: "100vh",
         background: "var(--nm-bg, #fff)",
-        color: "var(--nm-text-secondary, #888)",
-        fontFamily: "var(--font-body, monospace)",
-        fontSize: "var(--text-sm, 12px)",
-        fontWeight: 600,
-        letterSpacing: "0.1em",
-        textTransform: "uppercase",
+        padding: "clamp(1.5rem, 5%, 4rem)",
+        display: "flex",
+        flexDirection: "column",
+        gap: "var(--spacing-6, 24px)",
+        maxWidth: 960,
+        margin: "0 auto",
       }}
     >
-      Loading…
+      <div style={{ display: "flex", gap: "var(--spacing-3, 12px)", alignItems: "center" }} aria-hidden="true">
+        <div className="sk" style={{ width: 48, height: 48 }} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div className="sk" style={{ width: 160, height: 20 }} />
+          <div className="sk" style={{ width: 100, height: 12 }} />
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "var(--spacing-4, 16px)" }}>
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="sk-card" style={{ height: 140 }} />
+        ))}
+      </div>
+      <div className="sk-card" style={{ height: 240 }} />
     </div>
   );
 }

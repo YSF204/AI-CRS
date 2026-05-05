@@ -43,45 +43,87 @@ export default function PreviewModal({
       return;
     }
 
+    const getGroupTarget = (block) => {
+      const group = block.closest('.cv-page-group');
+      if (group && container.contains(group)) return group;
+      return block;
+    };
+
+    const targetByBlock = new Map();
+    blocks.forEach((block) => {
+      targetByBlock.set(block, getGroupTarget(block));
+    });
+
+    const elementsToMeasure = new Set();
+    blocks.forEach((block) => {
+      elementsToMeasure.add(block);
+      elementsToMeasure.add(targetByBlock.get(block));
+    });
+
     blocks.sort((a, b) => {
       const pos = a.compareDocumentPosition(b);
       return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
     });
 
     // Reset
-    blocks.forEach((b) => { b.style.paddingTop = ''; });
+    elementsToMeasure.forEach((el) => {
+      el.style.paddingTop = '';
+      el.removeAttribute('data-pagination-margin');
+    });
     void container.offsetHeight;
 
     // Measure (no scale in modal)
     const containerRect = container.getBoundingClientRect();
-    const measurements = blocks.map((block) => {
+    const measurements = new Map();
+    elementsToMeasure.forEach((block) => {
       const rect = block.getBoundingClientRect();
-      return {
+      measurements.set(block, {
         element: block,
         top: rect.top - containerRect.top,
         height: block.offsetHeight,
-      };
+      });
     });
 
     // Compute
     let cumulativeShift = 0;
     const margins = [];
 
-    for (const m of measurements) {
-      const adjustedTop = m.top + cumulativeShift;
-      const adjustedBottom = adjustedTop + m.height;
+    const movedTargets = new Set();
+
+    for (const block of blocks) {
+      const blockMetrics = measurements.get(block);
+      if (!blockMetrics) continue;
+
+      const adjustedTop = blockMetrics.top + cumulativeShift;
+      const adjustedBottom = adjustedTop + blockMetrics.height;
 
       const page = Math.floor(adjustedTop / A4_HEIGHT);
       const pageUsableEnd = (page + 1) * A4_HEIGHT - FOOTER_ZONE;
 
       if (adjustedBottom > pageUsableEnd) {
         const maxUsable = A4_HEIGHT - FOOTER_ZONE - HEADER_ZONE;
-        if (m.height <= maxUsable) {
-          const nextPageStart = (page + 1) * A4_HEIGHT + HEADER_ZONE + PUSH_BUFFER;
-          const pushAmount = nextPageStart - adjustedTop;
+        const target = targetByBlock.get(block) || block;
+        const targetMetrics = measurements.get(target) || blockMetrics;
+
+        let pushTarget = target;
+        let pushTop = targetMetrics.top;
+        let pushHeight = targetMetrics.height;
+
+        if (pushHeight > maxUsable) {
+          pushTarget = block;
+          pushTop = blockMetrics.top;
+          pushHeight = blockMetrics.height;
+        }
+
+        if (pushHeight <= maxUsable && !movedTargets.has(pushTarget)) {
+          const adjustedTargetTop = pushTop + cumulativeShift;
+          const targetPage = Math.floor(adjustedTargetTop / A4_HEIGHT);
+          const nextPageStart = (targetPage + 1) * A4_HEIGHT + HEADER_ZONE + PUSH_BUFFER;
+          const pushAmount = nextPageStart - adjustedTargetTop;
 
           if (pushAmount > 0) {
-            margins.push({ element: m.element, margin: pushAmount });
+            margins.push({ element: pushTarget, margin: pushAmount });
+            movedTargets.add(pushTarget);
             cumulativeShift += pushAmount;
           }
         }

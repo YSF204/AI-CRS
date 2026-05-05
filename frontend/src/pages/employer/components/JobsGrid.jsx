@@ -1,6 +1,7 @@
 import { Briefcase } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import JobCard from './JobCard';
+import { SkCard, SkBox, SkText } from '../../../components/ui/Skeleton';
 
 /**
  * JobsGrid
@@ -37,17 +38,20 @@ export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJob
 
       {/* States */}
       {loading ? (
-        <div style={{ 
-          fontFamily: 'var(--font-display)', 
-          fontSize: 14, 
-          fontWeight: 800,
-          color: 'var(--nm-text-tertiary)', 
-          padding: '4rem 0',
-          textAlign: 'center',
-          textTransform: 'uppercase',
-          letterSpacing: '0.1em'
-        }}>
-          Data Stream Loading...
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 400px), 1fr))', gap: '1.5rem' }}>
+          {[1, 2].map((i) => (
+            <SkCard key={i} style={{ padding: '2rem', gap: 'var(--spacing-4)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div style={{ flex: 1 }}>
+                  <SkBox w="70%" h={22} />
+                  <div style={{ marginTop: 'var(--spacing-2)' }}><SkBox w="30%" h={12} /></div>
+                </div>
+                <SkBox w={64} h={28} />
+              </div>
+              <SkBox w="100%" h={36} />
+              <SkText lines={1} />
+            </SkCard>
+          ))}
         </div>
       ) : jobs.length === 0 ? (
         <div 
@@ -102,8 +106,8 @@ export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJob
         <div>
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', 
-            gap: '2rem' 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 400px), 1fr))', 
+            gap: '1.5rem' 
           }}>
             {jobs.map((job) => (
               <JobCard

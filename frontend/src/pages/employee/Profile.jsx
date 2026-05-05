@@ -77,11 +77,11 @@ export default function Profile() {
         </div>
 
         {/* Forms stack */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-7">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 lg:gap-8">
+          <div className="md:col-span-7">
             <ProfileForm user={user} onSave={handleSaveProfile} />
           </div>
-          <div className="lg:col-span-5">
+          <div className="md:col-span-5">
             <SecuritySettings />
           </div>
         </div>

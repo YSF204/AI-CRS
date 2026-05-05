@@ -52,6 +52,9 @@
       width: 100%;
       margin-left: 0;
       padding: var(--spacing-4);
+      padding-top: 5rem;
+      padding-left: max(var(--spacing-4), env(safe-area-inset-left));
+      padding-right: max(var(--spacing-4), env(safe-area-inset-right));
     }
   }
 
@@ -231,6 +234,43 @@ body {
   max-width: 100%;
   overflow-x: auto;
   box-sizing: border-box;
+}
+
+/* Responsive table wrapper for all pages */
+.table-scroll-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-scroll-container table {
+  min-width: 600px;
+}
+
+@media (max-width: 767px) {
+  .table-scroll-container table {
+    min-width: 480px;
+  }
+}
+
+/* Stack two-panel layouts on mobile */
+@media (max-width: 767px) {
+  .dashboard-shell > * {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+}
+
+/* Employer bento grid */
+.bento-grid {
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 1024px) {
+  .bento-grid {
+    grid-template-columns: repeat(12, 1fr);
+  }
 }
 
 /* Fix for any elements that might have absolute positioning */

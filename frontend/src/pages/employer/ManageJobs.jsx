@@ -44,14 +44,15 @@ export default function ManageJobs() {
         <DashboardNav role="employer" />
       </div>
 
-      <div className="dashboard-shell" style={{ padding: 'var(--spacing-8)' }}>
+      <div className="dashboard-shell" style={{ padding: 'var(--spacing-4)' }}>
+        <style>{`@media (min-width: 768px) { .manage-jobs-shell { padding: var(--spacing-8) !important; } }`}</style>
         <div style={{ 
-          marginBottom: '3.5rem', 
+          marginBottom: '2rem', 
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'flex-end', 
           flexWrap: 'wrap', 
-          gap: 24 
+          gap: 'var(--spacing-4)' 
         }}>
           <div>
             <div style={{ 

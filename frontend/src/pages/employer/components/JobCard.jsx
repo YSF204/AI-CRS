@@ -81,11 +81,12 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
             <div style={{
               fontFamily: 'var(--font-display)',
               fontWeight: 900,
-              fontSize: 22,
+              fontSize: 'clamp(16px, 3vw, 22px)',
               color: 'var(--nm-text-primary)',
               lineHeight: 1.1,
               textTransform: 'uppercase',
-              letterSpacing: '-0.02em'
+              letterSpacing: '-0.02em',
+              wordBreak: 'break-word'
             }}>
               {job.position}
             </div>

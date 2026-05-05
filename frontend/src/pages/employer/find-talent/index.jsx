@@ -84,14 +84,16 @@ export default function FindTalent() {
         <DashboardNav role="employer" />
       </div>
 
-      <div className="dashboard-shell" style={{ padding: 'var(--spacing-8)' }}>
+      <div className="dashboard-shell" style={{ padding: 'var(--spacing-4)' }}>
+        <style>{`@media (min-width: 768px) { .dashboard-shell { padding: var(--spacing-8) !important; } }`}</style>
 
         <div style={{
           display: 'flex',
           gap: 16,
-          marginBottom: '3rem',
+          marginBottom: '2rem',
           borderBottom: '4px solid var(--nm-ink)',
-          paddingBottom: 20
+          paddingBottom: 20,
+          flexWrap: 'wrap'
         }}>
            <button
              onClick={() => setActiveTab('search')}

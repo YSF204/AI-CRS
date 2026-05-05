@@ -6,6 +6,7 @@ import useAdminDashboard from './hooks/useAdminDashboard';
 import StatCard from './components/StatCard';
 import ChartPanel from './components/ChartPanel';
 import PendingEmployersQueue from './components/PendingEmployersQueue';
+import { SkStatCard, SkCard } from '../../../components/ui/Skeleton';
 
 export default function AdminDash() {
   const navigate = useNavigate();
@@ -42,22 +43,17 @@ export default function AdminDash() {
           {loading ? (
             <div style={{
               display: 'grid',
-              gap: 'var(--spacing-5)',
+              gap: 'var(--spacing-6)',
               gridTemplateColumns: 'repeat(1, minmax(0, 1fr))'
             }}>
-              <style>{`@media (min-width: 768px) { .loading-grid { grid-template-columns: repeat(2, 1fr); } } @media (min-width: 1280px) { .loading-grid { grid-template-columns: repeat(4, 1fr); } }`}</style>
-              <div className="loading-grid" style={{ display: 'grid', gap: 'var(--spacing-5)' }}>
-                {[...Array(4)].map((_, index) => (
-                  <div
-                    key={index}
-                    className="nm-card"
-                    style={{
-                      height: '160px',
-                      background: 'var(--nm-surface)',
-                      animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-                    }}
-                  />
-                ))}
+              <div className="cards-grid" style={{ display: 'grid', gap: 'var(--spacing-5)' }}>
+                <style>{`@media (min-width: 768px) { .cards-grid { grid-template-columns: repeat(2, 1fr); } } @media (min-width: 1280px) { .cards-grid { grid-template-columns: repeat(4, 1fr); } }`}</style>
+                {[1, 2, 3, 4].map((i) => <SkStatCard key={i} />)}
+              </div>
+              <div className="charts-grid" style={{ display: 'grid', gap: 'var(--spacing-6)' }}>
+                <style>{`@media (min-width: 1280px) { .charts-grid { grid-template-columns: 1.5fr 0.9fr; } }`}</style>
+                <SkCard style={{ height: 400 }} />
+                <SkCard style={{ height: 400 }} />
               </div>
             </div>
           ) : error ? (

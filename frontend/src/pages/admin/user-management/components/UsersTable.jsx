@@ -1,5 +1,6 @@
 import React from 'react';
 import { Edit3, Trash2, Power, PowerOff, RefreshCcw, Search } from 'lucide-react';
+import { SkTable } from '../../../../components/ui/Skeleton';
 
 const statusClass = (status) => {
   switch (status) {
@@ -17,12 +18,8 @@ const statusClass = (status) => {
 export default function UsersTable({ users, updatingStatus, handleStatusUpdate, openDeleteDialog, navigate, pagination, page, setPage, refetchUsers, loading }) {
   if (loading) {
     return (
-      <div style={{
-        padding: 'var(--spacing-12)',
-        textAlign: 'center',
-        color: 'var(--nm-text-secondary)'
-      }}>
-        Loading users...
+      <div className="table-scroll-container">
+        <SkTable rows={5} cols={5} />
       </div>
     );
   }
@@ -47,7 +44,8 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
 
   return (
     <>
-      <table className="admin-table">
+      <div className="table-scroll-container">
+        <table className="admin-table">
         <thead>
           <tr>
             <th>User</th>
@@ -158,6 +156,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
           })}
         </tbody>
       </table>
+      </div>
 
       {/* Pagination */}
       <div className="admin-pagination">

@@ -103,7 +103,8 @@ export default function EditJob() {
         <DashboardNav role="employer" />
       </div>
 
-      <div className="dashboard-shell" style={{ padding: 'var(--spacing-8)' }}>
+      <div className="dashboard-shell" style={{ padding: 'var(--spacing-4)' }}>
+        <style>{`@media (min-width: 768px) { .dashboard-shell { padding: var(--spacing-8) !important; } }`}</style>
 
         <button 
           onClick={() => navigate(-1)}

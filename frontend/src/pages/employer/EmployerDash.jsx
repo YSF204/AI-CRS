@@ -39,14 +39,15 @@ export default function EmployerDash() {
         <DashboardNav role="employer" />
       </div>
 
-      <div className="dashboard-shell" style={{ padding: 'var(--spacing-8)' }}>
+      <div className="dashboard-shell" style={{ padding: 'var(--spacing-4)' }}>
+        <style>{`@media (min-width: 768px) { .employer-dash-shell { padding: var(--spacing-8) !important; } }`}</style>
         <div style={{
-          marginBottom: '3.5rem',
+          marginBottom: '2rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-end',
           flexWrap: 'wrap',
-          gap: 'var(--spacing-6)'
+          gap: 'var(--spacing-4)'
         }}>
           <div>
             <div style={{
@@ -81,22 +82,24 @@ export default function EmployerDash() {
               color: '#fff',
               display: 'flex',
               alignItems: 'center',
-              gap: 'var(--spacing-3)',
-              padding: '16px 32px',
-              fontSize: '15px',
-              fontWeight: 800
+              gap: 'var(--spacing-2)',
+              padding: '12px 20px',
+              fontSize: '14px',
+              fontWeight: 800,
+              whiteSpace: 'nowrap',
+              minHeight: 44
             }}
           >
-            <PlusCircle size={20} strokeWidth={3} />
-            Initialize Listing
+            <PlusCircle size={18} strokeWidth={3} />
+            <span className="hidden sm:inline">Initialize</span> Listing
           </button>
         </div>
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-          gap: '1.5rem',
-          marginBottom: '2.5rem'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '1rem',
+          marginBottom: '2rem'
         }}>
           <StatWidget label="Live Listings"  value={loading ? '…' : openJobs}                              accent="var(--nm-warning)" icon={Briefcase}     />
           <StatWidget label="History Total"    value={loading ? '…' : jobs.length}                           accent="var(--nm-primary)" icon={CheckCircle2}  />
@@ -106,11 +109,10 @@ export default function EmployerDash() {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(1, minmax(0, 1fr))',
+          gridTemplateColumns: '1fr',
           gap: '1.5rem',
           alignItems: 'stretch'
         }}>
-          <style>{`@media (min-width: 1024px) { .bento-grid { grid-template-columns: repeat(12, 1fr); } }`}</style>
           <div className="bento-grid" style={{ display: 'grid', gap: '1.5rem', alignItems: 'stretch' }}>
             <ChartWidget jobs={jobs} />
             <CompanyProfileCard company={company} loading={loading} error={profileError} />

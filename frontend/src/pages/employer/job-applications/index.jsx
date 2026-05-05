@@ -5,6 +5,7 @@ import DashboardNav from "../../../components/shared/DashboardNav";
 import api from "../../../services/api";
 import ApplicationViewer from "../../../components/applications/ApplicationViewer";
 import ApplicantCard from "./ApplicantCard";
+import { SkCard, SkBox } from "../../../components/ui/Skeleton";
 
 export default function JobApplications() {
   const { jobId } = useParams();
@@ -45,7 +46,8 @@ export default function JobApplications() {
         <DashboardNav role="employer" />
       </div>
 
-      <div className="dashboard-shell" style={{ padding: 'var(--spacing-8)' }}>
+      <div className="dashboard-shell" style={{ padding: 'var(--spacing-4)' }}>
+        <style>{`@media (min-width: 768px) { .dashboard-shell { padding: var(--spacing-8) !important; } }`}</style>
         <div style={{ 
           display: "flex", 
           justifyContent: "space-between", 
@@ -98,16 +100,24 @@ export default function JobApplications() {
         </div>
 
         {loading ? (
-          <div style={{
-            fontFamily: 'var(--font-display)',
-            fontWeight: 800,
-            color: 'var(--nm-text-tertiary)',
-            padding: '5rem',
-            textAlign: 'center',
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em'
-          }}>
-            Synchronizing Intake Data...
+          <div className="applications-two-panel">
+            <div className="applications-left-panel">
+              <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-3)" }}>
+                {[1, 2, 3].map((i) => (
+                  <SkCard key={i} style={{ padding: "var(--spacing-4)" }}>
+                    <div style={{ display: "flex", gap: "var(--spacing-3)" }}>
+                      <div style={{ flex: 1 }}>
+                        <SkBox w="60%" h={16} />
+                        <div style={{ marginTop: "var(--spacing-1)" }}><SkBox w="40%" h={12} /></div>
+                      </div>
+                    </div>
+                  </SkCard>
+                ))}
+              </div>
+            </div>
+            <div className="applications-right-panel">
+              <SkCard style={{ minHeight: 400 }} />
+            </div>
           </div>
         ) : applications.length === 0 ? (
           <div 

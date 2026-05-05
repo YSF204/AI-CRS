@@ -236,7 +236,7 @@ export default function Applications() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-6 lg:gap-8 items-start">
           <ApplicationsList
             paginatedApps={paginatedApps}
             selectedApp={selectedApp}
