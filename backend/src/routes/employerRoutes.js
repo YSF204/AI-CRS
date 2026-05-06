@@ -4,6 +4,7 @@ import {
     updateEmployer,
     deleteEmployer,
     getMyEmployerProfile,
+    getDashboardAnalytics,
 } from "../controllers/employerController.js";
 import { authenticate } from "../middleware/Auth.js";
 import { isEmployer } from "../middleware/roleCheck.js";
@@ -16,5 +17,6 @@ employerRouter.post("/", createEmployer);
 employerRouter.patch("/", updateEmployer);
 employerRouter.delete("/", deleteEmployer);
 employerRouter.get("/", getMyEmployerProfile);
+employerRouter.get("/analytics", getDashboardAnalytics);
 
 export default employerRouter;

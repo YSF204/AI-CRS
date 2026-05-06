@@ -3,6 +3,7 @@ import { createEmployerProfile } from "../services/employers/profile/createEmplo
 import { updateEmployerProfile } from "../services/employers/profile/updateEmployerProfile.js";
 import { deleteEmployerProfile } from "../services/employers/profile/deleteEmployerProfile.js";
 import { getEmployerProfile } from "../services/employers/profile/getEmployerProfile.js";
+import { getEmployerAnalytics } from "../services/employers/analytics/getEmployerAnalytics.js";
 import { getCacheJson, setCacheJson, delCache } from "../utils/redisHelper.js";
 
 // ================================== //
@@ -66,4 +67,10 @@ export const getMyEmployerProfile = catchAsync(async (req, res, next) => {
         data: { employer },
         source: "database",
     });
+});
+
+export const getDashboardAnalytics = catchAsync(async (req, res, next) => {
+    const days = parseInt(req.query.days) || 30;
+    const data = await getEmployerAnalytics({ userId: req.user._id, days });
+    res.status(200).json({ success: true, data });
 });

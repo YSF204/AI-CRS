@@ -4,6 +4,7 @@ import { ArrowLeft, X, Mail, Phone, MapPin, Briefcase, Calendar, FileText } from
 import DashboardNav from "../../../components/shared/DashboardNav";
 import api from "../../../services/api";
 import ApplicationViewer from "../../../components/applications/ApplicationViewer";
+import ApplicantDetail from "../../../components/applications/ApplicantDetail";
 import ApplicantCard from "./ApplicantCard";
 import { SkCard, SkBox } from "../../../components/ui/Skeleton";
 
@@ -35,47 +36,50 @@ export default function JobApplications() {
   }, [jobId]);
 
   return (
-    <div style={{ 
-      minHeight: "100vh", 
-      backgroundColor: "var(--nm-bg)", 
+    <div style={{
+      height: "100vh",
+      backgroundColor: "var(--nm-bg)",
       color: "var(--nm-text-primary)",
       fontFamily: "var(--font-body)",
-      overflowX: "hidden"
+      overflow: "hidden",
+      display: "flex",
+      flexDirection: "column",
     }}>
-      <div className="dashboard-nav-area">
+      <div className="dashboard-nav-area" style={{ flexShrink: 0 }}>
         <DashboardNav role="employer" />
       </div>
 
-      <div className="dashboard-shell" style={{ padding: 'var(--spacing-4)' }}>
-        <style>{`@media (min-width: 768px) { .dashboard-shell { padding: var(--spacing-8) !important; } }`}</style>
-        <div style={{ 
-          display: "flex", 
-          justifyContent: "space-between", 
-          alignItems: "flex-end", 
-          gap: 24, 
-          marginBottom: "2rem", 
-          flexWrap: "wrap" 
+      <div className="dashboard-shell" style={{ padding: 'var(--spacing-4)', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <style>{`@media (min-width: 768px) { .dashboard-shell { padding: var(--spacing-4) !important; } }`}</style>
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+          gap: 16,
+          marginBottom: "1rem",
+          flexWrap: "wrap",
+          flexShrink: 0,
         }}>
           <div>
-            <div style={{ 
-              fontFamily: "var(--font-display)", 
-              fontSize: 14, 
+            <div style={{
+              fontFamily: "var(--font-display)",
+              fontSize: 14,
               fontWeight: 800,
-              color: "var(--nm-text-tertiary)", 
-              textTransform: "uppercase", 
+              color: "var(--nm-text-tertiary)",
+              textTransform: "uppercase",
               letterSpacing: "0.15em",
-              marginBottom: 8
+              marginBottom: 4
             }}>
               Talent Pipelines
             </div>
-            <h1 style={{ 
-              fontFamily: "var(--font-display)", 
-              fontWeight: 900, 
-              fontSize: "clamp(2rem, 5vw, 3rem)", 
-              letterSpacing: "-0.04em", 
+            <h1 style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 900,
+              fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
+              letterSpacing: "-0.04em",
               lineHeight: 1,
               textTransform: "uppercase",
-              margin: 0 
+              margin: 0
             }}>
               {job ? job.position : "Unit Intake"}
             </h1>
@@ -83,44 +87,42 @@ export default function JobApplications() {
           <button
             onClick={() => navigate("/employer/jobs")}
             className="nm-btn"
-            style={{ 
-              background: "var(--nm-surface)", 
+            style={{
+              background: "var(--nm-surface)",
               color: "var(--nm-text-primary)",
-              padding: '12px 24px',
+              padding: '8px 16px',
               fontFamily: 'var(--font-display)',
               fontWeight: 900,
-              fontSize: 14,
+              fontSize: 12,
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
-              border: '4px solid var(--nm-ink)'
+              border: '3px solid var(--nm-ink)'
             }}
           >
-            <ArrowLeft size={18} strokeWidth={3} style={{ marginRight: 8, display: 'inline' }} /> Return to Inventory
+            <ArrowLeft size={14} strokeWidth={3} style={{ marginRight: 6, display: 'inline' }} /> Back
           </button>
         </div>
 
         {loading ? (
-          <div className="applications-two-panel">
-            <div className="applications-left-panel">
-              <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-3)" }}>
-                {[1, 2, 3].map((i) => (
-                  <SkCard key={i} style={{ padding: "var(--spacing-4)" }}>
-                    <div style={{ display: "flex", gap: "var(--spacing-3)" }}>
-                      <div style={{ flex: 1 }}>
-                        <SkBox w="60%" h={16} />
-                        <div style={{ marginTop: "var(--spacing-1)" }}><SkBox w="40%" h={12} /></div>
-                      </div>
+          <div style={{ flex: 1, display: 'flex', gap: 'var(--spacing-6)', minHeight: 0 }}>
+            <div style={{ width: '35%', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
+              {[1, 2, 3].map((i) => (
+                <SkCard key={i} style={{ padding: "var(--spacing-4)" }}>
+                  <div style={{ display: "flex", gap: "var(--spacing-3)" }}>
+                    <div style={{ flex: 1 }}>
+                      <SkBox w="60%" h={16} />
+                      <div style={{ marginTop: "var(--spacing-1)" }}><SkBox w="40%" h={12} /></div>
                     </div>
-                  </SkCard>
-                ))}
-              </div>
+                  </div>
+                </SkCard>
+              ))}
             </div>
-            <div className="applications-right-panel">
-              <SkCard style={{ minHeight: 400 }} />
+            <div style={{ flex: 1, borderLeft: '4px solid var(--nm-ink)', paddingLeft: 'var(--spacing-6)' }}>
+              <SkCard style={{ flex: 1 }} />
             </div>
           </div>
         ) : applications.length === 0 ? (
-          <div 
+          <div
             className="nm-card"
             style={{
               background: 'var(--nm-surface)',
@@ -131,10 +133,10 @@ export default function JobApplications() {
               borderRadius: '0px'
             }}
           >
-            <div style={{ 
-              fontFamily: 'var(--font-display)', 
-              fontWeight: 900, 
-              fontSize: 24, 
+            <div style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 900,
+              fontSize: 24,
               color: 'var(--nm-text-primary)',
               textTransform: 'uppercase',
               letterSpacing: '0.05em'
@@ -143,17 +145,17 @@ export default function JobApplications() {
             </div>
           </div>
         ) : (
-          <div className="applications-two-panel">
-            <div className="applications-left-panel">
+          <div style={{ flex: 1, display: 'flex', gap: 'var(--spacing-6)', minHeight: 0 }}>
+            <div style={{ width: '620px', flexShrink: 0, overflowY: 'auto', paddingRight: 'var(--spacing-3)' }}>
               <div style={{
                 fontFamily: 'var(--font-display)',
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: 900,
                 color: 'var(--nm-text-tertiary)',
                 textTransform: 'uppercase',
                 letterSpacing: '0.1em',
-                marginBottom: '1rem',
-                paddingBottom: '0.75rem',
+                marginBottom: '0.75rem',
+                paddingBottom: '0.5rem',
                 borderBottom: '3px solid var(--nm-ink)',
               }}>
                 {applications.length} Applicant{applications.length !== 1 ? 's' : ''}
@@ -161,67 +163,68 @@ export default function JobApplications() {
 
               {selected ? (
                 <div>
-                  <CandidateDetail app={selected} onClose={() => setSelected(null)} />
+                  <ApplicantDetail app={selected} onClose={() => setSelected(null)} showMatchScore={false} />
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {applications.map((app) => (
                     <ApplicantCard
                       key={app._id}
                       app={app}
                       onClick={() => setSelected(app)}
                       compact
+                      showMatchScore={false}
                     />
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="applications-right-panel">
+            <div style={{ flex: 1, minWidth: 0, borderLeft: '4px solid var(--nm-ink)', paddingLeft: 'var(--spacing-6)', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
               {selected ? (
-                <div style={{ height: '100%' }}>
+                <>
                   <div style={{
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '1rem',
-                    paddingBottom: '0.75rem',
+                    paddingBottom: '0.5rem',
                     borderBottom: '3px solid var(--nm-ink)',
+                    flexShrink: 0,
+                    marginBottom: '0.75rem',
                   }}>
                     <div style={{
                       fontFamily: 'var(--font-display)',
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: 900,
                       color: 'var(--nm-text-tertiary)',
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                     }}>
-                      <FileText size={14} strokeWidth={3} style={{ marginRight: 6, verticalAlign: 'middle' }} />
-                      CV Document
+                      {/* <FileText size={12} strokeWidth={3} style={{ marginRight: 4, verticalAlign: 'middle' }} />
+                      CV Document */}
                     </div>
                   </div>
-                  <div style={{ height: 'calc(100% - 50px)', overflow: 'auto' }}>
-                    <ApplicationViewer application={selected} />
+                  <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: '10px' }}>
+                    <ApplicationViewer application={selected} showAnalysis={false} />
                   </div>
-                </div>
+                </>
               ) : (
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  height: '100%',
-                  minHeight: '400px',
+                  flex: 1,
                   border: '4px dashed var(--nm-ink)',
                   background: 'var(--nm-surface)',
                   padding: '3rem',
                   textAlign: 'center',
                 }}>
-                  <FileText size={48} strokeWidth={2} style={{ color: 'var(--nm-text-tertiary)', marginBottom: '1rem' }} />
+                  <FileText size={40} strokeWidth={2} style={{ color: 'var(--nm-text-tertiary)', marginBottom: '1rem' }} />
                   <div style={{
                     fontFamily: 'var(--font-display)',
                     fontWeight: 900,
-                    fontSize: 16,
+                    fontSize: 14,
                     color: 'var(--nm-text-tertiary)',
                     textTransform: 'uppercase',
                   }}>
@@ -232,155 +235,6 @@ export default function JobApplications() {
             </div>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-function CandidateDetail({ app, onClose }) {
-  const applicant = app.applicantInfo || {};
-  const statusColor = app.status === 'accepted' ? 'var(--nm-success)' : app.status === 'rejected' ? 'var(--nm-error)' : 'var(--nm-warning)';
-
-  return (
-    <div>
-      <div style={{
-        fontFamily: 'var(--font-display)',
-        fontWeight: 900,
-        fontSize: 20,
-        color: 'var(--nm-text-primary)',
-        textTransform: 'uppercase',
-        letterSpacing: '-0.02em',
-        marginBottom: 4,
-      }}>
-        {applicant.fullName || 'Unidentified'}
-      </div>
-      <div style={{
-        fontFamily: 'var(--font-display)',
-        fontSize: 13,
-        fontWeight: 800,
-        color: 'var(--nm-text-tertiary)',
-        textTransform: 'uppercase',
-        letterSpacing: '0.05em',
-        marginBottom: 20,
-      }}>
-        {applicant.email || '—'}
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <DetailRow icon={<Mail size={14} strokeWidth={3} />} label="Email" value={applicant.email} />
-        <DetailRow icon={<Phone size={14} strokeWidth={3} />} label="Phone" value={applicant.phone} />
-        <DetailRow icon={<Briefcase size={14} strokeWidth={3} />} label="Experience" value={applicant.yearsOfExperience != null ? `${applicant.yearsOfExperience} years` : '—'} />
-        <DetailRow icon={<Calendar size={14} strokeWidth={3} />} label="Applied" value={new Date(app.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })} />
-
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '12px 0',
-          borderTop: '2px solid var(--nm-ink)',
-          marginTop: 4,
-        }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--nm-text-tertiary)' }}>
-            Status
-          </span>
-          <span style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 12,
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            background: statusColor,
-            color: '#fff',
-            padding: '4px 12px',
-            border: '2px solid var(--nm-ink)',
-          }}>
-            {app.status}
-          </span>
-        </div>
-
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '12px 0',
-          borderTop: '2px solid var(--nm-ink)',
-        }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--nm-text-tertiary)' }}>
-            Match Score
-          </span>
-          <span style={{
-            fontFamily: 'var(--font-display)',
-            fontWeight: 900,
-            fontSize: 22,
-            color: (app.matchPercentage || 0) > 80 ? 'var(--nm-success)' : 'var(--nm-warning)',
-          }}>
-            {app.matchPercentage ?? '—'}%
-          </span>
-        </div>
-
-        {(applicant.technicalSkills || []).length > 0 && (
-          <div style={{ marginTop: 8 }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--nm-text-tertiary)', marginBottom: 8 }}>
-              Skills
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-              {applicant.technicalSkills.map((s, i) => (
-                <span key={i} style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 10,
-                  fontWeight: 900,
-                  padding: '3px 8px',
-                  border: '2px solid var(--nm-ink)',
-                  background: 'var(--nm-primary)',
-                  color: '#fff',
-                  textTransform: 'uppercase',
-                }}>
-                  {s}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      <button
-        onClick={onClose}
-        className="nm-btn"
-        style={{
-          width: '100%',
-          marginTop: '1.5rem',
-          padding: '12px',
-          background: 'var(--nm-surface)',
-          color: 'var(--nm-text-primary)',
-          fontFamily: 'var(--font-display)',
-          fontWeight: 900,
-          fontSize: 12,
-          textTransform: 'uppercase',
-          border: '3px solid var(--nm-ink)',
-        }}
-      >
-        <ArrowLeft size={14} strokeWidth={3} style={{ marginRight: 6, verticalAlign: 'middle' }} /> Back to List
-      </button>
-    </div>
-  );
-}
-
-function DetailRow({ icon, label, value }) {
-  return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10,
-      padding: '6px 0',
-      borderBottom: '1px solid var(--nm-ink)',
-    }}>
-      <span style={{ color: 'var(--nm-primary)', flexShrink: 0 }}>{icon}</span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 10, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--nm-text-tertiary)' }}>
-          {label}
-        </div>
-        <div style={{ fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 700, color: 'var(--nm-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {value || '—'}
-        </div>
       </div>
     </div>
   );

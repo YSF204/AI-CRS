@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function ApplicantCard({ app, onClick, compact }) {
+export default function ApplicantCard({ app, onClick, compact, showMatchScore = true }) {
   if (compact) {
     return (
       <div
@@ -45,15 +45,17 @@ export default function ApplicantCard({ app, onClick, compact }) {
             {app.applicantInfo?.email || '—'}
           </div>
         </div>
-        <div style={{
-          fontFamily: 'var(--font-display)',
-          fontWeight: 900,
-          fontSize: 18,
-          flexShrink: 0,
-          color: (app.matchPercentage || 0) > 80 ? 'var(--nm-success)' : 'var(--nm-warning)',
-        }}>
-          {app.matchPercentage ?? '—'}%
-        </div>
+        {showMatchScore && (
+          <div style={{
+            fontFamily: 'var(--font-display)',
+            fontWeight: 900,
+            fontSize: 18,
+            flexShrink: 0,
+            color: (app.matchPercentage || 0) > 80 ? 'var(--nm-success)' : 'var(--nm-warning)',
+          }}>
+            {app.matchPercentage ?? '—'}%
+          </div>
+        )}
       </div>
     );
   }
@@ -74,10 +76,10 @@ export default function ApplicantCard({ app, onClick, compact }) {
       onMouseEnter={e => e.currentTarget.style.transform = 'translate(-4px, -4px)'}
       onMouseLeave={e => e.currentTarget.style.transform = 'none'}
     >
-      <div style={{ 
-        fontFamily: 'var(--font-display)', 
-        fontWeight: 900, 
-        fontSize: 24, 
+      <div style={{
+        fontFamily: 'var(--font-display)',
+        fontWeight: 900,
+        fontSize: 24,
         color: 'var(--nm-text-primary)',
         textTransform: 'uppercase',
         letterSpacing: '-0.02em',
@@ -85,43 +87,45 @@ export default function ApplicantCard({ app, onClick, compact }) {
       }}>
         {app.applicantInfo?.fullName || "ENTITY UNIDENTIFIED"}
       </div>
-      <div style={{ 
-        fontFamily: 'var(--font-display)', 
-        fontSize: 12, 
+      <div style={{
+        fontFamily: 'var(--font-display)',
+        fontSize: 12,
         fontWeight: 800,
-        color: 'var(--nm-text-tertiary)', 
+        color: 'var(--nm-text-tertiary)',
         textTransform: 'uppercase',
         letterSpacing: '0.05em'
       }}>
         {app.applicantInfo?.email || "DATA MASKED"}
       </div>
-      
-      <div style={{ 
-        marginTop: 24, 
-        background: 'var(--nm-bg)', 
-        border: '3px solid var(--nm-ink)', 
-        padding: '12px 16px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 13, color: 'var(--nm-text-primary)' }}>
-          MATCH SCORE
-        </div>
-        <div style={{ 
-          fontFamily: 'var(--font-display)', 
-          fontWeight: 900, 
-          fontSize: 24, 
-          color: app.matchPercentage > 80 ? 'var(--nm-success)' : 'var(--nm-warning)' 
-        }}>
-          {app.matchPercentage ?? "—"}%
-        </div>
-      </div>
 
-      <div style={{ 
-        marginTop: 16, 
-        fontFamily: 'var(--font-display)', 
-        fontSize: 11, 
+      {showMatchScore && (
+        <div style={{
+          marginTop: 24,
+          background: 'var(--nm-bg)',
+          border: '3px solid var(--nm-ink)',
+          padding: '12px 16px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 13, color: 'var(--nm-text-primary)' }}>
+            MATCH SCORE
+          </div>
+          <div style={{
+            fontFamily: 'var(--font-display)',
+            fontWeight: 900,
+            fontSize: 24,
+            color: app.matchPercentage > 80 ? 'var(--nm-success)' : 'var(--nm-warning)'
+          }}>
+            {app.matchPercentage ?? "—"}%
+          </div>
+        </div>
+      )}
+
+      <div style={{
+        marginTop: 16,
+        fontFamily: 'var(--font-display)',
+        fontSize: 11,
         fontWeight: 800,
         color: 'var(--nm-text-tertiary)',
         textTransform: 'uppercase',

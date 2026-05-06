@@ -269,7 +269,7 @@ Return ONLY a valid JSON array (no markdown, no code fences), sorted best-first:
   }
 ]
 
-If NO candidates match, return: []`,
+You MUST rank ALL provided candidates. Return an entry for every candidate with an appropriate matchScore (0-100). Even weaker matches should be included with lower scores.`,
       },
     ],
   });

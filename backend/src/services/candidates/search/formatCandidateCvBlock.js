@@ -31,4 +31,27 @@ export const formatCandidateCvBlock = (cv) =>
         }`,
     ].join("\n");
 
+export const normalizeApplicationToCvLike = (app) => {
+    const cv = app.cvId && typeof app.cvId === "object" ? app.cvId : null;
+    const info = app.applicantInfo || {};
+
+    return {
+        _id: app._id,
+        jobTitle: cv?.jobTitle || null,
+        summary: cv?.summary || info.summary || null,
+        contact: {
+            email: cv?.contact?.email || info.email || null,
+            phone: cv?.contact?.phone || info.phone || null,
+            github: cv?.contact?.github || null,
+            linkedin: cv?.contact?.linkedin || info.linkedin || null,
+        },
+        address: cv?.address || null,
+        technicalSkills: cv?.technicalSkills || info.technicalSkills || [],
+        softSkills: cv?.softSkills || info.softSkills || [],
+        language: cv?.language || info.languages || [],
+        experience: cv?.experience || [],
+        education: cv?.education || info.education || [],
+    };
+};
+
 export default formatCandidateCvBlock;

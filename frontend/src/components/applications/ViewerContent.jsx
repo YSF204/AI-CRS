@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import api from "../../services/api";
 import { getTemplateById } from "../../features/cv-management";
+
+const A4_W = 794;
+const A4_H = 1123;
 
 const buildFileUrl = (cvFile) => {
   if (!cvFile?.path) return null;
@@ -15,7 +18,7 @@ const buildFileUrl = (cvFile) => {
 };
 
 const Section = ({ title, icon, children }) => (
-  <div 
+  <div
     className="nm-card"
     style={{
       background: "var(--nm-surface)",
@@ -174,7 +177,7 @@ export {
   LABEL_STYLE,
 };
 
-export default function ViewerContent({ application, cv, loadingCv }) {
+export default function ViewerContent({ application, cv, loadingCv, showAnalysis = true }) {
   const method = application.applicationMethod;
   const fileUrl = buildFileUrl(application.cvFile);
   const applicant = application.applicantInfo || {};
@@ -185,70 +188,72 @@ export default function ViewerContent({ application, cv, loadingCv }) {
 
   return (
     <div style={{ fontFamily: "var(--font-body)", color: "var(--nm-text-primary)" }}>
-      <Section
-        title="Intelligence Analysis"
-        icon="👁️"
-      >
-        <div style={{
-          background: "var(--nm-bg)",
-          padding: "28px",
-          border: "4px solid var(--nm-ink)",
-          boxShadow: "6px 6px 0 var(--nm-ink)",
-          position: "relative"
-        }}>
+      {showAnalysis && (
+        <Section
+          title="Intelligence Analysis"
+          icon="👁️"
+        >
           <div style={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            padding: "8px 16px",
-            background: "var(--nm-primary)",
-            color: "#fff",
-            fontFamily: "var(--font-display)",
-            fontSize: "11px",
-            fontWeight: 900,
-            textTransform: "uppercase",
-            letterSpacing: "0.1em"
+            background: "var(--nm-bg)",
+            padding: "28px",
+            border: "4px solid var(--nm-ink)",
+            boxShadow: "6px 6px 0 var(--nm-ink)",
+            position: "relative"
           }}>
-            AI CORE OUTPUT
-          </div>
-          
-          <div style={{ marginBottom: "28px" }}>
-            <div style={{ fontSize: "11px", fontWeight: 900, textTransform: "uppercase", color: "var(--nm-text-tertiary)", marginBottom: "8px" }}>
-              Signal Strength Analysis • {new Date(application.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+            <div style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              padding: "8px 16px",
+              background: "var(--nm-primary)",
+              color: "#fff",
+              fontFamily: "var(--font-display)",
+              fontSize: "11px",
+              fontWeight: 900,
+              textTransform: "uppercase",
+              letterSpacing: "0.1em"
+            }}>
+              AI CORE OUTPUT
             </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
-              <span style={{ fontSize: "64px", fontWeight: 900, fontFamily: "var(--font-display)", lineHeight: 1 }}>
-                {application.matchPercentage || 0}%
-              </span>
-              <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--nm-text-tertiary)", textTransform: "uppercase" }}>
-                Accurate Fit Probability
-              </span>
-            </div>
-          </div>
 
-          <div style={{ 
-            borderTop: "3px solid var(--nm-ink)", 
-            paddingTop: "24px",
-            display: "flex",
-            gap: "20px"
-          }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: "11px", fontWeight: 900, textTransform: "uppercase", color: "var(--nm-primary)", marginBottom: "12px", letterSpacing: "0.15em" }}>
-                Recruiter Verdict
+            <div style={{ marginBottom: "28px" }}>
+              <div style={{ fontSize: "11px", fontWeight: 900, textTransform: "uppercase", color: "var(--nm-text-tertiary)", marginBottom: "8px" }}>
+                Signal Strength Analysis • {new Date(application.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
               </div>
-              <p style={{
-                fontSize: "16px",
-                color: "var(--nm-text-primary)",
-                lineHeight: 1.6,
-                fontWeight: 700,
-                margin: 0
-              }}>
-                {matchDetails.matchAnalysis || "Analysis complete. The candidate profile shows strong structural alignment with the job requirements. Further manual review recommended for cultural fit assessment."}
-              </p>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
+                <span style={{ fontSize: "64px", fontWeight: 900, fontFamily: "var(--font-display)", lineHeight: 1 }}>
+                  {application.matchPercentage || 0}%
+                </span>
+                <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--nm-text-tertiary)", textTransform: "uppercase" }}>
+                  Accurate Fit Probability
+                </span>
+              </div>
+            </div>
+
+            <div style={{
+              borderTop: "3px solid var(--nm-ink)",
+              paddingTop: "24px",
+              display: "flex",
+              gap: "20px"
+            }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: "11px", fontWeight: 900, textTransform: "uppercase", color: "var(--nm-primary)", marginBottom: "12px", letterSpacing: "0.15em" }}>
+                  Recruiter Verdict
+                </div>
+                <p style={{
+                  fontSize: "16px",
+                  color: "var(--nm-text-primary)",
+                  lineHeight: 1.6,
+                  fontWeight: 700,
+                  margin: 0
+                }}>
+                  {matchDetails.matchAnalysis || "Analysis complete. The candidate profile shows strong structural alignment with the job requirements. Further manual review recommended for cultural fit assessment."}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </Section>
+        </Section>
+      )}
 
       {method === "manual" && (
         <Section
@@ -319,8 +324,7 @@ export default function ViewerContent({ application, cv, loadingCv }) {
 
       {method !== "manual" && (
         <Section
-          title="Digital Asset Scan"
-          icon="📄"
+          
         >
           {loadingCv ? (
             <div style={{
@@ -354,28 +358,7 @@ export default function ViewerContent({ application, cv, loadingCv }) {
               }}>
                 Configuration: {template?.name || "STD-V1"} • Subject: {cv.fullName || "IDENTIFIED"}
               </div>
-              <div style={{
-                border: "4px solid var(--nm-ink)",
-                background: "#fff",
-                boxShadow: "10px 10px 0 var(--nm-ink)",
-                overflow: "auto",
-                maxHeight: "70vh"
-              }}>
-                {TemplateComponent ? (
-                  <TemplateComponent userName={cv.fullName || "Candidate"} cvData={templateCvData} />
-                ) : (
-                  <p style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "14px",
-                    color: "var(--nm-text-tertiary)",
-                    padding: "40px",
-                    textAlign: "center",
-                    textTransform: "uppercase"
-                  }}>
-                    Visual Matrix Unavailable.
-                  </p>
-                )}
-              </div>
+              <A4CvPreview TemplateComponent={TemplateComponent} cv={cv} templateCvData={templateCvData} />
             </div>
           )}
 
@@ -398,6 +381,101 @@ export default function ViewerContent({ application, cv, loadingCv }) {
           )}
         </Section>
       )}
+    </div>
+  );
+}
+
+function A4CvPreview({ TemplateComponent, cv, templateCvData }) {
+  const viewportRef = useRef(null);
+  const [baseScale, setBaseScale] = useState(0.85);
+  const [zoom, setZoom] = useState(1);
+
+  useEffect(() => {
+    const el = viewportRef.current;
+    if (!el) return undefined;
+    const update = () => {
+      const { width } = el.getBoundingClientRect();
+      if (!width) return;
+      const s = (width * 0.9) / A4_W;
+      setBaseScale(Math.min(Math.max(s, 0.2), 1.2));
+    };
+    update();
+    const obs = new ResizeObserver(update);
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => { setZoom(1); }, [cv]);
+
+  if (!TemplateComponent) {
+    return (
+      <div style={{
+        fontFamily: "var(--font-display)",
+        fontSize: "14px",
+        color: "var(--nm-text-tertiary)",
+        padding: "40px",
+        textAlign: "center",
+        textTransform: "uppercase",
+      }}>
+        Visual Matrix Unavailable.
+      </div>
+    );
+  }
+
+  const scale = baseScale * zoom;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        padding: "6px 0",
+        flexShrink: 0,
+      }}>
+        <button onClick={() => setZoom(Math.max(0.5, zoom - 0.15))} className="nm-btn" style={{ padding: "4px 10px", fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 13, border: "2px solid var(--nm-ink)", background: "var(--nm-surface)", cursor: "pointer" }}>−</button>
+        <span style={{ fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 800, color: "var(--nm-text-tertiary)", textTransform: "uppercase", minWidth: 40, textAlign: "center" }}>{Math.round(scale * 100)}%</span>
+        <button onClick={() => setZoom(Math.min(2, zoom + 0.15))} className="nm-btn" style={{ padding: "4px 10px", fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 13, border: "2px solid var(--nm-ink)", background: "var(--nm-surface)", cursor: "pointer" }}>+</button>
+        <button onClick={() => setZoom(1)} className="nm-btn" style={{ padding: "4px 10px", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 10, border: "2px solid var(--nm-ink)", background: "var(--nm-bg)", textTransform: "uppercase", marginLeft: 4, cursor: "pointer" }}>Reset</button>
+      </div>
+      <div
+        ref={viewportRef}
+        style={{
+          flex: 1,
+          background: "var(--nm-bg)",
+          padding: "24px 0",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "flex-start",
+          overflow: "auto",
+        }}
+      >
+        <div style={{
+          width: `${A4_W * scale}px`,
+          height: `${A4_H * scale}px`,
+          position: "relative",
+          flexShrink: 0
+        }}>
+          <div style={{
+            width: `${A4_W}px`,
+            height: `${A4_H}px`,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+            background: "#fff",
+            boxShadow: "4px 4px 0 var(--nm-ink)",
+            border: "2px solid var(--nm-ink)",
+            position: "absolute",
+            top: 0,
+            left: 0,
+          }}>
+            <TemplateComponent
+              userName={cv.fullName || "Candidate"}
+              cvData={templateCvData}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

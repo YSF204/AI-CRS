@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Trash2, DollarSign, Wifi, Clock, Briefcase, Power, Edit, Users, Sparkles, X } from 'lucide-react';
+import { Trash2, DollarSign, Wifi, Clock, Briefcase, Power, Edit, Users, Sparkles, X, FileText, ArrowLeft } from 'lucide-react';
 import api from '../../../services/api';
+import ApplicantDetail from '../../../components/applications/ApplicantDetail';
+import ApplicationViewer from '../../../components/applications/ApplicationViewer';
 
 const fmt = (n) => (n == null ? '—' : n.toLocaleString());
 const ago = (d) => {
@@ -19,6 +21,50 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
   const [shortlisting, setShortlisting] = useState(false);
   const [shortlistResults, setShortlistResults] = useState(null);
   const [shortlistError, setShortlistError] = useState(null);
+  const [selectedCandidateId, setSelectedCandidateId] = useState(null);
+  const [applicationDetail, setApplicationDetail] = useState(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [detailError, setDetailError] = useState(null);
+
+  const closeShortlistModal = useCallback(() => {
+    setShortlistResults(null);
+    setShortlistError(null);
+    setSelectedCandidateId(null);
+    setApplicationDetail(null);
+    setLoadingDetail(false);
+    setDetailError(null);
+  }, []);
+
+  useEffect(() => {
+    if (!(shortlistResults || shortlistError)) return;
+    const handleKey = (e) => {
+      if (e.key === 'Escape') closeShortlistModal();
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
+  }, [shortlistResults, shortlistError, closeShortlistModal]);
+
+  const handleSelectCandidate = async (candidate) => {
+    if (selectedCandidateId === candidate.applicationId && applicationDetail) return;
+    setSelectedCandidateId(candidate.applicationId);
+    setApplicationDetail(null);
+    setDetailError(null);
+    setLoadingDetail(true);
+    try {
+      const res = await api.get(`/applications/${candidate.applicationId}`);
+      setApplicationDetail(res.data?.data?.application || null);
+    } catch (err) {
+      setDetailError(err.response?.data?.message || 'Failed to load application');
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+
+  const handleDeselectCandidate = () => {
+    setSelectedCandidateId(null);
+    setApplicationDetail(null);
+    setDetailError(null);
+  };
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -50,6 +96,8 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
     setShortlisting(true);
     setShortlistError(null);
     setShortlistResults(null);
+    setSelectedCandidateId(null);
+    setApplicationDetail(null);
     try {
       const res = await api.post('/candidates/ai-shortlist', { jobId: job._id });
       setShortlistResults(res.data?.data || null);
@@ -59,6 +107,10 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
       setShortlisting(false);
     }
   };
+
+  const selectedCandidate = shortlistResults?.candidates?.find(
+    (c) => c.applicationId === selectedCandidateId
+  );
 
   return (
     <>
@@ -291,14 +343,40 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
       )}
 
       {(shortlistResults || shortlistError) && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: "2rem" }}>
-          <div className="nm-card" style={{ background: "var(--nm-bg)", padding: "32px", maxWidth: "720px", width: "100%", maxHeight: "85vh", overflowY: "auto", border: "4px solid var(--nm-ink)", boxShadow: "12px 12px 0 var(--nm-ink)", borderRadius: "0px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem", borderBottom: "3px solid var(--nm-ink)", paddingBottom: "1rem" }}>
-              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "22px", textTransform: "uppercase", margin: 0, color: "var(--nm-text-primary)" }}>
+        <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: "1.5rem" }}>
+          <style>{`
+            @media (max-width: 860px) {
+              .shortlist-modal-body { flex-direction: column !important; }
+              .shortlist-left { max-height: 260px !important; width: 100% !important; min-width: 0 !important; border-right: none !important; border-bottom: 3px solid var(--nm-ink) !important; }
+              .shortlist-right { min-height: 400px !important; }
+            }
+          `}</style>
+          <div className="nm-card" style={{
+            background: "var(--nm-bg)",
+            maxWidth: selectedCandidateId ? "1200px" : "720px",
+            width: "100%",
+            maxHeight: "90vh",
+            height: "90vh",
+            display: "flex",
+            flexDirection: "column",
+            border: "4px solid var(--nm-ink)",
+            boxShadow: "12px 12px 0 var(--nm-ink)",
+            borderRadius: "0px",
+            overflow: "hidden",
+          }}>
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "20px 24px",
+              borderBottom: "3px solid var(--nm-ink)",
+              flexShrink: 0,
+            }}>
+              <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "20px", textTransform: "uppercase", margin: 0, color: "var(--nm-text-primary)" }}>
                 AI Shortlist Results
               </h2>
               <button
-                onClick={() => { setShortlistResults(null); setShortlistError(null); }}
+                onClick={closeShortlistModal}
                 className="nm-btn"
                 style={{ background: "var(--nm-error)", color: "#fff", padding: "8px 12px" }}
               >
@@ -307,60 +385,230 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
             </div>
 
             {shortlistError && (
-              <div style={{ background: "var(--nm-error)", color: "#fff", padding: "16px", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "13px", textTransform: "uppercase", marginBottom: "1rem" }}>
+              <div style={{ background: "var(--nm-error)", color: "#fff", padding: "16px 24px", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "13px", textTransform: "uppercase" }}>
                 {shortlistError}
               </div>
             )}
 
             {shortlistResults && (
-              <>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: 12, fontWeight: 800, color: "var(--nm-text-tertiary)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1.5rem" }}>
-                  {shortlistResults.total} candidate{shortlistResults.total !== 1 ? 's' : ''} ranked for {shortlistResults.job?.position || job.position}
+              <div className="shortlist-modal-body" style={{ display: "flex", flex: 1, minHeight: 0 }}>
+                <div className="shortlist-left" style={{
+                  width: selectedCandidateId ? "340px" : "100%",
+                  minWidth: selectedCandidateId ? "280px" : 0,
+                  borderRight: selectedCandidateId ? "3px solid var(--nm-ink)" : "none",
+                  overflowY: "auto",
+                  padding: "16px 20px",
+                  flexShrink: 0,
+                }}>
+                  <div style={{ fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 800, color: "var(--nm-text-tertiary)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>
+                    {shortlistResults.total} candidate{shortlistResults.total !== 1 ? 's' : ''} ranked
+                  </div>
+
+                  {shortlistResults.candidates?.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "2rem", fontFamily: "var(--font-display)", fontWeight: 900, color: "var(--nm-text-tertiary)", textTransform: "uppercase" }}>
+                      No candidates found
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                      {shortlistResults.candidates.map((c, i) => {
+                        const isSelected = selectedCandidateId === c.applicationId;
+                        return (
+                          <div
+                            key={c.applicationId || c.cvId || i}
+                            onClick={() => handleSelectCandidate(c)}
+                            style={{
+                              background: isSelected ? "var(--nm-primary)" : "var(--nm-surface)",
+                              border: isSelected ? "3px solid var(--nm-ink)" : "3px solid var(--nm-ink)",
+                              padding: "12px 14px",
+                              cursor: "pointer",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              gap: 10,
+                              transition: "transform 0.15s ease, background 0.15s ease",
+                              boxShadow: isSelected ? "4px 4px 0 var(--nm-ink)" : "none",
+                            }}
+                            onMouseEnter={(e) => {
+                              if (!isSelected) {
+                                e.currentTarget.style.transform = "translate(-2px, -2px)";
+                                e.currentTarget.style.boxShadow = "3px 3px 0 var(--nm-ink)";
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (!isSelected) {
+                                e.currentTarget.style.transform = "none";
+                                e.currentTarget.style.boxShadow = "none";
+                              }
+                            }}
+                          >
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{
+                                fontFamily: "var(--font-display)",
+                                fontWeight: 900,
+                                fontSize: 13,
+                                color: isSelected ? "#fff" : "var(--nm-text-primary)",
+                                textTransform: "uppercase",
+                                letterSpacing: "-0.01em",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}>
+                                #{c.rank} {c.profile?.name || "Unknown"}
+                              </div>
+                              <div style={{
+                                fontFamily: "var(--font-body)",
+                                fontSize: 11,
+                                color: isSelected ? "rgba(255,255,255,0.7)" : "var(--nm-text-tertiary)",
+                                marginTop: 2,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}>
+                                {c.profile?.jobTitle || "—"}
+                              </div>
+                            </div>
+                            <div style={{
+                              fontFamily: "var(--font-display)",
+                              fontWeight: 900,
+                              fontSize: 18,
+                              color: isSelected ? "#fff" : c.matchScore >= 80 ? "var(--nm-success)" : c.matchScore >= 60 ? "var(--nm-warning)" : "var(--nm-text-tertiary)",
+                              flexShrink: 0,
+                            }}>
+                              {c.matchScore}%
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
-                {shortlistResults.candidates?.length === 0 ? (
-                  <div style={{ textAlign: "center", padding: "3rem", fontFamily: "var(--font-display)", fontWeight: 900, color: "var(--nm-text-tertiary)", textTransform: "uppercase" }}>
-                    No candidates found
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                    {shortlistResults.candidates.map((c, i) => (
-                      <div key={c.cvId || i} style={{
-                        background: "var(--nm-surface)",
-                        border: "3px solid var(--nm-ink)",
-                        padding: "16px 20px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        gap: 16,
-                      }}>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 16, color: "var(--nm-text-primary)", textTransform: "uppercase" }}>
-                            #{c.rank} {c.profile?.name || "Unknown"}
-                          </div>
-                          <div style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--nm-text-secondary)", marginTop: 4 }}>
-                            {c.profile?.jobTitle || "—"}
-                          </div>
-                          {c.reasoning && (
-                            <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--nm-text-tertiary)", marginTop: 6, lineHeight: 1.5 }}>
-                              {c.reasoning}
-                            </div>
-                          )}
-                        </div>
-                        <div style={{
+                {selectedCandidateId && (
+                  <div className="shortlist-right" style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    minHeight: 0,
+                    overflow: "hidden",
+                  }}>
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "12px 20px",
+                      borderBottom: "3px solid var(--nm-ink)",
+                      flexShrink: 0,
+                    }}>
+                      <button
+                        onClick={handleDeselectCandidate}
+                        className="nm-btn"
+                        style={{
+                          background: "var(--nm-surface)",
+                          color: "var(--nm-text-primary)",
+                          padding: "6px 10px",
                           fontFamily: "var(--font-display)",
                           fontWeight: 900,
-                          fontSize: 28,
-                          color: c.matchScore >= 80 ? "var(--nm-success)" : c.matchScore >= 60 ? "var(--nm-warning)" : "var(--nm-text-tertiary)",
-                          flexShrink: 0,
+                          fontSize: 11,
+                          textTransform: "uppercase",
+                          border: "2px solid var(--nm-ink)",
+                        }}
+                      >
+                        <ArrowLeft size={14} strokeWidth={3} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Back
+                      </button>
+                      <span style={{
+                        fontFamily: "var(--font-display)",
+                        fontWeight: 900,
+                        fontSize: 13,
+                        color: "var(--nm-text-primary)",
+                        textTransform: "uppercase",
+                        letterSpacing: "-0.01em",
+                      }}>
+                        {selectedCandidate?.profile?.name || "Candidate"}
+                      </span>
+                      {selectedCandidate && (
+                        <span style={{
+                          fontFamily: "var(--font-display)",
+                          fontWeight: 900,
+                          fontSize: 16,
+                          marginLeft: "auto",
+                          color: selectedCandidate.matchScore >= 80 ? "var(--nm-success)" : "var(--nm-warning)",
                         }}>
-                          {c.matchScore}%
+                          {selectedCandidate.matchScore}%
+                        </span>
+                      )}
+                    </div>
+
+                    <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+                      {loadingDetail && (
+                        <div style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: "100%",
+                          fontFamily: "var(--font-display)",
+                          fontWeight: 900,
+                          fontSize: 14,
+                          color: "var(--nm-text-tertiary)",
+                          textTransform: "uppercase",
+                        }}>
+                          Loading...
                         </div>
-                      </div>
-                    ))}
+                      )}
+
+                      {detailError && (
+                        <div style={{
+                          background: "var(--nm-error)",
+                          color: "#fff",
+                          padding: "16px",
+                          margin: "16px 20px",
+                          fontFamily: "var(--font-display)",
+                          fontWeight: 800,
+                          fontSize: "12px",
+                          textTransform: "uppercase",
+                        }}>
+                          {detailError}
+                        </div>
+                      )}
+
+                      {applicationDetail && !loadingDetail && (
+                        <>
+                          <div style={{ padding: "16px 20px", borderBottom: "3px solid var(--nm-ink)" }}>
+                            <ApplicantDetail
+                              app={applicationDetail}
+                              onClose={undefined}
+                              showBackButton={false}
+                              showMatchScore={false}
+                            />
+                          </div>
+                          <div style={{ padding: "16px 20px" }}>
+                            <div style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              marginBottom: "12px",
+                              paddingBottom: "8px",
+                              borderBottom: "2px solid var(--nm-ink)",
+                            }}>
+                              <div style={{
+                                fontFamily: "var(--font-display)",
+                                fontSize: 11,
+                                fontWeight: 900,
+                                color: "var(--nm-text-tertiary)",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.1em",
+                              }}>
+                                <FileText size={12} strokeWidth={3} style={{ marginRight: 4, verticalAlign: "middle" }} />
+                                CV Preview
+                              </div>
+                            </div>
+                            <ApplicationViewer application={applicationDetail} showAnalysis={false} />
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
         </div>
