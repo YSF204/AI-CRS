@@ -15,6 +15,63 @@ export default function JobApplications() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
   const [job, setJob] = useState(null);
+  const [activeTab, setActiveTab] = useState('all'); // 'all' or 'potential'
+
+  const handleStatusChange = async (appId, newStatus) => {
+    // 1. Save original state for possible revert
+    const originalApps = [...applications];
+    const originalSelected = selected ? { ...selected } : null;
+
+    // 2. Optimistically update local state
+    setApplications(prev => prev.map(a => a._id === appId ? { ...a, status: newStatus } : a));
+    if (selected?._id === appId) {
+      setSelected(prev => ({ ...prev, status: newStatus }));
+    }
+
+    try {
+      await api.patch(`/applications/${appId}/status`, { status: newStatus });
+      // On success, we don't need to do anything as state is already correct
+    } catch (err) {
+      console.error(err);
+      // 3. Revert on failure
+      setApplications(originalApps);
+      if (originalSelected?._id === appId) {
+        setSelected(originalSelected);
+      }
+      alert("Failed to update status. Please try again.");
+    }
+  };
+
+  const handleTogglePotential = async (appId) => {
+    // 1. Save original state
+    const originalApps = [...applications];
+    const originalSelected = selected ? { ...selected } : null;
+    
+    // 2. Determine next state optimistically
+    const appToUpdate = applications.find(a => a._id === appId);
+    const nextPotential = !appToUpdate?.isPotential;
+
+    setApplications(prev => prev.map(a => a._id === appId ? { ...a, isPotential: nextPotential } : a));
+    if (selected?._id === appId) {
+      setSelected(prev => ({ ...prev, isPotential: nextPotential }));
+    }
+
+    try {
+      await api.patch(`/applications/${appId}/potential`);
+    } catch (err) {
+      console.error(err);
+      // 3. Revert on failure
+      setApplications(originalApps);
+      if (originalSelected?._id === appId) {
+        setSelected(originalSelected);
+      }
+      alert("Failed to update potential list. Please try again.");
+    }
+  };
+
+  const filteredApps = activeTab === 'all' 
+    ? applications 
+    : applications.filter(a => a.isPotential);
 
   useEffect(() => {
     const load = async () => {
@@ -103,6 +160,47 @@ export default function JobApplications() {
           </button>
         </div>
 
+        <div style={{ display: 'flex', gap: 16, marginBottom: '1.5rem', borderBottom: '3px solid var(--nm-ink)' }}>
+          <button
+            onClick={() => setActiveTab('all')}
+            style={{
+              padding: '8px 16px',
+              fontFamily: 'var(--font-display)',
+              fontWeight: 900,
+              fontSize: 12,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              background: activeTab === 'all' ? 'var(--nm-primary)' : 'transparent',
+              color: activeTab === 'all' ? '#fff' : 'var(--nm-text-tertiary)',
+              border: 'none',
+              cursor: 'pointer',
+              marginBottom: -3,
+              borderBottom: activeTab === 'all' ? '6px solid var(--nm-ink)' : 'none'
+            }}
+          >
+            All Applicants
+          </button>
+          <button
+            onClick={() => setActiveTab('potential')}
+            style={{
+              padding: '8px 16px',
+              fontFamily: 'var(--font-display)',
+              fontWeight: 900,
+              fontSize: 12,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              background: activeTab === 'potential' ? 'var(--nm-warning)' : 'transparent',
+              color: activeTab === 'potential' ? '#000' : 'var(--nm-text-tertiary)',
+              border: 'none',
+              cursor: 'pointer',
+              marginBottom: -3,
+              borderBottom: activeTab === 'potential' ? '6px solid var(--nm-ink)' : 'none'
+            }}
+          >
+            Potential List
+          </button>
+        </div>
+
         {loading ? (
           <div style={{ flex: 1, display: 'flex', gap: 'var(--spacing-6)', minHeight: 0 }}>
             <div style={{ width: '35%', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-3)' }}>
@@ -158,16 +256,22 @@ export default function JobApplications() {
                 paddingBottom: '0.5rem',
                 borderBottom: '3px solid var(--nm-ink)',
               }}>
-                {applications.length} Applicant{applications.length !== 1 ? 's' : ''}
+                {filteredApps.length} {activeTab === 'all' ? 'Applicant' : 'Potential Candidate'}{filteredApps.length !== 1 ? 's' : ''}
               </div>
 
               {selected ? (
                 <div>
-                  <ApplicantDetail app={selected} onClose={() => setSelected(null)} showMatchScore={false} />
+                  <ApplicantDetail 
+                    app={selected} 
+                    onClose={() => setSelected(null)} 
+                    showMatchScore={false} 
+                    onStatusChange={(s) => handleStatusChange(selected._id, s)}
+                    onTogglePotential={() => handleTogglePotential(selected._id)}
+                  />
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {applications.map((app) => (
+                  {filteredApps.map((app) => (
                     <ApplicantCard
                       key={app._id}
                       app={app}

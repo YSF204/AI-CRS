@@ -181,6 +181,10 @@ const applicationSchema = new mongoose.Schema(
       required: true,
       default: "manual",
     },
+    isPotential: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

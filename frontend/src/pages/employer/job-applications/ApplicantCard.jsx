@@ -1,4 +1,5 @@
 import React from 'react';
+import { Star } from 'lucide-react';
 
 export default function ApplicantCard({ app, onClick, compact, showMatchScore = true }) {
   if (compact) {
@@ -32,6 +33,7 @@ export default function ApplicantCard({ app, onClick, compact, showMatchScore = 
             whiteSpace: 'nowrap',
           }}>
             {app.applicantInfo?.fullName || 'Unidentified'}
+            {app.isPotential && <Star size={12} fill="var(--nm-warning)" color="var(--nm-warning)" style={{ marginLeft: 6, display: 'inline' }} />}
           </div>
           <div style={{
             fontFamily: 'var(--font-display)',
@@ -86,6 +88,7 @@ export default function ApplicantCard({ app, onClick, compact, showMatchScore = 
         marginBottom: 8
       }}>
         {app.applicantInfo?.fullName || "ENTITY UNIDENTIFIED"}
+        {app.isPotential && <Star size={20} fill="var(--nm-warning)" color="var(--nm-warning)" style={{ marginLeft: 8, display: 'inline', verticalAlign: 'middle' }} />}
       </div>
       <div style={{
         fontFamily: 'var(--font-display)',

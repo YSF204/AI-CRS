@@ -2,6 +2,19 @@ import React from 'react';
 import { Sparkles, CheckCircle2, XCircle } from 'lucide-react';
 
 export default function CandidateCard({ candidate, index }) {
+  const displayName =
+    candidate.profile?.name && candidate.profile.name !== 'Unknown'
+      ? candidate.profile.name
+      : candidate.profile?.email || 'SECURE ENTITY';
+
+  const contact = candidate.profile?.contact || {};
+  const contactItems = [
+    candidate.profile?.email && { label: 'Email', value: candidate.profile.email },
+    contact.phone && { label: 'Phone', value: contact.phone },
+    contact.github && { label: 'GitHub', value: contact.github },
+    contact.linkedin && { label: 'LinkedIn', value: contact.linkedin },
+  ].filter(Boolean);
+
   return (
     <div
       className="nm-card"
@@ -31,17 +44,41 @@ export default function CandidateCard({ candidate, index }) {
         color: '#fff',
         boxShadow: '4px 4px 0 var(--nm-ink)'
       }}>
-        #{candidate.rank}
+        #{index + 1}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 24 }}>
         <div>
           <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 32, margin: '0 0 8px', color: 'var(--nm-text-primary)', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>
-            {candidate.profile?.name || candidate.userId?.firstName + ' ' + candidate.userId?.lastName || 'SECURE ENTITY'}
+            {displayName}
           </h3>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 16, fontWeight: 600, color: 'var(--nm-text-tertiary)', marginBottom: 12 }}>
-            {candidate.profile?.jobTitle || candidate.CVId?.jobTitle || 'UNSPECIFIED ROLE'} • {candidate.profile?.email || candidate.userId?.email || 'DATA ENCRYPTED'}
+            {candidate.profile?.jobTitle || candidate.CVId?.jobTitle || 'UNSPECIFIED ROLE'} • {candidate.profile?.email || 'DATA ENCRYPTED'}
           </div>
+          {contactItems.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 12 }}>
+              {contactItems.map((item) => (
+                <div
+                  key={`${item.label}-${item.value}`}
+                  style={{
+                    border: '2px solid var(--nm-ink)',
+                    background: 'var(--nm-bg)',
+                    padding: '8px 12px',
+                    fontFamily: 'var(--font-body)',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    color: 'var(--nm-text-primary)',
+                    textTransform: 'none',
+                  }}
+                >
+                  <span style={{ color: 'var(--nm-text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    {item.label}:
+                  </span>{' '}
+                  {item.value}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{
@@ -98,6 +135,36 @@ export default function CandidateCard({ candidate, index }) {
           {candidate.reasoning}
         </p>
       </div>
+
+      {candidate.profile?.summary && (
+        <div style={{
+          marginTop: '2rem',
+          background: 'var(--nm-surface-high)',
+          border: '4px solid var(--nm-ink)',
+          padding: '1.5rem 2rem',
+        }}>
+          <div style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 13,
+            color: 'var(--nm-primary)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.15em',
+            marginBottom: 10,
+            fontWeight: 900
+          }}>
+            Profile Snapshot
+          </div>
+          <p style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 16,
+            lineHeight: 1.7,
+            color: 'var(--nm-text-primary)',
+            margin: 0
+          }}>
+            {candidate.profile.summary}
+          </p>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.5rem', marginTop: '2.5rem' }}>
         <div>
@@ -183,24 +250,7 @@ export default function CandidateCard({ candidate, index }) {
         </div>
       </div>
 
-      <div style={{ marginTop: '3rem', display: 'flex', justifyContent: 'flex-end' }}>
-         <button
-          onClick={() => alert('Detailed dossier access coming in next build phase.')}
-          className="nm-btn"
-          style={{
-            padding: '14px 28px',
-            background: 'var(--nm-text-primary)',
-            color: 'var(--nm-bg)',
-            fontFamily: 'var(--font-display)',
-            fontWeight: 900,
-            fontSize: 14,
-            textTransform: 'uppercase',
-            letterSpacing: '0.15em',
-          }}
-         >
-           View Full Dossier
-         </button>
-      </div>
+
     </div>
   );
 }

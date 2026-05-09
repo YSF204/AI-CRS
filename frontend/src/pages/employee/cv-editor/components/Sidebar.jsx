@@ -24,18 +24,18 @@ export default function Sidebar({
       >
         {sidebarOpen && (
           <div className="px-5 flex-1 overflow-hidden">
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--nm-text-tertiary)] whitespace-nowrap font-bold">
-              Registry
+            <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--nm-text-tertiary)] whitespace-nowrap font-bold opacity-70">
+              Block Registry
             </p>
-            <p className="font-[var(--font-display)] font-black text-xs mt-0.5 whitespace-nowrap uppercase">
-              Add Block →
+            <p className="font-[var(--font-display)] font-black text-[11px] mt-0.5 whitespace-nowrap uppercase tracking-wider text-[var(--nm-text-primary)]">
+              AVAILABLE MODULES
             </p>
           </div>
         )}
         {/* Expand / collapse toggle */}
         <button
           type="button"
-          onClick={() => setSidebarOpen((o) => !o)}
+          onClick={() => setSidebarOpen(!sidebarOpen)}
           title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           className="flex-shrink-0 w-[64px] h-[60px] flex items-center justify-center hover:bg-[var(--nm-surface-high)] transition-colors"
           style={{

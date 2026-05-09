@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { X, Plus } from "lucide-react";
+import Field from "../Field";
 
 const PROFICIENCY_LEVELS = [
   { value: "A1", label: "A1 — Beginner" },
@@ -54,39 +55,33 @@ export default function LanguageSection({ form, handlers }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-2xl font-bold font-['Space_Grotesk'] uppercase mb-4">
+        <h2 className="font-[var(--font-display)] text-2xl font-black uppercase tracking-tight text-[var(--nm-text-primary)] mb-2">
           Languages
         </h2>
-        <p className="font-mono text-sm text-(--fg-muted) mb-6">
+        <p className="font-mono text-sm text-[var(--fg-muted)]">
           List the languages you speak and your proficiency level.
         </p>
       </div>
 
-      <div className="space-y-4">
-        <div className="flex gap-2 items-end">
-          <div className="flex-1">
-            <label className="block font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--nm-text-tertiary)] mb-2">
-              Language Name
-            </label>
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr_auto] gap-3 items-end">
+          <Field label="Language Name">
             <input
               type="text"
               value={inputName}
               onChange={(e) => setInputName(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="w-full h-[44px] px-3 border border-[var(--border-color)] rounded font-mono text-sm"
+              onKeyDown={handleKeyPress}
+              className="nm-input"
               placeholder="e.g., English, Spanish, French"
             />
-          </div>
-          <div className="flex-1">
-            <label className="block font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--nm-text-tertiary)] mb-2">
-              Proficiency Level
-            </label>
+          </Field>
+          <Field label="Proficiency Level">
             <select
               value={inputLevel}
               onChange={(e) => setInputLevel(e.target.value)}
-              className="w-full h-[44px] px-3 border border-[var(--border-color)] rounded font-mono text-sm"
+              className="nm-input"
             >
               {PROFICIENCY_LEVELS.map((level) => (
                 <option key={level.value} value={level.value}>
@@ -94,10 +89,11 @@ export default function LanguageSection({ form, handlers }) {
                 </option>
               ))}
             </select>
-          </div>
+          </Field>
           <button
+            type="button"
             onClick={addLanguage}
-            className="h-[44px] px-4 flex items-center gap-2 bg-[var(--nm-primary)] text-white border-2 border-[var(--nm-ink)] rounded font-mono text-xs font-bold uppercase"
+            className="nm-btn nm-btn-primary h-[48px] px-4"
           >
             <Plus size={16} />
             Add
@@ -107,13 +103,14 @@ export default function LanguageSection({ form, handlers }) {
         <div className="flex flex-wrap gap-2">
           {normalizedLanguages.map((language, index) => (
             <div
-              key={index}
-              className="flex items-center gap-2 px-3 py-2 bg-[var(--nm-surface-high)] text-[var(--nm-text-primary)] rounded border border-[var(--nm-ink)] font-mono text-sm"
+              key={`${language.name}-${language.level}-${index}`}
+              className="flex items-center gap-2 px-3 py-2 bg-[var(--nm-surface-high)] text-[var(--nm-text-primary)] border-2 border-[var(--nm-ink)] font-mono text-sm"
             >
               <span>
                 {language.name} — {language.level}
               </span>
               <button
+                type="button"
                 onClick={() => removeLanguage(index)}
                 className="hover:text-[var(--nm-error)] transition-colors p-0.5"
                 title="Remove language"

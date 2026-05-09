@@ -27,7 +27,7 @@ Return exactly this JSON structure:
     },
     "address": {
       "city": "extracted city or empty string",
-      "street": "extracted street or empty string"
+      "country": "extracted country or empty string"
     },
     "experience": [
       {
@@ -102,113 +102,136 @@ Scoring Criteria:
    */
   ANALYZE_SECTION: (section, sectionData) => {
     if (section === "fullCv") {
-      return `You are a professional CV coach and ATS expert. Analyze the CV data provided and do ALL of the following in one response:
-
-1) Check each standard section — Contact Information, Summary, Work Experience, Education, Technical Skills, Soft Skills, Languages. Also check any custom sections present in the data (e.g. Certifications, Projects, Publications, Volunteer Work, etc.). Flag each section as "Empty", "Needs Attention", or "Good" with specific advice.
-
-2) Calculate an overall completeness score (0–100). Deduct 10–15 points per empty major section. A fully empty CV must score below 20.
-
-3) Identify specific text fields that can be concretely improved. For each, provide a ready-to-use professional rewrite. Use ONLY these exact fieldId formats:
-   - "summary" for the professional summary
-   - "experience_0_summary", "experience_1_summary" etc. for experience descriptions (0-indexed)
-   - "education_0_summary", "education_1_summary" etc. for education descriptions (0-indexed)
-   - "customSections_0_items_0_description", "customSections_0_items_1_description" etc. for custom section item descriptions (both indices 0-indexed, first index = which custom section, second = which item within it)
-
-CRITICAL: Return ONLY valid JSON. NO markdown, NO code fences, NO preamble. Start with { end with }
-
-Return exactly this structure:
-{
-  "overallScore": <number 0-100>,
-  "sections": [
-    {
-      "name": "Contact Information",
-      "status": "Good",
-      "suggestions": ["suggestion1"]
-    },
-    {
-      "name": "Summary",
-      "status": "Needs Attention",
-      "suggestions": ["suggestion1", "suggestion2"]
-    },
-    {
-      "name": "Work Experience",
-      "status": "Good",
-      "suggestions": []
-    },
-    {
-      "name": "Education",
-      "status": "Good",
-      "suggestions": []
-    },
-    {
-      "name": "Technical Skills",
-      "status": "Empty",
-      "suggestions": ["Add relevant technical skills"]
-    },
-    {
-      "name": "Soft Skills",
-      "status": "Good",
-      "suggestions": []
-    },
-    {
-      "name": "Languages",
-      "status": "Good",
-      "suggestions": []
-    }
-  ],
-  "generalAdvice": ["overall advice 1", "overall advice 2", "overall advice 3"],
-  "issues": [
-    {
-      "fieldId": "summary",
-      "originalText": "current text or empty string if missing",
-      "reason": "1 sentence explaining what is weak or missing",
-      "improvedText": "polished, professional, ready-to-use rewrite"
-    }
-  ]
-}
-
-Notes:
-- Include custom sections in the "sections" array using their actual title as the "name".
-- Only add entries to "issues" for fields with improvable or empty text. Skip fields that are already professional and complete.
-- For custom section items, use the correct 0-based indices matching the order they appear in the customSections array.
+      return `You are an expert ATS judge. Evaluate this CV holistically — reward what IS there, only flag what is genuinely missing or broken.
 
 CV Data:
-${JSON.stringify(sectionData, null, 2)}`;
-    }
-
-    // For individual sections, use the original prompt
-    return `
-Please analyze this CV data and identify any missing, poorly written, or incomplete parts.
-
-Data provided as a flattened dictionary (Key = Field ID, Value = Text Content):
 ${JSON.stringify(sectionData, null, 2)}
 
-CRITICAL INSTRUCTIONS:
-1. Return ONLY a valid JSON object.
-2. DO NOT wrap the response in markdown code blocks (\`\`\`json).
-3. DO NOT include any conversational text, preamble, or explanations.
-4. Output must start exactly with { and end exactly with }.
-5. IMPORTANT: If a field is completely empty, missing, or contains no meaningful text, you MUST flag it as an issue. Set the 'reason' to "CRITICAL: This field is empty and must be filled out for a complete CV." and provide a placeholder or suggestion in 'improvedText'. DO NOT say "Great job" or return an empty issues array for empty fields.
+=== FIELD MAPPING ===
+- "fullName", "jobTitle": identity fields
+- "summary": professional summary paragraph
+- "contact": { phone, email, linkedin, github }
+- "address": { city, country }
+- "experience[]": { position, institutionName, durationFrom, durationTo, summary }
+- "education[]": { institutionName, certification, durationFrom, durationTo, summary }
+- "technicalSkills": string array
+- "softSkills": string array
+- "language": array of strings or objects
+- "customSections[]": { title, sectionType, items[{name, description}] }
 
-Return exactly this JSON structure:
+=== HOW TO SCORE (0-100) ===
+Think like a recruiter scanning this CV for 10 seconds. How complete and professional does it look?
+
+Key principles:
+- REWARD completeness: filled fields, relevant details, professional language, action verbs
+- REWARD extras: LinkedIn, GitHub, languages, certifications, custom sections with real content
+- Custom sections can be MORE valuable than standard ones if they add relevant projects, certifications, or achievements
+- PENALIZE only real problems: empty fields, actual typos, missing information, first-person writing, passive/weak verbs
+- DO NOT penalize "could be better" — if text is professional and uses action verbs, that's good enough
+- More content and more completeness = higher score. Always.
+
+Score guidelines:
+- 90-100: Complete CV with rich details, multiple experiences, strong skills, extras like LinkedIn/languages/custom sections
+- 75-89: Good CV, well-filled, maybe missing one minor thing
+- 60-74: Decent start, some sections clearly filled but others empty or thin
+- 40-59: Partial CV, several sections empty or very thin
+- 20-39: Mostly empty, just basic info
+- 0-19: Nearly blank CV
+
+=== WHAT TO FLAG AS AN ISSUE ===
+ONLY create issues for these REAL problems:
+1. EMPTY fields that should have content (no summary, no experience, no education, no skills)
+2. ACTUAL typos or misspelled words (real spelling errors, not style preferences)
+3. GRAMMAR errors (wrong tense, subject-verb disagreement, missing words)
+4. First-person writing ("I am", "I have", "I did")
+5. Weak passive verbs ("responsible for", "helped with", "was involved in") that should be action verbs
+6. Clearly incomplete entries (experience with position but no summary at all)
+
+DO NOT flag for:
+- "Could add more metrics/quantification" — not everyone has quantified data
+- "Sentence is too long" or "could be more concise" — style preferences
+- "Could include more keywords" — if keywords are already present, don't ask for more
+- Minor rephrasing of already-professional text
+- Any text that already uses action verbs and professional language
+
+If the text is professional, uses action verbs, and has no errors, LEAVE IT ALONE.
+An EMPTY issues array is perfectly fine and expected for a well-written CV.
+
+=== FIELD ID FORMATS FOR ISSUES ===
+- "summary" for professional summary
+- "experience_0_summary", "experience_1_summary" etc (0-indexed)
+- "experience_0" to DELETE entire entry (set improvedText to "")
+- "education_0_summary", "education_1_summary" etc
+- "education_0" to DELETE entire entry (set improvedText to "")
+- "customSections_0_items_0_description" etc for custom section items
+- "customSections_0_items_0" to DELETE entire item
+- "technicalSkills_0", "softSkills_0", "language_0" to DELETE items
+
+=== OUTPUT (JSON only, no markdown) ===
 {
-  "atsScore": 0-100,
-  "atsFeedback": "1 sentence summarizing an overall ATS score review. If fields are empty, give a low score.",
-  "issues": [
-    {
-      "fieldId": "the exact key from the provided JSON",
-      "originalText": "The exact poorly written text snippet, or an empty string if missing",
-      "reason": "1 sentence explaining why this is bad or missing",
-      "improvedText": "A professional, ready-to-use rewritten version of the text or a strong suggestion"
-    }
-  ]
+  "overallScore": <0-100 based on your holistic judgment>,
+  "sections": [
+    { "name": "Contact Information", "status": "Good|Needs Attention|Empty", "suggestions": [] },
+    { "name": "Summary", "status": "...", "suggestions": [] },
+    { "name": "Work Experience", "status": "...", "suggestions": [] },
+    { "name": "Education", "status": "...", "suggestions": [] },
+    { "name": "Technical Skills", "status": "...", "suggestions": [] },
+    { "name": "Soft Skills", "status": "...", "suggestions": [] },
+    { "name": "Languages", "status": "...", "suggestions": [] }
+  ],
+  "generalAdvice": [],
+  "issues": []
 }
 
-Focus strictly on:
-- Flagging empty or missing fields as CRITICAL issues.
-- Rewriting informal language into professional terminology.
-- Enhancing impact and achievements.
-- Correcting spelling and grammar.
-- Only return issues for fields that actually need improvement or are missing. If the text is professional and complete, do not return an issue for it.`;
+RULES:
+- sections array MUST always have all 7 entries above plus one for each customSection
+- suggestions in each section: only add if status is not "Good"
+- generalAdvice: max 3 items, only actionable advice for things NOT already done
+- issues: ONLY real problems from the list above. Empty array is OK and common for good CVs.
+- More content = higher score. Always.`;
+    }
+
+    return `You are an expert ATS judge. Analyze this CV section data and flag ONLY genuine problems.
+
+Data (Key = Field ID, Value = Text Content):
+${JSON.stringify(sectionData, null, 2)}
+
+Return ONLY valid JSON. No markdown, no code fences, no preamble. Start with { end with }
+
+=== WHAT TO FLAG ===
+ONLY flag fields that have REAL objective problems:
+1. EMPTY or missing text that should have content
+2. ACTUAL typos, misspellings, grammar errors
+3. First-person writing ("I am", "I have", "I did")
+4. Weak passive verbs ("responsible for", "helped with") that should be action verbs
+5. Clearly incomplete entries
+
+DO NOT flag:
+- Professional text that already uses action verbs — leave it alone
+- Style preferences ("could be more concise", "could add metrics")
+- Rewording already-good text
+
+If all fields are well-written, return an empty issues array. That's perfectly fine.
+
+=== SCORING ===
+Score 0-100 based on how complete and professional the content is:
+- 90-100: Complete, professional, rich with detail
+- 70-89: Good content, maybe one minor gap
+- 50-69: Partial, clearly missing some content
+- Below 50: Mostly empty or has real problems
+
+Return exactly:
+{
+  "atsScore": 0-100,
+  "atsFeedback": "1 sentence summary",
+  "issues": [
+    {
+      "fieldId": "exact key from the data",
+      "originalText": "the problematic text, or empty string if missing",
+      "reason": "why this is a problem",
+      "improvedText": "professional replacement"
+    }
+  ]
+}`;
   },
 };

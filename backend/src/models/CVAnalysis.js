@@ -33,6 +33,10 @@ const cvAnalysisSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    fullAnalysis: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
   },
   {
     timestamps: true,

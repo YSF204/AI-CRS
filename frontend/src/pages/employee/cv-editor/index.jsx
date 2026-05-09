@@ -62,9 +62,9 @@ export default function CVEditor() {
     analysisResult,
     highlights,
     analyzing,
+    analysisProgress,
     showSkillGap,
     setShowSkillGap,
-    staleAnalysis,
     handleAnalyze,
     handleAnalyzeSection,
     handleApplyAnalysis,
@@ -209,13 +209,52 @@ export default function CVEditor() {
       <AnalysisModal
         show={showAnalysis}
         analysis={analysisResult}
-        stale={staleAnalysis}
         currentData={form}
         userName={user?.firstName || "Candidate"}
         templateId={form.templateId || cv?.templateId || 1}
         onClose={() => setShowAnalysis(false)}
         onApply={handleApplyAnalysis}
       />
+
+      {/* ── Analysis Progress Bar (bottom-right) ── */}
+      {analyzing && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 24,
+            right: 24,
+            zIndex: 9999,
+            width: 280,
+            background: "var(--nm-surface)",
+            border: "4px solid var(--nm-ink)",
+            boxShadow: "6px 6px 0 var(--nm-ink)",
+            padding: "16px",
+            fontFamily: "'Space Grotesk', sans-serif",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <span style={{ fontWeight: 800, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--nm-text-primary)" }}>
+              AI Analysis
+            </span>
+            <span style={{ fontWeight: 800, fontSize: "0.85rem", color: "var(--nm-primary)" }}>
+              {analysisProgress}%
+            </span>
+          </div>
+          <div style={{ width: "100%", height: 10, background: "var(--nm-surface-high)", border: "2px solid var(--nm-ink)" }}>
+            <div
+              style={{
+                height: "100%",
+                width: `${analysisProgress}%`,
+                background: "var(--nm-primary)",
+                transition: "width 0.3s ease",
+              }}
+            />
+          </div>
+          <p style={{ margin: "8px 0 0", fontSize: "0.7rem", color: "var(--nm-text-tertiary)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+            {analysisProgress < 30 ? "Reading CV data..." : analysisProgress < 60 ? "Analyzing content quality..." : analysisProgress < 90 ? "Generating suggestions..." : "Almost done..."}
+          </p>
+        </div>
+      )}
 
       {/* ── Skill Gap Modal ── */}
       <SkillGapModal

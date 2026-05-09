@@ -245,6 +245,10 @@ export const rankCandidates = async (
   requirementsText,
   candidates,
 ) => {
+  const candidateText = candidates
+    .map((candidate, index) => `=== CANDIDATEID ${candidate.cvId || index + 1} ===\n${candidate}`)
+    .join("\n\n");
+
   const response = await getClient().responses.create({
     model: "gpt-5.4-nano",
     input: [
@@ -257,6 +261,10 @@ You will receive multiple candidate CVs, each delimited by "=== CANDIDATEID [cvI
 Rank them strictly based on how well they fit the following position:
 
 ${requirementsText}
+
+Candidate CVs:
+
+${candidateText}
 
 Return ONLY a valid JSON array (no markdown, no code fences), sorted best-first:
 

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useCallback } from "react";
 import api from "../../../../services/api";
 
 export default function useCVAnalysis({
@@ -12,11 +12,35 @@ export default function useCVAnalysis({
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
   const [showSkillGap, setShowSkillGap] = useState(false);
-  const [staleAnalysis, setStaleAnalysis] = useState(false);
+  const progressTimerRef = useRef(null);
+  const filteredFormDataRef = useRef(filteredFormData);
 
-  const buildCvPayload = () => {
-    const filtered = filteredFormData();
+  filteredFormDataRef.current = filteredFormData;
+
+  const startProgressSimulation = useCallback(() => {
+    setAnalysisProgress(0);
+    let progress = 0;
+    clearInterval(progressTimerRef.current);
+    progressTimerRef.current = setInterval(() => {
+      progress += Math.random() * 8 + 2;
+      if (progress >= 92) {
+        progress = 92;
+        clearInterval(progressTimerRef.current);
+      }
+      setAnalysisProgress(Math.round(progress));
+    }, 400);
+  }, []);
+
+  const finishProgress = useCallback(() => {
+    clearInterval(progressTimerRef.current);
+    setAnalysisProgress(100);
+    setTimeout(() => setAnalysisProgress(0), 600);
+  }, []);
+
+  const buildCvPayload = useCallback(() => {
+    const filtered = filteredFormDataRef.current();
     return {
       fullName: filtered.fullName || userName || "",
       jobTitle: filtered.jobTitle || "",
@@ -58,23 +82,12 @@ export default function useCVAnalysis({
       })),
       cvId: id && id !== "new" ? id : undefined,
     };
-  };
+  }, [userName, id]);
 
-  const handleAnalyze = async () => {
-    const cached = sessionStorage.getItem(`cv_analysis_${id}`);
-    if (cached) {
-      const parsed = JSON.parse(cached);
-      const cvModified = form.updatedAt || form.createdAt;
-      const isStale = cvModified && parsed.cvUpdatedAt && new Date(cvModified) > new Date(parsed.cvUpdatedAt);
-      setStaleAnalysis(isStale);
-      setAnalysisResult(parsed);
-      setShowAnalysis(true);
-      return;
-    }
-
-    setStaleAnalysis(false);
-
+  const handleAnalyze = useCallback(async () => {
     setAnalyzing(true);
+    startProgressSimulation();
+
     try {
       const cvPayload = buildCvPayload();
 
@@ -90,18 +103,18 @@ export default function useCVAnalysis({
         const mergedResult = {
           ...analysisData,
           atsScore: analysisData.overallScore ?? null,
-          cvUpdatedAt: analysisData.cvUpdatedAt || new Date().toISOString(),
           atsBreakdown: analysisData.atsBreakdown || null,
         };
 
         setAnalysisResult(mergedResult);
-        sessionStorage.setItem(`cv_analysis_${id}`, JSON.stringify(mergedResult));
-        setStaleAnalysis(false);
+        finishProgress();
         setShowAnalysis(true);
       } else {
+        finishProgress();
         showToast("error", "Unable to generate analysis. Please try again.");
       }
     } catch (err) {
+      finishProgress();
       showToast(
         "error",
         err?.response?.data?.message || err?.message || "Analysis failed.",
@@ -109,10 +122,10 @@ export default function useCVAnalysis({
     } finally {
       setAnalyzing(false);
     }
-  };
+  }, [buildCvPayload, userName, startProgressSimulation, finishProgress, showToast]);
 
   const handleSkillGapAnalysis = async ({ targetRole, additionalInfo }) => {
-    const filtered = filteredFormData();
+    const filtered = filteredFormDataRef.current();
     const res = await api.post("/cvs/skill-gap", {
       cvData: {
         fullName: filtered.fullName || "",
@@ -131,10 +144,11 @@ export default function useCVAnalysis({
     return res.data?.data;
   };
 
-  const handleAnalyzeSection = async (sectionKey) => {
+  const handleAnalyzeSection = useCallback(async (sectionKey) => {
     setAnalyzing(true);
+    startProgressSimulation();
     try {
-      const filtered = filteredFormData();
+      const filtered = filteredFormDataRef.current();
       const flat = {};
 
       if (sectionKey === "summary" && filtered.summary !== undefined)
@@ -167,11 +181,14 @@ export default function useCVAnalysis({
       if (response.data?.success && response.data?.data) {
         const result = response.data.data;
         setAnalysisResult(result);
+        finishProgress();
         setShowAnalysis(true);
       } else {
+        finishProgress();
         showToast("error", "Unable to generate analysis. Please try again.");
       }
     } catch (err) {
+      finishProgress();
       showToast(
         "error",
         err?.response?.data?.message || err?.message || "Analysis failed.",
@@ -179,14 +196,16 @@ export default function useCVAnalysis({
     } finally {
       setAnalyzing(false);
     }
-  };
+  }, [userName, startProgressSimulation, finishProgress, showToast]);
 
-  const handleApplyAnalysis = (updatesToApply) => {
+  const handleApplyAnalysis = useCallback((updatesToApply) => {
     if (!updatesToApply || Object.keys(updatesToApply).length === 0) {
       showToast("info", "No changes were selected.");
       setShowAnalysis(false);
-      return;
+      return null;
     }
+
+    let appliedForm = null;
 
     setForm((prev) => {
       const next = { ...prev };
@@ -194,24 +213,37 @@ export default function useCVAnalysis({
       next.experience = next.experience ? [...next.experience] : [];
       next.education = next.education ? [...next.education] : [];
       next.customSections = next.customSections ? [...next.customSections] : [];
+      next.technicalSkills = next.technicalSkills ? [...next.technicalSkills] : [];
+      next.softSkills = next.softSkills ? [...next.softSkills] : [];
+      next.language = next.language ? [...next.language] : [];
+
+      const indicesToDelete = { experience: new Set(), education: new Set(), customSectionItems: new Map() };
 
       Object.entries(updatesToApply).forEach(([key, value]) => {
-        if (key === "summary") next.summary = value;
-        else if (key === "jobTitle") next.jobTitle = value;
-        else if (key.startsWith("experience_")) {
+        const isDelete = value === "__DELETE__" || value === "";
+
+        if (key === "summary") {
+          next.summary = isDelete ? "" : value;
+        } else if (key === "jobTitle") {
+          next.jobTitle = isDelete ? "" : value;
+        } else if (key.startsWith("experience_")) {
           const parts = key.split("_");
           const idx = parseInt(parts[1], 10);
-          if (next.experience[idx]) {
+          if (parts.length === 2 && isDelete) {
+            indicesToDelete.experience.add(idx);
+          } else if (next.experience[idx]) {
             next.experience[idx] = {
               ...next.experience[idx],
-              [parts[2]]: value,
+              [parts[2]]: isDelete ? "" : value,
             };
           }
         } else if (key.startsWith("education_")) {
           const parts = key.split("_");
           const idx = parseInt(parts[1], 10);
-          if (next.education[idx]) {
-            next.education[idx] = { ...next.education[idx], [parts[2]]: value };
+          if (parts.length === 2 && isDelete) {
+            indicesToDelete.education.add(idx);
+          } else if (next.education[idx]) {
+            next.education[idx] = { ...next.education[idx], [parts[2]]: isDelete ? "" : value };
           }
         } else if (key.startsWith("customSections_")) {
           const parts = key.split("_");
@@ -226,21 +258,54 @@ export default function useCVAnalysis({
             next.customSections[sIdx].items = [
               ...next.customSections[sIdx].items,
             ];
-            next.customSections[sIdx].items[iIdx] = {
-              ...next.customSections[sIdx].items[iIdx],
-              description: value,
-            };
+            if (isDelete && parts[4] === undefined) {
+              if (!indicesToDelete.customSectionItems.has(sIdx)) {
+                indicesToDelete.customSectionItems.set(sIdx, new Set());
+              }
+              indicesToDelete.customSectionItems.get(sIdx).add(iIdx);
+            } else {
+              next.customSections[sIdx].items[iIdx] = {
+                ...next.customSections[sIdx].items[iIdx],
+                description: isDelete ? "" : value,
+              };
+            }
           }
+        } else if (key.startsWith("technicalSkills_") && isDelete) {
+          const idx = parseInt(key.split("_")[1], 10);
+          next.technicalSkills = next.technicalSkills.filter((_, i) => i !== idx);
+        } else if (key.startsWith("softSkills_") && isDelete) {
+          const idx = parseInt(key.split("_")[1], 10);
+          next.softSkills = next.softSkills.filter((_, i) => i !== idx);
+        } else if (key.startsWith("language_") && isDelete) {
+          const idx = parseInt(key.split("_")[1], 10);
+          next.language = next.language.filter((_, i) => i !== idx);
         }
       });
 
+      if (indicesToDelete.experience.size > 0) {
+        next.experience = next.experience.filter((_, i) => !indicesToDelete.experience.has(i));
+      }
+      if (indicesToDelete.education.size > 0) {
+        next.education = next.education.filter((_, i) => !indicesToDelete.education.has(i));
+      }
+      if (indicesToDelete.customSectionItems.size > 0) {
+        indicesToDelete.customSectionItems.forEach((itemIndices, sIdx) => {
+          if (next.customSections[sIdx]) {
+            next.customSections[sIdx].items = next.customSections[sIdx].items.filter(
+              (_, i) => !itemIndices.has(i),
+            );
+          }
+        });
+      }
+
+      appliedForm = next;
       return next;
     });
 
-    showToast("success", "Selected changes applied to your CV.");
     setShowAnalysis(false);
-    sessionStorage.removeItem(`cv_analysis_${id}`);
-  };
+    setAnalysisResult(null);
+    return appliedForm;
+  }, [setForm, showToast]);
 
   const highlights = useMemo(() => {
     if (!analysisResult?.issues) return {};
@@ -261,9 +326,9 @@ export default function useCVAnalysis({
     analysisResult,
     highlights,
     analyzing,
+    analysisProgress,
     showSkillGap,
     setShowSkillGap,
-    staleAnalysis,
     handleAnalyze,
     handleAnalyzeSection,
     handleApplyAnalysis,

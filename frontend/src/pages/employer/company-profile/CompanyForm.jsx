@@ -34,7 +34,7 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
       
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={LABEL}>Legal Entity Name *</label>
+          <label style={LABEL}>Company Name *</label>
           <input 
             style={INPUT} 
             value={form.name} 
@@ -47,7 +47,7 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
         </div>
         <div style={{ position: 'relative' }}>
           <label style={LABEL}>
-            Operational License * 
+            License Number * 
             {isEditing && <span style={{ textTransform: 'none', fontWeight: 800, color: 'var(--nm-error)', marginLeft: 8 }}>(LOCKED)</span>}
           </label>
           <input 
@@ -67,7 +67,7 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
           />
         </div>
         <div>
-          <label style={LABEL}>Primary Intake Email *</label>
+          <label style={LABEL}>Contact Email *</label>
           <input 
             style={INPUT} 
             type="email" 
@@ -80,7 +80,7 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
           />
         </div>
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={LABEL}>Digital Domain URL <span style={{ textTransform: 'none', fontWeight: 500, color: 'var(--nm-text-tertiary)' }}>(OPTIONAL)</span></label>
+          <label style={LABEL}>Website URL <span style={{ textTransform: 'none', fontWeight: 500, color: 'var(--nm-text-tertiary)' }}>(OPTIONAL)</span></label>
           <input 
             style={INPUT} 
             type="url" 
@@ -98,8 +98,8 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
           <div>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 24, color: 'var(--nm-text-primary)', textTransform: 'uppercase', margin: 0 }}>Operational Nodes *</h3>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 11, color: 'var(--nm-text-tertiary)', marginTop: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>MINIMUM 1 ACTIVE NODE REQUIRED</div>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 24, color: 'var(--nm-text-primary)', textTransform: 'uppercase', margin: 0 }}>Branches *</h3>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 11, color: 'var(--nm-text-tertiary)', marginTop: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>MINIMUM 1 ACTIVE BRANCH REQUIRED</div>
           </div>
           <button
             type="button" onClick={addBranch}
@@ -117,7 +117,7 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
               textTransform: 'uppercase' 
             }}
           >
-            <PlusCircle size={16} strokeWidth={3} /> Add Node
+            <PlusCircle size={16} strokeWidth={3} /> Add Branch
           </button>
         </div>
 
@@ -134,15 +134,15 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
             }}>
               <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 20 }}>
                 <div>
-                  <label style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>NODE DESIGNATION</label>
+                  <label style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>BRANCH NAME</label>
                   <input style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none', borderSize: '3px' }} value={branch.name} onChange={(e) => updateBranch(i, 'name', e.target.value)} placeholder="e.g. SECTOR_HQ" required />
                 </div>
                 <div>
-                  <label style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>SECTOR / CITY</label>
+                  <label style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>CITY</label>
                   <input style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none', borderSize: '3px' }} value={branch.city} onChange={(e) => updateBranch(i, 'city', e.target.value)} placeholder="e.g. LONDON" required />
                 </div>
                 <div>
-                  <label style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>GEOSPATIAL ADDRESS</label>
+                  <label style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>ADDRESS</label>
                   <input style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none', borderSize: '3px' }} value={branch.street} onChange={(e) => updateBranch(i, 'street', e.target.value)} placeholder="123 VECTOR ST" required />
                 </div>
               </div>
@@ -151,7 +151,7 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
                   type="button" onClick={() => removeBranch(i)}
                   className="nm-btn"
                   style={{ marginTop: 24, padding: '12px', background: 'var(--nm-error)', color: '#fff' }}
-                  title="TERMINATE NODE"
+                  title="REMOVE BRANCH"
                 >
                   <Trash2 size={18} strokeWidth={3} />
                 </button>
@@ -179,7 +179,7 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
           opacity: (saving || cooldownDaysLeft > 0) ? 0.7 : 1,
         }}
       >
-        {saving ? 'COMMITTING...' : cooldownDaysLeft > 0 ? `IDENTITY LOCKED [${cooldownDaysLeft} DAYS]` : isEditing ? 'COMMIT UPDATES →' : 'INITIALIZE UNIT →'}
+        {saving ? 'SAVING...' : cooldownDaysLeft > 0 ? `LOCKED [${cooldownDaysLeft} DAYS]` : isEditing ? 'SAVE PROFILE' : 'CREATE PROFILE'}
       </button>
     </form>
   );

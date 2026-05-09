@@ -98,7 +98,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
       <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
           <div>
-            <label style={LABEL}>Position Designation *</label>
+            <label style={LABEL}>Job Title *</label>
             <input
               style={INPUT}
               value={form.position}
@@ -110,7 +110,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
             />
           </div>
           <div>
-            <label style={LABEL}>Experience Threshold (Years)</label>
+            <label style={LABEL}>Minimum Experience (Years)</label>
             <input
               style={INPUT}
               type="number"
@@ -125,12 +125,12 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
         </div>
 
         <div>
-          <label style={LABEL}>Contextual Role Requirements</label>
+          <label style={LABEL}>Job Description</label>
           <textarea
             style={{ ...INPUT, minHeight: 140, resize: 'vertical' }}
             value={form.description}
             onChange={set('description')}
-            placeholder="Specify technical complexity, leadership expectations, and operational environment..."
+            placeholder="Describe the role, responsibilities, and key requirements..."
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
@@ -138,7 +138,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
           <div>
-            <label style={LABEL}>Technical Competencies <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+            <label style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(comma separated)</span></label>
             <input
               style={INPUT}
               value={form.technicalSkills}
@@ -149,7 +149,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
             />
           </div>
           <div>
-            <label style={LABEL}>Behavioral Traits <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+            <label style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(comma separated)</span></label>
             <input
               style={INPUT}
               value={form.softSkills}
@@ -163,7 +163,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
           <div>
-            <label style={LABEL}>Linguistic Proficiency <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+            <label style={LABEL}>Languages <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(comma separated)</span></label>
             <input
               style={INPUT}
               value={form.language}
@@ -174,7 +174,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
             />
           </div>
           <div>
-            <label style={LABEL}>Strategic Constraints</label>
+            <label style={LABEL}>Additional Requirements</label>
             <input
               style={INPUT}
               value={form.additionalNotes}
@@ -210,12 +210,12 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
           {loading ? (
             <>
               <Search className="animate-spin" size={28} strokeWidth={3} />
-              ANALYZING DATASETS...
+              SEARCHING...
             </>
           ) : (
             <>
               <Sparkles size={28} strokeWidth={2.5} />
-              ACTIVATE AI SCAN →
+              SEARCH CANDIDATES →
             </>
           )}
         </button>

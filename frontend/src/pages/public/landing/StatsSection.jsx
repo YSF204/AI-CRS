@@ -1,10 +1,10 @@
 import React from 'react';
 
 const stats = [
-  { value: '500+', label: 'CVs Built', icon: '◆' },
-  { value: '98%', label: 'ATS Pass Rate', icon: '◆' },
-  { value: '4', label: 'Developers', icon: '◆' },
-  { value: '2', label: 'AI Models', icon: '◆' },
+  { value: '10', label: 'ATS Templates', icon: '◆' },
+  { value: '4', label: 'AI Engines', icon: '◆' },
+  { value: '24/7', label: 'AI Support', icon: '◆' },
+  { value: 'Neo-Minimal', label: 'Design System', icon: '◆' },
 ];
 
 export default function StatsSection() {
@@ -20,8 +20,8 @@ export default function StatsSection() {
           padding: 'clamp(0.75rem, 1.5%, 1rem) 0',
         }}
       >
-        <div className="marquee-track inline-flex" style={{ gap: 'clamp(3rem, 6%, 4rem)' }}>
-          {[...Array(4)].map((_, rep) => (
+        <div className="marquee-track">
+          {[...Array(8)].map((_, rep) => (
             <React.Fragment key={rep}>
               {stats.map((s, i) => (
                 <span
@@ -62,7 +62,16 @@ export default function StatsSection() {
             style={{
               padding: 'clamp(3rem, 6%, 5rem) clamp(1rem, 2%, 2rem)',
               background: 'var(--nm-surface)',
-              transition: 'background-color 0.2s ease',
+              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              cursor: 'default'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--nm-bg)';
+              e.currentTarget.style.color = 'var(--nm-primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'var(--nm-surface)';
+              e.currentTarget.style.color = 'inherit';
             }}
           >
             <div
@@ -72,7 +81,7 @@ export default function StatsSection() {
                 fontWeight: 800,
                 lineHeight: 1,
                 marginBottom: '0.75rem',
-                color: 'var(--nm-text-primary)',
+                color: 'inherit',
                 letterSpacing: '-0.04em',
               }}
             >

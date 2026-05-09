@@ -117,7 +117,7 @@ export default function FindTalent() {
                transform: activeTab === 'search' ? 'translate(-2px, -2px)' : 'none'
              }}
            >
-             <Search size={20} strokeWidth={3} /> Primary Sync
+             <Search size={20} strokeWidth={3} /> TALENT SEARCH
            </button>
            <button
              onClick={fetchHistory}
@@ -141,7 +141,7 @@ export default function FindTalent() {
                transform: activeTab === 'history' ? 'translate(-2px, -2px)' : 'none'
              }}
            >
-             <Clock size={20} strokeWidth={3} /> Archive Logs
+             <Clock size={20} strokeWidth={3} /> SEARCH HISTORY
            </button>
         </div>
 

@@ -516,6 +516,17 @@ export const analyzeSection = catchAsync(async (req, res, next) => {
   }
 
   if (section === "fullCv") {
+    console.log("[CV Analysis] Received data summary:", {
+      summary: (data.summary || "").substring(0, 80) + "...",
+      experienceCount: (data.experience || []).length,
+      educationCount: (data.education || []).length,
+      technicalSkillsCount: (data.technicalSkills || []).length,
+      softSkillsCount: (data.softSkills || []).length,
+      languageCount: (data.language || []).length,
+      customSectionsCount: (data.customSections || []).length,
+      hasLinkedin: !!data.contact?.linkedin,
+      hasGithub: !!data.contact?.github,
+    });
     const normalized = normalizeEditorAnalysis(parsed);
 
     let atsResult = null;
@@ -537,6 +548,32 @@ export const analyzeSection = catchAsync(async (req, res, next) => {
       overallScore < 25 &&
       normalized.sections.length > 0 &&
       emptyCount >= Math.floor(normalized.sections.length * 0.6);
+
+    const toBulletText = (value) => (Array.isArray(value) ? value.join("\n• ") : value || "N/A");
+
+    if (data.cvId && atsResult) {
+      try {
+        await CVAnalysis.deleteMany({ CVId: data.cvId });
+        await CVAnalysis.create({
+          userId: req.user._id,
+          CVId: data.cvId,
+          atsScore: atsResult.overallScore,
+          strength: toBulletText(atsResult.topStrengths),
+          weakness: toBulletText(atsResult.topWeaknesses),
+          suggestion: toBulletText(atsResult.improvementSuggestions),
+          fullAnalysis: {
+            overallScore: atsResult.overallScore,
+            sections: atsResult.sections,
+            topStrengths: atsResult.topStrengths,
+            topWeaknesses: atsResult.topWeaknesses,
+            improvementSuggestions: atsResult.improvementSuggestions,
+            summary: atsResult.summary,
+          },
+        });
+      } catch (saveErr) {
+        console.error("Failed to save CV analysis:", saveErr.message);
+      }
+    }
 
     return res.status(200).json({
       success: true,

@@ -35,10 +35,10 @@ export default function ResultsOverlay({ results, onClose }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem', flexWrap: 'wrap', gap: 24 }}>
           <div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--nm-primary)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 8 }}>
-              Neural Match Logic v2.4
+              AI MATCHING ENGINE
             </div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(2.5rem, 6vw, 4rem)', color: 'var(--nm-text-primary)', textTransform: 'uppercase', letterSpacing: '-0.04em', lineHeight: 1, margin: 0 }}>
-              Primary Targets
+              MATCHING CANDIDATES
             </h2>
           </div>
           <div style={{

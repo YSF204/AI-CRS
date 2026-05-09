@@ -3,12 +3,32 @@ const MAX_CANDIDATES = 20;
 export const mapRankedCandidates = (allCvs, ranked) => {
     const cvMap = new Map(allCvs.map((cv) => [String(cv._id), cv]));
 
+    const getCandidateName = (cv) => {
+        const fullName = typeof cv.fullName === "string" ? cv.fullName.trim() : "";
+        if (fullName) return fullName;
+
+        const user = cv.userId;
+        if (user && typeof user === "object") {
+            const name = `${user.firstName || ""} ${user.lastName || ""}`.trim();
+            if (name) return name;
+        }
+
+        return "";
+    };
+
     return (ranked || [])
         .map((item) => {
             const cv = cvMap.get(String(item.cvId || ""));
             if (!cv) {
                 return null;
             }
+
+            const contact = {
+                email: cv.contact?.email || cv.userId?.email || "",
+                phone: cv.contact?.phone || "",
+                github: cv.contact?.github || "",
+                linkedin: cv.contact?.linkedin || "",
+            };
 
             return {
                 cvId: cv._id,
@@ -24,8 +44,9 @@ export const mapRankedCandidates = (allCvs, ranked) => {
                 skillsMatched: item.skillsMatched || [],
                 skillsMissing: item.skillsMissing || [],
                 profile: {
-                    name: cv.userId ? `${cv.userId.firstName} ${cv.userId.lastName}` : "Unknown",
-                    email: cv.userId?.email,
+                    name: getCandidateName(cv),
+                    email: contact.email,
+                    contact,
                     jobTitle: cv.jobTitle,
                     summary: cv.summary,
                     technicalSkills: cv.technicalSkills,

@@ -152,8 +152,6 @@ export default function useCVEditor() {
   };
 
   useEffect(() => {
-    sessionStorage.removeItem(`cv_analysis_${id}`);
-
     const normalizeMonth = (value) => {
       if (!value) return "";
       return /^\d{4}$/.test(value) ? `${value}-01` : value;
@@ -253,9 +251,9 @@ export default function useCVEditor() {
     analysisResult,
     highlights,
     analyzing,
+    analysisProgress,
     showSkillGap,
     setShowSkillGap,
-    staleAnalysis,
     handleAnalyze,
     handleAnalyzeSection,
     handleApplyAnalysis,
@@ -304,6 +302,38 @@ export default function useCVEditor() {
       showToast("error", err?.response?.data?.message || "Failed to save.");
     } finally {
       dispatch({ type: "SET_SAVING", payload: false });
+    }
+  };
+
+  const handleApplyAndSave = async (updatesToApply) => {
+    const appliedForm = handleApplyAnalysis(updatesToApply);
+
+    if (!appliedForm || id === "new") return;
+
+    try {
+      const activeSections = ui.activeSections;
+      const f = { ...appliedForm };
+      const sectionClearMap = {
+        summary: { jobTitle: "", summary: "" },
+        contact: { contact: { phone: "", email: "", github: "", linkedin: "" } },
+        address: { address: { city: "", street: "" } },
+        experience: { experience: [] },
+        education: { education: [] },
+        technicalSkills: { technicalSkills: [] },
+        softSkills: { softSkills: [] },
+        language: { language: [] },
+        customSections: { customSections: [] },
+      };
+      for (const [section, clear] of Object.entries(sectionClearMap)) {
+        if (!activeSections.includes(section)) Object.assign(f, clear);
+      }
+      f.layout = { ...(f.layout || {}), sectionOrder: activeSections };
+
+      const payload = buildPayload(f);
+      await api.patch(`/cvs/${id}`, payload);
+      showToast("success", "Changes applied & saved.");
+    } catch (err) {
+      showToast("error", "Applied but auto-save failed. Please save manually.");
     }
   };
 
@@ -423,12 +453,12 @@ export default function useCVEditor() {
     analysisResult,
     highlights,
     analyzing,
+    analysisProgress,
     showSkillGap,
     setShowSkillGap,
-    staleAnalysis,
     handleAnalyze,
     handleAnalyzeSection,
-    handleApplyAnalysis,
+    handleApplyAnalysis: handleApplyAndSave,
     handleSkillGapAnalysis,
     navigate,
   };

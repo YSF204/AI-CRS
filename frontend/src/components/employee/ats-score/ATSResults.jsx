@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp, ArrowLeft, CheckCircle2, AlertCircle, Lightbulb } from "lucide-react";
 
-export default function ATSResults({ result, onBack }) {
+export default function ATSResults({ result, onBack, onReanalyze }) {
   const [expandedSections, setExpandedSections] = useState({});
 
   const toggleSection = (section) => {
@@ -229,6 +229,9 @@ export default function ATSResults({ result, onBack }) {
 
       {/* CTA */}
       <div className="flex flex-col items-center gap-4 py-6">
+        <button onClick={onReanalyze} className="jd-btn jd-btn-secondary px-16 py-4 text-sm tracking-widest uppercase shadow-[6px_6px_0_var(--nm-ink)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
+          Re-analyze (Fresh)
+        </button>
         <button onClick={onBack} className="jd-btn jd-btn-primary px-16 py-4 text-sm tracking-widest uppercase shadow-[6px_6px_0_var(--nm-ink)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
           Analyze Another
         </button>

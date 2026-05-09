@@ -9,6 +9,7 @@ import {
   getApplicationById,
   updateApplication,
   updateApplicationStatus,
+  togglePotential,
   deleteApplication,
 } from "../controllers/applicationController.js";
 import { authenticate } from "../middleware/Auth.js";
@@ -31,6 +32,7 @@ applicationRouter.get("/my-applications", getMyApplications);
 applicationRouter.get("/employer/all", isEmployer, getEmployerApplications);
 applicationRouter.get("/employer/job/:jobId", isEmployer, getApplicationsByJob);
 applicationRouter.patch("/:id/status", isEmployer, updateApplicationStatus);
+applicationRouter.patch("/:id/potential", isEmployer, togglePotential);
 
 // Shared routes (after specific prefixes)
 applicationRouter.get("/:id", getApplicationById);

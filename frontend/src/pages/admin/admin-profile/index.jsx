@@ -115,6 +115,8 @@ export default function AdminProfile() {
         setMessage('');
         setError('');
 
+        const originalUser = { ...user };
+        
         try {
             const targetId = user.id || user._id;
             const payload = {
@@ -126,11 +128,16 @@ export default function AdminProfile() {
                 telephone: form.telephone ? [form.telephone] : [],
             };
 
+            // Optimistic Update
+            updateUserState({ ...user, ...payload });
+
             const res = await api.patch(`/admin/users/${targetId}`, payload);
             updateUserState(res.data.data.user);
             setMessage('Account details updated successfully.');
         } catch (err) {
             setError(err.response?.data?.message || 'Unable to update your admin profile.');
+            // Revert
+            updateUserState(originalUser);
         } finally {
             setSaving(false);
         }

@@ -13,7 +13,7 @@ export default function SearchHistory({ history, historyLoading, onSelectRecord 
           textAlign: 'center',
           textTransform: 'uppercase',
           letterSpacing: '0.1em'
-        }}>Syncing Intelligence Cache...</div>
+        }}>LOADING SEARCH HISTORY...</div>
       ) : history.length === 0 ? (
         <div style={{
           background: 'var(--nm-surface)',
@@ -25,7 +25,7 @@ export default function SearchHistory({ history, historyLoading, onSelectRecord 
         }}>
           <Clock size={48} strokeWidth={2.5} style={{ margin: '0 auto 24px', opacity: 0.5 }} />
           <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 18, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            No Search Logs Identified
+            No Search History Found
           </div>
         </div>
       ) : (
@@ -68,7 +68,7 @@ export default function SearchHistory({ history, historyLoading, onSelectRecord 
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em'
               }}>
-                {new Date(record.createdAt).toLocaleDateString()} • {record.candidate.length} Neural Matches
+                {new Date(record.createdAt).toLocaleDateString()} • {record.candidate.length} Matches Found
               </div>
             </div>
             <div style={{

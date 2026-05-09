@@ -1,6 +1,7 @@
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import CV from "../models/CV.js";
+import CVAnalysis from "../models/CVAnalysis.js";
 import Application from "../models/Application.js";
 import Job from "../models/Job.js";
 import Employer from "../models/Employer.js";
@@ -80,7 +81,7 @@ export const applyForJob = catchAsync(async (req, res, next) => {
 //    ANALYZE CV FOR ATS SCORE        //
 // ================================== //
 export const analyzeAtsScore = catchAsync(async (req, res, next) => {
-  const { cvId } = req.body;
+  const { cvId, forceRefresh } = req.body;
   const userId = req.user._id;
 
   if (!cvId) {
@@ -96,8 +97,45 @@ export const analyzeAtsScore = catchAsync(async (req, res, next) => {
     return next(new AppError("You are not authorized to analyze this CV", 403));
   }
 
+  if (!forceRefresh) {
+    const cached = await CVAnalysis.findOne({ CVId: cvId, fullAnalysis: { $ne: null } })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    if (cached && cached.fullAnalysis) {
+      return res.status(200).json({
+        success: true,
+        data: {
+          ...cached.fullAnalysis,
+          cvUpdatedAt: cv.updatedAt,
+          cvId: cv._id,
+        },
+      });
+    }
+  }
+
   try {
     const normalized = await runUnifiedATSScoring(cv);
+
+    const toBulletText = (value) => (Array.isArray(value) ? value.join("\n• ") : value || "N/A");
+
+    await CVAnalysis.deleteMany({ CVId: cv._id });
+    await CVAnalysis.create({
+      userId,
+      CVId: cv._id,
+      atsScore: normalized.overallScore,
+      strength: toBulletText(normalized.topStrengths),
+      weakness: toBulletText(normalized.topWeaknesses),
+      suggestion: toBulletText(normalized.improvementSuggestions),
+      fullAnalysis: {
+        overallScore: normalized.overallScore,
+        sections: normalized.sections,
+        topStrengths: normalized.topStrengths,
+        topWeaknesses: normalized.topWeaknesses,
+        improvementSuggestions: normalized.improvementSuggestions,
+        summary: normalized.summary,
+      },
+    });
 
     res.status(200).json({
       success: true,
@@ -411,6 +449,29 @@ export const updateApplication = catchAsync(async (req, res, next) => {
     success: true,
     message: "Application updated successfully",
     data: { application },
+  });
+});
+
+// ================================== //
+//   TOGGLE POTENTIAL STATUS          //
+// ================================== //
+export const togglePotential = catchAsync(async (req, res, next) => {
+  const application = await Application.findById(req.params.id);
+  if (!application) return next(new AppError("Application not found", 404));
+
+  // Check if employer is authorized
+  const employer = await Employer.findOne({ userId: req.user._id });
+  if (!employer || application.employerId.toString() !== employer._id.toString()) {
+    return next(new AppError("Not authorized to update this application", 403));
+  }
+
+  application.isPotential = !application.isPotential;
+  await application.save();
+
+  res.status(200).json({
+    success: true,
+    message: application.isPotential ? "Added to potential list" : "Removed from potential list",
+    data: { isPotential: application.isPotential },
   });
 });
 

@@ -99,7 +99,7 @@ export default function CompanyProfile() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: 'var(--nm-bg)', color: 'var(--nm-text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Accessing Organizational Data...</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Loading Profile...</div>
       </div>
     );
   }
@@ -137,7 +137,7 @@ export default function CompanyProfile() {
               lineHeight: 1,
               margin: 0
             }}>
-              {isEditing ? 'Unit Identity' : 'Initialize Unit'}
+              {isEditing ? 'Company Profile' : 'Create Profile'}
             </h1>
           </div>
           <p style={{ 
@@ -149,8 +149,8 @@ export default function CompanyProfile() {
             lineHeight: 1.6
           }}>
             {isEditing 
-              ? 'Update operational parameters for the primary organizational unit.' 
-              : 'Initial synchronization required. Establish corporate identity to enable listing deployment.'}
+              ? 'Update your organization details and branch information.' 
+              : 'Create your company profile to start posting job listings.'}
           </p>
 
           {error && (

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Mail, Phone, Briefcase, Calendar } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, Briefcase, Calendar, Check, X, Star } from 'lucide-react';
 
 function DetailRow({ icon, label, value }) {
   return (
@@ -23,7 +23,14 @@ function DetailRow({ icon, label, value }) {
   );
 }
 
-export default function ApplicantDetail({ app, onClose, showBackButton = true, showMatchScore = true }) {
+export default function ApplicantDetail({ 
+  app, 
+  onClose, 
+  showBackButton = true, 
+  showMatchScore = true,
+  onStatusChange,
+  onTogglePotential 
+}) {
   const applicant = app.applicantInfo || {};
   const statusColor = app.status === 'accepted' ? 'var(--nm-success)' : app.status === 'rejected' ? 'var(--nm-error)' : 'var(--nm-warning)';
 
@@ -128,6 +135,83 @@ export default function ApplicantDetail({ app, onClose, showBackButton = true, s
             </div>
           </div>
         )}
+
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 24, paddingTop: 24, borderTop: '4px solid var(--nm-ink)' }}>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <button
+              onClick={() => onStatusChange?.('accepted')}
+              className="nm-btn"
+              style={{
+                flex: 1,
+                padding: '12px',
+                background: 'var(--nm-success)',
+                color: '#fff',
+                fontFamily: 'var(--font-display)',
+                fontWeight: 900,
+                fontSize: 12,
+                textTransform: 'uppercase',
+                border: '3px solid var(--nm-ink)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                opacity: app.status === 'accepted' ? 0.5 : 1,
+                cursor: app.status === 'accepted' ? 'default' : 'pointer'
+              }}
+              disabled={app.status === 'accepted'}
+            >
+              <Check size={16} strokeWidth={3} /> Accept
+            </button>
+            <button
+              onClick={() => onStatusChange?.('rejected')}
+              className="nm-btn"
+              style={{
+                flex: 1,
+                padding: '12px',
+                background: 'var(--nm-error)',
+                color: '#fff',
+                fontFamily: 'var(--font-display)',
+                fontWeight: 900,
+                fontSize: 12,
+                textTransform: 'uppercase',
+                border: '3px solid var(--nm-ink)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                opacity: app.status === 'rejected' ? 0.5 : 1,
+                cursor: app.status === 'rejected' ? 'default' : 'pointer'
+              }}
+              disabled={app.status === 'rejected'}
+            >
+              <X size={16} strokeWidth={3} /> Reject
+            </button>
+          </div>
+          
+          <button
+            onClick={() => onTogglePotential?.()}
+            className="nm-btn"
+            style={{
+              width: '100%',
+              padding: '12px',
+              background: app.isPotential ? 'var(--nm-warning)' : 'var(--nm-surface)',
+              color: app.isPotential ? '#000' : 'var(--nm-text-primary)',
+              fontFamily: 'var(--font-display)',
+              fontWeight: 900,
+              fontSize: 12,
+              textTransform: 'uppercase',
+              border: '3px solid var(--nm-ink)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8
+            }}
+          >
+            <Star size={16} strokeWidth={3} fill={app.isPotential ? 'currentColor' : 'none'} />
+            {app.isPotential ? 'In Potential List' : 'Add to Potential List'}
+          </button>
+        </div>
       </div>
 
       {showBackButton && onClose && (

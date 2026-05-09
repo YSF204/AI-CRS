@@ -22,9 +22,9 @@ export default function SectionCard({
       />
       <div
         style={{
-          maxHeight: collapsed ? 0 : 4000,
+          maxHeight: collapsed ? 0 : 1200,
           overflow: "hidden",
-          transition: "max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+          transition: "max-height 0.3s ease-out",
           background: "var(--nm-bg)",
         }}
       >

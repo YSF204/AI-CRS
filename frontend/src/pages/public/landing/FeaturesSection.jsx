@@ -1,4 +1,4 @@
-import { FileText, Brain, Zap, TrendingUp, Shield } from 'lucide-react';
+import { FileText, Brain, Zap, Shield } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 
 const features = [
@@ -21,16 +21,10 @@ const features = [
     color: 'var(--nm-success)',
   },
   {
-    Icon: TrendingUp,
-    title: 'Career Path AI',
-    description: 'Personalized career trajectories based on your experience and industry trends. Plan your next 5 years with confidence.',
-    color: 'var(--nm-primary)',
-  },
-  {
     Icon: Shield,
     title: 'Secure & Private',
     description: 'Your data stays encrypted end-to-end. We never share your information with third parties. Your career data belongs to you.',
-    color: 'var(--nm-text-secondary)',
+    color: 'var(--nm-ink)',
   },
 ];
 
@@ -85,9 +79,8 @@ export default function FeaturesSection() {
 
       {/* Feature cards grid */}
       <div
-        className="grid w-full max-w-7xl mx-auto"
+        className="grid w-full max-w-5xl mx-auto grid-cols-1 md:grid-cols-2"
         style={{
-          gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(280px, 30vw, 380px), 1fr))',
           gap: '2.5rem',
         }}
       >
@@ -101,9 +94,18 @@ export default function FeaturesSection() {
               display: 'flex',
               flexDirection: 'column',
               gap: '1.5rem',
-              transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+              transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
               background: 'var(--nm-surface)',
-              boxShadow: '8px 8px 0 var(--nm-ink)'
+              boxShadow: '8px 8px 0 var(--nm-ink)',
+              cursor: 'default'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translate(-4px, -4px)';
+              e.currentTarget.style.boxShadow = '12px 12px 0 var(--nm-ink)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translate(0, 0)';
+              e.currentTarget.style.boxShadow = '8px 8px 0 var(--nm-ink)';
             }}
           >
             {/* Icon */}

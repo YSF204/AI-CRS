@@ -245,5 +245,25 @@
       transition: none;
     }
   }
+
+  /* ═════════════════════════════════════════════════════════════════════
+     ANIMATION UTILITIES
+     ═════════════════════════════════════════════════════════════════════ */
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .marquee-track {
+    display: inline-flex;
+    white-space: nowrap;
+    animation: marquee 40s linear infinite;
+    will-change: transform;
+  }
+
+  .marquee-track:hover {
+    animation-play-state: paused;
+  }
 }
 

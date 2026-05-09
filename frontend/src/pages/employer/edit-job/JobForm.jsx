@@ -33,7 +33,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
       
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={LABEL}>Position Designation *</label>
+          <label style={LABEL}>Job Title *</label>
           <input 
             style={INPUT} 
             value={form.position} 
@@ -45,7 +45,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={LABEL}>Role Specification *</label>
+          <label style={LABEL}>Description *</label>
           <textarea 
             style={{ ...INPUT, minHeight: 180, resize: 'vertical', lineHeight: 1.7 }} 
             value={form.description} 
@@ -57,7 +57,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div>
-          <label style={LABEL}>Workspace Configuration *</label>
+          <label style={LABEL}>Work Mode *</label>
           <select 
             style={{ ...INPUT, cursor: 'pointer' }} 
             value={form.workSite} 
@@ -73,7 +73,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div>
-          <label style={LABEL}>Temporal Commitment *</label>
+          <label style={LABEL}>Job Type *</label>
           <select 
             style={{ ...INPUT, cursor: 'pointer' }} 
             value={form.workDuration} 
@@ -90,7 +90,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div>
-          <label style={LABEL}>Experience Threshold (Y) *</label>
+          <label style={LABEL}>Experience Required (Y) *</label>
           <input 
             style={INPUT} 
             type="number" 
@@ -104,7 +104,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div>
-          <label style={LABEL}>Base Remuneration ($/YR)</label>
+          <label style={LABEL}>Salary ($/YR)</label>
           <input 
             style={INPUT} 
             type="number" 
@@ -118,7 +118,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={LABEL}>Technical Competencies <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+          <label style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
           <input 
             style={INPUT} 
             value={form.technicalSkills} 
@@ -130,7 +130,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={LABEL}>Operational Traits <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+          <label style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
           <input 
             style={INPUT} 
             value={form.softSkills} 
@@ -159,7 +159,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
           cursor: saving ? 'not-allowed' : 'pointer',
         }}
       >
-        {saving ? 'UPDATING...' : 'COMMIT CHANGES →'}
+        {saving ? 'SAVING...' : 'SAVE CHANGES'}
       </button>
     </form>
   );

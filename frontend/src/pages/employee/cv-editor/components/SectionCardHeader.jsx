@@ -7,15 +7,15 @@ export default function SectionCardHeader({
   collapsed,
   onToggleCollapse,
   onRemove,
-  onAnalyzeSection,
 }) {
   const meta = getSectionMeta(sectionKey);
   const Icon = meta.icon;
 
   return (
     <div
-      className="flex items-center gap-3 px-5 py-4 border-b-4 border-[var(--nm-ink)]"
+      className="flex items-center gap-3 px-5 py-4 border-b-4 border-[var(--nm-ink)] cursor-pointer select-none transition-colors hover:brightness-95"
       style={{ background: meta.accent }}
+      onClick={onToggleCollapse}
     >
       <div
         style={{
@@ -24,6 +24,7 @@ export default function SectionCardHeader({
           display: "flex",
           alignItems: "center",
         }}
+        onClick={(e) => e.stopPropagation()}
       >
         <GripVertical size={18} color={meta.textColor} strokeWidth={2.5} />
       </div>
@@ -35,12 +36,17 @@ export default function SectionCardHeader({
         {meta.label}
       </span>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
 
         <button
           type="button"
-          onClick={onToggleCollapse}
-          title={collapsed ? "EXPAND_SECTION" : "COLLAPSE_SECTION"}
+          draggable={false}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleCollapse();
+          }}
+          title={collapsed ? "Expand Section" : "Collapse Section"}
           className="nm-btn"
           style={{
             padding: "6px",
@@ -62,6 +68,8 @@ export default function SectionCardHeader({
         </button>
         <button
           type="button"
+          draggable={false}
+          onMouseDown={(e) => e.stopPropagation()}
           onClick={onRemove}
           className="nm-btn"
           style={{

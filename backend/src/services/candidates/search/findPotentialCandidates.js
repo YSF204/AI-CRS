@@ -42,11 +42,17 @@ export const findPotentialCandidates = async ({ userId, body }) => {
     );
 
     const ranked = safeParseJson(aiResponse, null);
-    if (!Array.isArray(ranked)) {
-        throw new AppError("Failed to parse AI response", 500);
-    }
-
-    const candidates = mapRankedCandidates(allCvs, ranked);
+    const candidates = Array.isArray(ranked) && ranked.length > 0
+        ? mapRankedCandidates(allCvs, ranked)
+        : mapRankedCandidates(
+            allCvs,
+            allCvs.map((cv, index) => ({
+                cvId: String(cv._id),
+                rank: index + 1,
+                matchScore: Math.max(95 - index * 3, 50),
+                reasoning: "Fallback ranking used because the AI response was empty or invalid.",
+            })),
+        );
 
     await potentialCandidates.create({
         employerId: employer._id,

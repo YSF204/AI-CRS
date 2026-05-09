@@ -32,7 +32,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
         <div>
-          <label style={LABEL}>Position Title *</label>
+          <label style={LABEL}>Job Title *</label>
           <input 
             style={INPUT} 
             value={form.position} 
@@ -44,7 +44,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
           />
         </div>
         <div>
-          <label style={LABEL}>Base Remuneration ($/YR) *</label>
+          <label style={LABEL}>Salary ($/YR) *</label>
           <input 
             style={INPUT} 
             type="number" 
@@ -59,7 +59,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
       </div>
 
       <div>
-        <label style={LABEL}>Role Specification *</label>
+        <label style={LABEL}>Description *</label>
         <textarea 
           style={{ ...INPUT, minHeight: 180, resize: 'vertical', lineHeight: 1.7 }} 
           value={form.description} 
@@ -73,7 +73,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32 }}>
         <div>
-          <label style={LABEL}>Workspace Configuration *</label>
+          <label style={LABEL}>Work Mode *</label>
           <select 
             style={{ ...INPUT, cursor: 'pointer' }} 
             value={form.workSite} 
@@ -87,7 +87,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
           </select>
         </div>
         <div>
-          <label style={LABEL}>Temporal Commitment *</label>
+          <label style={LABEL}>Job Type *</label>
           <select 
             style={{ ...INPUT, cursor: 'pointer' }} 
             value={form.workDuration} 
@@ -102,7 +102,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
           </select>
         </div>
         <div>
-          <label style={LABEL}>Exp. Threshold (Y) *</label>
+          <label style={LABEL}>Experience Required (Y) *</label>
           <input 
             style={INPUT} 
             type="number" 
@@ -119,7 +119,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
         <div>
-          <label style={LABEL}>Technical Competencies <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+          <label style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
           <input 
             style={INPUT} 
             value={form.technicalSkills} 
@@ -130,7 +130,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
           />
         </div>
         <div>
-          <label style={LABEL}>Operational Traits <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+          <label style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
           <input 
             style={INPUT} 
             value={form.softSkills} 
@@ -159,7 +159,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
           cursor: loading ? 'not-allowed' : 'pointer',
         }}
       >
-        {loading ? 'PUBLISHING...' : 'CONFIRM DEPLOYMENT →'}
+        {loading ? 'POSTING...' : 'POST JOB'}
       </button>
     </form>
   );

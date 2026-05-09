@@ -54,7 +54,7 @@ export const analyzeUploadedCvFile = async ({ filePath, userId, jobDescription }
             jobTitle: cvData.jobTitle || "Uploaded CV",
             summary: cvData.summary || "Extracted from uploaded PDF",
             contact: cvData.contact || {},
-            address: cvData.address || { city: "N/A", street: "N/A" },
+            address: cvData.address || { city: "N/A", country: "N/A" },
             experience: scrubbedExperience,
             education: scrubbedEducation,
             technicalSkills: cvData.technicalSkills || [],

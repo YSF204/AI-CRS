@@ -66,6 +66,47 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
     setDetailError(null);
   };
 
+  const handleStatusChange = async (appId, newStatus) => {
+    const originalDetail = applicationDetail ? { ...applicationDetail } : null;
+    
+    // Optimistic update
+    if (applicationDetail?._id === appId) {
+      setApplicationDetail(prev => ({ ...prev, status: newStatus }));
+    }
+
+    try {
+      await api.patch(`/applications/${appId}/status`, { status: newStatus });
+    } catch (err) {
+      console.error(err);
+      // Revert
+      if (originalDetail?._id === appId) {
+        setApplicationDetail(originalDetail);
+      }
+      alert("Failed to update status. Please try again.");
+    }
+  };
+
+  const handleTogglePotential = async (appId) => {
+    const originalDetail = applicationDetail ? { ...applicationDetail } : null;
+    const nextPotential = !applicationDetail?.isPotential;
+
+    // Optimistic update
+    if (applicationDetail?._id === appId) {
+      setApplicationDetail(prev => ({ ...prev, isPotential: nextPotential }));
+    }
+
+    try {
+      await api.patch(`/applications/${appId}/potential`);
+    } catch (err) {
+      console.error(err);
+      // Revert
+      if (originalDetail?._id === appId) {
+        setApplicationDetail(originalDetail);
+      }
+      alert("Failed to update potential list. Please try again.");
+    }
+  };
+
   const handleDelete = async () => {
     setDeleting(true);
     try {
@@ -578,6 +619,8 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
                               onClose={undefined}
                               showBackButton={false}
                               showMatchScore={false}
+                              onStatusChange={(s) => handleStatusChange(applicationDetail._id, s)}
+                              onTogglePotential={() => handleTogglePotential(applicationDetail._id)}
                             />
                           </div>
                           <div style={{ padding: "16px 20px" }}>

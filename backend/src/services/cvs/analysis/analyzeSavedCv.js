@@ -20,7 +20,7 @@ export const buildCvDataForATS = (cv) => ({
   },
   address: {
     city: cv.address?.city || "",
-    street: cv.address?.street || "",
+    country: cv.address?.country || "",
   },
   experience: (cv.experience || []).map((e) => ({
     position: e.position || "",

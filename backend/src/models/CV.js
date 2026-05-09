@@ -52,7 +52,7 @@ const cvSchema = new mongoose.Schema(
         trim: true,
         default: "",
       },
-      street: {
+      country: {
         type: String,
         trim: true,
         default: "",

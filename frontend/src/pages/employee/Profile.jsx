@@ -40,12 +40,19 @@ export default function Profile() {
   }, [refreshUser]);
 
   const handleSaveProfile = async (updatedData) => {
+    const originalUser = { ...user };
     setError('');
+
+    // Optimistic Update
+    updateUserState({ ...user, ...updatedData });
+
     try {
       const res = await api.patch('/users/updateMe', updatedData);
       updateUserState(res.data?.data?.user);
     } catch (err) {
       setError(err.response?.data?.message || 'Unable to update profile.');
+      // Revert
+      updateUserState(originalUser);
     }
   };
 
