@@ -53,9 +53,6 @@ export default function ApplicationDetails({
 
           <div className="mb-10">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-[var(--nm-ink)] flex items-center justify-center text-white flex-shrink-0">
-                <span className="text-2xl">👁️</span>
-              </div>
               <div>
                 <h3 className="font-black uppercase text-sm tracking-tight leading-none mb-1 text-[var(--nm-text-primary)]">
                   Intelligence Analysis

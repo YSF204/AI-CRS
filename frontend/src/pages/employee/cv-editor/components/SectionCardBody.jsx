@@ -33,6 +33,9 @@ export default function SectionCardBody({ sectionKey, form, handlers }) {
     addCustomItem,
     removeCustomItem,
     updateCustomItem,
+    addCustomLink,
+    removeCustomLink,
+    updateCustomLink,
   } = handlers;
 
   switch (sectionKey) {
@@ -50,58 +53,103 @@ export default function SectionCardBody({ sectionKey, form, handlers }) {
 
     case "contact":
       return (
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            {
-              label: "Phone",
-              key: "phone",
-              placeholder: "+1 (555) 000-0000",
-            },
-            {
-              label: "Email",
-              key: "email",
-              placeholder: "you@example.com",
-            },
-            {
-              label: "LinkedIn",
-              key: "linkedin",
-              placeholder: "linkedin.com/in/username",
-            },
-            {
-              label: "GitHub",
-              key: "github",
-              placeholder: "github.com/username",
-            },
-          ].map(({ label, key, placeholder }) => (
-            <Field key={key} label={label}>
-              <input
-                className={inpCls}
-                value={form.contact[key]}
-                onChange={handlers.setContact(key)}
-                placeholder={placeholder}
-              />
-            </Field>
-          ))}
+        <div>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              {
+                label: "Phone",
+                key: "phone",
+                placeholder: "+1 (555) 000-0000",
+              },
+              {
+                label: "Email",
+                key: "email",
+                placeholder: "you@example.com",
+              },
+              {
+                label: "LinkedIn",
+                key: "linkedin",
+                placeholder: "linkedin.com/in/username",
+              },
+              {
+                label: "GitHub",
+                key: "github",
+                placeholder: "github.com/username",
+              },
+            ].map(({ label, key, placeholder }) => (
+              <Field key={key} label={label}>
+                <input
+                  className={inpCls}
+                  value={form.contact[key]}
+                  onChange={handlers.setContact(key)}
+                  placeholder={placeholder}
+                />
+              </Field>
+            ))}
+          </div>
+
+          <div className="mt-4">
+            <label className="font-mono text-[11px] uppercase font-bold tracking-widest text-[var(--nm-text-primary)] mb-2 block">
+              Custom Links
+            </label>
+            <div className="flex flex-col gap-2">
+              {(form.contact.customLinks || []).map((link, i) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <select
+                    className={inpCls}
+                    value={link.icon || "globe"}
+                    onChange={(e) => updateCustomLink(i, "icon", e.target.value)}
+                  >
+                    <option value="globe">Website</option>
+                    <option value="twitter">X (Twitter)</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="facebook">Facebook</option>
+                  </select>
+                  <input
+                    className={inpCls}
+                    value={link.url}
+                    onChange={(e) => updateCustomLink(i, "url", e.target.value)}
+                    placeholder="URL (https://...)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeCustomLink(i)}
+                    className="text-red-500 hover:text-red-700 p-1"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addCustomLink}
+                className="flex items-center justify-center gap-1.5 w-full py-2 border-2 border-dashed border-[var(--border-color)] text-[var(--fg-muted)] font-mono text-[10px] font-bold uppercase tracking-wider hover:border-[var(--fg)] hover:text-[var(--fg)] transition-colors"
+              >
+                <Plus size={11} /> Add Custom Link
+              </button>
+            </div>
+          </div>
         </div>
       );
 
     case "address":
       return (
         <div className="grid grid-cols-2 gap-3">
+          <Field label="Country">
+            <input
+              className={inpCls}
+              value={form.address.country}
+              onChange={handlers.setAddress("country")}
+              placeholder="e.g. United States"
+            />
+          </Field>
           <Field label="City">
             <input
               className={inpCls}
               value={form.address.city}
               onChange={handlers.setAddress("city")}
-              placeholder="San Francisco"
-            />
-          </Field>
-          <Field label="Street">
-            <input
-              className={inpCls}
-              value={form.address.street}
-              onChange={handlers.setAddress("street")}
-              placeholder="42 Market St"
+              placeholder="e.g. San Francisco"
             />
           </Field>
         </div>

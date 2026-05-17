@@ -1,4 +1,5 @@
 import React from "react";
+import { getSocialName } from "./SocialIcons";
 
 const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
@@ -30,6 +31,17 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
   }
   if (cvData.contact?.linkedin) contactItems.push(cvData.contact.linkedin);
   if (cvData.contact?.github) contactItems.push(cvData.contact.github);
+  if (cvData.contact?.customLinks) {
+    cvData.contact.customLinks.forEach(link => {
+      if (link.url) {
+        contactItems.push(
+          <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+            {getSocialName(link.icon)}
+          </a>
+        );
+      }
+    });
+  }
 
   const SectionHeader = ({ title }) => (
     <h2 className="text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-2 border-b-[1px] border-gray-400 pb-1">

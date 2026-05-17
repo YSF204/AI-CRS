@@ -23,7 +23,9 @@ Return exactly this JSON structure:
     "summary": "extracted or suggested professional summary",
     "contact": {
       "phone": "extracted phone or empty string",
-      "email": "extracted email or empty string"
+      "email": "extracted email or empty string",
+      "linkedin": "extracted LinkedIn URL or empty string",
+      "github": "extracted GitHub URL or empty string"
     },
     "address": {
       "city": "extracted city or empty string",

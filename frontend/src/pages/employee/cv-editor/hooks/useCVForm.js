@@ -12,8 +12,8 @@ const INITIAL_FORM = {
   fullName: "",
   jobTitle: "",
   summary: "",
-  contact: { phone: "", email: "", github: "", linkedin: "" },
-  address: { city: "", street: "" },
+  contact: { phone: "", email: "", github: "", linkedin: "", customLinks: [] },
+  address: { country: "", city: "" },
   experience: [],
   education: [],
   technicalSkills: [],
@@ -108,6 +108,37 @@ export default function useCVForm(showToast, autoSaveFunction = null, user = nul
     triggerAutoSave();
   }, [triggerAutoSave]);
 
+  const addCustomLink = () => {
+    setForm((f) => ({
+      ...f,
+      contact: {
+        ...f.contact,
+        customLinks: [...(f.contact.customLinks || []), { label: "", url: "", icon: "globe" }]
+      }
+    }));
+    triggerAutoSave();
+  };
+
+  const removeCustomLink = (i) => {
+    setForm((f) => ({
+      ...f,
+      contact: {
+        ...f.contact,
+        customLinks: f.contact.customLinks.filter((_, idx) => idx !== i)
+      }
+    }));
+    triggerAutoSave();
+  };
+
+  const updateCustomLink = (i, field, val) => {
+    setForm((f) => {
+      const a = [...(f.contact.customLinks || [])];
+      a[i] = { ...a[i], [field]: val };
+      return { ...f, contact: { ...f.contact, customLinks: a } };
+    });
+    triggerAutoSave();
+  };
+
   const fetchSuggestions = useCallback(async (field, context = {}) => {
     setIsLoadingSuggestions((prev) => ({ ...prev, [field]: true }));
     try {
@@ -182,7 +213,7 @@ export default function useCVForm(showToast, autoSaveFunction = null, user = nul
     const sectionClearMap = {
       summary: { jobTitle: "", summary: "" },
       contact: { contact: { phone: "", email: "", github: "", linkedin: "" } },
-      address: { address: { city: "", street: "" } },
+      address: { address: { country: "", city: "" } },
       experience: { experience: [] },
       education: { education: [] },
       technicalSkills: { technicalSkills: [] },
@@ -222,6 +253,9 @@ export default function useCVForm(showToast, autoSaveFunction = null, user = nul
     removeCustomItem,
     updateCustomItem,
     updateField,
+    addCustomLink,
+    removeCustomLink,
+    updateCustomLink,
     suggestions,
     isLoadingSuggestions,
     fetchSuggestions: debouncedFetchSuggestions,

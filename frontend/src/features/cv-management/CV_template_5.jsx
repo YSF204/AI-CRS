@@ -1,4 +1,5 @@
 import React from "react";
+import { getSocialIcon, getSocialName } from "./SocialIcons";
 
 const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highlights = {} }) => {
   if (!cvData) return null;
@@ -127,7 +128,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
         )}
 
         {/* LINKS */}
-        {(cvData.contact?.linkedin || cvData.contact?.github) && (
+        {(cvData.contact?.linkedin || cvData.contact?.github || (cvData.contact?.customLinks && cvData.contact.customLinks.length > 0)) && (
           <div className="mb-4">
             <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               Links
@@ -159,6 +160,20 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
                   </a>
                 </div>
               )}
+              {(cvData.contact.customLinks || []).map((link, i) => (
+                link.url && (
+                  <div key={i}>
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-white hover:text-gray-300 underline break-all"
+                    >
+                      {getSocialName(link.icon)}
+                    </a>
+                  </div>
+                )
+              ))}
             </div>
           </div>
         )}

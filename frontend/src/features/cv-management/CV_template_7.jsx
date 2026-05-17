@@ -1,4 +1,5 @@
 import React from "react";
+import { getSocialIcon, getSocialName } from "./SocialIcons";
 
 const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
@@ -30,6 +31,17 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
   }
   if (cvData.contact?.linkedin) contactItems.push(cvData.contact.linkedin);
   if (cvData.contact?.github) contactItems.push(cvData.contact.github);
+  if (cvData.contact?.customLinks) {
+    cvData.contact.customLinks.forEach(link => {
+      if (link.url) {
+        contactItems.push(
+          <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+            {getSocialName(link.icon)}
+          </a>
+        );
+      }
+    });
+  }
 
   const SectionHeader = ({ title }) => (
     <div className="my-3">
@@ -215,17 +227,16 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                       >
                         <div className="text-xs md:text-sm text-gray-800 mb-0.5">
                           <span className="font-bold">
-                            {item.link ? (
+                            <span>{item.name}</span>
+                            {item.link && (
                               <a
                                 href={item.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline"
+                                className="ml-1 text-gray-500 hover:text-gray-700"
                               >
-                                {item.name}
+                                <svg className="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                               </a>
-                            ) : (
-                              item.name
                             )}
                           </span>
                           {dur && <span> | {dur}</span>}

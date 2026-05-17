@@ -283,10 +283,6 @@ export default function useCVEditor() {
   }, [ui.activeSections, ui.cv?.templateId, form.profileImage]);
 
   const handleSave = async () => {
-    if (id === "new" && !isComplete()) {
-      showToast("error", "Please complete all required fields before saving your CV.");
-      return;
-    }
     dispatch({ type: "SET_SAVING", payload: true });
     try {
       const payload = buildPayload(filteredFormData());

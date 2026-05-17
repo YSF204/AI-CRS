@@ -25,10 +25,10 @@ export default function Sidebar({
         {sidebarOpen && (
           <div className="px-5 flex-1 overflow-hidden">
             <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--nm-text-tertiary)] whitespace-nowrap font-bold opacity-70">
-              Block Registry
+              CV Editor
             </p>
             <p className="font-[var(--font-display)] font-black text-[11px] mt-0.5 whitespace-nowrap uppercase tracking-wider text-[var(--nm-text-primary)]">
-              AVAILABLE MODULES
+              Available Sections
             </p>
           </div>
         )}
@@ -134,7 +134,7 @@ export default function Sidebar({
             <span className="font-black text-[var(--nm-text-primary)]">
               {activeSections.length}
             </span>{" "}
-            / {ALL_SECTIONS.length} ACTIVE BLOCKS
+            / {ALL_SECTIONS.length} Active Sections
           </p>
         </div>
       )}

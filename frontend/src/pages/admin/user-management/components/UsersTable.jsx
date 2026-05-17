@@ -105,7 +105,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
                     fontSize: 'var(--text-sm)',
                     color: 'var(--nm-text-primary)'
                   }}>
-                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
                   </div>
                 </td>
                 <td>

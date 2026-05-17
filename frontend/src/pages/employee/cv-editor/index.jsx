@@ -318,7 +318,7 @@ export default function CVEditor() {
                   marginRight: "auto",
                 }}
               >
-                Template Configuration Matrix
+                Select Template
               </span>
               <button
                 onClick={() => setShowTemplateSelector(false)}
@@ -333,7 +333,7 @@ export default function CVEditor() {
                   textTransform: "uppercase",
                 }}
               >
-                Abort
+                Exit
               </button>
             </div>
 
@@ -344,7 +344,7 @@ export default function CVEditor() {
                 overflowY: "auto",
                 padding: "32px",
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
+                gridTemplateColumns: "repeat(3, 1fr)",
                 gap: "24px",
                 scrollbarWidth: "thin",
               }}
@@ -385,16 +385,26 @@ export default function CVEditor() {
                   <div
                     style={{
                       width: "100%",
-                      height: "140px",
-                      background: "var(--nm-bg)",
+                      height: "400px",
+                      background: "#fff",
                       border: "3px solid var(--nm-ink)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "40px",
+                      overflow: "hidden",
+                      position: "relative",
                     }}
                   >
-                    {tmpl.id === 1 ? "📄" : tmpl.id === 5 ? "👤" : "📝"}
+                    <div style={{
+                      transform: "scale(0.35)",
+                      transformOrigin: "top left",
+                      width: "794px",
+                      height: "1123px",
+                      position: "absolute",
+                      top: 0,
+                      left: "calc(50% - 138.95px)",
+                      pointerEvents: "none",
+                      userSelect: "none",
+                    }}>
+                      <tmpl.component userName={userName} cvData={filteredFormData()} />
+                    </div>
                   </div>
                   <span
                     style={{
@@ -433,11 +443,10 @@ export default function CVEditor() {
         >
           <div className="nm-card bg-[var(--nm-bg)] p-8 max-w-md w-full mx-4 flex flex-col gap-6">
             <h3 className="font-[var(--font-display)] font-black text-xl uppercase tracking-tight">
-              ABORT SEQUENCE?
+              Unsaved Changes
             </h3>
             <p className="font-mono text-xs text-[var(--nm-text-secondary)] uppercase font-bold leading-relaxed">
-              Your CV data has not been fully committed to the central database. 
-              Discarding now will result in permanent loss of progress.
+              Your CV data has not been saved. Leaving now will result in loss of progress.
             </p>
             <div className="flex flex-col gap-3 mt-2">
               <button

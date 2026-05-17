@@ -8,38 +8,38 @@ const JobDiscoveryState = ({ type, title, description, action, onAction }) => {
         return {
           icon: Loader2,
           iconProps: { className: "animate-spin" },
-          defaultTitle: "SYNCHRONIZING_MATRIX",
-          defaultDescription: "Fetching available positions from the central database..."
+          defaultTitle: "Loading Jobs",
+          defaultDescription: "Fetching available jobs..."
         };
       case "error":
         return {
           icon: AlertCircle,
-          defaultTitle: "CRITICAL_SYSTEM_ERROR",
-          defaultDescription: "The job retrieval protocol encountered an unexpected anomaly."
+          defaultTitle: "Error",
+          defaultDescription: "Failed to load jobs. Please try again."
         };
       case "empty":
         return {
           icon: Search,
-          defaultTitle: "ZERO_MATCHES_DETECTED",
-          defaultDescription: "No available positions align with your current search parameters."
+          defaultTitle: "No Jobs Found",
+          defaultDescription: "Try adjusting your search filters."
         };
       case "no-results":
         return {
           icon: Inbox,
-          defaultTitle: "EMPTY_RESULT_SET",
-          defaultDescription: "The matching engine has exhausted all available possibilities."
+          defaultTitle: "No Results",
+          defaultDescription: "No jobs match your criteria."
         };
       case "no-cv":
         return {
           icon: FileText,
-          defaultTitle: "ASSET_MISSING",
-          defaultDescription: "Upload a CV profile to initialize the personalized matching engine."
+          defaultTitle: "CV Missing",
+          defaultDescription: "Upload a CV to see jobs that match your skills."
         };
       default:
         return {
           icon: Inbox,
-          defaultTitle: "NULL_STATE",
-          defaultDescription: "No data available in the current context."
+          defaultTitle: "No Data",
+          defaultDescription: "No information available."
         };
     }
   };

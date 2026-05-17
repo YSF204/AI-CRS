@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import logoExpanded from '../../assets/LOGO 1.svg';
+import logoCollapsed from '../../assets/LOGO2.svg';
 import './DashboardNav.css';
 
 export default function DashboardNav({ role = 'employee' }) {
@@ -49,7 +51,7 @@ export default function DashboardNav({ role = 'employee' }) {
     } else {
       document.body.classList.remove('sidebar-open');
       // Force CSS variable update for immediate effect
-      document.documentElement.style.setProperty('--sidebar-width', '5rem');
+      document.documentElement.style.setProperty('--sidebar-width', 'calc(5rem + 10px)');
     }
 
     return () => {
@@ -153,9 +155,13 @@ export default function DashboardNav({ role = 'employee' }) {
       </button>
 
       <aside className="jd-sidebar">
-        <div className="jd-sidebar-header">
-          <Link to={config.baseLink} className="jd-sidebar-brand" style={{ textDecoration: 'none' }}>
-            <span className="jd-sidebar-brand-text">AI-CRS</span>
+        <div className="jd-sidebar-header" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Link to={config.baseLink} className="jd-sidebar-brand" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+            {isOpen ? (
+              <img src={logoExpanded} alt="Logo" style={{ height: '64px', width: 'auto' }} />
+            ) : (
+              <img src={logoCollapsed} alt="Logo" style={{ height: '64px', width: 'auto' }} />
+            )}
           </Link>
         </div>
         <button

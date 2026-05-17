@@ -67,7 +67,7 @@ export default function CVTemplates() {
                   letterSpacing: "0.05em",
                 }}
               >
-                {TEMPLATES.length} Configuration Blueprints — Select Matrix to Initialize
+                Choose a template to get started.
               </p>
             </div>
 
@@ -87,7 +87,7 @@ export default function CVTemplates() {
               }}
             >
               <Layers size={14} strokeWidth={2.5} />
-              <span>{TEMPLATES.length} Vectors</span>
+              <span>{TEMPLATES.length} Templates</span>
             </div>
           </div>
 
@@ -149,7 +149,7 @@ export default function CVTemplates() {
             textTransform: "uppercase",
           }}
         >
-          Initialize generation sequence by selecting a target blueprint
+          Select a template to start building your CV.
         </div>
 
       </div>

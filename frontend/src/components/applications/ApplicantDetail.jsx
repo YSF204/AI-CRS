@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowLeft, Mail, Phone, Briefcase, Calendar, Check, X, Star } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, Briefcase, Calendar, Check, X, Star, Loader } from 'lucide-react';
 
 function DetailRow({ icon, label, value }) {
   return (
@@ -29,7 +29,8 @@ export default function ApplicantDetail({
   showBackButton = true, 
   showMatchScore = true,
   onStatusChange,
-  onTogglePotential 
+  onTogglePotential,
+  isToggling = false
 }) {
   const applicant = app.applicantInfo || {};
   const statusColor = app.status === 'accepted' ? 'var(--nm-success)' : app.status === 'rejected' ? 'var(--nm-error)' : 'var(--nm-warning)';
@@ -192,6 +193,7 @@ export default function ApplicantDetail({
           <button
             onClick={() => onTogglePotential?.()}
             className="nm-btn"
+            disabled={isToggling}
             style={{
               width: '100%',
               padding: '12px',
@@ -205,10 +207,16 @@ export default function ApplicantDetail({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 8
+              gap: 8,
+              opacity: isToggling ? 0.7 : 1,
+              cursor: isToggling ? 'wait' : 'pointer'
             }}
           >
-            <Star size={16} strokeWidth={3} fill={app.isPotential ? 'currentColor' : 'none'} />
+            {isToggling ? (
+              <Loader size={16} className="animate-spin" />
+            ) : (
+              <Star size={16} strokeWidth={3} fill={app.isPotential ? 'currentColor' : 'none'} />
+            )}
             {app.isPotential ? 'In Potential List' : 'Add to Potential List'}
           </button>
         </div>

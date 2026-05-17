@@ -237,10 +237,10 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
       }
 
       const msg = isEdit
-        ? "✅ Application updated!"
+        ? "Application updated!"
         : skipAnalysis
-          ? "✅ Application submitted instantly!"
-          : "✅ Application submitted successfully!";
+          ? "Application submitted instantly!"
+          : "Application submitted successfully!";
       showToastNotice(msg);
       setTimeout(() => {
         if (onCloseFn) onCloseFn();
