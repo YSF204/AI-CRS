@@ -1,4 +1,6 @@
 import fs from "fs";
+import os from "os";
+import path from "path";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import {
@@ -19,6 +21,8 @@ import { generateAIMatchAnalysis } from "../services/matching/matchingService.js
 import { runUnifiedATSScoring, buildCvDataForATS } from "../services/cvs/analysis/analyzeSavedCv.js";
 import { normalizeEditorAnalysis, normalizeATSScore } from "../services/cvs/analysis/normalizeScore.js";
 import parseAiJsonResponse from "../services/cvs/helpers/parseAiJsonResponse.js";
+import crypto from "crypto";
+import { supabase, SUPABASE_BUCKET } from "../config/supabase.js";
 
 const verifyOwnership = (cv, userId) => {
   if (cv.userId.toString() !== userId.toString()) {
@@ -219,19 +223,43 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
 
   const { jobDescription } = req.body;
 
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "ai-crs-cv-"));
+  const tempFilePath = path.join(tempDir, `${crypto.randomBytes(8).toString("hex")}.pdf`);
+  fs.writeFileSync(tempFilePath, req.file.buffer);
+
+  const supabaseFileName = `${req.user._id}-${Date.now()}-${crypto.randomBytes(6).toString("hex")}.pdf`;
+  const supabaseFilePath = `cvs/${supabaseFileName}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from(SUPABASE_BUCKET)
+    .upload(supabaseFilePath, req.file.buffer, {
+      contentType: req.file.mimetype || "application/pdf",
+      upsert: true,
+    });
+
+  if (uploadError) {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+    return next(new AppError(`Failed to upload CV PDF: ${uploadError.message}`, 500));
+  }
+
+  const { data: publicData } = supabase.storage
+    .from(SUPABASE_BUCKET)
+    .getPublicUrl(supabaseFilePath);
+  const pdfUrl = publicData?.publicUrl || "";
+
   let aiResult;
   try {
-    aiResult = await analyzeCVFromFile(req.file.path, jobDescription);
+    aiResult = await analyzeCVFromFile(tempFilePath, jobDescription);
   } catch (error) {
     console.error("AI file analysis error:", error);
-    fs.unlinkSync(req.file.path);
+    fs.rmSync(tempDir, { recursive: true, force: true });
     return next(
       new AppError("Unable to analyze PDF file, please try again", 500),
     );
   }
 
   if (!aiResult) {
-    fs.unlinkSync(req.file.path);
+    fs.rmSync(tempDir, { recursive: true, force: true });
     return next(
       new AppError("No response from AI analysis, please try again", 500),
     );
@@ -331,12 +359,12 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
     suggestion: str(analysisData.suggestions),
   });
 
-  fs.unlinkSync(req.file.path);
+  fs.rmSync(tempDir, { recursive: true, force: true });
 
   res.status(201).json({
     success: true,
     message: "CV extracted and analyzed successfully",
-    data: { cv, analysis },
+    data: { cv, analysis, pdfUrl },
   });
 });
 

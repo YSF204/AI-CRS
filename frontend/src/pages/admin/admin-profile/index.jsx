@@ -46,9 +46,10 @@ export default function AdminProfile() {
         return value || 'Administrator';
     }, [form.firstName, form.lastName]);
 
+    const safeSplit = (value, separator = ' ') => String(value || '').split(separator);
+
     const initials = useMemo(() => {
-        return fullName
-            .split(' ')
+        return safeSplit(fullName)
             .map((part) => part[0])
             .slice(0, 2)
             .join('')
@@ -115,7 +116,7 @@ export default function AdminProfile() {
         setError('');
 
         const originalUser = { ...user };
-        
+
         try {
             const targetId = user.id || user._id;
             const payload = {

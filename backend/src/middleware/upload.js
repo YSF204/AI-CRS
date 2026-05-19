@@ -6,21 +6,6 @@ const ALLOWED_PDF_MIME_TYPES = new Set(["application/pdf"]);
 const ALLOWED_PDF_EXTENSIONS = new Set([".pdf"]);
 
 // ================================== //
-//     MULTER STORAGE CONFIG          //
-// ================================== //
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "src/uploads/cv");
-  },
-  filename: (req, file, cb) => {
-    // userId-timestamp.extension
-    const ext = path.extname(file.originalname);
-    cb(null, `${req.user._id}-${Date.now()}${ext}`);
-  },
-});
-
-// ================================== //
 //     FILE FILTER ( PDF ONLY )       //
 // ================================== //
 
@@ -41,7 +26,7 @@ const fileFilter = (req, file, cb) => {
 // ================================== //
 
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5 MB max

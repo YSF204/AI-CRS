@@ -110,23 +110,23 @@ export default function useCVEditor() {
     showToast,
     id !== "new"
       ? async (formData) => {
-          try {
-            const visibleSections = {};
-            ui.activeSections.forEach((k) => { visibleSections[k] = true; });
-            const payload = {
-              ...formData,
-              experience: formData.experience.map((e) => ({ ...e })),
-              education: formData.education.map((e) => ({ ...e })),
-              customSections: formData.customSections
-                .filter((s) => s.title?.trim() || (s.items && s.items.length > 0))
-                .map((s) => ({ ...s, items: s.items.map((it) => ({ ...it })) })),
-              layout: { sectionOrder: [...ui.activeSections], visibleSections },
-            };
-            await api.patch(`/cvs/${id}`, payload);
-          } catch (err) {
-            console.error("Auto-save failed:", err);
-          }
+        try {
+          const visibleSections = {};
+          ui.activeSections.forEach((k) => { visibleSections[k] = true; });
+          const payload = {
+            ...formData,
+            experience: formData.experience.map((e) => ({ ...e })),
+            education: formData.education.map((e) => ({ ...e })),
+            customSections: formData.customSections
+              .filter((s) => s.title?.trim() || (s.items && s.items.length > 0))
+              .map((s) => ({ ...s, items: s.items.map((it) => ({ ...it })) })),
+            layout: { sectionOrder: [...ui.activeSections], visibleSections },
+          };
+          await api.patch(`/cvs/${id}`, payload);
+        } catch (err) {
+          console.error("Auto-save failed:", err);
         }
+      }
       : null,
     user,
   );
@@ -154,7 +154,27 @@ export default function useCVEditor() {
   useEffect(() => {
     const normalizeMonth = (value) => {
       if (!value) return "";
-      return /^\d{4}$/.test(value) ? `${value}-01` : value;
+
+      const stringValue = String(value).trim();
+
+      if (/^\d{4}-\d{2}$/.test(stringValue)) {
+        return stringValue;
+      }
+
+      if (/^\d{2}\/\d{4}$/.test(stringValue)) {
+        const [month, year] = stringValue.split("/");
+        return `${year}-${month}`;
+      }
+
+      if (/^\d{4}$/.test(stringValue)) {
+        return `${stringValue}-01`;
+      }
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(stringValue)) {
+        return stringValue.slice(0, 7);
+      }
+
+      return stringValue;
     };
 
     const load = async () => {

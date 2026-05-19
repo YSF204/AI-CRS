@@ -12,10 +12,10 @@ export default function ProfileHeader({ user }) {
   const { updateUserState } = useAuth();
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const safeSplit = (value, separator = ' ') => String(value || '').split(separator);
 
   const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
-  const initials = (fullName || user?.email || 'U')
-    .split(' ')
+  const initials = safeSplit(fullName || user?.email || 'U')
     .map((w) => w[0])
     .slice(0, 2)
     .join('')
