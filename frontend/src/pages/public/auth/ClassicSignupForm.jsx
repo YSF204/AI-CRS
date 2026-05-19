@@ -56,9 +56,8 @@ export default function ClassicSignupForm() {
   const [form, setForm] = useState(EMPTY_FORM);
   const advanceRef = useRef(null);
 
-  // Track phone and email duplicate validity from child components
+  // Track phone validity from child components
   const [phoneValid, setPhoneValid] = useState(true);
-  const [emailDuplicate, setEmailDuplicate] = useState(false);
 
   const validationData = {
     ...form,
@@ -113,8 +112,7 @@ export default function ClassicSignupForm() {
           form.email.trim() &&
           !errors.firstName &&
           !errors.lastName &&
-          !errors.email &&
-          !emailDuplicate
+          !errors.email
         );
       case 2: {
         // Phone: if they typed something, it must be exactly 10 digits
@@ -154,7 +152,6 @@ export default function ClassicSignupForm() {
       branchStreet: "",
     }));
     setPhoneValid(true);
-    setEmailDuplicate(false);
     setTimeout(() => advanceRef.current?.(), 0); // defer so state update is committed first
   };
 
@@ -224,7 +221,7 @@ export default function ClassicSignupForm() {
     <PersonalStep
       key="personal"
       field={field}
-      onEmailDuplicateStatus={(isDuplicate) => setEmailDuplicate(isDuplicate)}
+      onEmailDuplicateStatus={() => {}}
     />,
     <ProfileStep
       key="profile"

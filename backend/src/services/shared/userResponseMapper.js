@@ -9,6 +9,8 @@ export const mapUserResponse = (user) => ({
     telephone: user.telephone,
     accountStatus: user.accountStatus,
     profilePic: user.profilePic,
+    isEmailVerified: user.isEmailVerified,
+    authProvider: user.authProvider,
 });
 
 export default {

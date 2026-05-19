@@ -9,6 +9,13 @@ import multer from "multer";
 import path from "path";
 import { delCache } from "../utils/redisHelper.js";
 
+const ALLOWED_PROFILE_IMAGE_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
+const ALLOWED_PROFILE_IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp"]);
+
 // ================================== //
 //  PROFILE PICTURE UPLOAD CONFIG     //
 // ================================== //
@@ -24,10 +31,14 @@ const profileStorage = multer.diskStorage({
 });
 
 const profileFileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
+  const extension = path.extname(file.originalname || "").toLowerCase();
+  const isAllowedMime = ALLOWED_PROFILE_IMAGE_MIME_TYPES.includes(file.mimetype);
+  const isAllowedExtension = ALLOWED_PROFILE_IMAGE_EXTENSIONS.has(extension);
+
+  if (isAllowedMime && isAllowedExtension) {
     cb(null, true);
   } else {
-    cb(new AppError("Only image files are allowed", 400), false);
+    cb(new AppError("Only JPG, PNG, and WebP images are allowed", 400), false);
   }
 };
 
@@ -72,8 +83,6 @@ export const updateMe = catchAsync(async (req, res, next) => {
 export const deleteMe = catchAsync(async (req, res, next) => {
   await requestDelete({
     userId: req.user.id,
-    protocol: req.protocol,
-    host: req.get("host"),
   });
 
   res.status(200).json({

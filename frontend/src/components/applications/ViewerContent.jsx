@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import api from "../../services/api";
 import { getTemplateById } from "../../features/cv-management";
+import { API_ORIGIN } from "../../utils/apiConfig";
 
 const A4_W = 794;
 const A4_H = 1123;
@@ -8,13 +8,7 @@ const A4_H = 1123;
 const buildFileUrl = (cvFile) => {
   if (!cvFile?.path) return null;
   const cleaned = cvFile.path.replace(/^src\//, "");
-  const origin =
-    typeof window !== "undefined"
-      ? `${window.location.protocol}//${window.location.hostname}:${window.location.port || "5173"}`
-      : "";
-  const apiBase = api.defaults.baseURL?.replace(/\/api$/, "") || "";
-  const base = apiBase || origin;
-  return `${base}/${cleaned}`;
+  return `${API_ORIGIN}/${cleaned}`;
 };
 
 const Section = ({ title, icon, children }) => (

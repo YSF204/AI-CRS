@@ -14,7 +14,9 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
 
     try {
       await api.post("/auth/resend-verification-email", { email });
-      setResendMessage("✓ Verification email sent! Check your inbox.");
+      setResendMessage(
+        "If your account still needs verification, a fresh email is on the way.",
+      );
     } catch (err) {
       setResendError(
         err.response?.data?.message ||
@@ -53,8 +55,8 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
               background: "var(--nm-primary)",
               padding: 20,
               marginBottom: 32,
-              border: '4px solid var(--nm-ink)',
-              boxShadow: '4px 4px 0 var(--nm-ink)',
+              border: "4px solid var(--nm-ink)",
+              boxShadow: "4px 4px 0 var(--nm-ink)",
             }}
           >
             <Mail size={48} color="#fff" strokeWidth={2.5} />
@@ -68,8 +70,8 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
               color: "var(--nm-text-primary)",
               textAlign: "center",
               marginBottom: 16,
-              textTransform: 'uppercase',
-              letterSpacing: '-0.03em',
+              textTransform: "uppercase",
+              letterSpacing: "-0.03em",
             }}
           >
             Check Your Email
@@ -85,7 +87,7 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
               lineHeight: 1.6,
             }}
           >
-            We've sent a verification link to:
+            We&apos;ve sent a verification link to:
           </p>
 
           <p
@@ -97,9 +99,9 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
               textAlign: "center",
               marginBottom: 32,
               wordBreak: "break-all",
-              textDecoration: 'underline',
-              textDecorationColor: 'var(--nm-primary)',
-              textDecorationThickness: '3px',
+              textDecoration: "underline",
+              textDecorationColor: "var(--nm-primary)",
+              textDecorationThickness: "3px",
             }}
           >
             {email}
@@ -174,7 +176,9 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
                 gap: 10,
               }}
             >
-              {resendLoading && <Loader size={18} className="animate-spin" strokeWidth={2.5} />}
+              {resendLoading && (
+                <Loader size={18} className="animate-spin" strokeWidth={2.5} />
+              )}
               {resendLoading ? "Sending..." : "Resend Verification Email"}
             </button>
 

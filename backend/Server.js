@@ -8,6 +8,7 @@ import hpp from "hpp";
 import mongoSanitize from "express-mongo-sanitize";
 import connectDB from "./src/config/dbConnect.js";
 import { initRedis } from "./src/config/redis.js";
+import { getAllowedOrigins } from "./src/config/security.js";
 
 const envPath = path.resolve(process.cwd(), ".env");
 dotenv.config({ path: envPath });
@@ -32,6 +33,7 @@ import suggestionRouter from "./src/routes/suggestionRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const allowedOrigins = getAllowedOrigins();
 
 app.use(
   helmet({
@@ -40,18 +42,32 @@ app.use(
       useDefaults: true,
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        "frame-ancestors": [
-          "'self'",
-          "http://localhost:5173",
-          "http://127.0.0.1:5173",
-        ],
+        "frame-ancestors": ["'self'", ...allowedOrigins],
       },
     },
   })
 );
 
-app.use(cors({ origin: true, credentials: true }));
-app.use("/uploads", express.static(path.join(process.cwd(), "src", "uploads")));
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("CORS origin not allowed"));
+    },
+    credentials: true,
+  }),
+);
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "src", "uploads"), {
+    dotfiles: "ignore",
+    fallthrough: false,
+    index: false,
+  }),
+);
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(mongoSanitize());

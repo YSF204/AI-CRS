@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { User, Mail, Briefcase, MapPin, Camera } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { toApiAssetUrl } from '../../utils/apiConfig';
 
 /**
  * ProfileHeader — displays the user's avatar (initials or photo), name, role,
@@ -21,9 +22,7 @@ export default function ProfileHeader({ user }) {
     .toUpperCase();
 
   const profilePicUrl = user?.profilePic
-    ? (user.profilePic.startsWith('http')
-      ? user.profilePic
-      : `http://localhost:3001${user.profilePic}`)
+    ? toApiAssetUrl(user.profilePic)
     : null;
 
   const handleCameraClick = () => {
@@ -90,7 +89,7 @@ export default function ProfileHeader({ user }) {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />

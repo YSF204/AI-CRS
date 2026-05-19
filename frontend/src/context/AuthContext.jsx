@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
+import { clearStoredToken, getStoredToken, setStoredToken } from '../utils/authStorage';
 
 const AuthContext = createContext(null);
 
@@ -16,7 +17,7 @@ export function AuthProvider({ children }) {
       // Do NOT log out on 429 (rate-limited), 5xx, or network errors —
       // those are transient and should not destroy the session.
       if (err.response?.status === 401) {
-        localStorage.removeItem('token');
+        clearStoredToken();
         setUser(null);
       }
     } finally {
@@ -25,7 +26,7 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = getStoredToken();
     if (token) {
       fetchUser(token);
     } else {
@@ -34,12 +35,12 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = (token, userData) => {
-    localStorage.setItem('token', token);
+    setStoredToken(token);
     setUser(userData);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
+    clearStoredToken();
     setUser(null);
   };
 

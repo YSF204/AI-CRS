@@ -2,8 +2,9 @@ import User from "../../../models/User.js";
 import AppError from "../../../utils/appError.js";
 import sendEmail from "../../../utils/email.js";
 import { buildDeleteConfirmationEmail } from "../../shared/emailTemplateService.js";
+import { getTrustedBackendUrl } from "../../../config/security.js";
 
-export const requestAccountDeletion = async ({ userId, protocol, host }) => {
+export const requestAccountDeletion = async ({ userId }) => {
     const user = await User.findById(userId);
     if (!user) {
         throw new AppError("User not found", 404);
@@ -12,7 +13,7 @@ export const requestAccountDeletion = async ({ userId, protocol, host }) => {
     const deleteToken = user.createDeleteToken();
     await user.save({ validateBeforeSave: false });
 
-    const deleteURL = `${protocol}://${host}/api/v1/users/confirmDelete/${deleteToken}`;
+    const deleteURL = `${getTrustedBackendUrl()}/api/users/confirmDelete/${deleteToken}`;
 
     try {
         const template = buildDeleteConfirmationEmail({

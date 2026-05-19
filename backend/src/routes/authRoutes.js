@@ -9,7 +9,6 @@ import {
   updatePassword,
   verifyEmail,
   resendVerificationEmail,
-  checkEmail,
 } from "../controllers/authController.js";
 import { googleAuth, googleRegister, googleCompleteProfile } from "../controllers/OauthController.js";
 import { authenticate } from "../middleware/Auth.js";
@@ -27,9 +26,6 @@ router.patch("/updatePassword", authenticate, updatePassword);
 // FIX #1: Email verification routes
 router.get("/verify-email/:token", verifyEmail);
 router.post("/resend-verification-email", resendVerificationEmail);
-
-// Email duplicate check (used by signup form on blur)
-router.get("/check-email", checkEmail);
 
 // Google OAuth routes
 router.post("/google", googleAuth);
