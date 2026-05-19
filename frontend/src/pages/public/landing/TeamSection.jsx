@@ -1,13 +1,14 @@
 import React from 'react';
 import { Code2, Brain, Server, Layout } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
+import YousefImage from '../../../assets/Yousef.png';
 
 const team = [
   {
     name: 'Yousef AL Bakri',
     role: 'Full Stack Developer',
     initials: 'YA',
-    image: '/src/assets/Yousef.png',
+    image: YousefImage,
     bio: 'Passionate full stack developer with experience in modern web technologies. Designed the platform architecture and AI integration pipeline.',
     skills: ['React', 'Node.js', 'MongoDB', 'OpenAI API'],
     Icon: Code2,
@@ -60,8 +61,8 @@ export default function TeamSection() {
         className="text-center"
         style={{ padding: 'clamp(5rem, 10%, 8rem) clamp(1.5rem, 5%, 4rem) 0' }}
       >
-        <span 
-          className="nm-status-pill active" 
+        <span
+          className="nm-status-pill active"
           style={{ marginBottom: '1.25rem', borderWidth: '4px' }}
         >
           The Crew
@@ -136,9 +137,9 @@ export default function TeamSection() {
                     }}
                   >
                     {member.image ? (
-                      <img 
-                        src={member.image} 
-                        alt={member.name} 
+                      <img
+                        src={member.image}
+                        alt={member.name}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     ) : (
@@ -161,10 +162,10 @@ export default function TeamSection() {
                       {member.name}
                     </h3>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '0.5rem' }}>
-                      <div 
-                        style={{ 
-                          padding: '0.25rem 0.75rem', 
-                          background: member.accent, 
+                      <div
+                        style={{
+                          padding: '0.25rem 0.75rem',
+                          background: member.accent,
                           color: '#fff',
                           fontFamily: 'var(--font-display)',
                           fontSize: '0.75rem',
