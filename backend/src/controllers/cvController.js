@@ -22,7 +22,7 @@ import { runUnifiedATSScoring, buildCvDataForATS } from "../services/cvs/analysi
 import { normalizeEditorAnalysis, normalizeATSScore } from "../services/cvs/analysis/normalizeScore.js";
 import parseAiJsonResponse from "../services/cvs/helpers/parseAiJsonResponse.js";
 import crypto from "crypto";
-import { supabase, SUPABASE_BUCKET } from "../config/supabase.js";
+import { getSupabaseClient, SUPABASE_BUCKET } from "../config/supabase.js";
 
 const verifyOwnership = (cv, userId) => {
   if (cv.userId.toString() !== userId.toString()) {
@@ -229,6 +229,7 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
 
   const supabaseFileName = `${req.user._id}-${Date.now()}-${crypto.randomBytes(6).toString("hex")}.pdf`;
   const supabaseFilePath = `cvs/${supabaseFileName}`;
+  const supabase = getSupabaseClient();
 
   const { error: uploadError } = await supabase.storage
     .from(SUPABASE_BUCKET)

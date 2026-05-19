@@ -9,7 +9,7 @@ import multer from "multer";
 import path from "path";
 import crypto from "crypto";
 import { delCache } from "../utils/redisHelper.js";
-import { supabase, SUPABASE_BUCKET } from "../config/supabase.js";
+import { getSupabaseClient, SUPABASE_BUCKET } from "../config/supabase.js";
 
 const ALLOWED_PROFILE_IMAGE_MIME_TYPES = [
   "image/jpeg",
@@ -106,6 +106,7 @@ export const uploadProfilePicture = catchAsync(async (req, res, next) => {
   const extension = path.extname(req.file.originalname || ".jpg") || ".jpg";
   const fileName = `${req.user._id}-${Date.now()}-${crypto.randomBytes(6).toString("hex")}${extension}`;
   const filePath = `profile/${fileName}`;
+  const supabase = getSupabaseClient();
 
   const { error: uploadError } = await supabase.storage
     .from(SUPABASE_BUCKET)
