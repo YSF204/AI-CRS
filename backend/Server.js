@@ -35,6 +35,9 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const allowedOrigins = getAllowedOrigins();
 
+// Render sits behind a proxy, so trust one hop for correct client IPs.
+app.set("trust proxy", 1);
+
 app.use(
   helmet({
     crossOriginResourcePolicy: false,
