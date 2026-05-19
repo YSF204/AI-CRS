@@ -45,7 +45,7 @@ const errorHandler = (err, req, res, next) => {
   if (process.env.NODE_ENV === "development") {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === "production") {
-    const error = normalizeProductionError({ ...err });
+    const error = normalizeProductionError(err);
     sendErrorProd(error, res);
   }
 };
