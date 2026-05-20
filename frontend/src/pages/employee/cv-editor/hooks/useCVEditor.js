@@ -402,8 +402,26 @@ export default function useCVEditor() {
         if (s.outline && s.outline.includes("dashed")) { s.outline = ""; s.outlineOffset = ""; s.backgroundColor = ""; s.borderRadius = ""; }
       });
       clone.querySelectorAll(".break-inside-avoid").forEach((node) => node.classList.remove("break-inside-avoid"));
-      const styles = Array.from(document.querySelectorAll("style")).map((s) => s.outerHTML).join("\n");
-      const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8">${styles}<style>html,body{margin:0;padding:0;background:#fff!important}*{print-color-adjust:exact;-webkit-print-color-adjust:exact;box-shadow:none!important;text-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;filter:none!important;animation:none!important;transition:none!important;will-change:auto!important}[style*="dashed"]{outline:none!important;background:transparent!important}</style></head><body><div style="width:794px;margin:0 auto;background:#fff">${clone.innerHTML}</div></body></html>`;
+      
+      const styleTags = Array.from(document.querySelectorAll("style")).map((s) => s.outerHTML).join("\n");
+      
+      const linkElements = Array.from(document.querySelectorAll("link[rel='stylesheet']"));
+      const linkStylesheets = await Promise.all(
+        linkElements.map(async (link) => {
+          try {
+            const res = await fetch(link.href);
+            const css = await res.text();
+            return `<style>${css}</style>`;
+          } catch (e) {
+            console.error("Failed to fetch stylesheet", link.href);
+            return "";
+          }
+        })
+      );
+      
+      const allStyles = styleTags + "\n" + linkStylesheets.join("\n");
+      
+      const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8">${allStyles}<style>html,body{margin:0;padding:0;background:#fff!important}*{print-color-adjust:exact;-webkit-print-color-adjust:exact;box-shadow:none!important;text-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;filter:none!important;animation:none!important;transition:none!important;will-change:auto!important}[style*="dashed"]{outline:none!important;background:transparent!important}</style></head><body><div style="width:794px;margin:0 auto;background:#fff">${clone.innerHTML}</div></body></html>`;
       const res = await api.post(`/cvs/${id}/download-pdf`, { html: htmlContent }, { responseType: "blob" });
       const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
       const a = document.createElement("a");
