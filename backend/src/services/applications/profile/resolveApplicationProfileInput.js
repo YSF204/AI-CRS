@@ -1,5 +1,6 @@
 import CV from "../../../models/CV.js";
 import { analyzeApplicationCV } from "../../../integrations/ai/openai.js";
+import { resolveUploadedFilePath } from "../../../utils/resolveUploadedFilePath.js";
 import { assertCvOwnership } from "../../shared/ownershipService.js";
 import {
     mapExistingCvToNormalizedProfile,
@@ -59,8 +60,13 @@ export const resolveApplicationProfileInput = async ({ user, body, file, jobDesc
         isManualApplication = false;
 
         if (!shouldSkipAnalysis(skipAnalysis)) {
-            const aiRaw = await analyzeApplicationCV(file.path, jobDescription || "");
-            parsedPdfAnalysis = normalizeAiApplicationAnalysis(aiRaw);
+            const { filePath, cleanup } = await resolveUploadedFilePath(file);
+            try {
+                const aiRaw = await analyzeApplicationCV(filePath, jobDescription || "");
+                parsedPdfAnalysis = normalizeAiApplicationAnalysis(aiRaw);
+            } finally {
+                if (cleanup) await cleanup();
+            }
         }
     }
 

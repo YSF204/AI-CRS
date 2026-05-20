@@ -32,9 +32,11 @@ export default function Applications() {
     data: applications = [],
     loading,
     error,
+    refetch,
+    setData: setApplications,
   } = useFetch(
     async () => {
-      const res = await api.get("/applications/my-applications");
+      const res = await api.get("/applications/my-applications", { __noCache: true });
       return res.data?.data?.applications || [];
     },
     { initialData: [] },
@@ -65,6 +67,7 @@ export default function Applications() {
   const handleCloseModal = () => {
     setEditJobId(null);
     setEditAppId(null);
+    refetch();
   };
 
   const handleDeleteApplication = (app) => {
@@ -78,6 +81,7 @@ export default function Applications() {
     try {
       await api.delete(`/applications/${app._id}`);
       setLocalDeleted((prev) => new Set([...prev, app._id]));
+      setApplications((prev = []) => prev.filter((item) => item._id !== app._id));
       if (selectedApp?._id === app._id) setSelectedApp(null);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to delete application.");
@@ -195,11 +199,10 @@ export default function Applications() {
                 onClick={() =>
                   updateParam("status", opt.value === "all" ? "" : opt.value)
                 }
-                className={`px-4 py-2 text-xs font-bold uppercase tracking-tight border-2 transition-all ${
-                  statusFilter === opt.value
-                    ? "bg-[var(--nm-ink)] text-white border-[var(--nm-ink)]"
-                    : "bg-[var(--nm-surface)] text-[var(--nm-text-primary)] border-[var(--nm-ink)]/10 hover:border-[var(--nm-ink)]"
-                }`}
+                className={`px-4 py-2 text-xs font-bold uppercase tracking-tight border-2 transition-all ${statusFilter === opt.value
+                  ? "bg-[var(--nm-ink)] text-white border-[var(--nm-ink)]"
+                  : "bg-[var(--nm-surface)] text-[var(--nm-text-primary)] border-[var(--nm-ink)]/10 hover:border-[var(--nm-ink)]"
+                  }`}
               >
                 {opt.label} ({statusCounts[opt.value] || 0})
               </button>

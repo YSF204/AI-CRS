@@ -7,6 +7,7 @@ const A4_H = 1123;
 
 const buildFileUrl = (cvFile) => {
   if (!cvFile?.path) return null;
+  if (/^https?:\/\//i.test(cvFile.path)) return cvFile.path;
   const cleaned = cvFile.path.replace(/^src\//, "");
   return `${API_ORIGIN}/${cleaned}`;
 };
@@ -318,7 +319,7 @@ export default function ViewerContent({ application, cv, loadingCv, showAnalysis
 
       {method !== "manual" && (
         <Section
-          
+
         >
           {loadingCv ? (
             <div style={{

@@ -22,6 +22,7 @@ function makeCacheKey(config) {
 
 api.interceptors.request.use((config) => {
   if (config.method && config.method.toLowerCase() !== "get") return config;
+  if (config.__noCache) return config;
   const key = makeCacheKey(config);
   const cached = dedupCache.get(key);
   if (!cached) return config;
@@ -38,7 +39,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => {
     const cfg = response.config;
-    if (cfg.method && cfg.method.toLowerCase() === "get") {
+    if (cfg.method && cfg.method.toLowerCase() === "get" && !cfg.__noCache) {
       const key = makeCacheKey(cfg);
       const ttl = cfg.__cacheTTL || 30_000;
       dedupCache.set(key, { data: response, expiresAt: Date.now() + ttl });

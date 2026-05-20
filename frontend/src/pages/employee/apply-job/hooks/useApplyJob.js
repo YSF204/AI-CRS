@@ -100,7 +100,7 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
       }
 
       try {
-        const res = await api.get("/applications/my-applications");
+        const res = await api.get("/applications/my-applications", { __noCache: true });
         const userApplications = res.data?.data?.applications || [];
         const alreadyApplied = userApplications.some(
           (app) => app.jobId === jobId || app.jobId?._id === jobId,
@@ -216,11 +216,11 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
         if (skipAnalysis) formData.append("skipAnalysis", "true");
         response = isEdit
           ? await api.patch(`/applications/${appId}`, formData, {
-              headers: { "Content-Type": "multipart/form-data" },
-            })
+            headers: { "Content-Type": "multipart/form-data" },
+          })
           : await api.post("/applications", formData, {
-              headers: { "Content-Type": "multipart/form-data" },
-            });
+            headers: { "Content-Type": "multipart/form-data" },
+          });
       } else {
         const payload = {
           jobId,
