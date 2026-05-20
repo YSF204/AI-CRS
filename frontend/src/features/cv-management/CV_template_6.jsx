@@ -212,7 +212,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                 style={getHighlightStyle('technicalSkills')}
               >
                 <SectionHeader title="Technical Skills" />
-                <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
+                <ul className="grid grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
                   {cvData.technicalSkills.map((skill, index) => (
                     <li key={index}>{skill}</li>
                   ))}
@@ -223,7 +223,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
             cvData.softSkills?.length > 0 ? (
               <section key="softSkills" className="break-inside-avoid mb-5" style={getHighlightStyle('softSkills')}>
                 <SectionHeader title="Soft Skills" />
-                <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
+                <ul className="grid grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
                   {cvData.softSkills.map((skill, index) => (
                     <li key={index}>{skill}</li>
                   ))}
@@ -234,7 +234,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
             cvData.language?.length > 0 ? (
               <section key="language" className="break-inside-avoid mb-5" style={getHighlightStyle('language')}>
                 <SectionHeader title="Languages" />
-                <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
+                <ul className="grid grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
                   {cvData.language.map((item, index) => {
                     const displayText =
                       typeof item === "string"

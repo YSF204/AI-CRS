@@ -154,6 +154,14 @@ export default function DashboardNav({ role = 'employee' }) {
         {isMobileOpen ? <X size={20} strokeWidth={3} /> : <Menu size={20} strokeWidth={3} />}
       </button>
 
+      {/* Mobile Backdrop overlay (separate from sidebar to avoid transform inheritance issues) */}
+      {isMobile && isMobileOpen && (
+        <div 
+          className="jd-sidebar-backdrop" 
+          onClick={handleMobileToggle}
+        />
+      )}
+
       <aside className="jd-sidebar">
         <div className="jd-sidebar-header" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <Link to={config.baseLink} className="jd-sidebar-brand" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>

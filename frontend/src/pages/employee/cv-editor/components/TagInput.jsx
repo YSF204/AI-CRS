@@ -28,10 +28,10 @@ export default function TagInput({ value = [], onChange, placeholder, onTyping }
       className="flex flex-wrap gap-1.5 p-2 border-2 border-[var(--border-color)] bg-[var(--bg)] min-h-[44px] cursor-text items-center"
       onClick={(e) => e.currentTarget.querySelector('input')?.focus()}
     >
-      {value.map((tag) => (
-        <span key={tag} className="inline-flex items-center gap-1 px-2 py-0.5 bg-[var(--yellow)] text-[#0a0a0a] border-2 border-[#0a0a0a] font-mono text-[10px] font-bold uppercase tracking-wider">
+      {value.map((tag, index) => (
+        <span key={`${tag}-${index}`} className="inline-flex items-center gap-1 px-2 py-0.5 bg-[var(--yellow)] text-[#0a0a0a] border-2 border-[#0a0a0a] font-mono text-[10px] font-bold uppercase tracking-wider">
           {tag}
-          <button type="button" onClick={() => onChange(value.filter((t) => t !== tag))} className="flex items-center hover:opacity-70">
+          <button type="button" onClick={() => onChange(value.filter((_, i) => i !== index))} className="flex items-center hover:opacity-70">
             <X size={9} />
           </button>
         </span>

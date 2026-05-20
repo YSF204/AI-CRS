@@ -509,7 +509,8 @@ export const downloadPDF = catchAsync(async (req, res, next) => {
     return next(new AppError(`PDF generation failed: ${error.message}`, 500));
   }
 
-  const filename = `cv_${cv.userId.fullName.replace(/\s+/g, "_")}_${Date.now()}.pdf`;
+  const userName = (cv.userId && cv.userId.fullName) ? cv.userId.fullName : (cv.fullName || "User");
+  const filename = `cv_${userName.replace(/\s+/g, "_")}_${Date.now()}.pdf`;
   res.download(pdfResult.absolutePath, filename, (err) => {
     if (fs.existsSync(pdfResult.absolutePath)) {
       fs.unlinkSync(pdfResult.absolutePath);

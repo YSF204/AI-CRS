@@ -174,7 +174,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
             cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
               <section key="technicalSkills" className="break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
                 <SectionHeader title="Technical Skills" />
-                <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-[13px] md:text-[14px] text-gray-700">
+                <ul className="grid grid-cols-4 gap-y-1 gap-x-3 text-[13px] md:text-[14px] text-gray-700">
                   {cvData.technicalSkills.map((skill, index) => (
                     <li key={index}>{skill}</li>
                   ))}
@@ -185,7 +185,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
             cvData.softSkills && cvData.softSkills.length > 0 ? (
               <section key="softSkills" className="break-inside-avoid" style={getHighlightStyle('softSkills')}>
                 <SectionHeader title="Soft Skills" />
-                <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-[13px] md:text-[14px] text-gray-700">
+                <ul className="grid grid-cols-4 gap-y-1 gap-x-3 text-[13px] md:text-[14px] text-gray-700">
                   {cvData.softSkills.map((skill, index) => (
                     <li key={index}>{skill}</li>
                   ))}
@@ -196,7 +196,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
             cvData.language && cvData.language.length > 0 ? (
               <section key="language" className="break-inside-avoid" style={getHighlightStyle('language')}>
                 <SectionHeader title="Languages" />
-                <ul className="grid grid-cols-2 md:grid-cols-4 gap-y-1 gap-x-3 text-[13px] md:text-[14px] text-gray-700">
+                <ul className="grid grid-cols-4 gap-y-1 gap-x-3 text-[13px] md:text-[14px] text-gray-700">
                   {cvData.language.map((item, index) => {
                     const displayText =
                       typeof item === "string"

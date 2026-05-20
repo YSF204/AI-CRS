@@ -108,7 +108,7 @@ const ResumeTemplate = ({ userName, cvData, highlights = {} }) => {
           <h3 className="text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1.5">
             Technical Skills
           </h3>
-          <ul className="grid grid-cols-1 md:grid-cols-3 gap-y-1.5 gap-x-3 text-[13px] md:text-[13.5px] text-gray-700 list-disc list-inside">
+          <ul className="grid grid-cols-3 gap-y-1.5 gap-x-3 text-[13px] md:text-[13.5px] text-gray-700 list-disc list-inside">
             {cvData.technicalSkills.map((skill, index) => (
               <li key={index} className="marker:text-gray-400">
                 {skill}
@@ -124,7 +124,7 @@ const ResumeTemplate = ({ userName, cvData, highlights = {} }) => {
           <h3 className="text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1.5">
             Soft Skills
           </h3>
-          <ul className="grid grid-cols-1 md:grid-cols-3 gap-y-1.5 gap-x-3 text-[13px] md:text-[13.5px] text-gray-700 list-disc list-inside">
+          <ul className="grid grid-cols-3 gap-y-1.5 gap-x-3 text-[13px] md:text-[13.5px] text-gray-700 list-disc list-inside">
             {cvData.softSkills.map((skill, index) => (
               <li key={index} className="marker:text-gray-400">
                 {skill}
@@ -140,7 +140,7 @@ const ResumeTemplate = ({ userName, cvData, highlights = {} }) => {
           <h3 className="text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1.5">
             Languages
           </h3>
-          <ul className="grid grid-cols-1 md:grid-cols-3 gap-y-1.5 gap-x-3 text-[13px] md:text-[13.5px] text-gray-700 list-disc list-inside">
+          <ul className="grid grid-cols-3 gap-y-1.5 gap-x-3 text-[13px] md:text-[13.5px] text-gray-700 list-disc list-inside">
             {cvData.language.map((item, index) => {
               const displayText =
                 typeof item === "string"

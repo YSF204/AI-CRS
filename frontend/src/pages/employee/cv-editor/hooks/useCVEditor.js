@@ -70,6 +70,20 @@ function editorReducer(state, action) {
       arr.splice(toIdx, 0, fromKey);
       return { ...state, activeSections: arr, dragOverKey: null };
     }
+    case "MOVE_SECTION_UP": {
+      const arr = [...state.activeSections];
+      const idx = arr.indexOf(action.payload);
+      if (idx <= 0) return state;
+      [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+      return { ...state, activeSections: arr };
+    }
+    case "MOVE_SECTION_DOWN": {
+      const arr = [...state.activeSections];
+      const idx = arr.indexOf(action.payload);
+      if (idx < 0 || idx >= arr.length - 1) return state;
+      [arr[idx + 1], arr[idx]] = [arr[idx], arr[idx + 1]];
+      return { ...state, activeSections: arr };
+    }
     default:
       return state;
   }
@@ -367,6 +381,15 @@ export default function useCVEditor() {
   };
   const onDragEnd = () => { dragItemRef.current = null; dispatch({ type: "SET_DRAG_OVER", payload: null }); };
 
+  // Mobile touch reorder — swap section up or down in the active list
+  const onMoveUp = useCallback((key) => {
+    dispatch({ type: "MOVE_SECTION_UP", payload: key });
+  }, []);
+
+  const onMoveDown = useCallback((key) => {
+    dispatch({ type: "MOVE_SECTION_DOWN", payload: key });
+  }, []);
+
   const handleDownloadPdf = async () => {
     if (id === "new") { showToast("error", "Please save the CV first to download it as PDF."); return; }
     dispatch({ type: "SET_DOWNLOADING_PDF", payload: true });
@@ -462,6 +485,8 @@ export default function useCVEditor() {
     onDragLeave,
     onDrop,
     onDragEnd,
+    onMoveUp,
+    onMoveDown,
     handleDownloadPdf,
     handleChangeTemplate,
     showAnalysis,

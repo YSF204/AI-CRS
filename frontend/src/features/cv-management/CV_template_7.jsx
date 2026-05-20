@@ -101,7 +101,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
             cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
               <section key="technicalSkills" className="break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
                 <SectionHeader title="Technical Strengths" />
-                <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-1 gap-x-2 pl-4 text-xs md:text-sm text-gray-800 list-disc">
+                <ul className="grid grid-cols-3 gap-y-1 gap-x-2 pl-4 text-xs md:text-sm text-gray-800 list-disc">
                   {cvData.technicalSkills.map((skill, index) => (
                     <li key={index} className="pl-1">
                       {skill}
@@ -114,7 +114,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
             cvData.softSkills && cvData.softSkills.length > 0 ? (
               <section key="softSkills" className="break-inside-avoid" style={getHighlightStyle('softSkills')}>
                 <SectionHeader title="Core Competencies" />
-                <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-1 gap-x-2 pl-4 text-xs md:text-sm text-gray-800 list-disc">
+                <ul className="grid grid-cols-3 gap-y-1 gap-x-2 pl-4 text-xs md:text-sm text-gray-800 list-disc">
                   {cvData.softSkills.map((skill, index) => (
                     <li key={index} className="pl-1">
                       {skill}
@@ -127,7 +127,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
             cvData.language && cvData.language.length > 0 ? (
               <section key="language" className="break-inside-avoid" style={getHighlightStyle('language')}>
                 <SectionHeader title="Languages" />
-                <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-1 gap-x-2 pl-4 text-xs md:text-sm text-gray-800 list-disc">
+                <ul className="grid grid-cols-3 gap-y-1 gap-x-2 pl-4 text-xs md:text-sm text-gray-800 list-disc">
                   {cvData.language.map((item, index) => {
                     const displayText =
                       typeof item === "string"
