@@ -124,11 +124,11 @@ export default function DashboardNav({ role = 'employee' }) {
     employee: {
       baseLink: '/employee',
       items: [
+        { label: "My CVs", href: "/employee/cvs", icon: FileText },
+        { label: "ATS Score", href: "/employee/ats-score", icon: CheckCircle },
+        { label: "CV Templates", href: "/employee/cv-templates", icon: LayoutTemplate },
         { label: "Find Jobs", href: "/employee/jobs", icon: Search },
         { label: "Applications", href: "/employee/applications", icon: Briefcase },
-        { label: "ATS Score", href: "/employee/ats-score", icon: CheckCircle },
-        { label: "My CVs", href: "/employee/cvs", icon: FileText },
-        { label: "CV Templates", href: "/employee/cv-templates", icon: LayoutTemplate },
       ],
     },
   };
