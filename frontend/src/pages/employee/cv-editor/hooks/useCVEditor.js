@@ -2,7 +2,12 @@ import { useReducer, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
 import api from "../../../../services/api";
-import { DEFAULT_SECTION_ORDER } from "../constants";
+import {
+  DEFAULT_SECTION_ORDER,
+  makeCustomSectionKey,
+  isCustomSectionKey,
+  getCustomSectionIndex,
+} from "../constants";
 import useCVForm from "./useCVForm";
 import useCVAnalysis from "./useCVAnalysis";
 
@@ -84,6 +89,26 @@ function editorReducer(state, action) {
       [arr[idx + 1], arr[idx]] = [arr[idx], arr[idx + 1]];
       return { ...state, activeSections: arr };
     }
+    // Add a new per-custom-section key at the end of activeSections
+    case "ADD_CUSTOM_SECTION_KEY": {
+      return { ...state, activeSections: [...state.activeSections, action.payload] };
+    }
+    // Remove a custom section key and re-index remaining ones
+    case "REMOVE_CUSTOM_SECTION_KEY": {
+      const { removedIndex, newLength } = action.payload;
+      // Remove the key for the removed section, then re-index all remaining customSection__ keys
+      const updatedActive = state.activeSections
+        .filter((k) => !(isCustomSectionKey(k) && getCustomSectionIndex(k) === removedIndex))
+        .map((k) => {
+          if (isCustomSectionKey(k)) {
+            const idx = getCustomSectionIndex(k);
+            // Shift down keys that were after the removed index
+            return idx > removedIndex ? makeCustomSectionKey(idx - 1) : k;
+          }
+          return k;
+        });
+      return { ...state, activeSections: updatedActive };
+    }
     default:
       return state;
   }
@@ -106,10 +131,19 @@ export default function useCVEditor() {
     toastTimerRef.current = setTimeout(() => dispatch({ type: "TOAST", payload: null }), 3500);
   }, []);
 
+  // Callbacks injected into form handlers to keep activeSections in sync
+  const onAddCustomSectionKey = useCallback((key) => {
+    dispatch({ type: "ADD_CUSTOM_SECTION_KEY", payload: key });
+  }, []);
+
+  const onRemoveCustomSectionKey = useCallback((removedIndex, newLength) => {
+    dispatch({ type: "REMOVE_CUSTOM_SECTION_KEY", payload: { removedIndex, newLength } });
+  }, []);
+
   const {
     form,
     setForm,
-    handlers,
+    handlers: baseHandlers,
     getFilteredFormData,
     handleImageUpload,
     removeProfileImage,
@@ -144,6 +178,13 @@ export default function useCVEditor() {
       : null,
     user,
   );
+
+  // Wrap handlers to inject the key-sync callbacks
+  const handlers = {
+    ...baseHandlers,
+    addCustomSection: () => baseHandlers.addCustomSection(onAddCustomSectionKey),
+    removeCustomSection: (si) => baseHandlers.removeCustomSection(si, onRemoveCustomSectionKey),
+  };
 
   const userName =
     form.fullName?.trim() ||
@@ -268,8 +309,41 @@ export default function useCVEditor() {
         if (d.technicalSkills?.length) auto.push("technicalSkills");
         if (d.softSkills?.length) auto.push("softSkills");
         if (d.language?.length) auto.push("language");
-        if (d.customSections?.length) auto.push("customSections");
-        dispatch({ type: "SET_ACTIVE_SECTIONS", payload: auto.length ? [...new Set(["summary", ...auto])] : ["summary"] });
+
+        // Build saved section order, replacing legacy "customSections" with per-section keys
+        const savedOrder = d.layout?.sectionOrder || [];
+        let resolvedOrder = savedOrder.flatMap((k) => {
+          if (k === "customSections") {
+            // Legacy: expand to individual keys
+            return (d.customSections || []).map((_, i) => makeCustomSectionKey(i));
+          }
+          return [k];
+        });
+
+        // Add any per-section custom keys not already in the saved order
+        if (d.customSections?.length) {
+          d.customSections.forEach((_, i) => {
+            const key = makeCustomSectionKey(i);
+            if (!resolvedOrder.includes(key)) resolvedOrder.push(key);
+          });
+        }
+
+        // If no saved order, build from auto-detected sections
+        if (!resolvedOrder.length) {
+          resolvedOrder = [
+            ...auto,
+            ...(d.customSections || []).map((_, i) => makeCustomSectionKey(i)),
+          ];
+        }
+
+        // Only keep keys that correspond to actual data
+        const validKeys = new Set([
+          ...auto,
+          ...(d.customSections || []).map((_, i) => makeCustomSectionKey(i)),
+        ]);
+        resolvedOrder = resolvedOrder.filter((k) => validKeys.has(k));
+
+        dispatch({ type: "SET_ACTIVE_SECTIONS", payload: resolvedOrder.length ? [...new Set(["summary", ...resolvedOrder])] : ["summary"] });
       } catch {
         showToast("error", "Failed to load CV.");
       } finally {
@@ -352,11 +426,18 @@ export default function useCVEditor() {
         technicalSkills: { technicalSkills: [] },
         softSkills: { softSkills: [] },
         language: { language: [] },
-        customSections: { customSections: [] },
       };
       for (const [section, clear] of Object.entries(sectionClearMap)) {
         if (!activeSections.includes(section)) Object.assign(f, clear);
       }
+      // Filter customSections by per-section active keys
+      const activeCustomKeys = activeSections.filter((k) => k && k.startsWith("customSection__"));
+      f.customSections = activeCustomKeys
+        .map((k) => {
+          const idx = parseInt(k.replace("customSection__", ""), 10);
+          return f.customSections?.[idx];
+        })
+        .filter(Boolean);
       f.layout = { ...(f.layout || {}), sectionOrder: activeSections };
 
       const payload = buildPayload(f);

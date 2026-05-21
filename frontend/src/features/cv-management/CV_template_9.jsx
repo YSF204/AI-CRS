@@ -259,8 +259,14 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
         ];
 
         return sectionOrder.map((key) => {
-          if (key === "customSections" && cvData.customSections?.length > 0) {
-            return cvData.customSections.map((section, sectionIndex) => (
+          const isCustom = key.startsWith("customSection__");
+          const isLegacyCustom = key === "customSections";
+          if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
+            const sectionIdx = isCustom ? parseInt(key.replace("customSection__", ""), 10) : -1;
+            const sectionsToRender = isCustom ? [cvData.customSections[sectionIdx]].filter(Boolean) : cvData.customSections;
+            return sectionsToRender.map((section, loopIdx) => {
+              const sectionIndex = isCustom ? sectionIdx : loopIdx;
+              return (
               <section
                 key={`custom-${sectionIndex}`}
                 className="cv-page-group mb-5"
@@ -344,10 +350,9 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
                   })}
                 </div>
               </section>
-            ));
+              );
+            });
           }
-          if (key.includes("Skills") || key === "language")
-            return sectionBlocks[key];
           return sectionBlocks[key];
         });
       })()}

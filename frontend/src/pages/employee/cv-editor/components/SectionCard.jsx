@@ -20,6 +20,7 @@ export default function SectionCard({
     <div className="nm-card" style={{ padding: 0, overflow: "hidden" }}>
       <SectionCardHeader
         sectionKey={sectionKey}
+        form={form}
         collapsed={collapsed}
         onToggleCollapse={onToggleCollapse}
         onRemove={onRemove}

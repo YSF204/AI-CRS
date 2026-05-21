@@ -261,8 +261,14 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
         ];
 
         return sectionOrder.map((key) => {
-          if (key === "customSections" && cvData.customSections?.length > 0) {
-            return cvData.customSections.map((section, sectionIndex) => (
+          const isCustom = key.startsWith("customSection__");
+          const isLegacyCustom = key === "customSections";
+          if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
+            const sectionIdx = isCustom ? parseInt(key.replace("customSection__", ""), 10) : -1;
+            const sectionsToRender = isCustom ? [cvData.customSections[sectionIdx]].filter(Boolean) : cvData.customSections;
+            return sectionsToRender.map((section, loopIdx) => {
+              const sectionIndex = isCustom ? sectionIdx : loopIdx;
+              return (
               <section
                 key={`custom-${sectionIndex}`}
                 className=""
@@ -332,7 +338,8 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                   </div>
                 )}
               </section>
-            ));
+              );
+            });
           }
           if (key === "skills") return null;
           return sectionBlocks[key];

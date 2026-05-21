@@ -447,11 +447,20 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
           ];
 
           return sectionOrder.map((key) => {
-            if (key === "customSections" && mainCustomSections.length > 0) {
-              return mainCustomSections.map((section, idx) => {
+            const isCustom = key.startsWith("customSection__");
+            const isLegacyCustom = key === "customSections";
+            if (isCustom || isLegacyCustom) {
+              const sectionIdx = isCustom ? parseInt(key.replace("customSection__", ""), 10) : -1;
+              const sectionsToRender = isCustom
+                ? [cvData.customSections[sectionIdx]].filter(Boolean).filter(
+                    (sec) => !sidebarSectionTitles.includes(sec.title.toLowerCase())
+                  )
+                : mainCustomSections;
+              if (!sectionsToRender || sectionsToRender.length === 0) return null;
+              return sectionsToRender.map((section, loopIdx) => {
                 const realSectionIdx = cvData.customSections.indexOf(section);
                 return (
-                  <div key={`custom-${idx}`} className="cv-page-group mb-5">
+                  <div key={`custom-${loopIdx}`} className="cv-page-group mb-5">
                     <div className="break-inside-avoid">
                       <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mb-5 border-b border-gray-400 pb-1">
                         {section.title}

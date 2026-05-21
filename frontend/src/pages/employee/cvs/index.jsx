@@ -311,7 +311,7 @@ export default function CVs() {
                   textTransform: "uppercase",
                 }}
               >
-                Purge CV
+                Delete Cv
               </button>
             </div>
           </div>

@@ -204,10 +204,10 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
             </div>
           </div>
         )}
-        <div className="p-8">
-          <div className="mb-8 flex justify-between items-start">
+        <div className="p-4 sm:p-8">
+          <div className="flex justify-between items-start gap-4 mb-6 sm:mb-8">
             <div>
-              <h1 className="text-3xl font-bold font-['Space_Grotesk'] uppercase tracking-tight mb-2 text-[var(--nm-text-primary)]">
+              <h1 className="text-xl sm:text-3xl font-bold font-['Space_Grotesk'] uppercase tracking-tight mb-2 text-[var(--nm-text-primary)]">
                 Apply for {job.position}
               </h1>
               <p className="font-['Manrope'] text-sm text-[var(--nm-text-secondary)]">
@@ -216,7 +216,7 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
             </div>
             <button
               onClick={handleClose}
-              className="p-2 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface)] hover:bg-[var(--nm-primary)] hover:text-white transition-colors shadow-[3px_3px_0_var(--nm-ink)]"
+              className="p-2 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface)] hover:bg-[var(--nm-primary)] hover:text-white transition-colors shadow-[3px_3px_0_var(--nm-ink)] shrink-0"
             >
               <X size={20} />
             </button>

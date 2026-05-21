@@ -13,7 +13,7 @@ export default function MethodSelector({
           handleSwitchMethod("existingCv");
           setSelectedCvId("");
         }}
-        className={`brutal-card p-8 flex flex-col items-center justify-center min-h-[280px] transition-all border-4 ${
+        className={`brutal-card p-6 md:p-8 flex flex-col items-center justify-center min-h-[200px] md:min-h-[280px] transition-all border-4 ${
           applicationMethod === "existingCv"
             ? "border-black scale-105"
             : "border-[var(--border-color)] hover:border-black"
@@ -49,7 +49,7 @@ export default function MethodSelector({
       {/* Option 2: Upload PDF */}
       <button
         onClick={() => handleSwitchMethod("uploadPdf")}
-        className={`brutal-card p-8 flex flex-col items-center justify-center min-h-[280px] transition-all border-4 ${
+        className={`brutal-card p-6 md:p-8 flex flex-col items-center justify-center min-h-[200px] md:min-h-[280px] transition-all border-4 ${
           applicationMethod === "uploadPdf"
             ? "border-black scale-105"
             : "border-[var(--border-color)] hover:border-black"

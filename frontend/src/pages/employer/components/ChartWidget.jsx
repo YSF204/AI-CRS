@@ -109,7 +109,6 @@ export default function ChartWidget({ jobs = [] }) {
     <div 
       className="nm-card"
       style={{
-        gridColumn: 'span 8',
         background: 'var(--nm-surface)',
         borderWidth: '4px',
         boxShadow: '10px 10px 0 var(--nm-ink)',
@@ -117,8 +116,9 @@ export default function ChartWidget({ jobs = [] }) {
         display: 'flex', 
         flexDirection: 'column', 
         gap: 20,
-        minHeight: '400px',
+        minHeight: '360px',
         borderRadius: '0px',
+        height: '100%',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -131,7 +131,7 @@ export default function ChartWidget({ jobs = [] }) {
             textTransform: 'uppercase', 
             letterSpacing: '0.15em' 
           }}>
-            Platform Pulse
+            Activity
           </div>
           <div style={{ 
             fontFamily: 'var(--font-display)', 
@@ -142,7 +142,7 @@ export default function ChartWidget({ jobs = [] }) {
             marginTop: 4,
             textTransform: 'uppercase'
           }}>
-            Hiring Velocity
+            Jobs Posted Over Time
           </div>
         </div>
         <div style={{ 
@@ -157,7 +157,7 @@ export default function ChartWidget({ jobs = [] }) {
           letterSpacing: '0.05em',
           boxShadow: '3px 3px 0 var(--nm-ink)'
         }}>
-          Live Activity
+          This Year
         </div>
       </div>
       

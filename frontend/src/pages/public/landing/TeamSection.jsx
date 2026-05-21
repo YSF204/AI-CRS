@@ -10,13 +10,13 @@ const team = [
     initials: 'YA',
     image: YousefImage,
     bio: 'Passionate full stack developer with experience in modern web technologies. Designed the platform architecture and AI integration pipeline.',
-    skills: ['React', 'Node.js', 'MongoDB', 'OpenAI API'],
+    skills: ['React', 'Node.js', 'MongoDB', 'Next.js', "AI Integration", "postgreSQL"],
     Icon: Code2,
     accent: 'var(--nm-primary)',
   },
   {
     name: 'Bashar AL-Ajalin',
-    role: 'Frontend Engineer',
+    role: 'Full Stack Developer',
     initials: 'BA',
     bio: 'Detail-oriented frontend engineer specializing in building responsive, accessible, and performant user interfaces with a strong eye for design.',
     skills: ['React', 'TailwindCSS', 'Figma', 'UI/UX'],
@@ -27,17 +27,17 @@ const team = [
     name: 'Ismail Jboor',
     role: 'Backend Developer',
     initials: 'IJ',
-    bio: 'Results-driven backend developer with expertise in designing scalable server-side architectures and optimizing database performance.',
-    skills: ['Node.js', 'Express', 'PostgreSQL', 'Docker'],
+    bio: 'good backend developer with expertise in building scalable APIs and managing databases. Focused on creating efficient server-side logic and seamless integration with AI services.    ',
+    skills: ['Node.js', 'Express', 'PostgreSQL'],
     Icon: Server,
     accent: 'var(--nm-success)',
   },
   {
     name: 'Azeez Abu Queider',
-    role: 'AI / ML Engineer',
+    role: 'Frontend Developer',
     initials: 'AA',
-    bio: 'AI/ML engineer passionate about applying machine learning and NLP to solve real-world problems. Built the CV analysis engine.',
-    skills: ['Python', 'TensorFlow', 'OpenAI', 'NLP'],
+    bio: 'Passionate frontend developer with a keen eye for design and a commitment to creating intuitive user experiences.',
+    skills: ['React', 'TailwindCSS', 'Figma', 'UI/UX'],
     Icon: Brain,
     accent: 'var(--nm-primary)',
   },
@@ -61,12 +61,6 @@ export default function TeamSection() {
         className="text-center"
         style={{ padding: 'clamp(5rem, 10%, 8rem) clamp(1.5rem, 5%, 4rem) 0' }}
       >
-        <span
-          className="nm-status-pill active"
-          style={{ marginBottom: '1.25rem', borderWidth: '4px' }}
-        >
-          The Crew
-        </span>
         <h2
           style={{
             fontFamily: 'var(--font-display)',

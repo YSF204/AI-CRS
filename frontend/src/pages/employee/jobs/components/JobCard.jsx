@@ -19,7 +19,7 @@ export default function JobCard({ stats }) {
           </p>
         </div>
 
-        <div className="jd-surface-stack min-w-0 xl:max-w-md">
+        <div className="hidden xl:block jd-surface-stack min-w-0 xl:max-w-md">
           <p className="jd-section-title mb-3">At a glance</p>
           <div className="jd-meta-grid">
             {stats.map((stat) => (

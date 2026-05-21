@@ -4,6 +4,7 @@ import { getSectionMeta } from "../constants";
 
 export default function SectionCardHeader({
   sectionKey,
+  form,
   collapsed,
   onToggleCollapse,
   onRemove,
@@ -13,7 +14,7 @@ export default function SectionCardHeader({
   isFirst,
   isLast,
 }) {
-  const meta = getSectionMeta(sectionKey);
+  const meta = getSectionMeta(sectionKey, form);
   const Icon = meta.icon;
 
   return (

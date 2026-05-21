@@ -144,13 +144,7 @@ export default function UserManagement() {
       <div className="dashboard-shell">
         {/* Header */}
         <div className="admin-header">
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 'var(--spacing-4)',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-          }}>
+          <div className="admin-header-row">
             <div>
               <div style={{
                 fontFamily: 'var(--font-body)',

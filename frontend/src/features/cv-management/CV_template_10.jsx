@@ -295,8 +295,16 @@ const StandardATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
         ];
 
         return sectionOrder.map((key) => {
-          if (key === "customSections" && cvData.customSections?.length > 0) {
-            return cvData.customSections.map((section, sectionIndex) => (
+          const isCustom = key.startsWith("customSection__");
+        const isLegacyCustom = key === "customSections";
+        if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
+          let sectionsToRender = isLegacyCustom 
+            ? cvData.customSections
+            : [cvData.customSections[parseInt(key.replace("customSection__", ""), 10)]].filter(Boolean);
+            
+          return sectionsToRender.map((section, loopIdx) => {
+            const sectionIndex = isLegacyCustom ? loopIdx : parseInt(key.replace("customSection__", ""), 10);
+            return (
               <section
                 key={`custom-${sectionIndex}`}
                 className="cv-page-group mb-5"
@@ -378,7 +386,8 @@ const StandardATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
                   })}
                 </div>
               </section>
-            ));
+            );
+          });
           }
           if (key.includes("Skills") || key === "language")
             return sectionBlocks[key];

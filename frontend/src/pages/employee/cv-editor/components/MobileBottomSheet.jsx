@@ -1,12 +1,12 @@
 import React from "react";
-import { X, Check } from "lucide-react";
-import { ALL_SECTIONS } from "../constants";
+import { X, Check, Plus } from "lucide-react";
+import { ALL_SECTIONS, isCustomSectionKey } from "../constants";
 
 /**
  * Slide-up bottom sheet for picking/toggling CV sections on mobile.
  * Opens when the user taps "Add Section" in the Sections tab or Editor tab FAB.
  */
-export default function MobileBottomSheet({ open, onClose, activeSections, toggleSection }) {
+export default function MobileBottomSheet({ open, onClose, activeSections, toggleSection, onAddCustomSection }) {
   return (
     <>
       {/* Backdrop */}
@@ -53,7 +53,7 @@ export default function MobileBottomSheet({ open, onClose, activeSections, toggl
               color: "var(--nm-text-tertiary)",
             }}
           >
-            {activeSections.length} / {ALL_SECTIONS.length} active
+          {activeSections.filter((k) => !isCustomSectionKey(k)).length} / {ALL_SECTIONS.filter((s) => s.key !== "customSections").length} active
           </span>
           <button
             type="button"
@@ -69,7 +69,7 @@ export default function MobileBottomSheet({ open, onClose, activeSections, toggl
         {/* Section grid */}
         <div className="cv-bottom-sheet-body">
           <div className="cv-section-picker-grid">
-            {ALL_SECTIONS.map(({ key, label, icon: Icon, accent }) => {
+            {ALL_SECTIONS.filter((s) => s.key !== "customSections").map(({ key, label, icon: Icon, accent }) => {
               const active = activeSections.includes(key);
               return (
                 <button
@@ -95,6 +95,17 @@ export default function MobileBottomSheet({ open, onClose, activeSections, toggl
                 </button>
               );
             })}
+            {/* Add Custom Section button */}
+            <button
+              type="button"
+              className="cv-section-picker-item"
+              data-active={false}
+              onClick={() => { onAddCustomSection && onAddCustomSection(); onClose(); }}
+              aria-label="Add Custom Section"
+            >
+              <Plus size={20} strokeWidth={2.5} style={{ color: "var(--nm-primary)" }} />
+              <span className="cv-section-picker-label">Add Custom</span>
+            </button>
           </div>
         </div>
 

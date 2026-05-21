@@ -310,101 +310,108 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
         ];
 
         return sectionOrder.map((key) => {
-          if (key === "customSections" && cvData.customSections?.length > 0) {
-            return cvData.customSections
-              .filter((sec) => sec.title.toLowerCase() !== "federal details")
-              .map((section, sectionIndex) => {
-                const useGrid = [
-                  "professional development",
-                  "skills",
-                  "certifications",
-                ].includes(section.title.toLowerCase());
-                return (
-                  <section
-                    key={`custom-${sectionIndex}`}
-                    className="mb-5 cv-page-group"
+          const isCustom = key.startsWith("customSection__");
+          const isLegacyCustom = key === "customSections";
+          if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
+            const sectionIdx = isCustom ? parseInt(key.replace("customSection__", ""), 10) : -1;
+            const sectionsToRender = isCustom
+              ? [cvData.customSections[sectionIdx]].filter(Boolean).filter((sec) => sec.title.toLowerCase() !== "federal details")
+              : cvData.customSections.filter((sec) => sec.title.toLowerCase() !== "federal details");
+            if (!sectionsToRender.length) return null;
+            return sectionsToRender.map((section, loopIdx) => {
+              const sectionIndex = isCustom ? sectionIdx : loopIdx;
+              const useGrid = [
+                "professional development",
+                "skills",
+                "certifications",
+              ].includes(section.title.toLowerCase());
+              return (
+                <section
+                  key={`custom-${sectionIndex}`}
+                  className="mb-5 cv-page-group"
+                >
+                  <div className="break-inside-avoid">
+                    <SectionHeader title={section.title} />
+                    {section.items.slice(0, 1).map((item, itemIndex) => {
+                      const dur = fmtDuration(
+                        item.durationFrom,
+                        item.durationTo,
+                      );
+                      return (
+                        <div
+                          key={itemIndex}
+                          className="text-xs md:text-[13px]"
+                          style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
+                        >
+                          <div className="font-bold text-gray-900">
+                            <span>{item.name}</span>
+                            {item.link && (
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-1 text-gray-500 hover:text-gray-700"
+                              >
+                                <svg className="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                              </a>
+                            )}
+                            {dur ? ` | ${dur}` : ""}
+                          </div>
+                          {item.description && (
+                            <div className="text-gray-700 mt-0.5 whitespace-pre-wrap break-words">
+                              {item.description}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div
+                    className={
+                      useGrid
+                        ? "grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5 mt-3.5"
+                        : "flex flex-col gap-3.5"
+                    }
                   >
-                    <div className="break-inside-avoid">
-                      <SectionHeader title={section.title} />
-                      {section.items.slice(0, 1).map((item, itemIndex) => {
-                        const dur = fmtDuration(
-                          item.durationFrom,
-                          item.durationTo,
-                        );
-                        return (
-                          <div
-                            key={itemIndex}
-                            className="text-xs md:text-[13px]"
-                            style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
-                          >
-                            <div className="font-bold text-gray-900">
-                              <span>{item.name}</span>
-                              {item.link && (
-                                <a
-                                  href={item.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="ml-1 text-gray-500 hover:text-gray-700"
-                                >
-                                  <svg className="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                                </a>
-                              )}
-                              {dur ? ` | ${dur}` : ""}
-                            </div>
-                            {item.description && (
-                              <div className="text-gray-700 mt-0.5 whitespace-pre-wrap break-words">
-                                {item.description}
-                              </div>
+                    {section.items.slice(1).map((item, itemIndex) => {
+                      const dur = fmtDuration(
+                        item.durationFrom,
+                        item.durationTo,
+                      );
+                      return (
+                        <div
+                          key={itemIndex + 1}
+                          className="text-xs md:text-[13px] break-inside-avoid"
+                          style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex + 1}_description`)}
+                        >
+                          <div className="font-bold text-gray-900">
+                            <span>{item.name}</span>
+                            {item.link && (
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-1 text-gray-500 hover:text-gray-700"
+                              >
+                                <svg className="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                              </a>
                             )}
+                            {dur ? ` | ${dur}` : ""}
                           </div>
-                        );
-                      })}
-                    </div>
-                    <div
-                      className={
-                        useGrid
-                          ? "grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5 mt-3.5"
-                          : "flex flex-col gap-3.5"
-                      }
-                    >
-                      {section.items.slice(1).map((item, itemIndex) => {
-                        const dur = fmtDuration(
-                          item.durationFrom,
-                          item.durationTo,
-                        );
-                        return (
-                          <div
-                            key={itemIndex + 1}
-                            className="text-xs md:text-[13px] break-inside-avoid"
-                            style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex + 1}_description`)}
-                          >
-                            <div className="font-bold text-gray-900">
-                              <span>{item.name}</span>
-                              {item.link && (
-                                <a
-                                  href={item.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="ml-1 text-gray-500 hover:text-gray-700"
-                                >
-                                  <svg className="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                                </a>
-                              )}
-                              {dur ? ` | ${dur}` : ""}
+                          {item.description && (
+                            <div className="text-gray-700 mt-0.5 whitespace-pre-wrap break-words">
+                              {item.description}
                             </div>
-                            {item.description && (
-                              <div className="text-gray-700 mt-0.5 whitespace-pre-wrap break-words">
-                                {item.description}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </section>
-                );
-              });
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            });
           }
+
           if (key === "skills") return null;
           return sectionBlocks[key];
         });

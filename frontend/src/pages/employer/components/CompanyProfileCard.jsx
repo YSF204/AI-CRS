@@ -6,7 +6,6 @@ export default function CompanyProfileCard({ company, loading, error }) {
     <div 
       className="nm-card"
       style={{
-        gridColumn: 'span 4',
         background: 'var(--nm-surface)',
         borderWidth: '4px',
         boxShadow: '8px 8px 0 var(--nm-ink)',
@@ -15,6 +14,7 @@ export default function CompanyProfileCard({ company, loading, error }) {
         flexDirection: 'column', 
         gap: 24,
         borderRadius: '0px',
+        height: '100%',
       }}
     >
       {/* Header */}
@@ -38,7 +38,7 @@ export default function CompanyProfileCard({ company, loading, error }) {
             textTransform: 'uppercase', 
             letterSpacing: '0.12em' 
           }}>
-            Entity Profile
+            Company Profile
           </div>
           <div style={{ 
             fontFamily: 'var(--font-display)', 
@@ -65,8 +65,8 @@ export default function CompanyProfileCard({ company, loading, error }) {
           border: '3px solid var(--nm-ink)',
           background: 'var(--nm-bg)'
         }}>
-          Profile Unreachable.{' '}
-          <Link to="/employer/profile" style={{ color: 'var(--nm-primary)', textDecoration: 'underline' }}>Initialize Now →</Link>
+          Profile not set up.{' '}
+          <Link to="/employer/profile" style={{ color: 'var(--nm-primary)', textDecoration: 'underline' }}>Create Profile →</Link>
         </div>
       ) : company ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>

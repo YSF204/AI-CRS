@@ -58,10 +58,10 @@ export default function AnalysisScreen({
           >
             <ChevronLeft size={16} /> Retour
           </button>
-          <h1 className="text-4xl md:text-5xl font-black font-['Space_Grotesk'] uppercase tracking-tight text-black">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-['Space_Grotesk'] uppercase tracking-tight text-black">
             Action Analysis
           </h1>
-          <p className="font-mono text-base text-black font-bold uppercase tracking-widest mt-2 border-2 border-black inline-block px-3 py-1 bg-[var(--yellow)]">
+          <p className="font-mono text-xs sm:text-base text-black font-bold uppercase tracking-widest mt-2 border-2 border-black inline-block px-2 sm:px-3 py-1 bg-[var(--yellow)]">
             POSITION: {job.position}
           </p>
         </div>
@@ -79,9 +79,9 @@ export default function AnalysisScreen({
             Overall AI Score
           </span>
 
-          <h2 className="text-8xl md:text-[9rem] font-black leading-none text-black">
+          <h2 className="text-6xl sm:text-8xl md:text-[9rem] font-black leading-none text-black">
             {matchPercentage}
-            <span className="text-4xl">%</span>
+            <span className="text-2xl sm:text-4xl">%</span>
           </h2>
         </div>
 
@@ -216,16 +216,16 @@ export default function AnalysisScreen({
           <button
             onClick={handleSubmitApplication}
             disabled={submitting}
-            className="w-full flex items-center justify-center gap-4 bg-[var(--teal)] hover:bg-[#fff] text-black border-[6px] border-black py-6 px-10 shadow-[8px_8px_0px_#000] hover:translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_#000] transition-all disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 sm:gap-4 bg-[var(--teal)] hover:bg-[#fff] text-black border-[6px] border-black py-4 sm:py-6 px-4 sm:px-10 shadow-[8px_8px_0px_#000] hover:translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_#000] transition-all disabled:opacity-50"
           >
-            <span className="font-black font-['Space_Grotesk'] text-3xl uppercase tracking-widest">
+            <span className="font-black font-['Space_Grotesk'] text-lg sm:text-2xl md:text-3xl uppercase tracking-wider sm:tracking-widest">
               {submitting
                 ? "Processing..."
                 : isEdit
                   ? "Update Submission"
                   : "Submit Application"}
             </span>
-            {!submitting && <ArrowRight size={32} />}
+            {!submitting && <ArrowRight className="w-6 h-6 sm:w-8 sm:h-8 shrink-0" />}
           </button>
         ) : (
           <div className="flex flex-col sm:flex-row gap-4">

@@ -16,23 +16,6 @@ export default function HeroSection() {
     >
       {/* Left content */}
       <div className="flex-1 flex flex-col items-start z-10" style={{ maxWidth: '640px' }}>
-        {/* Badge */}
-        <div
-          className="nm-status-pill active"
-          style={{ marginBottom: 'clamp(1.5rem, 2.5%, 2.5rem)', borderWidth: '4px' }}
-        >
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              backgroundColor: 'var(--nm-success)',
-              display: 'inline-block',
-              marginRight: '0.5rem',
-            }}
-          />
-          AI-Powered Platform
-        </div>
-
         <h1
           style={{
             fontFamily: 'var(--font-display)',

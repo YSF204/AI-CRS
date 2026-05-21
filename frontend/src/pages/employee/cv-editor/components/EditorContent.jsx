@@ -1,6 +1,7 @@
 import React from "react";
 import { Plus, User, ImagePlus, Trash2 } from "lucide-react";
 import SectionCard from "./SectionCard";
+import { isCustomSectionKey, getCustomSectionIndex } from "../constants";
 
 export default function EditorContent({
   form,
@@ -126,14 +127,20 @@ export default function EditorContent({
       <div className="flex flex-col gap-6" style={isMobile ? { gap: "10px" } : {}}>
         {activeSections.map((key, index) => {
           if (isMobile) {
-            // Mobile: no drag-and-drop, use up/down arrows
+                      // Mobile: no drag-and-drop, use up/down arrows
             return (
               <SectionCard
                 key={key}
                 sectionKey={key}
                 form={form}
                 handlers={handlers}
-                onRemove={() => toggleSection(key)}
+                onRemove={() => {
+                  if (isCustomSectionKey(key)) {
+                    handlers.removeCustomSection(getCustomSectionIndex(key));
+                  } else {
+                    toggleSection(key);
+                  }
+                }}
                 collapsed={!!collapsedSections[key]}
                 onToggleCollapse={() => toggleCollapse(key)}
                 fetchSuggestions={fetchSuggestions}
@@ -151,7 +158,7 @@ export default function EditorContent({
             );
           }
 
-          // Desktop: drag-and-drop enabled
+                    // Desktop: drag-and-drop enabled
           return (
             <div
               key={key}
@@ -171,7 +178,13 @@ export default function EditorContent({
                 sectionKey={key}
                 form={form}
                 handlers={handlers}
-                onRemove={() => toggleSection(key)}
+                onRemove={() => {
+                  if (isCustomSectionKey(key)) {
+                    handlers.removeCustomSection(getCustomSectionIndex(key));
+                  } else {
+                    toggleSection(key);
+                  }
+                }}
                 collapsed={!!collapsedSections[key]}
                 onToggleCollapse={() => toggleCollapse(key)}
                 fetchSuggestions={fetchSuggestions}

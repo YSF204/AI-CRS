@@ -17,26 +17,26 @@ const Section = ({ title, icon, children }) => (
     className="nm-card"
     style={{
       background: "var(--nm-surface)",
-      borderWidth: "4px",
+      borderWidth: "3px",
       borderRadius: "0px",
-      padding: "24px",
-      marginBottom: "24px",
-      boxShadow: "6px 6px 0 var(--nm-ink)"
+      padding: "clamp(12px, 3vw, 20px)",
+      marginBottom: "16px",
+      boxShadow: "4px 4px 0 var(--nm-ink)"
     }}
   >
     <div style={{
       display: "flex",
       alignItems: "center",
-      gap: 16,
-      marginBottom: "20px",
-      borderBottom: "3px solid var(--nm-ink)",
-      paddingBottom: "12px"
+      gap: 10,
+      marginBottom: "12px",
+      borderBottom: "2px solid var(--nm-ink)",
+      paddingBottom: "8px"
     }}>
-      {icon && <span style={{ fontSize: "24px" }}>{icon}</span>}
+      {icon && <span style={{ fontSize: "18px" }}>{icon}</span>}
       <h3 style={{
         fontFamily: "var(--font-display)",
         fontWeight: 900,
-        fontSize: "18px",
+        fontSize: "14px",
         color: "var(--nm-text-primary)",
         margin: 0,
         letterSpacing: "0.05em",
@@ -62,18 +62,18 @@ const SkillTag = ({ skill, type }) => {
   return (
     <span style={{
       display: "inline-block",
-      padding: "6px 14px",
+      padding: "4px 10px",
       background: color,
       color: "#fff",
-      border: "3px solid var(--nm-ink)",
+      border: "2px solid var(--nm-ink)",
       fontFamily: "var(--font-display)",
-      fontSize: "11px",
+      fontSize: "10px",
       fontWeight: 900,
       textTransform: "uppercase",
       letterSpacing: "0.1em",
-      marginRight: "10px",
-      marginBottom: "10px",
-      boxShadow: "3px 3px 0 var(--nm-ink)"
+      marginRight: "6px",
+      marginBottom: "6px",
+      boxShadow: "2px 2px 0 var(--nm-ink)"
     }}>
       {skill}
     </span>
@@ -84,25 +84,25 @@ const InfoItem = ({ label, value, icon }) => (
   <div style={{
     display: "flex",
     alignItems: "flex-start",
-    gap: 16,
-    padding: "16px 0",
+    gap: 12,
+    padding: "8px 0",
     borderBottom: "2px solid var(--nm-ink)"
   }}>
-    {icon && <span style={{ fontSize: "18px", color: "var(--nm-primary)", minWidth: "24px" }}>{icon}</span>}
+    {icon && <span style={{ fontSize: "14px", color: "var(--nm-primary)", minWidth: "18px" }}>{icon}</span>}
     <div style={{ flex: 1 }}>
       <div style={{
-        fontSize: "11px",
+        fontSize: "9px",
         color: "var(--nm-text-tertiary)",
         fontFamily: "var(--font-display)",
         fontWeight: 800,
         textTransform: "uppercase",
         letterSpacing: "0.1em",
-        marginBottom: "6px"
+        marginBottom: "3px"
       }}>
         {label}
       </div>
       <div style={{
-        fontSize: "15px",
+        fontSize: "13px",
         color: "var(--nm-text-primary)",
         fontFamily: "var(--font-body)",
         fontWeight: 700
@@ -154,13 +154,13 @@ const normalizeCvForTemplate = (cv) => ({
 });
 
 const LABEL_STYLE = {
-  fontSize: "12px",
+  fontSize: "11px",
   color: "var(--nm-text-tertiary)",
   fontFamily: "var(--font-display)",
   fontWeight: 900,
   textTransform: "uppercase",
-  letterSpacing: "0.15em",
-  marginBottom: "16px"
+  letterSpacing: "0.12em",
+  marginBottom: "10px"
 };
 
 export {
@@ -186,24 +186,23 @@ export default function ViewerContent({ application, cv, loadingCv, showAnalysis
       {showAnalysis && (
         <Section
           title="Intelligence Analysis"
-          icon="👁️"
         >
           <div style={{
             background: "var(--nm-bg)",
-            padding: "28px",
-            border: "4px solid var(--nm-ink)",
-            boxShadow: "6px 6px 0 var(--nm-ink)",
+            padding: "clamp(12px, 3vw, 20px)",
+            border: "3px solid var(--nm-ink)",
+            boxShadow: "4px 4px 0 var(--nm-ink)",
             position: "relative"
           }}>
             <div style={{
               position: "absolute",
               top: 0,
               right: 0,
-              padding: "8px 16px",
+              padding: "4px 10px",
               background: "var(--nm-primary)",
               color: "#fff",
               fontFamily: "var(--font-display)",
-              fontSize: "11px",
+              fontSize: "10px",
               fontWeight: 900,
               textTransform: "uppercase",
               letterSpacing: "0.1em"
@@ -211,34 +210,34 @@ export default function ViewerContent({ application, cv, loadingCv, showAnalysis
               AI CORE OUTPUT
             </div>
 
-            <div style={{ marginBottom: "28px" }}>
-              <div style={{ fontSize: "11px", fontWeight: 900, textTransform: "uppercase", color: "var(--nm-text-tertiary)", marginBottom: "8px" }}>
+            <div style={{ marginBottom: "16px" }}>
+              <div style={{ fontSize: "10px", fontWeight: 900, textTransform: "uppercase", color: "var(--nm-text-tertiary)", marginBottom: "4px" }}>
                 Signal Strength Analysis • {new Date(application.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
               </div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: "10px" }}>
-                <span style={{ fontSize: "64px", fontWeight: 900, fontFamily: "var(--font-display)", lineHeight: 1 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+                <span style={{ fontSize: "clamp(28px, 6vw, 44px)", fontWeight: 900, fontFamily: "var(--font-display)", lineHeight: 1 }}>
                   {application.matchPercentage || 0}%
                 </span>
-                <span style={{ fontSize: "14px", fontWeight: 800, color: "var(--nm-text-tertiary)", textTransform: "uppercase" }}>
+                <span style={{ fontSize: "11px", fontWeight: 800, color: "var(--nm-text-tertiary)", textTransform: "uppercase" }}>
                   Accurate Fit Probability
                 </span>
               </div>
             </div>
 
             <div style={{
-              borderTop: "3px solid var(--nm-ink)",
-              paddingTop: "24px",
+              borderTop: "2px solid var(--nm-ink)",
+              paddingTop: "16px",
               display: "flex",
-              gap: "20px"
+              gap: "16px"
             }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: "11px", fontWeight: 900, textTransform: "uppercase", color: "var(--nm-primary)", marginBottom: "12px", letterSpacing: "0.15em" }}>
+                <div style={{ fontSize: "10px", fontWeight: 900, textTransform: "uppercase", color: "var(--nm-primary)", marginBottom: "8px", letterSpacing: "0.15em" }}>
                   Recruiter Verdict
                 </div>
                 <p style={{
-                  fontSize: "16px",
+                  fontSize: "13px",
                   color: "var(--nm-text-primary)",
-                  lineHeight: 1.6,
+                  lineHeight: 1.5,
                   fontWeight: 700,
                   margin: 0
                 }}>
@@ -255,7 +254,7 @@ export default function ViewerContent({ application, cv, loadingCv, showAnalysis
           title="Subject Dossier"
           icon="👤"
         >
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "20px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))", gap: "16px" }}>
             <InfoItem label="Full Name" value={applicant.fullName} icon="👤" />
             <InfoItem label="Email Interface" value={applicant.email} icon="📧" />
             <InfoItem label="Comms Link" value={applicant.phone} icon="📱" />
@@ -265,25 +264,25 @@ export default function ViewerContent({ application, cv, loadingCv, showAnalysis
           </div>
 
           {applicant.summary && (
-            <div style={{ marginTop: "32px" }}>
+            <div style={{ marginTop: "20px" }}>
               <div style={{
-                fontSize: "12px",
+                fontSize: "11px",
                 color: "var(--nm-text-tertiary)",
                 fontFamily: "var(--font-display)",
                 fontWeight: 900,
                 textTransform: "uppercase",
                 letterSpacing: "0.15em",
-                marginBottom: "12px"
+                marginBottom: "8px"
               }}>
                 Executive Summary
               </div>
               <p style={{
-                fontSize: "15px",
+                fontSize: "13px",
                 color: "var(--nm-text-secondary)",
-                lineHeight: 1.7,
+                lineHeight: 1.6,
                 whiteSpace: "pre-wrap",
                 background: "var(--nm-bg)",
-                padding: "20px",
+                padding: "16px",
                 border: "3px solid var(--nm-ink)"
               }}>
                 {applicant.summary}
@@ -291,10 +290,10 @@ export default function ViewerContent({ application, cv, loadingCv, showAnalysis
             </div>
           )}
 
-          <div style={{ marginTop: "32px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
+          <div style={{ marginTop: "20px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "16px" }}>
             {(applicant.technicalSkills || []).length > 0 && (
               <div>
-                <div style={LABEL_STYLE}>Technical Competencies</div>
+                <div style={{ ...LABEL_STYLE, fontSize: "11px", marginBottom: "8px" }}>Technical Competencies</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                   {(applicant.technicalSkills || []).map((skill, i) => (
                     <SkillTag key={`tech-${i}`} skill={skill} type="technical" />
@@ -305,7 +304,7 @@ export default function ViewerContent({ application, cv, loadingCv, showAnalysis
 
             {(applicant.softSkills || []).length > 0 && (
               <div>
-                <div style={LABEL_STYLE}>Operational Traits</div>
+                <div style={{ ...LABEL_STYLE, fontSize: "11px", marginBottom: "8px" }}>Operational Traits</div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
                   {(applicant.softSkills || []).map((skill, i) => (
                     <SkillTag key={`soft-${i}`} skill={skill} type="soft" />
@@ -326,12 +325,12 @@ export default function ViewerContent({ application, cv, loadingCv, showAnalysis
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              padding: "60px",
+              padding: "40px",
               background: "var(--nm-bg)",
-              border: "4px dashed var(--nm-ink)"
+              border: "3px dashed var(--nm-ink)"
             }}>
               <div style={{
-                fontSize: "14px",
+                fontSize: "12px",
                 color: "var(--nm-text-tertiary)",
                 fontFamily: "var(--font-display)",
                 fontWeight: 900,
@@ -343,8 +342,8 @@ export default function ViewerContent({ application, cv, loadingCv, showAnalysis
           ) : cv && (
             <div>
               <div style={{
-                marginBottom: "20px",
-                fontSize: "12px",
+                marginBottom: "16px",
+                fontSize: "11px",
                 color: "var(--nm-text-tertiary)",
                 fontFamily: "var(--font-display)",
                 fontWeight: 900,
@@ -358,12 +357,12 @@ export default function ViewerContent({ application, cv, loadingCv, showAnalysis
           )}
 
           {!cv && fileUrl && (
-            <div style={{ marginTop: "24px" }}>
-              <div style={LABEL_STYLE}>Uploaded PDF Stream</div>
+            <div style={{ marginTop: "20px" }}>
+              <div style={{ ...LABEL_STYLE, fontSize: "11px", marginBottom: "8px" }}>Uploaded PDF Stream</div>
               <div style={{
-                height: "600px",
+                height: "clamp(300px, 50vh, 500px)",
                 border: "4px solid var(--nm-ink)",
-                boxShadow: "10px 10px 0 var(--nm-ink)",
+                boxShadow: "6px 6px 0 var(--nm-ink)",
                 background: "var(--nm-bg)"
               }}>
                 <iframe
@@ -425,21 +424,21 @@ function A4CvPreview({ TemplateComponent, cv, templateCvData }) {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: 8,
-        padding: "6px 0",
+        gap: 6,
+        padding: "4px 0",
         flexShrink: 0,
       }}>
-        <button onClick={() => setZoom(Math.max(0.5, zoom - 0.15))} className="nm-btn" style={{ padding: "4px 10px", fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 13, border: "2px solid var(--nm-ink)", background: "var(--nm-surface)", cursor: "pointer" }}>−</button>
-        <span style={{ fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 800, color: "var(--nm-text-tertiary)", textTransform: "uppercase", minWidth: 40, textAlign: "center" }}>{Math.round(scale * 100)}%</span>
-        <button onClick={() => setZoom(Math.min(2, zoom + 0.15))} className="nm-btn" style={{ padding: "4px 10px", fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 13, border: "2px solid var(--nm-ink)", background: "var(--nm-surface)", cursor: "pointer" }}>+</button>
-        <button onClick={() => setZoom(1)} className="nm-btn" style={{ padding: "4px 10px", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 10, border: "2px solid var(--nm-ink)", background: "var(--nm-bg)", textTransform: "uppercase", marginLeft: 4, cursor: "pointer" }}>Reset</button>
+        <button onClick={() => setZoom(Math.max(0.5, zoom - 0.15))} className="nm-btn" style={{ padding: "3px 8px", fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 11, border: "2px solid var(--nm-ink)", background: "var(--nm-surface)", cursor: "pointer" }}>−</button>
+        <span style={{ fontFamily: "var(--font-display)", fontSize: 10, fontWeight: 800, color: "var(--nm-text-tertiary)", textTransform: "uppercase", minWidth: 35, textAlign: "center" }}>{Math.round(scale * 100)}%</span>
+        <button onClick={() => setZoom(Math.min(2, zoom + 0.15))} className="nm-btn" style={{ padding: "3px 8px", fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 11, border: "2px solid var(--nm-ink)", background: "var(--nm-surface)", cursor: "pointer" }}>+</button>
+        <button onClick={() => setZoom(1)} className="nm-btn" style={{ padding: "3px 8px", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 9, border: "2px solid var(--nm-ink)", background: "var(--nm-bg)", textTransform: "uppercase", marginLeft: 2, cursor: "pointer" }}>Reset</button>
       </div>
       <div
         ref={viewportRef}
         style={{
           flex: 1,
           background: "var(--nm-bg)",
-          padding: "24px 0",
+          padding: "16px 0",
           display: "flex",
           justifyContent: "center",
           alignItems: "flex-start",

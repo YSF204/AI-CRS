@@ -11,6 +11,7 @@ export default function MobileSectionsTab({
   activeSections,
   toggleSection,
   onOpenSheet,
+  form,
 }) {
   return (
     <div className="cv-sections-tab">
@@ -47,7 +48,7 @@ export default function MobileSectionsTab({
               marginTop: 2,
             }}
           >
-            {activeSections.length} / {ALL_SECTIONS.length} selected
+            {activeSections.length} / {ALL_SECTIONS.filter((s) => s.key !== "customSections").length}+ selected
           </p>
         </div>
 
@@ -123,7 +124,7 @@ export default function MobileSectionsTab({
         </div>
       ) : (
         activeSections.map((key) => {
-          const meta = getSectionMeta(key);
+          const meta = getSectionMeta(key, form);
           const Icon = meta.icon;
           return (
             <div

@@ -3,6 +3,7 @@ import {
   DEFAULT_SECTION_ORDER,
   newCustomSection,
   newCustomItem,
+  makeCustomSectionKey,
 } from "../constants";
 import { debounce } from "../../../../utils/debounce";
 import api from "../../../../services/api";
@@ -84,8 +85,20 @@ export default function useCVForm(showToast, autoSaveFunction = null, user = nul
   const exp = makeArr("experience");
   const edu = makeArr("education");
 
-  const addCustomSection = () => { setForm((f) => ({ ...f, customSections: [...f.customSections, newCustomSection()] })); triggerAutoSave(); };
-  const removeCustomSection = (si) => { setForm((f) => ({ ...f, customSections: f.customSections.filter((_, i) => i !== si) })); triggerAutoSave(); };
+  // onAddCustomSectionKey / onRemoveCustomSectionKey are injected by useCVEditor
+  // so the editor state (activeSections) can stay in sync.
+  const addCustomSection = (onAddKey) => {
+    // Compute new index from current form state (before update)
+    const newIndex = form.customSections.length;
+    setForm((f) => ({ ...f, customSections: [...f.customSections, newCustomSection()] }));
+    if (onAddKey) onAddKey(makeCustomSectionKey(newIndex));
+    triggerAutoSave();
+  };
+  const removeCustomSection = (si, onRemoveKey) => {
+    setForm((f) => ({ ...f, customSections: f.customSections.filter((_, i) => i !== si) }));
+    if (onRemoveKey) onRemoveKey(si, form.customSections.length - 1);
+    triggerAutoSave();
+  };
   const updateCustomSectionTitle = (si, val) => {
     setForm((f) => { const a = [...f.customSections]; a[si] = { ...a[si], title: val }; return { ...f, customSections: a }; });
     triggerAutoSave();
@@ -219,10 +232,21 @@ export default function useCVForm(showToast, autoSaveFunction = null, user = nul
       technicalSkills: { technicalSkills: [] },
       softSkills: { softSkills: [] },
       language: { language: [] },
-      customSections: { customSections: [] },
     };
     for (const [section, clear] of Object.entries(sectionClearMap)) {
       if (!activeSections.includes(section)) Object.assign(f, clear);
+    }
+    // Filter and reorder customSections based on per-section active keys
+    const activeCustomKeys = activeSections.filter((k) => k && k.startsWith("customSection__"));
+    if (activeCustomKeys.length === 0) {
+      f.customSections = [];
+    } else {
+      f.customSections = activeCustomKeys
+        .map((k) => {
+          const idx = parseInt(k.replace("customSection__", ""), 10);
+          return form.customSections[idx];
+        })
+        .filter(Boolean);
     }
     f.layout = { ...(f.layout || {}), sectionOrder: activeSections };
     return f;

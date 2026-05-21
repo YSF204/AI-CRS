@@ -54,10 +54,11 @@ export default function Applications() {
   const [localDeleted, setLocalDeleted] = useState(new Set());
 
   useEffect(() => {
-    if (applications.length > 0 && !selectedApp) {
+    const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024;
+    if (isDesktop && applications.length > 0 && !selectedApp) {
       setSelectedApp(applications[0]);
     }
-  }, [applications]);
+  }, [applications, selectedApp]);
 
   const handleEditApplication = (app) => {
     setEditJobId(app.jobId?._id || app.jobId);
@@ -160,6 +161,7 @@ export default function Applications() {
         ).length;
       }
     });
+
     return counts;
   }, [applications, localDeleted]);
 
@@ -191,7 +193,7 @@ export default function Applications() {
       </div>
 
       <div className="dashboard-shell jd-shell py-8">
-        <div className="jd-surface-stack mb-8 p-5 flex flex-col xl:flex-row items-center justify-between gap-6">
+        <div className="jd-surface-stack mb-8 p-5 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-6">
           <div className="flex flex-wrap gap-2">
             {STATUS_OPTIONS.map((opt) => (
               <button
@@ -240,23 +242,26 @@ export default function Applications() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-6 lg:gap-8 items-start">
-          <ApplicationsList
-            paginatedApps={paginatedApps}
-            selectedApp={selectedApp}
-            onSelectApp={setSelectedApp}
-            getStatusInfo={getStatusInfo}
-            loading={loading}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={(page) => updateParam("page", page)}
-          />
+          <div className={selectedApp ? "hidden lg:block" : "block"}>
+            <ApplicationsList
+              paginatedApps={paginatedApps}
+              selectedApp={selectedApp}
+              onSelectApp={setSelectedApp}
+              getStatusInfo={getStatusInfo}
+              loading={loading}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => updateParam("page", page)}
+            />
+          </div>
 
-          <div className="lg:sticky lg:top-8">
+          <div className={`lg:sticky lg:top-8 ${selectedApp ? "block" : "hidden lg:block"}`}>
             <ApplicationDetails
               selectedApp={selectedApp}
               onEdit={handleEditApplication}
               onDelete={handleDeleteApplication}
               deletingId={deletingId}
+              onBack={() => setSelectedApp(null)}
             />
           </div>
         </div>

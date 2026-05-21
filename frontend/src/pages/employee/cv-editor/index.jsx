@@ -345,6 +345,7 @@ export default function CVEditor() {
               activeSections={activeSections}
               toggleSection={toggleSection}
               onOpenSheet={() => setBottomSheetOpen(true)}
+              form={form}
             />
           )}
 
@@ -373,6 +374,7 @@ export default function CVEditor() {
           onClose={() => setBottomSheetOpen(false)}
           activeSections={activeSections}
           toggleSection={toggleSection}
+          onAddCustomSection={handlers.addCustomSection}
         />
 
         {/* Fixed Tab Bar */}
@@ -426,6 +428,8 @@ export default function CVEditor() {
             setSidebarOpen={setSidebarOpen}
             activeSections={activeSections}
             toggleSection={toggleSection}
+            onAddCustomSection={handlers.addCustomSection}
+            form={form}
           />
 
           {/* CENTER: form cards */}
