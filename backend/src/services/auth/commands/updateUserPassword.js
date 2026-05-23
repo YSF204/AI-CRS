@@ -17,10 +17,10 @@ export const updateUserPassword = async ({
     String(currentPassword),
   );
   if (!isCurrentPasswordValid) {
-    throw new AppError("You're current password is wrong ", 401);
+    throw new AppError("Your current password is wrong", 401);
   }
 
-  // FIX #6: Verify new password is different from current password
+  // Verify new password is different from current password
   const isSamePassword = await user.comparePassword(String(password));
   if (isSamePassword) {
     throw new AppError(
@@ -33,8 +33,9 @@ export const updateUserPassword = async ({
   user.passwordConfirm = passwordConfirm;
   await user.save();
 
+  // FIX: pass user.role so the token carries the correct role claim
   return {
-    token: generateToken(user._id),
+    token: generateToken(user._id, user.role),
   };
 };
 

@@ -43,6 +43,16 @@ export const register = catchAsync(async (req, res, next) => {
     company,
   } = result.data;
 
+  // FIX: Server-side ADMIN registration guard.
+  // The schema already excludes ADMIN from the enum, but we add an explicit
+  // check here as defence-in-depth — in case the schema is ever changed or
+  // bypassed via a raw API request.
+  if (role?.toUpperCase() === "ADMIN") {
+    return next(
+      new AppError("You cannot self-register as ADMIN.", 403),
+    );
+  }
+
   // Check if the user already exists
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
