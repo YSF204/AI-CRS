@@ -137,7 +137,7 @@ export default function ClassicSignupForm() {
   // Clicking a role card saves role AND immediately jumps to next step
   const handleRoleSelect = (r) => {
     setRole(r);
-    // Reset ALL role-specific fields when switching roles (FIX 3)
+    // Reset ALL role-specific fields when switching roles
     setForm((prev) => ({
       ...prev,
       gender: "",
@@ -195,7 +195,7 @@ export default function ClassicSignupForm() {
 
       const res = await api.post("/auth/register", body);
 
-      // FIX #1: If requiresEmailVerification is true, show CheckYourEmailPage instead of logging in
+      // If requiresEmailVerification is true, show CheckYourEmailPage instead of logging in
       if (res.data.requiresEmailVerification) {
         setVerificationEmail(res.data.data.user.email);
         return;
@@ -210,8 +210,16 @@ export default function ClassicSignupForm() {
       login(token, data.user);
       navigate("/");
     } catch (err) {
+      // If the account already exists but is unverified (happens when a previous
+      // attempt failed mid-way after the DB record was already created), redirect
+      // straight to the "check your email" page instead of showing a confusing error.
+      const responseData = err.response?.data;
+      if (responseData?.emailNotVerified && responseData?.email) {
+        setVerificationEmail(responseData.email);
+        return;
+      }
       setErrorMsg(
-        err.response?.data?.message || "Registration failed. Please try again.",
+        responseData?.message || "Registration failed. Please try again.",
       );
     }
   };

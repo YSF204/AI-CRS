@@ -43,18 +43,28 @@ export const register = catchAsync(async (req, res, next) => {
     company,
   } = result.data;
 
-  // check if the user already exists
+  // Check if the user already exists
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
+    // If the account exists but email is NOT verified, give a helpful message
+    // instead of a generic error (this prevents confusion after a failed first attempt
+    // where the DB record was created but something went wrong afterward).
+    if (!existingUser.isEmailVerified) {
+      return res.status(409).json({
+        success: false,
+        message:
+          "An account with this email already exists but has not been verified yet. " +
+          "Please check your inbox or request a new verification email.",
+        requiresEmailVerification: true,
+        emailNotVerified: true,
+        email: existingUser.email,
+      });
+    }
     return next(new AppError("User with this email already exists", 400));
   }
 
-  // if no issues , create the user
-
-  // but before creating the user , we need to determine the account status based on the role
-  // if the role is EMPLOYEE , then the account status will be ACTIVE
-  // if the role is EMPLOYER , then the account status will be PENDING ( waiting for admin approval )
-
+  // Determine account status based on role:
+  // EMPLOYEE → ACTIVE, EMPLOYER → PENDING (waiting for admin approval)
   const normalizedRole = role?.toUpperCase();
   const accountStatus = normalizedRole === "EMPLOYER" ? "PENDING" : "ACTIVE";
 
@@ -68,20 +78,40 @@ export const register = catchAsync(async (req, res, next) => {
     role: normalizedRole,
     telephone: telephone || [],
     age,
-    accountStatus, // it will be based on the role
-    isEmailVerified: false, // Email not verified yet
+    accountStatus,
+    isEmailVerified: false,
   });
 
+  // Create the Employer record (if applicable) before we do anything else
+  // so we know what to roll back if something goes wrong below.
+  let employerDoc = null;
   if (normalizedRole === "EMPLOYER" && company) {
-    await Employer.create({
+    employerDoc = await Employer.create({
       userId: user._id,
       company,
     });
   }
 
-  // FIX #1: Generate email verification token and send verification email
-  const verificationToken = user.createEmailVerificationToken();
-  await user.save({ validateBeforeSave: false });
+  // Generate email verification token and persist it.
+  // Wrapped in try/catch so we can roll back the user (and employer) record if
+  // anything here fails — otherwise the DB keeps the user but the frontend
+  // shows an error, and the NEXT registration attempt hits "already exists".
+  let verificationToken;
+  try {
+    verificationToken = user.createEmailVerificationToken();
+    await user.save({ validateBeforeSave: false });
+  } catch (setupErr) {
+    // Roll back: delete the just-created user (and employer) so the user
+    // can retry registration cleanly.
+    await User.findByIdAndDelete(user._id);
+    if (employerDoc) await Employer.findByIdAndDelete(employerDoc._id);
+    return next(
+      new AppError(
+        "Registration could not be completed. Please try again.",
+        500,
+      ),
+    );
+  }
 
   // Build verification email HTML
   const verificationURL = `${getTrustedFrontendUrl()}/verify-email/${verificationToken}`;
@@ -192,10 +222,8 @@ export const register = catchAsync(async (req, res, next) => {
     console.error("Error sending verification email:", err.message);
   }
 
-  // FIX #1: Do NOT generate token for unverified email
-  // User must verify email first before logging in
-  // Return response without token to gate access completely
-
+  // Do NOT generate a login token for unverified email.
+  // User must verify email first before logging in.
   const userResponse = {
     id: user._id,
     firstName: user.firstName,
@@ -223,7 +251,7 @@ export const register = catchAsync(async (req, res, next) => {
 
 // ================================== //
 //            LOGIN USER              //
-// ======================.============ //
+// ================================== //
 export const login = catchAsync(async (req, res, next) => {
   const result = loginSchema.safeParse(req.body);
 
@@ -244,7 +272,6 @@ export const login = catchAsync(async (req, res, next) => {
   }
 
   // check if the Account is ACTIVE or not
-
   if (user.accountStatus !== "ACTIVE") {
     return res.status(403).json({
       success: false,
@@ -260,7 +287,7 @@ export const login = catchAsync(async (req, res, next) => {
     return next(new AppError("Invalid email or password", 401));
   }
 
-  // FIX #1: Check if email is verified before allowing login
+  // Check if email is verified before allowing login
   if (!user.isEmailVerified) {
     return res.status(403).json({
       success: false,
@@ -373,7 +400,6 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
 
   const resetURL = `${getTrustedFrontendUrl()}/reset-password?token=${resetToken}`;
 
-  // const message = `forget your password ? please submit a patch request to : ${resetURL}`;
   const htmlMessage = `
 <!DOCTYPE html>
 <html lang="en">
@@ -450,7 +476,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
                 color: #9ca3af;
                 line-height: 1.5;
               ">
-                If you didn’t request a password reset, you can safely ignore this email.
+                If you didn't request a password reset, you can safely ignore this email.
                 Your password will remain unchanged.
               </p>
 
@@ -486,6 +512,7 @@ export const forgotPassword = catchAsync(async (req, res, next) => {
     return res.status(200).json(genericResponse);
   }
 });
+
 export const resetPassword = catchAsync(async (req, res, next) => {
   const resultData = await resetUserPassword({
     rawToken: req.params.token,
@@ -550,7 +577,7 @@ export const verifyEmail = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(user._id, {
     isEmailVerified: true,
     emailVerificationToken: undefined,
-    emailVerificationExpires: undefined
+    emailVerificationExpires: undefined,
   });
 
   res.status(200).json({
