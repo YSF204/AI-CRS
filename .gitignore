@@ -37,7 +37,7 @@ eslint.json
 *.md
 
 .claude/*
-
+.venv/
 # Scraper outputs (tracked intentionally)
 # scraper/*.json
 # scraper/*.csv

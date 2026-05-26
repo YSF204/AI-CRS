@@ -26,8 +26,11 @@ from bs4 import BeautifulSoup
 SITE_ROOT = "https://www.jobs.ps"
 BASE_URL = "https://www.jobs.ps/en/jobs?page={page}"
 RSS_URL = "https://www.jobs.ps/en/rss/jobs"
+ALLOWED_SOURCES = {"auto", "html", "rss"}
 DELAY_BETWEEN_PAGES = 3
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
 def build_headers():
     return {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -186,6 +189,34 @@ def scrape_rss_feed(scraper, max_items=None):
     return jobs
 
 
+def scrape_html_range(scraper, start_page, end_page):
+    all_jobs = []
+    for page_number in range(start_page, end_page + 1):
+        jobs = scrape_listing_page(scraper, page_number)
+        if not jobs and page_number > start_page:
+            print(f"No jobs on page {page_number}, stopping.")
+            break
+        all_jobs.extend(jobs)
+        time.sleep(DELAY_BETWEEN_PAGES)
+
+    return all_jobs
+
+
+def resolve_source(cli_source):
+    cli_source = (cli_source or "").strip().lower()
+    env_source = os.getenv("JOBS_SCRAPER_SOURCE", "").strip().lower()
+
+    source = cli_source or env_source or "auto"
+    if source not in ALLOWED_SOURCES:
+        print(f"[WARN] Unknown source '{source}', falling back to auto.")
+        source = "auto"
+
+    if source == "auto" and os.getenv("CI", "").strip().lower() == "true":
+        return "rss"
+
+    return source
+
+
 def save_to_json(jobs, filename):
     """Save jobs to JSON."""
     filepath = os.path.join(OUTPUT_DIR, filename)
@@ -199,6 +230,7 @@ def main():
     parser.add_argument("--start-page", type=int, default=1)
     parser.add_argument("--end-page",   type=int, default=3)
     parser.add_argument("--output",     type=str, default="jobs_2026")
+    parser.add_argument("--source",     type=str, default="auto", choices=sorted(ALLOWED_SOURCES))
     args = parser.parse_args()
 
     scraper = make_scraper()
@@ -214,18 +246,18 @@ def main():
     except Exception as e:
         print(f"[WARN] Homepage visit failed: {e}")
 
-    all_jobs = []
-    for page_number in range(args.start_page, args.end_page + 1):
-        jobs = scrape_listing_page(scraper, page_number)
-        if not jobs and page_number > args.start_page:
-            print(f"No jobs on page {page_number}, stopping.")
-            break
-        all_jobs.extend(jobs)
-        time.sleep(DELAY_BETWEEN_PAGES)
+    source = resolve_source(args.source)
+    print(f"Using source mode: {source}")
 
-    if not all_jobs:
-        print("[WARNING] No jobs found from HTML. Trying RSS feed...")
+    if source == "rss":
         all_jobs = scrape_rss_feed(scraper)
+    elif source == "html":
+        all_jobs = scrape_html_range(scraper, args.start_page, args.end_page)
+    else:
+        all_jobs = scrape_html_range(scraper, args.start_page, args.end_page)
+        if not all_jobs:
+            print("[WARNING] No jobs found from HTML. Trying RSS feed...")
+            all_jobs = scrape_rss_feed(scraper)
 
     print(f"\nTotal jobs scraped: {len(all_jobs)}")
     if not all_jobs:

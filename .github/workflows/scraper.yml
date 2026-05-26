@@ -29,7 +29,7 @@ jobs:
           pip install cloudscraper beautifulsoup4
 
       - name: Run scraper
-        run: python scraper/jobs_scraper.py --start-page 1 --end-page 3
+        run: python scraper/jobs_scraper.py --start-page 1 --end-page 3 --source rss
 
       - name: Show scraped output
         run: cat scraper/jobs_2026.json
