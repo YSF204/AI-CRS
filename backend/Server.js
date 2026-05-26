@@ -9,6 +9,7 @@ import mongoSanitize from "express-mongo-sanitize";
 import connectDB from "./src/config/dbConnect.js";
 import { initRedis } from "./src/config/redis.js";
 import { getAllowedOrigins } from "./src/config/security.js";
+import morgan from "morgan";
 
 const envPath = path.resolve(process.cwd(), ".env");
 dotenv.config({ path: envPath });
@@ -34,6 +35,7 @@ import suggestionRouter from "./src/routes/suggestionRoutes.js";
 const app = express();
 const PORT = process.env.PORT || 3001;
 const allowedOrigins = getAllowedOrigins();
+const isProd = process.env.NODE_ENV === "production";
 
 // Render sits behind a proxy, so trust one hop for correct client IPs.
 app.set("trust proxy", 1);
@@ -72,23 +74,15 @@ app.use(
   }),
 );
 
-// FIX: Default body limit is 1 MB — sufficient for all auth/API payloads.
-// The old 50 MB limit on public auth routes was a DoS vector (memory exhaustion).
-// CV/file upload routes override this with their own multer limits.
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ limit: "1mb", extended: true }));
+app.use(morgan(isProd ? "combined" : "tiny"));
 
 app.use(mongoSanitize());
 app.use(hpp());
 
 // ── Rate Limiting ──────────────────────────────────────────────────────────
-// General API traffic: 500 req / hour
 app.use("/api", regularLimiter);
-
-// FIX: Auth endpoints that are brute-force / abuse targets must use the
-// strict limiter (50 req/hr) rather than the loose one (500 req/hr).
-// Previously login and register were re-applying regularLimiter (no effect),
-// and resend-verification + verify-email had NO specific limiter at all.
 app.use("/api/auth/login", sensitiveLimiter);
 app.use("/api/auth/register", sensitiveLimiter);
 app.use("/api/auth/forgotPassword", sensitiveLimiter);

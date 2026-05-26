@@ -77,13 +77,13 @@ function normalizeEditorIssue(issue) {
 
   const fieldId = normalizeFieldId(
     issue.fieldId ??
-      issue.fieldID ??
-      issue.field_id ??
-      issue.field ??
-      issue.path ??
-      issue.key ??
-      issue.fieldKey ??
-      issue.fieldName,
+    issue.fieldID ??
+    issue.field_id ??
+    issue.field ??
+    issue.path ??
+    issue.key ??
+    issue.fieldKey ??
+    issue.fieldName,
   );
 
   return {
