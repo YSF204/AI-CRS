@@ -18,23 +18,16 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install playwright
-
-      - name: Install Playwright browsers & system deps
-        run: |
-          playwright install chromium
-          playwright install-deps chromium
+          pip install curl_cffi beautifulsoup4
 
       - name: Run scraper
         run: python scraper/jobs_scraper.py --start-page 1 --end-page 3
 
       - name: Show scraped output
-        run: |
-          echo "=== jobs_2026.json ==="
-          cat scraper/jobs_2026.json
+        run: cat scraper/jobs_2026.json
 
       - name: Commit and push results
         run: |
