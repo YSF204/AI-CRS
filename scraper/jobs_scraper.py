@@ -16,11 +16,13 @@ import argparse
 import json
 import os
 import time
+from urllib.parse import urljoin
 
 import cloudscraper
 from bs4 import BeautifulSoup
 
-BASE_URL = "https://www.jobs.ps/en/jobs/latest?page={page}"
+SITE_ROOT = "https://www.jobs.ps"
+BASE_URL = "https://www.jobs.ps/en/jobs?page={page}"
 DELAY_BETWEEN_PAGES = 3
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -43,8 +45,15 @@ def scrape_listing_page(scraper, page_number):
     print(f"\n{'='*60}")
     print(f"Scraping page {page_number}: {url}")
 
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.jobs.ps/en/jobs",
+    }
+
     try:
-        response = scraper.get(url, timeout=60)
+        response = scraper.get(url, timeout=60, headers=headers)
         print(f"HTTP status: {response.status_code}")
     except Exception as e:
         print(f"[ERROR] Request failed on page {page_number}: {e}")
@@ -65,7 +74,7 @@ def scrape_listing_page(scraper, page_number):
         return []
 
     soup = BeautifulSoup(html, "html.parser")
-    cards = soup.select("a.list-3--row")
+    cards = soup.select("a.list-3--row, a.list-3--title")
     print(f"Found {len(cards)} job cards on page {page_number}")
 
     if not cards:
@@ -77,6 +86,7 @@ def scrape_listing_page(scraper, page_number):
     for card in cards:
         try:
             href = (card.get("href") or "").strip()
+            href = urljoin(SITE_ROOT, href) if href else ""
             title = (card.get("title") or "").strip()
 
             if not title:
