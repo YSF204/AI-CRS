@@ -74,6 +74,35 @@ def extract_location_from_description(description):
     return ""
 
 
+def extract_rss_payload(text):
+    if not text:
+        return ""
+
+    cleaned = text.lstrip("\ufeff").strip()
+    if cleaned.startswith("<"):
+        return cleaned
+
+    start = cleaned.find("<?xml")
+    if start == -1:
+        start = cleaned.find("<rss")
+    if start == -1:
+        start = cleaned.find("<feed")
+    if start == -1:
+        return ""
+
+    end = cleaned.rfind("</rss>")
+    if end != -1:
+        end += len("</rss>")
+        return cleaned[start:end]
+
+    end = cleaned.rfind("</feed>")
+    if end != -1:
+        end += len("</feed>")
+        return cleaned[start:end]
+
+    return cleaned[start:]
+
+
 
 def make_scraper():
     """Create a cloudscraper session that solves Cloudflare JS challenges."""
@@ -181,10 +210,17 @@ def scrape_rss_feed(scraper, max_items=None):
         print(f"[ERROR] RSS non-200 status: {response.status_code}")
         return []
 
+    rss_payload = extract_rss_payload(response.text)
+    if not rss_payload:
+        snippet = (response.text or "").strip().replace("\n", " ")[:200]
+        print(f"[ERROR] RSS payload missing or not XML. Snippet: {snippet}")
+        return []
+
     try:
-        root = ET.fromstring(response.text)
+        root = ET.fromstring(rss_payload)
     except ET.ParseError as e:
-        print(f"[ERROR] RSS parse failed: {e}")
+        snippet = rss_payload.replace("\n", " ")[:200]
+        print(f"[ERROR] RSS parse failed: {e}. Snippet: {snippet}")
         return []
 
     items = root.findall(".//item")
