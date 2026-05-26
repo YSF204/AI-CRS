@@ -38,6 +38,6 @@ eslint.json
 
 .claude/*
 
-# Scraper outputs
-scraper/*.json
-scraper/*.csv
+# Scraper outputs (tracked intentionally)
+# scraper/*.json
+# scraper/*.csv
