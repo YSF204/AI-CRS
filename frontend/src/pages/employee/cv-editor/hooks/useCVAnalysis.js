@@ -311,10 +311,12 @@ export default function useCVAnalysis({
     if (!analysisResult?.issues) return {};
     const h = {};
     analysisResult.issues.forEach((issue) => {
+      const fieldId = typeof issue?.fieldId === "string" ? issue.fieldId.trim() : null;
+      if (!fieldId) return;
       if (issue.improvedText) {
-        h[issue.fieldId] = "suggestion";
+        h[fieldId] = "suggestion";
       } else {
-        h[issue.fieldId] = "warning";
+        h[fieldId] = "warning";
       }
     });
     return h;

@@ -71,17 +71,7 @@ export default function PostJob() {
             borderRadius: '0px',
           }}
         >
-          <div style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 14,
-            color: 'var(--nm-primary)',
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            letterSpacing: '0.2em',
-            marginBottom: 8
-          }}>
-            Asset Deployment
-          </div>
+          
           <h1 style={{
             fontFamily: 'var(--font-display)',
             fontWeight: 900,
@@ -93,7 +83,7 @@ export default function PostJob() {
             lineHeight: 1,
             margin: 0
           }}>
-            Publish Listing
+            Publish a Job Listing
           </h1>
           <p style={{
             fontFamily: 'var(--font-body)',

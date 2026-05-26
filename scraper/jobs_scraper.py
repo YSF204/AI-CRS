@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple Jobs.ps scraper using cloudscraper (handles Cloudflare challenges).
+Simple Jobs.ps scraper.
 
 Collects only:
   - title
@@ -16,304 +16,118 @@ import argparse
 import json
 import os
 import time
-import xml.etree.ElementTree as ET
-from html import unescape
-from urllib.parse import urljoin
 
-import cloudscraper
-from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
 
-SITE_ROOT = "https://www.jobs.ps"
-BASE_URL = "https://www.jobs.ps/en/jobs?page={page}"
-RSS_URL = "https://www.jobs.ps/en/rss/jobs"
-JINA_PREFIX = "https://r.jina.ai/http://"
-ALLOWED_SOURCES = {"auto", "html", "rss"}
-DELAY_BETWEEN_PAGES = 3
+BASE_URL = "https://www.jobs.ps/en/jobs/latest?page={page}"
+DELAY_BETWEEN_PAGES = 2
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-def build_headers():
-    return {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Referer": "https://www.jobs.ps/en/jobs",
-    }
-
-
-def extract_location_from_description(description):
-    if not description:
-        return ""
-
-    text = BeautifulSoup(description, "html.parser").get_text(" ", strip=True)
-    text = unescape(text)
-
-    dash_tokens = [" - ", " \u2013 ", " \u2014 "]
-    for token in dash_tokens:
-        if token in text:
-            after = text.split(token, 1)[1].strip()
-            stop_markers = [
-                " | ",
-                " Start:",
-                " Duration:",
-                " Fixed",
-                " Full",
-                " Part",
-                " Temporary",
-                " Contract",
-                " Type",
-                " Duty",
-            ]
-            cut_indexes = [after.find(marker) for marker in stop_markers if after.find(marker) != -1]
-            if cut_indexes:
-                after = after[:min(cut_indexes)].strip()
-            after = after.strip(" -|")
-            after = after.strip("\u2013\u2014")
-            return after
-
-    return ""
-
-
-def extract_rss_payload(text):
-    if not text:
-        return ""
-
-    cleaned = text.lstrip("\ufeff").strip()
-    if cleaned.startswith("<"):
-        return cleaned
-
-    start = cleaned.find("<?xml")
-    if start == -1:
-        start = cleaned.find("<rss")
-    if start == -1:
-        start = cleaned.find("<feed")
-    if start == -1:
-        return ""
-
-    end = cleaned.rfind("</rss>")
-    if end != -1:
-        end += len("</rss>")
-        return cleaned[start:end]
-
-    end = cleaned.rfind("</feed>")
-    if end != -1:
-        end += len("</feed>")
-        return cleaned[start:end]
-
-    return cleaned[start:]
-
-
-
-def make_scraper():
-    """Create a cloudscraper session that solves Cloudflare JS challenges."""
-    return cloudscraper.create_scraper(
-        browser={
-            "browser": "chrome",
-            "platform": "windows",
-            "mobile": False,
-        },
-        delay=10,           # seconds to wait before solving the CF challenge
-    )
-
-
-def scrape_listing_page(scraper, page_number):
+def scrape_listing_page(page, page_number):
     """Scrape a single listing page."""
     url = BASE_URL.format(page=page_number)
-    print(f"\n{'='*60}")
     print(f"Scraping page {page_number}: {url}")
 
-    headers = build_headers()
+    page.goto(url, wait_until="domcontentloaded", timeout=30000)
 
     try:
-        response = scraper.get(url, timeout=60, headers=headers)
-        print(f"HTTP status: {response.status_code}")
-    except Exception as e:
-        print(f"[ERROR] Request failed on page {page_number}: {e}")
+        page.wait_for_selector("a.list-3--row", timeout=15000)
+    except Exception:
+        print(f"No jobs found on page {page_number}")
         return []
-
-    html = response.text
-
-    # Debug: first 2000 chars
-    print(f"[DEBUG] HTML snippet:\n{html[:2000]}\n{'='*60}")
-
-    if response.status_code != 200:
-        print(f"[ERROR] Non-200 status: {response.status_code}")
-        return []
-
-    # Check if still blocked
-    if "just a moment" in html.lower() or "cf-browser-verification" in html.lower():
-        print(f"[BLOCKED] Cloudflare challenge not solved on page {page_number}.")
-        return []
-
-    soup = BeautifulSoup(html, "html.parser")
-    cards = soup.select("a.list-3--row, a.list-3--title")
-    print(f"Found {len(cards)} job cards on page {page_number}")
-
-    if not cards:
-        print("[DEBUG] No 'a.list-3--row' found. Nearby list elements:")
-        for tag in soup.find_all(class_=lambda c: c and "list" in c)[:5]:
-            print(f"  → <{tag.name} class='{tag.get('class')}'> {str(tag)[:200]}")
 
     jobs = []
+    cards = page.query_selector_all("a.list-3--row")
+
     for card in cards:
         try:
-            href = (card.get("href") or "").strip()
-            href = urljoin(SITE_ROOT, href) if href else ""
-            title = (card.get("title") or "").strip()
+            href = (card.get_attribute("href") or "").strip()
+            title = (card.get_attribute("title") or "").strip()
 
             if not title:
-                cell = card.select_one(".list-3--cell-1")
-                title = cell.get_text(strip=True) if cell else ""
+                title_cell = card.query_selector(".list-3--cell-1")
+                title = title_cell.inner_text().strip() if title_cell else ""
 
             location = ""
-            tooltip = card.select_one(".tooltip")
+            tooltip = card.query_selector(".tooltip")
             if tooltip:
-                location = (tooltip.get("title") or tooltip.get_text(strip=True) or "").strip()
+                location = (
+                    tooltip.get_attribute("title") or tooltip.inner_text() or ""
+                ).strip()
 
             if href and title:
-                jobs.append({"title": title, "location": location, "url": href})
-        except Exception as e:
-            print(f"Skipped one card: {e}")
+                jobs.append(
+                    {
+                        "title": title,
+                        "location": location,
+                        "url": href,
+                    }
+                )
+        except Exception as error:
+            print(f"Skipped one card: {error}")
 
-    print(f"Scraped {len(jobs)} valid jobs on page {page_number}")
+    print(f"Found {len(jobs)} jobs on page {page_number}")
     return jobs
-
-
-def scrape_rss_feed(scraper, max_items=None):
-    """Scrape the RSS feed as a fallback for blocked HTML pages."""
-    print(f"\n{'='*60}")
-    print(f"Scraping RSS feed: {RSS_URL}")
-
-    allow_jina = os.getenv("JOBS_SCRAPER_ALLOW_JINA", "").strip().lower() in {"1", "true", "yes"}
-    in_ci = os.getenv("CI", "").strip().lower() == "true"
-    if in_ci and os.getenv("JOBS_SCRAPER_ALLOW_JINA", "").strip() == "":
-        allow_jina = True
-
-    try:
-        response = scraper.get(RSS_URL, timeout=60, headers=build_headers())
-        print(f"RSS status: {response.status_code}")
-    except Exception as e:
-        print(f"[ERROR] RSS request failed: {e}")
-        return []
-
-    if response.status_code != 200 and allow_jina:
-        jina_url = f"{JINA_PREFIX}{RSS_URL}"
-        print(f"[WARN] RSS non-200 status ({response.status_code}). Trying Jina: {jina_url}")
-        try:
-            response = scraper.get(jina_url, timeout=60, headers=build_headers())
-            print(f"Jina RSS status: {response.status_code}")
-        except Exception as e:
-            print(f"[ERROR] Jina RSS request failed: {e}")
-            return []
-
-    if response.status_code != 200:
-        print(f"[ERROR] RSS non-200 status: {response.status_code}")
-        return []
-
-    rss_payload = extract_rss_payload(response.text)
-    if not rss_payload:
-        snippet = (response.text or "").strip().replace("\n", " ")[:200]
-        print(f"[ERROR] RSS payload missing or not XML. Snippet: {snippet}")
-        return []
-
-    try:
-        root = ET.fromstring(rss_payload)
-    except ET.ParseError as e:
-        snippet = rss_payload.replace("\n", " ")[:200]
-        print(f"[ERROR] RSS parse failed: {e}. Snippet: {snippet}")
-        return []
-
-    items = root.findall(".//item")
-    if max_items is not None:
-        items = items[:max_items]
-
-    jobs = []
-    for item in items:
-        title = (item.findtext("title") or "").strip()
-        link = (item.findtext("link") or "").strip()
-        description = (item.findtext("description") or "").strip()
-        location = extract_location_from_description(description)
-
-        if title and link:
-            jobs.append({"title": title, "location": location, "url": link})
-
-    print(f"Scraped {len(jobs)} jobs from RSS")
-    return jobs
-
-
-def scrape_html_range(scraper, start_page, end_page):
-    all_jobs = []
-    for page_number in range(start_page, end_page + 1):
-        jobs = scrape_listing_page(scraper, page_number)
-        if not jobs and page_number > start_page:
-            print(f"No jobs on page {page_number}, stopping.")
-            break
-        all_jobs.extend(jobs)
-        time.sleep(DELAY_BETWEEN_PAGES)
-
-    return all_jobs
-
-
-def resolve_source(cli_source):
-    cli_source = (cli_source or "").strip().lower()
-    env_source = os.getenv("JOBS_SCRAPER_SOURCE", "").strip().lower()
-
-    source = cli_source or env_source or "auto"
-    if source not in ALLOWED_SOURCES:
-        print(f"[WARN] Unknown source '{source}', falling back to auto.")
-        source = "auto"
-
-    if source == "auto" and os.getenv("CI", "").strip().lower() == "true":
-        return "rss"
-
-    return source
 
 
 def save_to_json(jobs, filename):
     """Save jobs to JSON."""
     filepath = os.path.join(OUTPUT_DIR, filename)
-    with open(filepath, "w", encoding="utf-8") as f:
-        json.dump(jobs, f, ensure_ascii=False, indent=2)
-    print(f"Saved JSON: {filepath} ({len(jobs)} jobs)")
+    with open(filepath, "w", encoding="utf-8") as file:
+        json.dump(jobs, file, ensure_ascii=False, indent=2)
+    print(f"Saved JSON: {filepath}")
 
 
 def main():
     parser = argparse.ArgumentParser(description="Scrape job listings from jobs.ps")
-    parser.add_argument("--start-page", type=int, default=1)
-    parser.add_argument("--end-page",   type=int, default=3)
-    parser.add_argument("--output",     type=str, default="jobs_2026")
-    parser.add_argument("--source",     type=str, default="auto", choices=sorted(ALLOWED_SOURCES))
+    parser.add_argument(
+        "--start-page",
+        type=int,
+        default=1,
+        help="First page to scrape (default: 1)",
+    )
+    parser.add_argument(
+        "--end-page",
+        type=int,
+        default=10,
+        help="Last page to scrape (default: 10)",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="jobs_2026",
+        help="Output filename prefix (default: jobs_2026)",
+    )
     args = parser.parse_args()
 
-    scraper = make_scraper()
+    all_jobs = []
 
-    # Warm up: visit homepage first to get CF clearance cookie
-    print("Warming up: visiting homepage to solve Cloudflare challenge...")
-    try:
-        r = scraper.get("https://www.jobs.ps/en/", timeout=60)
-        print(f"Homepage status: {r.status_code}")
-        if "just a moment" in r.text.lower():
-            print("[WARN] Homepage: still seeing CF challenge after warm-up")
-        time.sleep(3)
-    except Exception as e:
-        print(f"[WARN] Homepage visit failed: {e}")
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch(headless=True)
+        context = browser.new_context(
+            user_agent=(
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/120.0.0.0 Safari/537.36"
+            ),
+            viewport={"width": 1280, "height": 800},
+        )
+        page = context.new_page()
 
-    source = resolve_source(args.source)
-    print(f"Using source mode: {source}")
+        for page_number in range(args.start_page, args.end_page + 1):
+            jobs = scrape_listing_page(page, page_number)
+            if not jobs:
+                break
+            all_jobs.extend(jobs)
+            time.sleep(DELAY_BETWEEN_PAGES)
 
-    if source == "rss":
-        all_jobs = scrape_rss_feed(scraper)
-    elif source == "html":
-        all_jobs = scrape_html_range(scraper, args.start_page, args.end_page)
-    else:
-        all_jobs = scrape_html_range(scraper, args.start_page, args.end_page)
-        if not all_jobs:
-            print("[WARNING] No jobs found from HTML. Trying RSS feed...")
-            all_jobs = scrape_rss_feed(scraper)
+        browser.close()
 
-    print(f"\nTotal jobs scraped: {len(all_jobs)}")
+    print(f"Total jobs scraped: {len(all_jobs)}")
+
     if not all_jobs:
-        print("[WARNING] No jobs found. Writing empty output.")
+        print("No jobs found. Writing empty output files.")
 
     save_to_json(all_jobs, f"{args.output}.json")
 

@@ -17,10 +17,20 @@ export default function AnalysisModal({
   const [selectedUpdates, setSelectedUpdates] = useState({});
   const [showImprovements, setShowImprovements] = useState(false);
 
+  const normalizeFieldId = (value) => {
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      return trimmed ? trimmed : null;
+    }
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+    return null;
+  };
+
   useEffect(() => {
     if (analysis?.issues) {
       const initialSelected = analysis.issues.reduce((acc, issue) => {
-        acc[issue.fieldId] = true;
+        const fieldId = normalizeFieldId(issue?.fieldId);
+        if (fieldId) acc[fieldId] = true;
         return acc;
       }, {});
       setSelectedUpdates(initialSelected);
@@ -30,11 +40,13 @@ export default function AnalysisModal({
   const highlights = useMemo(() => {
     if (!analysis?.issues) return {};
     const h = {};
-    analysis.issues.forEach(issue => {
+    analysis.issues.forEach((issue) => {
+      const fieldId = normalizeFieldId(issue?.fieldId);
+      if (!fieldId) return;
       if (issue.improvedText) {
-        h[issue.fieldId] = 'suggestion';
+        h[fieldId] = "suggestion";
       } else {
-        h[issue.fieldId] = 'warning';
+        h[fieldId] = "warning";
       }
     });
     return h;
@@ -50,8 +62,10 @@ export default function AnalysisModal({
     const updatesToApply = {};
     if (analysis.issues) {
       analysis.issues.forEach((issue) => {
-        if (issue.improvedText || issue.fieldId) {
-          updatesToApply[issue.fieldId] = issue.improvedText || "__DELETE__";
+        const fieldId = normalizeFieldId(issue?.fieldId);
+        if (!fieldId) return;
+        if (issue.improvedText || fieldId) {
+          updatesToApply[fieldId] = issue.improvedText || "__DELETE__";
         }
       });
     }
@@ -62,8 +76,10 @@ export default function AnalysisModal({
     const updatesToApply = {};
     if (analysis.issues) {
       analysis.issues.forEach((issue) => {
-        if (selectedUpdates[issue.fieldId]) {
-          updatesToApply[issue.fieldId] = issue.improvedText || "__DELETE__";
+        const fieldId = normalizeFieldId(issue?.fieldId);
+        if (!fieldId) return;
+        if (selectedUpdates[fieldId]) {
+          updatesToApply[fieldId] = issue.improvedText || "__DELETE__";
         }
       });
     }

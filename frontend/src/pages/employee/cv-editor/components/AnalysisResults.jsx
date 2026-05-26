@@ -99,8 +99,17 @@ export default function AnalysisResults({
 
   const scoreColor = getScoreColor(analysis.overallScore ?? 0);
 
+  const normalizeFieldId = (id) => {
+    if (id == null) return null;
+    if (typeof id === "string") return id.trim() ? id : null;
+    if (typeof id === "number") return String(id);
+    return null;
+  };
+
   const formatFieldId = (id) => {
-    return id
+    const normalized = normalizeFieldId(id);
+    if (!normalized) return "Unknown Field";
+    return normalized
       .split("_")
       .map((word) =>
         /^\d+$/.test(word)
@@ -315,91 +324,101 @@ export default function AnalysisResults({
 
               {showImprovements && (
                 <div style={{ marginTop: "16px", display: "grid", gap: "14px" }}>
-                  {analysis.issues.map((issue) => (
-                    <div
-                      key={issue.fieldId}
-                      style={{
-                        background: "var(--nm-surface-low)",
-                        border: "3px solid var(--nm-ink)",
-                        padding: "14px",
-                      }}
-                    >
-                      <label style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "10px",
-                        cursor: "pointer",
-                        marginBottom: "12px",
-                      }}>
-                        <input
-                          type="checkbox"
-                          checked={selectedUpdates[issue.fieldId] || false}
-                          onChange={(e) => onCheckboxChange(issue.fieldId, e.target.checked)}
-                          style={{
-                            width: "18px",
-                            height: "18px",
-                            cursor: "pointer",
-                            accentColor: "var(--nm-primary)",
-                          }}
-                        />
-                        <strong style={{
-                          fontSize: "0.85rem",
-                          fontFamily: "'Space Grotesk', sans-serif",
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.05em",
-                        }}>
-                          {formatFieldId(issue.fieldId)}
-                        </strong>
-                      </label>
+                  {analysis.issues.map((issue, idx) => {
+                    const fieldId = normalizeFieldId(issue?.fieldId);
+                    const issueKey = fieldId ?? `issue_${idx}`;
+                    const isSelectable = Boolean(fieldId);
 
-                      <div style={{ display: "grid", gap: "10px", paddingLeft: "28px" }}>
-                        <p style={{
-                          fontSize: "0.85rem",
-                          color: "var(--nm-error)",
-                          margin: 0,
-                          padding: "8px 10px",
-                          background: "var(--nm-error-surface)",
-                          border: "2px solid var(--nm-error)",
-                          fontFamily: "Manrope, sans-serif",
-                          fontWeight: 500,
+                    return (
+                      <div
+                        key={issueKey}
+                        style={{
+                          background: "var(--nm-surface-low)",
+                          border: "3px solid var(--nm-ink)",
+                          padding: "14px",
+                        }}
+                      >
+                        <label style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "10px",
+                          cursor: isSelectable ? "pointer" : "not-allowed",
+                          marginBottom: "12px",
                         }}>
-                          <strong>Issue: </strong> {issue.reason}
-                        </p>
-                        {issue.originalText && (
+                          <input
+                            type="checkbox"
+                            disabled={!isSelectable}
+                            checked={fieldId ? selectedUpdates[fieldId] || false : false}
+                            onChange={(e) => {
+                              if (fieldId) onCheckboxChange(fieldId, e.target.checked);
+                            }}
+                            style={{
+                              width: "18px",
+                              height: "18px",
+                              cursor: isSelectable ? "pointer" : "not-allowed",
+                              opacity: isSelectable ? 1 : 0.6,
+                              accentColor: "var(--nm-primary)",
+                            }}
+                          />
+                          <strong style={{
+                            fontSize: "0.85rem",
+                            fontFamily: "'Space Grotesk', sans-serif",
+                            fontWeight: 700,
+                            textTransform: "uppercase",
+                            letterSpacing: "0.05em",
+                          }}>
+                            {formatFieldId(fieldId)}
+                          </strong>
+                        </label>
+
+                        <div style={{ display: "grid", gap: "10px", paddingLeft: "28px" }}>
                           <p style={{
                             fontSize: "0.85rem",
-                            color: "var(--nm-text-secondary)",
+                            color: "var(--nm-error)",
                             margin: 0,
                             padding: "8px 10px",
-                            background: "var(--nm-bg)",
-                            border: "2px solid var(--nm-text-tertiary)",
+                            background: "var(--nm-error-surface)",
+                            border: "2px solid var(--nm-error)",
                             fontFamily: "Manrope, sans-serif",
+                            fontWeight: 500,
                           }}>
-                            <strong>Current: </strong>
-                            <span style={{ textDecoration: "line-through" }}>
-                              {issue.originalText.length > 150
-                                ? issue.originalText.slice(0, 150) + "..."
-                                : issue.originalText}
-                            </span>
+                            <strong>Issue: </strong> {issue.reason}
                           </p>
-                        )}
-                        <p style={{
-                          fontSize: "0.9rem",
-                          color: "var(--nm-success)",
-                          margin: 0,
-                          padding: "10px 12px",
-                          background: "var(--nm-success-surface)",
-                          border: "2px solid var(--nm-success)",
-                          fontFamily: "Manrope, sans-serif",
-                          fontWeight: 500,
-                          lineHeight: 1.6,
-                        }}>
-                          <strong>Suggested: </strong> {issue.improvedText}
-                        </p>
+                          {issue.originalText && (
+                            <p style={{
+                              fontSize: "0.85rem",
+                              color: "var(--nm-text-secondary)",
+                              margin: 0,
+                              padding: "8px 10px",
+                              background: "var(--nm-bg)",
+                              border: "2px solid var(--nm-text-tertiary)",
+                              fontFamily: "Manrope, sans-serif",
+                            }}>
+                              <strong>Current: </strong>
+                              <span style={{ textDecoration: "line-through" }}>
+                                {issue.originalText.length > 150
+                                  ? issue.originalText.slice(0, 150) + "..."
+                                  : issue.originalText}
+                              </span>
+                            </p>
+                          )}
+                          <p style={{
+                            fontSize: "0.9rem",
+                            color: "var(--nm-success)",
+                            margin: 0,
+                            padding: "10px 12px",
+                            background: "var(--nm-success-surface)",
+                            border: "2px solid var(--nm-success)",
+                            fontFamily: "Manrope, sans-serif",
+                            fontWeight: 500,
+                            lineHeight: 1.6,
+                          }}>
+                            <strong>Suggested: </strong> {issue.improvedText}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
 
                   <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "8px" }}>
                     <BrutalButton onClick={onApplySelected} variant="primary">

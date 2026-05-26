@@ -59,8 +59,56 @@ export function normalizeEditorAnalysis(raw) {
     overallScore: clampScore(raw.overallScore ?? 0),
     sections,
     generalAdvice: Array.isArray(raw.generalAdvice) ? raw.generalAdvice : [],
-    issues: Array.isArray(raw.issues) ? raw.issues : [],
+    issues: normalizeEditorIssues(raw.issues),
   };
+}
+
+export function normalizeEditorIssues(rawIssues) {
+  const issues = Array.isArray(rawIssues) ? rawIssues : [];
+  return issues
+    .map(normalizeEditorIssue)
+    .filter((issue) => issue.fieldId && (issue.reason || issue.improvedText || issue.originalText));
+}
+
+function normalizeEditorIssue(issue) {
+  if (!issue || typeof issue !== "object") {
+    return { fieldId: null, originalText: "", reason: "", improvedText: "" };
+  }
+
+  const fieldId = normalizeFieldId(
+    issue.fieldId ??
+      issue.fieldID ??
+      issue.field_id ??
+      issue.field ??
+      issue.path ??
+      issue.key ??
+      issue.fieldKey ??
+      issue.fieldName,
+  );
+
+  return {
+    fieldId,
+    originalText: normalizeIssueText(issue.originalText ?? issue.original ?? issue.before ?? ""),
+    reason: normalizeIssueText(issue.reason ?? issue.issue ?? issue.problem ?? ""),
+    improvedText: normalizeIssueText(issue.improvedText ?? issue.suggestion ?? issue.rewrite ?? issue.after ?? ""),
+  };
+}
+
+function normalizeIssueText(value) {
+  if (typeof value !== "string") return "";
+  return value.trim();
+}
+
+function normalizeFieldId(value) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  // Normalize common path formats like experience[0].summary to experience_0_summary
+  return trimmed
+    .replace(/\[(\d+)\]/g, "_$1")
+    .replace(/\./g, "_")
+    .replace(/__+/g, "_");
 }
 
 function clampScore(score) {

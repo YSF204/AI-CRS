@@ -19,7 +19,7 @@ import {
 } from "../utils/profileNormalizer.js";
 import { generateAIMatchAnalysis } from "../services/matching/matchingService.js";
 import { runUnifiedATSScoring, buildCvDataForATS } from "../services/cvs/analysis/analyzeSavedCv.js";
-import { normalizeEditorAnalysis, normalizeATSScore } from "../services/cvs/analysis/normalizeScore.js";
+import { normalizeEditorAnalysis, normalizeEditorIssues, normalizeATSScore } from "../services/cvs/analysis/normalizeScore.js";
 import parseAiJsonResponse from "../services/cvs/helpers/parseAiJsonResponse.js";
 import crypto from "crypto";
 import { getSupabaseClient, SUPABASE_BUCKET } from "../config/supabase.js";
@@ -624,7 +624,7 @@ export const analyzeSection = catchAsync(async (req, res, next) => {
     });
   }
 
-  const issues = parsed.issues || [];
+  const issues = normalizeEditorIssues(parsed.issues || []);
   const atsScore = parsed.atsScore || null;
   const atsFeedback = parsed.atsFeedback || "";
 
