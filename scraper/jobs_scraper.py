@@ -16,6 +16,8 @@ import argparse
 import json
 import os
 import time
+import xml.etree.ElementTree as ET
+from html import unescape
 from urllib.parse import urljoin
 
 import cloudscraper
@@ -23,8 +25,50 @@ from bs4 import BeautifulSoup
 
 SITE_ROOT = "https://www.jobs.ps"
 BASE_URL = "https://www.jobs.ps/en/jobs?page={page}"
+RSS_URL = "https://www.jobs.ps/en/rss/jobs"
 DELAY_BETWEEN_PAGES = 3
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
+def build_headers():
+    return {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.jobs.ps/en/jobs",
+    }
+
+
+def extract_location_from_description(description):
+    if not description:
+        return ""
+
+    text = BeautifulSoup(description, "html.parser").get_text(" ", strip=True)
+    text = unescape(text)
+
+    dash_tokens = [" - ", " \u2013 ", " \u2014 "]
+    for token in dash_tokens:
+        if token in text:
+            after = text.split(token, 1)[1].strip()
+            stop_markers = [
+                " | ",
+                " Start:",
+                " Duration:",
+                " Fixed",
+                " Full",
+                " Part",
+                " Temporary",
+                " Contract",
+                " Type",
+                " Duty",
+            ]
+            cut_indexes = [after.find(marker) for marker in stop_markers if after.find(marker) != -1]
+            if cut_indexes:
+                after = after[:min(cut_indexes)].strip()
+            after = after.strip(" -|")
+            after = after.strip("\u2013\u2014")
+            return after
+
+    return ""
+
 
 
 def make_scraper():
@@ -45,12 +89,7 @@ def scrape_listing_page(scraper, page_number):
     print(f"\n{'='*60}")
     print(f"Scraping page {page_number}: {url}")
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                      "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Referer": "https://www.jobs.ps/en/jobs",
-    }
+    headers = build_headers()
 
     try:
         response = scraper.get(url, timeout=60, headers=headers)
@@ -107,6 +146,46 @@ def scrape_listing_page(scraper, page_number):
     return jobs
 
 
+def scrape_rss_feed(scraper, max_items=None):
+    """Scrape the RSS feed as a fallback for blocked HTML pages."""
+    print(f"\n{'='*60}")
+    print(f"Scraping RSS feed: {RSS_URL}")
+
+    try:
+        response = scraper.get(RSS_URL, timeout=60, headers=build_headers())
+        print(f"RSS status: {response.status_code}")
+    except Exception as e:
+        print(f"[ERROR] RSS request failed: {e}")
+        return []
+
+    if response.status_code != 200:
+        print(f"[ERROR] RSS non-200 status: {response.status_code}")
+        return []
+
+    try:
+        root = ET.fromstring(response.text)
+    except ET.ParseError as e:
+        print(f"[ERROR] RSS parse failed: {e}")
+        return []
+
+    items = root.findall(".//item")
+    if max_items is not None:
+        items = items[:max_items]
+
+    jobs = []
+    for item in items:
+        title = (item.findtext("title") or "").strip()
+        link = (item.findtext("link") or "").strip()
+        description = (item.findtext("description") or "").strip()
+        location = extract_location_from_description(description)
+
+        if title and link:
+            jobs.append({"title": title, "location": location, "url": link})
+
+    print(f"Scraped {len(jobs)} jobs from RSS")
+    return jobs
+
+
 def save_to_json(jobs, filename):
     """Save jobs to JSON."""
     filepath = os.path.join(OUTPUT_DIR, filename)
@@ -143,6 +222,10 @@ def main():
             break
         all_jobs.extend(jobs)
         time.sleep(DELAY_BETWEEN_PAGES)
+
+    if not all_jobs:
+        print("[WARNING] No jobs found from HTML. Trying RSS feed...")
+        all_jobs = scrape_rss_feed(scraper)
 
     print(f"\nTotal jobs scraped: {len(all_jobs)}")
     if not all_jobs:
