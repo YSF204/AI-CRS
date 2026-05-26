@@ -26,6 +26,7 @@ from bs4 import BeautifulSoup
 SITE_ROOT = "https://www.jobs.ps"
 BASE_URL = "https://www.jobs.ps/en/jobs?page={page}"
 RSS_URL = "https://www.jobs.ps/en/rss/jobs"
+JINA_PREFIX = "https://r.jina.ai/http://"
 ALLOWED_SOURCES = {"auto", "html", "rss"}
 DELAY_BETWEEN_PAGES = 3
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -154,12 +155,27 @@ def scrape_rss_feed(scraper, max_items=None):
     print(f"\n{'='*60}")
     print(f"Scraping RSS feed: {RSS_URL}")
 
+    allow_jina = os.getenv("JOBS_SCRAPER_ALLOW_JINA", "").strip().lower() in {"1", "true", "yes"}
+    in_ci = os.getenv("CI", "").strip().lower() == "true"
+    if in_ci and os.getenv("JOBS_SCRAPER_ALLOW_JINA", "").strip() == "":
+        allow_jina = True
+
     try:
         response = scraper.get(RSS_URL, timeout=60, headers=build_headers())
         print(f"RSS status: {response.status_code}")
     except Exception as e:
         print(f"[ERROR] RSS request failed: {e}")
         return []
+
+    if response.status_code != 200 and allow_jina:
+        jina_url = f"{JINA_PREFIX}{RSS_URL}"
+        print(f"[WARN] RSS non-200 status ({response.status_code}). Trying Jina: {jina_url}")
+        try:
+            response = scraper.get(jina_url, timeout=60, headers=build_headers())
+            print(f"Jina RSS status: {response.status_code}")
+        except Exception as e:
+            print(f"[ERROR] Jina RSS request failed: {e}")
+            return []
 
     if response.status_code != 200:
         print(f"[ERROR] RSS non-200 status: {response.status_code}")
