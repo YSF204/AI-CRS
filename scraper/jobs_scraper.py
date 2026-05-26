@@ -132,7 +132,7 @@ def main():
     print(f"Total jobs scraped: {len(all_jobs)}")
 
     if not all_jobs:
-        print("No jobs found. Writing empty output file.")
+        print("No jobs found. Writing empty output files.")
 
     save_to_json(all_jobs, f"{args.output}.json")
 
