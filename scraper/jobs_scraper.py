@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple Jobs.ps scraper using curl_cffi (bypasses Cloudflare).
+Simple Jobs.ps scraper using cloudscraper (handles Cloudflare challenges).
 
 Collects only:
   - title
@@ -17,54 +17,51 @@ import json
 import os
 import time
 
+import cloudscraper
 from bs4 import BeautifulSoup
-from curl_cffi import requests
 
 BASE_URL = "https://www.jobs.ps/en/jobs/latest?page={page}"
-DELAY_BETWEEN_PAGES = 2
+DELAY_BETWEEN_PAGES = 3
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Impersonate real Chrome to bypass Cloudflare
-SESSION = requests.Session(impersonate="chrome124")
-SESSION.headers.update({
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.9",
-    "Accept-Encoding": "gzip, deflate, br",
-    "DNT": "1",
-    "Upgrade-Insecure-Requests": "1",
-    "Sec-Fetch-Dest": "document",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "none",
-    "Sec-Fetch-User": "?1",
-})
+
+def make_scraper():
+    """Create a cloudscraper session that solves Cloudflare JS challenges."""
+    return cloudscraper.create_scraper(
+        browser={
+            "browser": "chrome",
+            "platform": "windows",
+            "mobile": False,
+        },
+        delay=10,           # seconds to wait before solving the CF challenge
+    )
 
 
-def scrape_listing_page(page_number):
-    """Scrape a single listing page using curl_cffi."""
+def scrape_listing_page(scraper, page_number):
+    """Scrape a single listing page."""
     url = BASE_URL.format(page=page_number)
     print(f"\n{'='*60}")
     print(f"Scraping page {page_number}: {url}")
 
     try:
-        response = SESSION.get(url, timeout=30)
+        response = scraper.get(url, timeout=60)
         print(f"HTTP status: {response.status_code}")
     except Exception as e:
         print(f"[ERROR] Request failed on page {page_number}: {e}")
         return []
 
-    if response.status_code != 200:
-        print(f"[ERROR] Non-200 status: {response.status_code}")
-        print(response.text[:1000])
-        return []
-
     html = response.text
 
-    # Debug: show first 2000 chars
+    # Debug: first 2000 chars
     print(f"[DEBUG] HTML snippet:\n{html[:2000]}\n{'='*60}")
 
-    # Check for Cloudflare block
+    if response.status_code != 200:
+        print(f"[ERROR] Non-200 status: {response.status_code}")
+        return []
+
+    # Check if still blocked
     if "just a moment" in html.lower() or "cf-browser-verification" in html.lower():
-        print(f"[BLOCKED] Cloudflare challenge still present on page {page_number}.")
+        print(f"[BLOCKED] Cloudflare challenge not solved on page {page_number}.")
         return []
 
     soup = BeautifulSoup(html, "html.parser")
@@ -72,8 +69,7 @@ def scrape_listing_page(page_number):
     print(f"Found {len(cards)} job cards on page {page_number}")
 
     if not cards:
-        # Print a bit more HTML for diagnosis
-        print("[DEBUG] No cards found. Trying to find any job-related elements...")
+        print("[DEBUG] No 'a.list-3--row' found. Nearby list elements:")
         for tag in soup.find_all(class_=lambda c: c and "list" in c)[:5]:
             print(f"  → <{tag.name} class='{tag.get('class')}'> {str(tag)[:200]}")
 
@@ -93,11 +89,7 @@ def scrape_listing_page(page_number):
                 location = (tooltip.get("title") or tooltip.get_text(strip=True) or "").strip()
 
             if href and title:
-                jobs.append({
-                    "title": title,
-                    "location": location,
-                    "url": href,
-                })
+                jobs.append({"title": title, "location": location, "url": href})
         except Exception as e:
             print(f"Skipped one card: {e}")
 
@@ -115,24 +107,27 @@ def save_to_json(jobs, filename):
 
 def main():
     parser = argparse.ArgumentParser(description="Scrape job listings from jobs.ps")
-    parser.add_argument("--start-page", type=int, default=1, help="First page (default: 1)")
-    parser.add_argument("--end-page", type=int, default=3, help="Last page (default: 3)")
-    parser.add_argument("--output", type=str, default="jobs_2026", help="Output filename prefix")
+    parser.add_argument("--start-page", type=int, default=1)
+    parser.add_argument("--end-page",   type=int, default=3)
+    parser.add_argument("--output",     type=str, default="jobs_2026")
     args = parser.parse_args()
 
-    all_jobs = []
+    scraper = make_scraper()
 
-    # Warm up: visit homepage first to get cookies
-    print("Warming up: visiting homepage...")
+    # Warm up: visit homepage first to get CF clearance cookie
+    print("Warming up: visiting homepage to solve Cloudflare challenge...")
     try:
-        r = SESSION.get("https://www.jobs.ps/en/", timeout=20)
+        r = scraper.get("https://www.jobs.ps/en/", timeout=60)
         print(f"Homepage status: {r.status_code}")
-        time.sleep(1)
+        if "just a moment" in r.text.lower():
+            print("[WARN] Homepage: still seeing CF challenge after warm-up")
+        time.sleep(3)
     except Exception as e:
         print(f"[WARN] Homepage visit failed: {e}")
 
+    all_jobs = []
     for page_number in range(args.start_page, args.end_page + 1):
-        jobs = scrape_listing_page(page_number)
+        jobs = scrape_listing_page(scraper, page_number)
         if not jobs and page_number > args.start_page:
             print(f"No jobs on page {page_number}, stopping.")
             break
