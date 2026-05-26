@@ -13,7 +13,6 @@ Usage:
 """
 
 import argparse
-import csv
 import json
 import os
 import time
@@ -23,7 +22,6 @@ from playwright.sync_api import sync_playwright
 BASE_URL = "https://www.jobs.ps/en/jobs/latest?page={page}"
 DELAY_BETWEEN_PAGES = 2
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
-OUTPUT_FIELDS = ["title", "location", "url"]
 
 
 def scrape_listing_page(page, page_number):
@@ -81,16 +79,6 @@ def save_to_json(jobs, filename):
     print(f"Saved JSON: {filepath}")
 
 
-def save_to_csv(jobs, filename):
-    """Save jobs to CSV."""
-    filepath = os.path.join(OUTPUT_DIR, filename)
-    with open(filepath, "w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=OUTPUT_FIELDS)
-        writer.writeheader()
-        writer.writerows(jobs)
-    print(f"Saved CSV: {filepath}")
-
-
 def main():
     parser = argparse.ArgumentParser(description="Scrape job listings from jobs.ps")
     parser.add_argument(
@@ -139,11 +127,9 @@ def main():
     print(f"Total jobs scraped: {len(all_jobs)}")
 
     if not all_jobs:
-        print("No jobs found.")
-        return
+        print("No jobs found. Writing empty output file.")
 
     save_to_json(all_jobs, f"{args.output}.json")
-    save_to_csv(all_jobs, f"{args.output}.csv")
 
 
 if __name__ == "__main__":
