@@ -30,6 +30,8 @@ def scrape_listing_page(page, page_number):
     print(f"Scraping page {page_number}: {url}")
 
     page.goto(url, wait_until="domcontentloaded", timeout=30000)
+    # Debug: show the first part of the HTML so we can detect blocks or changes.
+    print(page.content()[:2000])
 
     try:
         page.wait_for_selector("a.list-3--row", timeout=15000)
@@ -104,7 +106,10 @@ def main():
     all_jobs = []
 
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(headless=True)
+        browser = playwright.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-setuid-sandbox"],
+        )
         context = browser.new_context(
             user_agent=(
                 "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
