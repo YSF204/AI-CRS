@@ -1,0 +1,49 @@
+{
+    "name": "ai-crs-backend",
+    "version": "1.0.0",
+    "description": "AI Career & Recruitment System - Backend API",
+    "main": "Server.js",
+    "type": "module",
+    "scripts": {
+        "start": "node Server.js",
+        "dev": "nodemon Server.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "ai",
+        "recruitment",
+        "career",
+        "job-matching",
+        "cv-analysis"
+    ],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@google/genai": "^1.40.0",
+        "axios": "^1.6.5",
+        "bcryptjs": "^2.4.3",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "express-mongo-sanitize": "^2.2.0",
+        "express-rate-limit": "^8.2.1",
+        "google-auth-library": "^10.6.1",
+        "groq-sdk": "^0.37.0",
+        "helmet": "^8.1.0",
+        "hpp": "^0.2.3",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^8.0.3",
+        "multer": "^2.0.2",
+        "nodemailer": "^8.0.1",
+        "openai": "^6.21.0",
+        "puppeteer": "^24.37.3",
+        "@supabase/supabase-js": "^2.106.0",
+        "redis": "^5.8.2",
+        "validator": "^13.15.26",
+        "zod": "^4.3.6"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.11",
+        "vitest": "^4.1.4"
+    }
+}

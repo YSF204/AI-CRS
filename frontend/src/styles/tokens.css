@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+/* ═════════════════════════════════════════════════════════════════════
+   NEO MINIMAL DESIGN SYSTEM — The Structural Manifesto
+   Industrial Editorial / Blueprinted Space
+   ═════════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ===== NEO MINIMAL COLOR TOKENS ===== */
+
+  /* Primary Colors */
+  --nm-bg: #fbfaee;
+  --nm-surface: #ffffff;
+  --nm-surface-high: #e9e9dd;
+  --nm-surface-low: #f5f4e8;
+
+  /* Action Colors */
+  --nm-primary: #1e51f6;
+  --nm-primary-hover: #003acb;
+  --nm-success: #198754;
+  --nm-success-surface: #d1e7dd;
+  --nm-warning: #fd7e14;
+  --nm-warning-surface: #fff3cd;
+  --nm-error: #ba1a1a;
+  --nm-error-surface: #f8d7da;
+
+  /* Text & Structural */
+  --nm-ink: #1b1c15;
+  --nm-text-primary: #1b1c15;
+  --nm-text-secondary: #6b6963;
+  --nm-text-tertiary: #9c9a92;
+  --nm-text-inverse: #ffffff;
+
+  /* Legacy Aliases for backward compatibility */
+  --color-primary: var(--nm-primary);
+  --color-primary-light: rgba(30, 81, 246, 0.1);
+  --color-primary-hover: var(--nm-primary-hover);
+  --color-success: var(--nm-success);
+  --color-success-light: var(--nm-success-surface);
+  --color-warning: var(--nm-warning);
+  --color-warning-light: var(--nm-warning-surface);
+  --color-danger: var(--nm-error);
+  --color-danger-light: var(--nm-error-surface);
+
+  --color-surface-1: var(--nm-bg);
+  --color-surface-2: var(--nm-surface);
+  --color-surface-3: var(--nm-surface-high);
+  --color-surface-4: var(--nm-surface-low);
+
+  --color-text-primary: var(--nm-text-primary);
+  --color-text-secondary: var(--nm-text-secondary);
+  --color-text-tertiary: var(--nm-text-tertiary);
+  --color-text-inverse: var(--nm-text-inverse);
+
+  --color-border-strong: var(--nm-ink);
+  --color-border-weak: var(--nm-surface-high);
+
+  /* Spacing Scale (4px base unit) */
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-12: 48px;
+
+  /* Typography Scale */
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+  --text-3xl: 48px;
+  --text-4xl: 64px;
+
+  /* Border Radius — ALWAYS 0px */
+  --border-radius-none: 0px;
+}
+
+/* Dark Mode Neo Minimal Tokens */
+[data-theme="dark"] {
+  --nm-bg: #2d323b;
+  --nm-surface: #3a414b;
+  --nm-surface-high: #4a515d;
+  --nm-surface-low: #353b46;
+
+  --nm-primary: #4d7bff;
+  --nm-primary-hover: #7aa2ff;
+  --nm-success: #40c057;
+  --nm-success-surface: rgba(64, 192, 87, 0.15);
+  --nm-warning: #ff922b;
+  --nm-warning-surface: rgba(255, 146, 43, 0.15);
+  --nm-error: #fa5252;
+  --nm-error-surface: rgba(250, 82, 82, 0.15);
+
+  --nm-ink: #4a515d;
+  --nm-text-primary: #e8eaed;
+  --nm-text-secondary: #b0b5bc;
+  --nm-text-tertiary: #8a8f96;
+  --nm-text-inverse: #ffffff;
+}

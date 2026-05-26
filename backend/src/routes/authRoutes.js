@@ -1,0 +1,35 @@
+import express from "express";
+import {
+  register,
+  login,
+  getCurrentUser,
+  logout,
+  forgotPassword,
+  resetPassword,
+  updatePassword,
+  verifyEmail,
+  resendVerificationEmail,
+} from "../controllers/authController.js";
+import { googleAuth, googleRegister, googleCompleteProfile } from "../controllers/OauthController.js";
+import { authenticate } from "../middleware/Auth.js";
+
+const router = express.Router();
+
+router.post("/register", register);
+router.post("/login", login);
+router.get("/me", authenticate, getCurrentUser);
+router.post("/logout", authenticate, logout);
+router.post("/forgotPassword", forgotPassword);
+router.patch("/resetPassword/:token", resetPassword);
+router.patch("/updatePassword", authenticate, updatePassword);
+
+// FIX #1: Email verification routes
+router.get("/verify-email/:token", verifyEmail);
+router.post("/resend-verification-email", resendVerificationEmail);
+
+// Google OAuth routes
+router.post("/google", googleAuth);
+router.post("/google/register", googleRegister);
+router.post("/google/complete-profile", googleCompleteProfile);
+
+export default router;

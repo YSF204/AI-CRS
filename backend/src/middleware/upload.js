@@ -1,0 +1,39 @@
+import multer from "multer";
+import path from "path";
+import AppError from "../utils/appError.js";
+
+const ALLOWED_PDF_MIME_TYPES = new Set(["application/pdf"]);
+const ALLOWED_PDF_EXTENSIONS = new Set([".pdf"]);
+
+// ================================== //
+//     FILE FILTER ( PDF ONLY )       //
+// ================================== //
+
+const fileFilter = (req, file, cb) => {
+  const extension = path.extname(file.originalname || "").toLowerCase();
+  const isPdfMime = ALLOWED_PDF_MIME_TYPES.has(file.mimetype);
+  const isPdfExtension = ALLOWED_PDF_EXTENSIONS.has(extension);
+
+  if (isPdfMime && isPdfExtension) {
+    cb(null, true);
+  } else {
+    cb(new AppError("Only PDF files are allowed", 400), false);
+  }
+};
+
+// ================================== //
+//     MULTER UPLOAD INSTANCE         //
+// ================================== //
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5 MB max
+  },
+});
+
+// middleware to upload a single CV file
+export const uploadCV = upload.single("cvFile");
+
+export default upload;

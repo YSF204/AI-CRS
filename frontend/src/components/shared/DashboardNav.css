@@ -1,0 +1,310 @@
+.jd-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--sidebar-width);
+  background: var(--nm-surface);
+  border-right: 4px solid var(--nm-ink);
+  /* z-index 400: above CV editor bottom sheet (300) and tab bar (100) */
+  z-index: 400;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+  border-radius: 0px;
+}
+
+/* Dark mode sidebar adjustments */
+[data-theme="dark"] .jd-sidebar {
+  background: var(--nm-surface);
+  border-right-color: var(--nm-ink);
+}
+
+/* Mobile responsive behavior - hide sidebar on small screens */
+@media (max-width: 767px) {
+  .jd-sidebar {
+    transform: translateX(-100%);
+  }
+
+  body.mobile-sidebar-open .jd-sidebar {
+    transform: translateX(0);
+  }
+
+  /* Mobile sidebar backdrop overlay */
+  .jd-sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 390; /* below sidebar (400) */
+    animation: fadeInOverlay 0.2s ease-out;
+  }
+
+  @keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Hide the floating hamburger inside the CV editor — it has its own action bar */
+  .cv-editor-mobile-layout .mobile-menu-btn {
+    display: none !important;
+  }
+}
+
+/* Mobile menu button for opening sidebar */
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  /* z-index 410: above everything including the open sidebar (400) */
+  z-index: 410;
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--nm-ink);
+  background: var(--nm-primary);
+  color: #fff;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 4px 4px 0 var(--nm-ink);
+  border-radius: 0px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-menu-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--nm-ink);
+}
+
+.mobile-menu-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--nm-ink);
+}
+
+/* Show mobile menu button only on mobile */
+@media (max-width: 767px) {
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  /* Adjust dashboard shell padding on mobile to account for menu button */
+  .dashboard-shell {
+    padding-top: 5rem !important;
+  }
+}
+
+/* Hide menu button when sidebar is open on mobile */
+body.mobile-sidebar-open .mobile-menu-btn {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Tablet and desktop - always show sidebar */
+@media (min-width: 768px) {
+  .jd-sidebar {
+    transform: translateX(0);
+  }
+
+  .jd-sidebar::before {
+    display: none;
+  }
+}
+
+.jd-sidebar-header {
+  height: 90px;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--spacing-4);
+  border-bottom: 4px solid var(--nm-ink);
+  flex-shrink: 0;
+  justify-content: flex-start;
+  position: relative;
+  overflow: hidden;
+  background: var(--nm-surface);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.jd-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: var(--nm-text-primary);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  transition: opacity 0.2s;
+  width: 100%;
+}
+
+.jd-sidebar-brand-text {
+  opacity: 0;
+  transform: translateX(-15px);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 0.2rem 0.6rem;
+  background: var(--nm-primary);
+  color: #fff;
+  border: 3px solid var(--nm-ink);
+  box-shadow: 3px 3px 0 var(--nm-ink);
+}
+
+body.sidebar-open .jd-sidebar-brand-text {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: 0.1s;
+}
+
+.jd-sidebar-toggle {
+  position: absolute;
+  top: 1.75rem;
+  right: -18px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid var(--nm-ink);
+  background: var(--nm-surface);
+  color: var(--nm-text-primary);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 55;
+  box-shadow: 4px 4px 0 var(--nm-ink);
+  border-radius: 0px;
+}
+
+.jd-sidebar-toggle:hover {
+  background: var(--nm-primary);
+  color: #fff;
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 var(--nm-ink);
+}
+
+.jd-sidebar-toggle:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--nm-ink);
+}
+
+.jd-sidebar-nav {
+  flex: 1;
+  padding: var(--spacing-8) var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.jd-sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  height: 52px;
+  padding: 0 var(--spacing-3);
+  color: var(--nm-text-secondary);
+  text-decoration: none;
+  font-weight: 800;
+  border: 4px solid transparent;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  border-radius: 0px;
+}
+
+.jd-sidebar-link:hover {
+  border-color: var(--nm-ink);
+  background: var(--nm-bg);
+  color: var(--nm-text-primary);
+  box-shadow: 4px 4px 0 var(--nm-ink);
+  transform: translate(-2px, -2px);
+}
+
+.jd-sidebar-link[data-active="true"] {
+  border-color: var(--nm-ink);
+  background: var(--nm-primary);
+  color: #fff;
+  box-shadow: 4px 4px 0 var(--nm-ink);
+}
+
+.jd-sidebar-link-icon {
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.jd-sidebar-link-text {
+  opacity: 0;
+  transform: translateX(-15px);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.sidebar-open .jd-sidebar-link-text {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: 0.1s;
+}
+
+.jd-sidebar-footer {
+  padding: var(--spacing-6) var(--spacing-4);
+  border-top: 4px solid var(--nm-ink);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  overflow: hidden;
+  background: var(--nm-surface);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.jd-sidebar-action {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  height: 48px;
+  padding: 0 var(--spacing-3);
+  color: var(--nm-text-primary);
+  border: 4px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 800;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  width: 100%;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: 12px;
+  box-sizing: border-box;
+  border-radius: 0px;
+  letter-spacing: 0.05em;
+}
+
+.jd-sidebar-action:hover {
+  border-color: var(--nm-ink);
+  background: var(--nm-bg);
+  box-shadow: 4px 4px 0 var(--nm-ink);
+  transform: translate(-2px, -2px);
+}
+
+.jd-sidebar-action-text {
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.sidebar-open .jd-sidebar-action-text {
+  opacity: 1;
+  transform: translateX(0);
+  transition-delay: 0.1s;
+}
