@@ -1,12 +1,14 @@
 import axios from "axios";
+import { getStoredToken } from "../utils/authStorage";
+import { API_BASE_URL } from "../utils/apiConfig";
 
 
 const api = axios.create({
-  baseURL: "http://localhost:3001/api",
+  baseURL: API_BASE_URL,
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const token = getStoredToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
@@ -20,6 +22,7 @@ function makeCacheKey(config) {
 
 api.interceptors.request.use((config) => {
   if (config.method && config.method.toLowerCase() !== "get") return config;
+  if (config.__noCache) return config;
   const key = makeCacheKey(config);
   const cached = dedupCache.get(key);
   if (!cached) return config;
@@ -36,7 +39,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => {
     const cfg = response.config;
-    if (cfg.method && cfg.method.toLowerCase() === "get") {
+    if (cfg.method && cfg.method.toLowerCase() === "get" && !cfg.__noCache) {
       const key = makeCacheKey(cfg);
       const ttl = cfg.__cacheTTL || 30_000;
       dedupCache.set(key, { data: response, expiresAt: Date.now() + ttl });

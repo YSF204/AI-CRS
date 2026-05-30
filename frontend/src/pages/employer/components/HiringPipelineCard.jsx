@@ -4,15 +4,14 @@ export default function HiringPipelineCard({ totalJobs, openJobs, loading }) {
   const closedJobs = totalJobs - openJobs;
 
   const bars = [
-    { label: 'Active Openings',   count: openJobs,   color: 'var(--nm-primary)' },
-    { label: 'Closed/Filled', count: closedJobs, color: 'var(--nm-text-tertiary)' },
+    { label: 'Open',   count: openJobs,   color: 'var(--nm-primary)' },
+    { label: 'Closed', count: closedJobs, color: 'var(--nm-text-tertiary)' },
   ];
 
   return (
     <div 
       className="nm-card"
       style={{
-        gridColumn: 'span 12',
         background: 'var(--nm-surface)',
         borderWidth: '4px',
         boxShadow: '10px 10px 0 var(--nm-ink)',
@@ -29,7 +28,7 @@ export default function HiringPipelineCard({ totalJobs, openJobs, loading }) {
         letterSpacing: '0.15em', 
         marginBottom: '2rem' 
       }}>
-        Hiring Pipeline Status
+        Job Status
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4rem', alignItems: 'center' }}>
@@ -54,7 +53,7 @@ export default function HiringPipelineCard({ totalJobs, openJobs, loading }) {
             textTransform: 'uppercase',
             letterSpacing: '0.05em'
           }}>
-            Active Jobs Now
+            Open Jobs
           </div>
         </div>
 

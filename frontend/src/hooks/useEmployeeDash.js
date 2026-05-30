@@ -5,7 +5,7 @@ export default function useEmployeeDash() {
   const fetchAll = useCallback(async () => {
     const [cvsRes, appsRes, jobsRes] = await Promise.all([
       api.get("/cvs"),
-      api.get("/applications/my-applications"),
+      api.get("/applications/my-applications", { __noCache: true }),
       api.get("/jobs"),
     ]);
 

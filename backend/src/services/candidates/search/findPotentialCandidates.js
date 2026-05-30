@@ -19,7 +19,27 @@ export const findPotentialCandidates = async ({ userId, body }) => {
         throw new AppError("Employer not found", 404);
     }
 
-    const allCvs = await CV.find({}).populate("userId", "firstName lastName email");
+    const query = {};
+    const orConditions = [];
+    
+    if (body.position) {
+        orConditions.push({ jobTitle: { $regex: body.position, $options: "i" } });
+    }
+    if (body.technicalSkills && body.technicalSkills.length > 0) {
+        orConditions.push({ technicalSkills: { $in: body.technicalSkills } });
+    }
+    
+    if (orConditions.length > 0) {
+        query.$or = orConditions;
+    }
+    
+    let allCvs = await CV.find(query).populate("userId", "firstName lastName email").limit(50);
+    
+    // Fallback: If no specific matches found, fetch a subset of any CVs to avoid returning nothing
+    if (!allCvs.length) {
+        allCvs = await CV.find({}).populate("userId", "firstName lastName email").limit(20);
+    }
+    
     if (!allCvs.length) {
         throw new AppError("No candidates were found in this system", 404);
     }

@@ -1,4 +1,5 @@
 import React from "react";
+import { getSocialIcon, getSocialName } from "./SocialIcons";
 
 const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highlights = {} }) => {
   if (!cvData) return null;
@@ -127,7 +128,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
         )}
 
         {/* LINKS */}
-        {(cvData.contact?.linkedin || cvData.contact?.github) && (
+        {(cvData.contact?.linkedin || cvData.contact?.github || (cvData.contact?.customLinks && cvData.contact.customLinks.length > 0)) && (
           <div className="mb-4">
             <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               Links
@@ -159,6 +160,20 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
                   </a>
                 </div>
               )}
+              {(cvData.contact.customLinks || []).map((link, i) => (
+                link.url && (
+                  <div key={i}>
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-white hover:text-gray-300 underline break-all"
+                    >
+                      {getSocialName(link.icon)}
+                    </a>
+                  </div>
+                )
+              ))}
             </div>
           </div>
         )}
@@ -338,12 +353,12 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
           const mainBlocks = {
             experience:
               cvData.experience && cvData.experience.length > 0 ? (
-                <div key="experience" className="mb-5">
-                  <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mb-5 border-b border-gray-400 pb-1">
-                    Work Experience
-                  </h3>
-                  <div className="block">
-                    {cvData.experience.map((exp, index) => {
+                <div key="experience" className="cv-page-group mb-5">
+                  <div className="break-inside-avoid">
+                    <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mb-5 border-b border-gray-400 pb-1">
+                      Work Experience
+                    </h3>
+                    {cvData.experience.slice(0, 1).map((exp, index) => {
                       const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                       return (
                         <TimelineItem
@@ -353,8 +368,25 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
                           leftText3={dur}
                           title={exp.position}
                           description={exp.summary}
-                          isLast={index === cvData.experience.length - 1}
+                          isLast={cvData.experience.length === 1}
                           highlightStyle={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className="block">
+                    {cvData.experience.slice(1).map((exp, index) => {
+                      const dur = fmtDuration(exp.durationFrom, exp.durationTo);
+                      return (
+                        <TimelineItem
+                          key={index + 1}
+                          leftText1={exp.institutionName}
+                          leftText2={""}
+                          leftText3={dur}
+                          title={exp.position}
+                          description={exp.summary}
+                          isLast={index + 1 === cvData.experience.length - 1}
+                          highlightStyle={getHighlightStyle(`experience_${index + 1}_institutionName`, `experience_${index + 1}_position`, `experience_${index + 1}_summary`)}
                         />
                       );
                     })}
@@ -363,12 +395,12 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
               ) : null,
             education:
               cvData.education && cvData.education.length > 0 ? (
-                <div key="education" className="mb-5">
-                  <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mb-5 border-b border-gray-400 pb-1">
-                    Education
-                  </h3>
-                  <div className="block">
-                    {cvData.education.map((edu, index) => {
+                <div key="education" className="cv-page-group mb-5">
+                  <div className="break-inside-avoid">
+                    <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mb-5 border-b border-gray-400 pb-1">
+                      Education
+                    </h3>
+                    {cvData.education.slice(0, 1).map((edu, index) => {
                       const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                       return (
                         <TimelineItem
@@ -378,8 +410,25 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
                           leftText3={dur}
                           title={edu.certification}
                           description={edu.summary}
-                          isLast={index === cvData.education.length - 1}
+                          isLast={cvData.education.length === 1}
                           highlightStyle={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className="block">
+                    {cvData.education.slice(1).map((edu, index) => {
+                      const dur = fmtDuration(edu.durationFrom, edu.durationTo);
+                      return (
+                        <TimelineItem
+                          key={index + 1}
+                          leftText1={edu.institutionName}
+                          leftText2={""}
+                          leftText3={dur}
+                          title={edu.certification}
+                          description={edu.summary}
+                          isLast={index + 1 === cvData.education.length - 1}
+                          highlightStyle={getHighlightStyle(`education_${index + 1}_institutionName`, `education_${index + 1}_certification`, `education_${index + 1}_summary`)}
                         />
                       );
                     })}
@@ -398,50 +447,92 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
           ];
 
           return sectionOrder.map((key) => {
-            if (key === "customSections" && mainCustomSections.length > 0) {
-              return mainCustomSections.map((section, idx) => (
-                <div key={`custom-${idx}`} className="mb-5">
-                  <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mb-5 border-b border-gray-400 pb-1">
-                    {section.title}
-                  </h3>
-                  <div className="block">
-                    {section.items.map((item, itemIdx) => {
-                      const dur = fmtDuration(
-                        item.durationFrom,
-                        item.durationTo,
-                      );
-                      // Find real index in original cvData.customSections array
-                      const realSectionIdx = cvData.customSections.indexOf(section);
-                      
-                      return (
-                        <TimelineItem
-                          key={itemIdx}
-                          leftText1={dur}
-                          leftText2={""}
-                          leftText3={""}
-                          highlightStyle={getHighlightStyle(`customSections_${realSectionIdx}_items_${itemIdx}_description`)}
-                          title={
-                            item.link ? (
-                              <a
-                                href={item.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline"
-                              >
-                                {item.name}
-                              </a>
-                            ) : (
-                              item.name
-                            )
-                          }
-                          description={item.description}
-                          isLast={itemIdx === section.items.length - 1}
-                        />
-                      );
-                    })}
+            const isCustom = key.startsWith("customSection__");
+            const isLegacyCustom = key === "customSections";
+            if (isCustom || isLegacyCustom) {
+              const sectionIdx = isCustom ? parseInt(key.replace("customSection__", ""), 10) : -1;
+              const sectionsToRender = isCustom
+                ? [cvData.customSections[sectionIdx]].filter(Boolean).filter(
+                    (sec) => !sidebarSectionTitles.includes(sec.title.toLowerCase())
+                  )
+                : mainCustomSections;
+              if (!sectionsToRender || sectionsToRender.length === 0) return null;
+              return sectionsToRender.map((section, loopIdx) => {
+                const realSectionIdx = cvData.customSections.indexOf(section);
+                return (
+                  <div key={`custom-${loopIdx}`} className="cv-page-group mb-5">
+                    <div className="break-inside-avoid">
+                      <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mb-5 border-b border-gray-400 pb-1">
+                        {section.title}
+                      </h3>
+                      {section.items.slice(0, 1).map((item, itemIdx) => {
+                        const dur = fmtDuration(
+                          item.durationFrom,
+                          item.durationTo,
+                        );
+                        return (
+                          <TimelineItem
+                            key={itemIdx}
+                            leftText1={dur}
+                            leftText2={""}
+                            leftText3={""}
+                            highlightStyle={getHighlightStyle(`customSections_${realSectionIdx}_items_${itemIdx}_description`)}
+                            title={
+                              item.link ? (
+                                <a
+                                  href={item.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  {item.name}
+                                </a>
+                              ) : (
+                                item.name
+                              )
+                            }
+                            description={item.description}
+                            isLast={section.items.length === 1}
+                          />
+                        );
+                      })}
+                    </div>
+                    <div className="block">
+                      {section.items.slice(1).map((item, itemIdx) => {
+                        const dur = fmtDuration(
+                          item.durationFrom,
+                          item.durationTo,
+                        );
+                        return (
+                          <TimelineItem
+                            key={itemIdx + 1}
+                            leftText1={dur}
+                            leftText2={""}
+                            leftText3={""}
+                            highlightStyle={getHighlightStyle(`customSections_${realSectionIdx}_items_${itemIdx + 1}_description`)}
+                            title={
+                              item.link ? (
+                                <a
+                                  href={item.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline"
+                                >
+                                  {item.name}
+                                </a>
+                              ) : (
+                                item.name
+                              )
+                            }
+                            description={item.description}
+                            isLast={itemIdx + 1 === section.items.length - 1}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ));
+                );
+              });
             }
             if (key === "summary") return null;
             if (

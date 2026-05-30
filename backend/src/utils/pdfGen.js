@@ -6,6 +6,48 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const buildAllowedAssetOrigins = () => {
+    const origins = new Set();
+    const addOrigin = (value) => {
+        if (!value) return;
+        try {
+            origins.add(new URL(value).origin);
+        } catch {
+            origins.add(String(value));
+        }
+    };
+
+    const extra = String(process.env.PDF_ASSET_ORIGINS || "")
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+
+    extra.forEach(addOrigin);
+    addOrigin(process.env.FRONTEND_URL);
+    addOrigin(process.env.VITE_FRONTEND_URL);
+    addOrigin("http://localhost:5173");
+    addOrigin("http://127.0.0.1:5173");
+
+    return origins;
+};
+
+const allowedAssetOrigins = buildAllowedAssetOrigins();
+
+const isAllowedAssetUrl = (url) => {
+    if (!url) return false;
+    if (url.startsWith("data:") || url.startsWith("blob:")) return true;
+
+    try {
+        const parsed = new URL(url);
+        if (parsed.protocol === "file:") return true;
+        if (allowedAssetOrigins.has(parsed.origin)) return true;
+        if (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1") return true;
+        return false;
+    } catch {
+        return false;
+    }
+};
+
 /**
  * Generate PDF from HTML using Puppeteer.
  * Optimized to avoid slow networkidle0 waits and external CDN fetches.
@@ -36,10 +78,8 @@ const htmlToPdf = async (html, cvid) => {
         page.on('request', (req) => {
             const type = req.resourceType();
             const url = req.url();
-            if (['image', 'media', 'font'].includes(type) && !url.startsWith('data:')) {
-                req.abort();
-            } else if (type === 'stylesheet' && url.startsWith('http')) {
-                // Block external CSS — styles are already inline in the HTML payload
+            if (['image', 'media', 'font', 'stylesheet'].includes(type) && !isAllowedAssetUrl(url)) {
+                // Block external assets by default; allow local/dev assets and inline data.
                 req.abort();
             } else {
                 req.continue();
@@ -85,7 +125,7 @@ const htmlToPdf = async (html, cvid) => {
         };
 
     } catch (err) {
-        if (browser) await browser.close().catch(() => {});
+        if (browser) await browser.close().catch(() => { });
         console.error('[PDF Gen] Error:', err.message);
         throw err;
     }

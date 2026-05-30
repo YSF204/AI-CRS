@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import logoExpanded from '../../assets/LOGO 1.svg';
+import logoCollapsed from '../../assets/LOGO2.svg';
 import './DashboardNav.css';
 
 export default function DashboardNav({ role = 'employee' }) {
@@ -49,7 +51,7 @@ export default function DashboardNav({ role = 'employee' }) {
     } else {
       document.body.classList.remove('sidebar-open');
       // Force CSS variable update for immediate effect
-      document.documentElement.style.setProperty('--sidebar-width', '5rem');
+      document.documentElement.style.setProperty('--sidebar-width', 'calc(5rem + 10px)');
     }
 
     return () => {
@@ -122,11 +124,11 @@ export default function DashboardNav({ role = 'employee' }) {
     employee: {
       baseLink: '/employee',
       items: [
+        { label: "My CVs", href: "/employee/cvs", icon: FileText },
+        { label: "ATS Score", href: "/employee/ats-score", icon: CheckCircle },
+        { label: "CV Templates", href: "/employee/cv-templates", icon: LayoutTemplate },
         { label: "Find Jobs", href: "/employee/jobs", icon: Search },
         { label: "Applications", href: "/employee/applications", icon: Briefcase },
-        { label: "ATS Score", href: "/employee/ats-score", icon: CheckCircle },
-        { label: "My CVs", href: "/employee/cvs", icon: FileText },
-        { label: "CV Templates", href: "/employee/cv-templates", icon: LayoutTemplate },
       ],
     },
   };
@@ -152,10 +154,22 @@ export default function DashboardNav({ role = 'employee' }) {
         {isMobileOpen ? <X size={20} strokeWidth={3} /> : <Menu size={20} strokeWidth={3} />}
       </button>
 
+      {/* Mobile Backdrop overlay (separate from sidebar to avoid transform inheritance issues) */}
+      {isMobile && isMobileOpen && (
+        <div 
+          className="jd-sidebar-backdrop" 
+          onClick={handleMobileToggle}
+        />
+      )}
+
       <aside className="jd-sidebar">
-        <div className="jd-sidebar-header">
-          <Link to={config.baseLink} className="jd-sidebar-brand" style={{ textDecoration: 'none' }}>
-            <span className="jd-sidebar-brand-text">AI-CRS</span>
+        <div className="jd-sidebar-header" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Link to={config.baseLink} className="jd-sidebar-brand" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+            {isOpen ? (
+              <img src={logoExpanded} alt="Logo" style={{ height: '64px', width: 'auto' }} />
+            ) : (
+              <img src={logoCollapsed} alt="Logo" style={{ height: '64px', width: 'auto' }} />
+            )}
           </Link>
         </div>
         <button

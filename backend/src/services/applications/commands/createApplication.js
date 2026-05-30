@@ -5,6 +5,7 @@ import { runPostSubmitWork } from "../notifications/runPostSubmitWork.js";
 import { resolveApplicationProfileInput } from "../profile/resolveApplicationProfileInput.js";
 import { computeApplicationScore } from "../scoring/computeApplicationScore.js";
 import { findOpenJobById } from "../helpers/findOpenJobById.js";
+import { uploadApplicationCvToSupabase } from "../helpers/uploadApplicationCv.js";
 
 export const createApplication = async ({ body, user, file }) => {
     const { jobId, cvId, skipAnalysis } = body;
@@ -51,9 +52,13 @@ export const createApplication = async ({ body, user, file }) => {
     };
 
     if (file) {
+        const uploadedCv = await uploadApplicationCvToSupabase({
+            file,
+            userId: user._id,
+        });
         applicationData.cvFile = {
             filename: file.originalname,
-            path: file.path,
+            path: uploadedCv?.publicUrl || "",
         };
     }
 

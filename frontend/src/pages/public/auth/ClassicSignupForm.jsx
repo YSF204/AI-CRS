@@ -56,9 +56,8 @@ export default function ClassicSignupForm() {
   const [form, setForm] = useState(EMPTY_FORM);
   const advanceRef = useRef(null);
 
-  // Track phone and email duplicate validity from child components
+  // Track phone validity from child components
   const [phoneValid, setPhoneValid] = useState(true);
-  const [emailDuplicate, setEmailDuplicate] = useState(false);
 
   const validationData = {
     ...form,
@@ -113,8 +112,7 @@ export default function ClassicSignupForm() {
           form.email.trim() &&
           !errors.firstName &&
           !errors.lastName &&
-          !errors.email &&
-          !emailDuplicate
+          !errors.email
         );
       case 2: {
         // Phone: if they typed something, it must be exactly 10 digits
@@ -139,7 +137,7 @@ export default function ClassicSignupForm() {
   // Clicking a role card saves role AND immediately jumps to next step
   const handleRoleSelect = (r) => {
     setRole(r);
-    // Reset ALL role-specific fields when switching roles (FIX 3)
+    // Reset ALL role-specific fields when switching roles
     setForm((prev) => ({
       ...prev,
       gender: "",
@@ -154,7 +152,6 @@ export default function ClassicSignupForm() {
       branchStreet: "",
     }));
     setPhoneValid(true);
-    setEmailDuplicate(false);
     setTimeout(() => advanceRef.current?.(), 0); // defer so state update is committed first
   };
 
@@ -198,7 +195,7 @@ export default function ClassicSignupForm() {
 
       const res = await api.post("/auth/register", body);
 
-      // FIX #1: If requiresEmailVerification is true, show CheckYourEmailPage instead of logging in
+      // If requiresEmailVerification is true, show CheckYourEmailPage instead of logging in
       if (res.data.requiresEmailVerification) {
         setVerificationEmail(res.data.data.user.email);
         return;
@@ -213,8 +210,16 @@ export default function ClassicSignupForm() {
       login(token, data.user);
       navigate("/");
     } catch (err) {
+      // If the account already exists but is unverified (happens when a previous
+      // attempt failed mid-way after the DB record was already created), redirect
+      // straight to the "check your email" page instead of showing a confusing error.
+      const responseData = err.response?.data;
+      if (responseData?.emailNotVerified && responseData?.email) {
+        setVerificationEmail(responseData.email);
+        return;
+      }
       setErrorMsg(
-        err.response?.data?.message || "Registration failed. Please try again.",
+        responseData?.message || "Registration failed. Please try again.",
       );
     }
   };
@@ -224,7 +229,7 @@ export default function ClassicSignupForm() {
     <PersonalStep
       key="personal"
       field={field}
-      onEmailDuplicateStatus={(isDuplicate) => setEmailDuplicate(isDuplicate)}
+      onEmailDuplicateStatus={() => {}}
     />,
     <ProfileStep
       key="profile"

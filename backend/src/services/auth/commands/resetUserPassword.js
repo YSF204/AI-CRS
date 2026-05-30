@@ -13,14 +13,14 @@ export const resetUserPassword = async ({ rawToken, password, passwordConfirm })
     }).select("+password");
 
     if (!user) {
-        throw new AppError("Token is invalid or has experied", 400);
+        throw new AppError("Token is invalid or has expired", 400);
     }
 
     // Check if new password is the same as the current password
     const isSame = await bcrypt.compare(password, user.password);
     if (isSame) {
         throw new AppError(
-            "You can use this password to log in — please choose a different one for your reset",
+            "You already use this password — please choose a different one for your reset",
             400,
         );
     }
@@ -31,8 +31,9 @@ export const resetUserPassword = async ({ rawToken, password, passwordConfirm })
     user.passwordResetExpires = undefined;
     await user.save();
 
+    // FIX: pass user.role so the token carries the correct role claim
     return {
-        token: generateToken(user._id),
+        token: generateToken(user._id, user.role),
     };
 };
 

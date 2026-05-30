@@ -1,4 +1,5 @@
 import React from "react";
+import { getSocialIcon } from "./SocialIcons";
 
 const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
@@ -55,6 +56,18 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
         <strong>GitHub:</strong> {cvData.contact.github}
       </span>,
     );
+  if (cvData.contact?.customLinks) {
+    cvData.contact.customLinks.forEach((link, i) => {
+      if (link.url) {
+        contactItems.push(
+          <span key={`custom-${i}`} className="inline-flex items-center gap-1">
+            {getSocialIcon(link.icon, 12)}
+            <strong>{link.label || "Link"}:</strong> {link.url}
+          </span>
+        );
+      }
+    });
+  }
 
   const SectionHeader = ({ title }) => (
     <div className="my-3">
@@ -129,13 +142,40 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
           ) : null,
           experience:
             cvData.experience && cvData.experience.length > 0 ? (
-              <section key="experience" className="mb-5">
-                <SectionHeader title="Work Experiences" />
-                <div className="space-y-5 block">
-                  {cvData.experience.map((exp, index) => {
+              <section key="experience" className="cv-page-group mb-5">
+                <div className="break-inside-avoid">
+                  <SectionHeader title="Work Experiences" />
+                  {cvData.experience.slice(0, 1).map((exp, index) => {
                     const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                     return (
-                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
+                      <div key={index} style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
+                        <div className="flex justify-between items-baseline text-[13px] md:text-sm text-gray-900 mb-1">
+                          <div>
+                            <span className="font-bold">{exp.position}</span>
+                            {exp.institutionName && (
+                              <span>
+                                {" "}
+                                | <strong>Employer:</strong>{" "}
+                                {exp.institutionName}
+                              </span>
+                            )}
+                          </div>
+                          {dur && <div className="font-medium">{dur}</div>}
+                        </div>
+                        {exp.summary && (
+                          <div className="text-[13px] md:text-[13.5px] text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1.5 text-left">
+                            {exp.summary}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="space-y-5 block">
+                  {cvData.experience.slice(1).map((exp, index) => {
+                    const dur = fmtDuration(exp.durationFrom, exp.durationTo);
+                    return (
+                      <div key={index + 1} className="break-inside-avoid" style={getHighlightStyle(`experience_${index + 1}_institutionName`, `experience_${index + 1}_position`, `experience_${index + 1}_summary`)}>
                         <div className="flex justify-between items-baseline text-[13px] md:text-sm text-gray-900 mb-1">
                           <div>
                             <span className="font-bold">{exp.position}</span>
@@ -162,16 +202,41 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
             ) : null,
           education:
             cvData.education && cvData.education.length > 0 ? (
-              <section key="education" className="mb-5">
-                <SectionHeader title="Education" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5">
-                  {cvData.education.map((edu, index) => {
+              <section key="education" className="cv-page-group mb-5">
+                <div className="break-inside-avoid">
+                  <SectionHeader title="Education" />
+                  {cvData.education.slice(0, 1).map((edu, index) => {
                     const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                     return (
                       <div
                         key={index}
-                        className="text-[13px] md:text-sm break-inside-avoid"
+                        className="text-[13px] md:text-sm"
                         style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}
+                      >
+                        <div className="font-bold text-gray-900">
+                          {edu.certification}
+                          {dur ? ` | ${dur}` : ""}
+                        </div>
+                        <div className="text-gray-700 mt-0.5">
+                          {edu.institutionName}
+                        </div>
+                        {edu.summary && (
+                          <div className="text-gray-600 mt-1 whitespace-pre-wrap break-words">
+                            {edu.summary}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5 mt-3.5">
+                  {cvData.education.slice(1).map((edu, index) => {
+                    const dur = fmtDuration(edu.durationFrom, edu.durationTo);
+                    return (
+                      <div
+                        key={index + 1}
+                        className="text-[13px] md:text-sm break-inside-avoid"
+                        style={getHighlightStyle(`education_${index + 1}_institutionName`, `education_${index + 1}_certification`, `education_${index + 1}_summary`)}
                       >
                         <div className="font-bold text-gray-900">
                           {edu.certification}
@@ -199,7 +264,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                 style={getHighlightStyle('technicalSkills')}
               >
                 <SectionHeader title="Technical Skills" />
-                <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
+                <ul className="grid grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
                   {cvData.technicalSkills.map((skill, index) => (
                     <li key={index}>{skill}</li>
                   ))}
@@ -210,7 +275,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
             cvData.softSkills?.length > 0 ? (
               <section key="softSkills" className="break-inside-avoid mb-5" style={getHighlightStyle('softSkills')}>
                 <SectionHeader title="Soft Skills" />
-                <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
+                <ul className="grid grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
                   {cvData.softSkills.map((skill, index) => (
                     <li key={index}>{skill}</li>
                   ))}
@@ -221,7 +286,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
             cvData.language?.length > 0 ? (
               <section key="language" className="break-inside-avoid mb-5" style={getHighlightStyle('language')}>
                 <SectionHeader title="Languages" />
-                <ul className="grid grid-cols-2 md:grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
+                <ul className="grid grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
                   {cvData.language.map((item, index) => {
                     const displayText =
                       typeof item === "string"
@@ -245,67 +310,108 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
         ];
 
         return sectionOrder.map((key) => {
-          if (key === "customSections" && cvData.customSections?.length > 0) {
-            return cvData.customSections
-              .filter((sec) => sec.title.toLowerCase() !== "federal details")
-              .map((section, sectionIndex) => {
-                const useGrid = [
-                  "professional development",
-                  "skills",
-                  "certifications",
-                ].includes(section.title.toLowerCase());
-                return (
-                  <section
-                    key={`custom-${sectionIndex}`}
-                    className="mb-5"
-                  >
+          const isCustom = key.startsWith("customSection__");
+          const isLegacyCustom = key === "customSections";
+          if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
+            const sectionIdx = isCustom ? parseInt(key.replace("customSection__", ""), 10) : -1;
+            const sectionsToRender = isCustom
+              ? [cvData.customSections[sectionIdx]].filter(Boolean).filter((sec) => sec.title.toLowerCase() !== "federal details")
+              : cvData.customSections.filter((sec) => sec.title.toLowerCase() !== "federal details");
+            if (!sectionsToRender.length) return null;
+            return sectionsToRender.map((section, loopIdx) => {
+              const sectionIndex = isCustom ? sectionIdx : loopIdx;
+              const useGrid = [
+                "professional development",
+                "skills",
+                "certifications",
+              ].includes(section.title.toLowerCase());
+              return (
+                <section
+                  key={`custom-${sectionIndex}`}
+                  className="mb-5 cv-page-group"
+                >
+                  <div className="break-inside-avoid">
                     <SectionHeader title={section.title} />
-                    <div
-                      className={
-                        useGrid
-                          ? "grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5"
-                          : "flex flex-col gap-3.5"
-                      }
-                    >
-                      {section.items.map((item, itemIndex) => {
-                        const dur = fmtDuration(
-                          item.durationFrom,
-                          item.durationTo,
-                        );
-                        return (
-                          <div
-                            key={itemIndex}
-                            className="text-xs md:text-[13px] break-inside-avoid"
-                            style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
-                          >
-                            <div className="font-bold text-gray-900">
-                              {item.link ? (
-                                <a
-                                  href={item.link}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
-                                >
-                                  {item.name}
-                                </a>
-                              ) : (
-                                item.name
-                              )}
-                              {dur ? ` | ${dur}` : ""}
-                            </div>
-                            {item.description && (
-                              <div className="text-gray-700 mt-0.5 whitespace-pre-wrap break-words">
-                                {item.description}
-                              </div>
+                    {section.items.slice(0, 1).map((item, itemIndex) => {
+                      const dur = fmtDuration(
+                        item.durationFrom,
+                        item.durationTo,
+                      );
+                      return (
+                        <div
+                          key={itemIndex}
+                          className="text-xs md:text-[13px]"
+                          style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
+                        >
+                          <div className="font-bold text-gray-900">
+                            <span>{item.name}</span>
+                            {item.link && (
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-1 text-gray-500 hover:text-gray-700"
+                              >
+                                <svg className="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                              </a>
                             )}
+                            {dur ? ` | ${dur}` : ""}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </section>
-                );
-              });
+                          {item.description && (
+                            <div className="text-gray-700 mt-0.5 whitespace-pre-wrap break-words">
+                              {item.description}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div
+                    className={
+                      useGrid
+                        ? "grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3.5 mt-3.5"
+                        : "flex flex-col gap-3.5"
+                    }
+                  >
+                    {section.items.slice(1).map((item, itemIndex) => {
+                      const dur = fmtDuration(
+                        item.durationFrom,
+                        item.durationTo,
+                      );
+                      return (
+                        <div
+                          key={itemIndex + 1}
+                          className="text-xs md:text-[13px] break-inside-avoid"
+                          style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex + 1}_description`)}
+                        >
+                          <div className="font-bold text-gray-900">
+                            <span>{item.name}</span>
+                            {item.link && (
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-1 text-gray-500 hover:text-gray-700"
+                              >
+                                <svg className="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                              </a>
+                            )}
+                            {dur ? ` | ${dur}` : ""}
+                          </div>
+                          {item.description && (
+                            <div className="text-gray-700 mt-0.5 whitespace-pre-wrap break-words">
+                              {item.description}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            });
           }
+
           if (key === "skills") return null;
           return sectionBlocks[key];
         });

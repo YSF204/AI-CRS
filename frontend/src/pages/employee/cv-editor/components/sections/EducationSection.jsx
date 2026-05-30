@@ -110,7 +110,7 @@ export default function EducationSection({ form, handlers }) {
               From
             </label>
             <input
-              type="date"
+              type="month"
               value={currentItem.durationFrom}
               onChange={(e) =>
                 setCurrentItem({ ...currentItem, durationFrom: e.target.value })
@@ -124,7 +124,7 @@ export default function EducationSection({ form, handlers }) {
               To
             </label>
             <input
-              type="date"
+              type="month"
               value={currentItem.durationTo}
               onChange={(e) =>
                 setCurrentItem({ ...currentItem, durationTo: e.target.value })

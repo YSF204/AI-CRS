@@ -10,6 +10,9 @@ import {
   newExp,
   newEdu,
   CUSTOM_SECTION_TYPES,
+  CUSTOM_SECTION_KEY_PREFIX,
+  getCustomSectionIndex,
+  isCustomSectionKey,
 } from "../constants";
 import TagInput from "./TagInput";
 import Field from "./Field";
@@ -33,6 +36,9 @@ export default function SectionCardBody({ sectionKey, form, handlers }) {
     addCustomItem,
     removeCustomItem,
     updateCustomItem,
+    addCustomLink,
+    removeCustomLink,
+    updateCustomLink,
   } = handlers;
 
   switch (sectionKey) {
@@ -50,58 +56,103 @@ export default function SectionCardBody({ sectionKey, form, handlers }) {
 
     case "contact":
       return (
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            {
-              label: "Phone",
-              key: "phone",
-              placeholder: "+1 (555) 000-0000",
-            },
-            {
-              label: "Email",
-              key: "email",
-              placeholder: "you@example.com",
-            },
-            {
-              label: "LinkedIn",
-              key: "linkedin",
-              placeholder: "linkedin.com/in/username",
-            },
-            {
-              label: "GitHub",
-              key: "github",
-              placeholder: "github.com/username",
-            },
-          ].map(({ label, key, placeholder }) => (
-            <Field key={key} label={label}>
-              <input
-                className={inpCls}
-                value={form.contact[key]}
-                onChange={handlers.setContact(key)}
-                placeholder={placeholder}
-              />
-            </Field>
-          ))}
+        <div>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              {
+                label: "Phone",
+                key: "phone",
+                placeholder: "+1 (555) 000-0000",
+              },
+              {
+                label: "Email",
+                key: "email",
+                placeholder: "you@example.com",
+              },
+              {
+                label: "LinkedIn",
+                key: "linkedin",
+                placeholder: "linkedin.com/in/username",
+              },
+              {
+                label: "GitHub",
+                key: "github",
+                placeholder: "github.com/username",
+              },
+            ].map(({ label, key, placeholder }) => (
+              <Field key={key} label={label}>
+                <input
+                  className={inpCls}
+                  value={form.contact[key]}
+                  onChange={handlers.setContact(key)}
+                  placeholder={placeholder}
+                />
+              </Field>
+            ))}
+          </div>
+
+          <div className="mt-4">
+            <label className="font-mono text-[11px] uppercase font-bold tracking-widest text-[var(--nm-text-primary)] mb-2 block">
+              Custom Links
+            </label>
+            <div className="flex flex-col gap-2">
+              {(form.contact.customLinks || []).map((link, i) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <select
+                    className={inpCls}
+                    value={link.icon || "globe"}
+                    onChange={(e) => updateCustomLink(i, "icon", e.target.value)}
+                  >
+                    <option value="globe">Website</option>
+                    <option value="twitter">X (Twitter)</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="instagram">Instagram</option>
+                    <option value="facebook">Facebook</option>
+                  </select>
+                  <input
+                    className={inpCls}
+                    value={link.url}
+                    onChange={(e) => updateCustomLink(i, "url", e.target.value)}
+                    placeholder="URL (https://...)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeCustomLink(i)}
+                    className="text-red-500 hover:text-red-700 p-1"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addCustomLink}
+                className="flex items-center justify-center gap-1.5 w-full py-2 border-2 border-dashed border-[var(--border-color)] text-[var(--fg-muted)] font-mono text-[10px] font-bold uppercase tracking-wider hover:border-[var(--fg)] hover:text-[var(--fg)] transition-colors"
+              >
+                <Plus size={11} /> Add Custom Link
+              </button>
+            </div>
+          </div>
         </div>
       );
 
     case "address":
       return (
         <div className="grid grid-cols-2 gap-3">
+          <Field label="Country">
+            <input
+              className={inpCls}
+              value={form.address.country}
+              onChange={handlers.setAddress("country")}
+              placeholder="e.g. United States"
+            />
+          </Field>
           <Field label="City">
             <input
               className={inpCls}
               value={form.address.city}
               onChange={handlers.setAddress("city")}
-              placeholder="San Francisco"
-            />
-          </Field>
-          <Field label="Street">
-            <input
-              className={inpCls}
-              value={form.address.street}
-              onChange={handlers.setAddress("street")}
-              placeholder="42 Market St"
+              placeholder="e.g. San Francisco"
             />
           </Field>
         </div>
@@ -300,254 +351,192 @@ export default function SectionCardBody({ sectionKey, form, handlers }) {
       return <LanguageSection form={form} handlers={handlers} />;
 
     case "customSections":
+      // Legacy fallback: render all custom sections (should not normally be reached)
       return (
         <div className="flex flex-col gap-4">
-          {form.customSections.length === 0 && (
-            <p className="text-center font-mono text-xs text-[var(--fg-muted)] py-2">
-              Add a custom section (Projects, Certifications, etc.)
-            </p>
-          )}
-          {form.customSections.map((section, si) => {
-            const sectionTypeConfig =
-              CUSTOM_SECTION_TYPES.find(
-                (t) => t.value === section.sectionType,
-              ) || CUSTOM_SECTION_TYPES[2];
-            const hasNameField = sectionTypeConfig.fields.includes("name");
-            const hasDescriptionField =
-              sectionTypeConfig.fields.includes("description");
-            const hasDurationFields =
-              sectionTypeConfig.fields.includes("durationFrom") &&
-              sectionTypeConfig.fields.includes("durationTo");
-            const hasLinkField = sectionTypeConfig.fields.includes("link");
-
-            return (
-              <div
-                key={`custom-section-wrapper-${si}`}
-                className="border-2 border-[var(--border-color)] bg-[var(--bg)]"
-              >
-                <div className="flex items-center gap-2.5 px-3 py-2 border-b-2 border-[var(--border-color)] bg-[var(--card-bg)]">
-                  <select
-                    className="bg-[var(--bg)] border border-[var(--border-color)] text-[var(--fg)] px-2 py-1 font-mono text-xs outline-none focus:border-[var(--yellow)] rounded"
-                    value={section.sectionType || "other"}
-                    onChange={(e) => {
-                      const newSections = [...form.customSections];
-                      const selectedType =
-                        CUSTOM_SECTION_TYPES.find(
-                          (t) => t.value === e.target.value,
-                        ) || CUSTOM_SECTION_TYPES[2];
-                      newSections[si].sectionType = e.target.value;
-                      if (selectedType?.defaultTitle) {
-                        newSections[si].title = selectedType.defaultTitle;
-                      } else if (section.sectionType === "other") {
-                        newSections[si].title = "";
-                      }
-                      setForm((f) => ({ ...f, customSections: newSections }));
-                      triggerAutoSave();
-                    }}
-                    placeholder={
-                      section.sectionType === "other"
-                        ? "Section title (e.g. Certifications)"
-                        : ""
-                    }
-                    disabled={section.sectionType === "other"}
-                  >
-                    {CUSTOM_SECTION_TYPES.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </select>
-
-                  <input
-                    className="flex-1 bg-transparent border-none outline-none font-['Space_Grotesk'] font-bold text-sm text-[var(--fg)] placeholder:text-[var(--fg-muted)]"
-                    value={section.title}
-                    onChange={(e) =>
-                      updateCustomSectionTitle(si, e.target.value)
-                    }
-                    placeholder={
-                      section.sectionType === "other"
-                        ? "Section title (e.g. Certifications)"
-                        : ""
-                    }
-                    disabled={section.sectionType !== "other"}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => removeCustomSection(si)}
-                    className="text-red-500 hover:text-red-700 flex items-center p-0.5"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
-
-                <div className="p-3 flex flex-col gap-2">
-                  {section.items.map((item, ii) => (
-                    <div
-                      key={`custom-section-${si}-item-${ii}`}
-                      className="border border-[var(--border-color)] p-2.5 bg-[var(--card-bg)] flex flex-col gap-2"
-                    >
-                      <div className="grid grid-cols-2 gap-2">
-                        {hasNameField && (
-                          <Field
-                            label={
-                              sectionTypeConfig.value === "projects"
-                                ? "Project"
-                                : sectionTypeConfig.value === "certifications"
-                                  ? "Certification"
-                                  : sectionTypeConfig.value === "hobbies"
-                                    ? "Hobby"
-                                    : "Name"
-                            }
-                          >
-                            <input
-                              className={inpCls}
-                              value={item.name}
-                              onChange={(e) =>
-                                updateCustomItem(
-                                  si,
-                                  ii,
-                                  "name",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder={
-                                sectionTypeConfig.value === "projects"
-                                  ? "Project name"
-                                  : sectionTypeConfig.value ===
-                                      "certifications"
-                                    ? "Certification name"
-                                    : sectionTypeConfig.value === "hobbies"
-                                      ? "Hobby name"
-                                      : "Name"
-                              }
-                            />
-                          </Field>
-                        )}
-
-                        {hasDurationFields && (
-                          <div className="grid grid-cols-2 gap-2">
-                            <Field label="Start">
-                              <input
-                                type="month"
-                                className={`${inpCls}`}
-                                value={item.durationFrom}
-                                onChange={(e) =>
-                                  updateCustomItem(
-                                    si,
-                                    ii,
-                                    "durationFrom",
-                                    e.target.value,
-                                  )
-                                }
-                                placeholder="2022-01"
-                              />
-                            </Field>
-                            <Field label="End">
-                              <input
-                                type="month"
-                                className={`${inpCls}`}
-                                value={item.durationTo}
-                                onChange={(e) =>
-                                  updateCustomItem(
-                                    si,
-                                    ii,
-                                    "durationTo",
-                                    e.target.value,
-                                  )
-                                }
-                                placeholder="2024-12"
-                              />
-                            </Field>
-                          </div>
-                        )}
-
-                        {hasLinkField && (
-                          <Field
-                            label={
-                              sectionTypeConfig.value === "projects"
-                                ? "Project Link"
-                                : sectionTypeConfig.value === "certifications"
-                                  ? "Certification Link"
-                                  : "Link (optional)"
-                            }
-                          >
-                            <input
-                              className={inpCls}
-                              value={item.link}
-                              onChange={(e) =>
-                                updateCustomItem(
-                                  si,
-                                  ii,
-                                  "link",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="https://..."
-                            />
-                          </Field>
-                        )}
-
-                        {hasDescriptionField && (
-                          <Field
-                            label={
-                              sectionTypeConfig.value === "hobbies"
-                                ? "Details"
-                                : "Description"
-                            }
-                          >
-                            <textarea
-                              className={`${txtCls} min-h-[56px]`}
-                              value={item.description}
-                              onChange={(e) =>
-                                updateCustomItem(
-                                  si,
-                                  ii,
-                                  "description",
-                                  e.target.value,
-                                )
-                              }
-                              placeholder="Brief description..."
-                            />
-                          </Field>
-                        )}
-
-                        <div className="flex justify-end">
-                          <button
-                            type="button"
-                            onClick={() => removeCustomItem(si, ii)}
-                            className="flex items-center gap-1 border border-red-400 text-red-400 font-mono text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 hover:bg-red-50 transition-colors"
-                          >
-                            <X size={9} /> Remove
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-
-                  <button
-                    type="button"
-                    onClick={() => addCustomItem(si)}
-                    className="flex items-center justify-center gap-1.5 w-full py-2 border-2 border-dashed border-[var(--border-color)] text-[var(--fg-muted)] font-mono text-[10px] font-bold uppercase tracking-wider hover:border-[var(--fg)] hover:text-[var(--fg)] transition-colors"
-                  >
-                    <Plus size={11} /> Add{" "}
-                    {sectionTypeConfig.label === "Hobbies" ? "Hobby" : "Item"}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-          <button
-            type="button"
-            onClick={addCustomSection}
-            className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-[var(--yellow)] text-[var(--fg)] font-['Space_Grotesk'] font-bold text-sm uppercase tracking-wider hover:bg-[rgba(255,230,48,0.08)] transition-colors"
-          >
-            <Plus size={14} /> Add Custom Section
-          </button>
+          <p className="text-center font-mono text-xs text-[var(--fg-muted)] py-2">
+            Use the sidebar to manage individual custom sections.
+          </p>
         </div>
       );
 
-    default:
+    default: {
+      // Per-section custom section key: customSection__N
+      if (isCustomSectionKey(sectionKey)) {
+        const si = getCustomSectionIndex(sectionKey);
+        const section = form.customSections?.[si];
+        if (!section) return null;
+
+        const sectionTypeConfig =
+          CUSTOM_SECTION_TYPES.find((t) => t.value === section.sectionType) || CUSTOM_SECTION_TYPES[3];
+        const hasNameField = sectionTypeConfig.fields.includes("name");
+        const hasDescriptionField = sectionTypeConfig.fields.includes("description");
+        const hasDurationFields =
+          sectionTypeConfig.fields.includes("durationFrom") &&
+          sectionTypeConfig.fields.includes("durationTo");
+        const hasLinkField = sectionTypeConfig.fields.includes("link");
+
+        return (
+          <div className="flex flex-col gap-3">
+            {/* Section header: type selector + title input */}
+            <div className="flex items-center gap-2.5 p-3 border-2 border-[var(--border-color)] bg-[var(--card-bg)]">
+              <div className="flex flex-col gap-1 flex-1">
+                <label className="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--nm-text-tertiary)]">
+                  Section Type
+                </label>
+                <select
+                  className="bg-[var(--nm-bg)] border-2 border-[var(--nm-ink)] text-[var(--nm-text-primary)] px-2 py-1.5 font-mono text-xs outline-none focus:border-[var(--nm-primary)] nm-input"
+                  value={section.sectionType || "other"}
+                  onChange={(e) => {
+                    const selectedType =
+                      CUSTOM_SECTION_TYPES.find((t) => t.value === e.target.value) || CUSTOM_SECTION_TYPES[3];
+                    const newSections = form.customSections.map((s, i) =>
+                      i === si
+                        ? {
+                            ...s,
+                            sectionType: e.target.value,
+                            title: selectedType?.defaultTitle || s.title,
+                          }
+                        : s
+                    );
+                    setForm((f) => ({ ...f, customSections: newSections }));
+                    triggerAutoSave();
+                  }}
+                >
+                  {CUSTOM_SECTION_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-1 flex-1">
+                <label className="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--nm-text-tertiary)]">
+                  Section Title
+                </label>
+                <input
+                  className="nm-input"
+                  value={section.title}
+                  onChange={(e) => updateCustomSectionTitle(si, e.target.value)}
+                  placeholder="e.g. My Projects, Awards..."
+                />
+              </div>
+            </div>
+
+            {/* Items */}
+            {section.items.map((item, ii) => (
+              <div
+                key={`custom-section-${si}-item-${ii}`}
+                className="border border-[var(--border-color)] p-2.5 bg-[var(--card-bg)] flex flex-col gap-2"
+              >
+                <div className="grid grid-cols-2 gap-2">
+                  {hasNameField && (
+                    <Field
+                      label={
+                        sectionTypeConfig.value === "projects"
+                          ? "Project"
+                          : sectionTypeConfig.value === "certifications"
+                          ? "Certification"
+                          : sectionTypeConfig.value === "hobbies"
+                          ? "Hobby"
+                          : "Name"
+                      }
+                    >
+                      <input
+                        className={inpCls}
+                        value={item.name}
+                        onChange={(e) => updateCustomItem(si, ii, "name", e.target.value)}
+                        placeholder={
+                          sectionTypeConfig.value === "projects"
+                            ? "Project name"
+                            : sectionTypeConfig.value === "certifications"
+                            ? "Certification name"
+                            : sectionTypeConfig.value === "hobbies"
+                            ? "Hobby name"
+                            : "Name"
+                        }
+                      />
+                    </Field>
+                  )}
+
+                  {hasDurationFields && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <Field label="Start">
+                        <input
+                          type="month"
+                          className={inpCls}
+                          value={item.durationFrom}
+                          onChange={(e) => updateCustomItem(si, ii, "durationFrom", e.target.value)}
+                        />
+                      </Field>
+                      <Field label="End">
+                        <input
+                          type="month"
+                          className={inpCls}
+                          value={item.durationTo}
+                          onChange={(e) => updateCustomItem(si, ii, "durationTo", e.target.value)}
+                        />
+                      </Field>
+                    </div>
+                  )}
+
+                  {hasLinkField && (
+                    <Field
+                      label={
+                        sectionTypeConfig.value === "projects"
+                          ? "Project Link"
+                          : sectionTypeConfig.value === "certifications"
+                          ? "Certification Link"
+                          : "Link (optional)"
+                      }
+                    >
+                      <input
+                        className={inpCls}
+                        value={item.link}
+                        onChange={(e) => updateCustomItem(si, ii, "link", e.target.value)}
+                        placeholder="https://..."
+                      />
+                    </Field>
+                  )}
+
+                  {hasDescriptionField && (
+                    <Field
+                      label={sectionTypeConfig.value === "hobbies" ? "Details" : "Description"}
+                    >
+                      <textarea
+                        className={`${txtCls} min-h-[56px]`}
+                        value={item.description}
+                        onChange={(e) => updateCustomItem(si, ii, "description", e.target.value)}
+                        placeholder="Brief description..."
+                      />
+                    </Field>
+                  )}
+
+                  <div className="flex justify-end col-span-2">
+                    <button
+                      type="button"
+                      onClick={() => removeCustomItem(si, ii)}
+                      className="flex items-center gap-1 border border-red-400 text-red-400 font-mono text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 hover:bg-red-50 transition-colors"
+                    >
+                      <X size={9} /> Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => addCustomItem(si)}
+              className="flex items-center justify-center gap-1.5 w-full py-2 border-2 border-dashed border-[var(--border-color)] text-[var(--fg-muted)] font-mono text-[10px] font-bold uppercase tracking-wider hover:border-[var(--fg)] hover:text-[var(--fg)] transition-colors"
+            >
+              <Plus size={11} /> Add{" "}
+              {sectionTypeConfig.label === "Hobbies" ? "Hobby" : "Item"}
+            </button>
+          </div>
+        );
+      }
       return null;
+    }
   }
 }

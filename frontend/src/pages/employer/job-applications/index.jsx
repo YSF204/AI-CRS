@@ -16,6 +16,7 @@ export default function JobApplications() {
   const [selected, setSelected] = useState(null);
   const [job, setJob] = useState(null);
   const [activeTab, setActiveTab] = useState('all'); // 'all' or 'potential'
+  const [togglingAppId, setTogglingAppId] = useState(null);
 
   const handleStatusChange = async (appId, newStatus) => {
     // 1. Save original state for possible revert
@@ -43,29 +44,20 @@ export default function JobApplications() {
   };
 
   const handleTogglePotential = async (appId) => {
-    // 1. Save original state
-    const originalApps = [...applications];
-    const originalSelected = selected ? { ...selected } : null;
-    
-    // 2. Determine next state optimistically
-    const appToUpdate = applications.find(a => a._id === appId);
-    const nextPotential = !appToUpdate?.isPotential;
-
-    setApplications(prev => prev.map(a => a._id === appId ? { ...a, isPotential: nextPotential } : a));
-    if (selected?._id === appId) {
-      setSelected(prev => ({ ...prev, isPotential: nextPotential }));
-    }
-
+    setTogglingAppId(appId);
     try {
       await api.patch(`/applications/${appId}/potential`);
+      
+      // Update state after successful API call
+      setApplications(prev => prev.map(a => a._id === appId ? { ...a, isPotential: !a.isPotential } : a));
+      if (selected?._id === appId) {
+        setSelected(prev => ({ ...prev, isPotential: !prev.isPotential }));
+      }
     } catch (err) {
       console.error(err);
-      // 3. Revert on failure
-      setApplications(originalApps);
-      if (originalSelected?._id === appId) {
-        setSelected(originalSelected);
-      }
       alert("Failed to update potential list. Please try again.");
+    } finally {
+      setTogglingAppId(null);
     }
   };
 
@@ -267,6 +259,7 @@ export default function JobApplications() {
                     showMatchScore={false} 
                     onStatusChange={(s) => handleStatusChange(selected._id, s)}
                     onTogglePotential={() => handleTogglePotential(selected._id)}
+                    isToggling={togglingAppId === selected._id}
                   />
                 </div>
               ) : (

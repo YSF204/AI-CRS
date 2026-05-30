@@ -18,9 +18,9 @@ const JobDetailsPanel = ({
       <div className="jd-detail-panel h-full flex items-center justify-center bg-[var(--nm-surface-low)]">
         <div className="text-left p-8 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface)] shadow-[8px_8px_0_var(--nm-ink)]">
           <Briefcase size={48} className="mb-4 text-[var(--nm-primary)]" />
-          <h3 className="font-[var(--font-display)] font-black text-xl uppercase mb-2">Discovery Portal</h3>
+          <h3 className="font-[var(--font-display)] font-black text-xl uppercase mb-2">Job Details</h3>
           <p className="text-[var(--nm-text-secondary)] font-[var(--font-body)] max-w-sm">
-            Select a job from the matrix to initialize detail extraction and application protocols.
+            Select a job to view details and apply.
           </p>
         </div>
       </div>

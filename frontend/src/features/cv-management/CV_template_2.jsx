@@ -1,4 +1,5 @@
 import React from "react";
+import { getSocialIcon, getSocialName } from "./SocialIcons";
 
 const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
@@ -31,6 +32,17 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (cvData.contact?.email) contactItems.push(cvData.contact.email);
   if (cvData.contact?.linkedin) contactItems.push(cvData.contact.linkedin);
   if (cvData.contact?.github) contactItems.push(cvData.contact.github);
+  if (cvData.contact?.customLinks) {
+    cvData.contact.customLinks.forEach(link => {
+      if (link.url) {
+        contactItems.push(
+          <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+            {getSocialName(link.icon)}
+          </a>
+        );
+      }
+    });
+  }
 
   return (
     <div
@@ -83,65 +95,121 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
           education:
             cvData.education && cvData.education.length > 0 ? (
               <section key="education" className="mb-4">
-                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
-                  Education
-                </h3>
-                <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
-                <div className="space-y-4 block">
-                  {cvData.education.map((edu, index) => {
-                    const dur = fmtDuration(edu.durationFrom, edu.durationTo);
-                    return (
-                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}>
-                        <p className="text-[13.5px] md:text-sm text-gray-900">
-                          <span className="font-semibold">
-                            {edu.certification}
-                          </span>
-                          {edu.institutionName && ` | ${edu.institutionName}`}
-                          {dur && (
-                            <span className="text-gray-500">{` | ${dur}`}</span>
-                          )}
-                        </p>
-                        {edu.summary && (
-                          <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
-                            {edu.summary}
+                <div className="break-inside-avoid cv-page-group">
+                  <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
+                    Education
+                  </h3>
+                  <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
+                  <div className="space-y-4 block">
+                    {cvData.education.slice(0, 1).map((edu, index) => {
+                      const dur = fmtDuration(edu.durationFrom, edu.durationTo);
+                      return (
+                        <div key={0} className="break-inside-avoid" style={getHighlightStyle(`education_0_institutionName`, `education_0_certification`, `education_0_summary`)}>
+                          <p className="text-[13.5px] md:text-sm text-gray-900">
+                            <span className="font-semibold">
+                              {edu.certification}
+                            </span>
+                            {edu.institutionName && ` | ${edu.institutionName}`}
+                            {dur && (
+                              <span className="text-gray-500">{` | ${dur}`}</span>
+                            )}
                           </p>
-                        )}
-                      </div>
-                    );
-                  })}
+                          {edu.summary && (
+                            <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                              {edu.summary}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
+                {cvData.education.length > 1 && (
+                  <div className="space-y-4 block mt-2">
+                    {cvData.education.slice(1).map((edu, index) => {
+                      const actualIndex = index + 1;
+                      const dur = fmtDuration(edu.durationFrom, edu.durationTo);
+                      return (
+                        <div key={actualIndex} className="break-inside-avoid" style={getHighlightStyle(`education_${actualIndex}_institutionName`, `education_${actualIndex}_certification`, `education_${actualIndex}_summary`)}>
+                          <p className="text-[13.5px] md:text-sm text-gray-900">
+                            <span className="font-semibold">
+                              {edu.certification}
+                            </span>
+                            {edu.institutionName && ` | ${edu.institutionName}`}
+                            {dur && (
+                              <span className="text-gray-500">{` | ${dur}`}</span>
+                            )}
+                          </p>
+                          {edu.summary && (
+                            <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                              {edu.summary}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </section>
             ) : null,
           experience:
             cvData.experience && cvData.experience.length > 0 ? (
               <section key="experience" className="mb-4">
-                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
-                  Experience
-                </h3>
-                <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
-                <div className="space-y-4 block">
-                  {cvData.experience.map((exp, index) => {
-                    const dur = fmtDuration(exp.durationFrom, exp.durationTo);
-                    return (
-                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
-                        <p className="text-[13.5px] md:text-sm text-gray-900">
-                          <span className="font-semibold">
-                            {exp.institutionName}
-                          </span>
-                          {exp.position && ` | ${exp.position}`}
-                          {dur && (
-                            <span className="text-gray-500">{` | ${dur}`}</span>
-                          )}
-                        </p>
-                        {exp.summary && (
-                          <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
-                            {exp.summary}
+                <div className="break-inside-avoid cv-page-group">
+                  <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
+                    Experience
+                  </h3>
+                  <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
+                  <div className="space-y-4 block">
+                    {cvData.experience.slice(0, 1).map((exp, index) => {
+                      const dur = fmtDuration(exp.durationFrom, exp.durationTo);
+                      return (
+                        <div key={0} className="break-inside-avoid" style={getHighlightStyle(`experience_0_institutionName`, `experience_0_position`, `experience_0_summary`)}>
+                          <p className="text-[13.5px] md:text-sm text-gray-900">
+                            <span className="font-semibold">
+                              {exp.institutionName}
+                            </span>
+                            {exp.position && ` | ${exp.position}`}
+                            {dur && (
+                              <span className="text-gray-500">{` | ${dur}`}</span>
+                            )}
                           </p>
-                        )}
-                      </div>
-                    );
-                  })}
+                          {exp.summary && (
+                            <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                              {exp.summary}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
+                {cvData.experience.length > 1 && (
+                  <div className="space-y-4 block mt-2">
+                    {cvData.experience.slice(1).map((exp, index) => {
+                      const actualIndex = index + 1;
+                      const dur = fmtDuration(exp.durationFrom, exp.durationTo);
+                      return (
+                        <div key={actualIndex} className="break-inside-avoid" style={getHighlightStyle(`experience_${actualIndex}_institutionName`, `experience_${actualIndex}_position`, `experience_${actualIndex}_summary`)}>
+                          <p className="text-[13.5px] md:text-sm text-gray-900">
+                            <span className="font-semibold">
+                              {exp.institutionName}
+                            </span>
+                            {exp.position && ` | ${exp.position}`}
+                            {dur && (
+                              <span className="text-gray-500">{` | ${dur}`}</span>
+                            )}
+                          </p>
+                          {exp.summary && (
+                            <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                              {exp.summary}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </section>
             ) : null,
           technicalSkills:
@@ -203,57 +271,108 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
         ];
 
         return sectionOrder.map((key) => {
-          if (key === "customSections" && cvData.customSections?.length > 0) {
-            return cvData.customSections.map((section, sectionIndex) => (
+          const isCustom = key.startsWith("customSection__");
+        const isLegacyCustom = key === "customSections";
+        if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
+          let sectionsToRender = isLegacyCustom 
+            ? cvData.customSections
+            : [cvData.customSections[parseInt(key.replace("customSection__", ""), 10)]].filter(Boolean);
+            
+          return sectionsToRender.map((section, loopIdx) => {
+            const sectionIndex = isLegacyCustom ? loopIdx : parseInt(key.replace("customSection__", ""), 10);
+            return (
               <section
                 key={`custom-${sectionIndex}`}
                 className="mb-4"
               >
-                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
-                  {section.title}
-                </h3>
-                <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
-                <div className="space-y-4 block">
-                  {section.items.map((item, itemIndex) => {
-                    const dur = fmtDuration(item.durationFrom, item.durationTo);
-                    return (
-                      <div 
-                        key={itemIndex} 
-                        className="break-inside-avoid"
-                        style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
-                      >
-                        <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="text-[13px] font-bold text-gray-900">
-                            {item.link ? (
-                              <a
-                                href={item.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline"
-                              >
-                                {item.name}
-                              </a>
-                            ) : (
-                              item.name
+                <div className="break-inside-avoid cv-page-group">
+                  <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
+                    {section.title}
+                  </h3>
+                  <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
+                  <div className="space-y-4 block">
+                    {section.items.slice(0, 1).map((item, itemIndex) => {
+                      const dur = fmtDuration(item.durationFrom, item.durationTo);
+                      return (
+                        <div
+                          key={0}
+                          className="break-inside-avoid"
+                          style={getHighlightStyle(`customSections_${sectionIndex}_items_0_description`)}
+                        >
+                          <div className="flex justify-between items-baseline mb-0.5">
+                            <h3 className="text-[13px] font-bold text-gray-900">
+                              <span>{item.name}</span>
+                              {item.link && (
+                                <a
+                                  href={item.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="ml-1 text-gray-500 hover:text-gray-700"
+                                >
+                                  <svg className="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                </a>
+                              )}
+                            </h3>
+                            {dur && (
+                              <span className="text-xs md:text-sm text-gray-500">
+                                {dur}
+                              </span>
                             )}
-                          </h3>
-                          {dur && (
-                            <span className="text-xs md:text-sm text-gray-500">
-                              {dur}
-                            </span>
+                          </div>
+                          {item.description && (
+                            <div className="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1">
+                              {item.description}
+                            </div>
                           )}
                         </div>
-                        {item.description && (
-                          <div className="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1">
-                            {item.description}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
+                {section.items.length > 1 && (
+                  <div className="space-y-4 block mt-2">
+                    {section.items.slice(1).map((item, itemIndex) => {
+                      const actualIndex = itemIndex + 1;
+                      const dur = fmtDuration(item.durationFrom, item.durationTo);
+                      return (
+                        <div
+                          key={actualIndex}
+                          className="break-inside-avoid"
+                          style={getHighlightStyle(`customSections_${sectionIndex}_items_${actualIndex}_description`)}
+                        >
+                          <div className="flex justify-between items-baseline mb-0.5">
+                            <h3 className="text-[13px] font-bold text-gray-900">
+                              <span>{item.name}</span>
+                              {item.link && (
+                                <a
+                                  href={item.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="ml-1 text-gray-500 hover:text-gray-700"
+                                >
+                                  <svg className="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                </a>
+                              )}
+                            </h3>
+                            {dur && (
+                              <span className="text-xs md:text-sm text-gray-500">
+                                {dur}
+                              </span>
+                            )}
+                          </div>
+                          {item.description && (
+                            <div className="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1">
+                              {item.description}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </section>
-            ));
+            );
+          });
           }
           if (key.includes("Skills") || key === "language") {
             return sectionBlocks[key];

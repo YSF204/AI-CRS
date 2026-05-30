@@ -6,6 +6,7 @@ import { resolveApplicationProfileInput } from "../profile/resolveApplicationPro
 import { shouldSkipAnalysis } from "../profile/shouldSkipAnalysis.js";
 import { computeApplicationScore } from "../scoring/computeApplicationScore.js";
 import { findOpenJobById } from "../helpers/findOpenJobById.js";
+import { uploadApplicationCvToSupabase } from "../helpers/uploadApplicationCv.js";
 
 export const updateApplication = async ({ applicationId, body, user, file }) => {
     const application = await Application.findById(applicationId);
@@ -52,9 +53,13 @@ export const updateApplication = async ({ applicationId, body, user, file }) => 
     }
 
     if (file) {
+        const uploadedCv = await uploadApplicationCvToSupabase({
+            file,
+            userId: user._id,
+        });
         application.cvFile = {
             filename: file.originalname,
-            path: file.path,
+            path: uploadedCv?.publicUrl || "",
         };
         application.applicationMethod = "uploadPdf";
     }

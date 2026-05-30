@@ -1,13 +1,20 @@
 import React from "react";
-import { PanelLeftClose, Check } from "lucide-react";
-import { ALL_SECTIONS } from "../constants";
+import { PanelLeftClose, Check, Plus, Layers } from "lucide-react";
+import { ALL_SECTIONS, isCustomSectionKey, getSectionMeta } from "../constants";
 
 export default function Sidebar({
   sidebarOpen,
   setSidebarOpen,
   activeSections,
   toggleSection,
+  onAddCustomSection,
+  form,
 }) {
+  // Standard sections (excluding legacy "customSections" block)
+  const standardSections = ALL_SECTIONS.filter((s) => s.key !== "customSections");
+  // Per-section custom section keys currently active
+  const activeCustomKeys = activeSections.filter(isCustomSectionKey);
+
   return (
     <div
       className="cv-editor-sidebar"
@@ -25,10 +32,10 @@ export default function Sidebar({
         {sidebarOpen && (
           <div className="px-5 flex-1 overflow-hidden">
             <p className="font-mono text-[9px] uppercase tracking-[0.2em] text-[var(--nm-text-tertiary)] whitespace-nowrap font-bold opacity-70">
-              Block Registry
+              CV Editor
             </p>
             <p className="font-[var(--font-display)] font-black text-[11px] mt-0.5 whitespace-nowrap uppercase tracking-wider text-[var(--nm-text-primary)]">
-              AVAILABLE MODULES
+              Available Sections
             </p>
           </div>
         )}
@@ -65,7 +72,7 @@ export default function Sidebar({
           scrollbarColor: "rgba(0,0,0,0.2) transparent",
         }}
       >
-        {ALL_SECTIONS.map(({ key, label, icon: Icon, accent, textColor }) => {
+        {standardSections.map(({ key, label, icon: Icon, accent, textColor }) => {
           const active = activeSections.includes(key);
           return (
             <button
@@ -125,6 +132,87 @@ export default function Sidebar({
             </button>
           );
         })}
+
+        {/* Divider before custom sections */}
+        {sidebarOpen && (
+          <div
+            style={{
+              height: 2,
+              background: "var(--nm-ink)",
+              margin: "8px 0",
+              opacity: 0.15,
+            }}
+          />
+        )}
+
+        {/* Active custom section entries */}
+        {sidebarOpen && activeCustomKeys.map((key) => {
+          const meta = getSectionMeta(key, form);
+          return (
+            <div
+              key={key}
+              className="w-full flex items-center text-left relative"
+              style={{
+                gap: 12,
+                padding: "10px 20px",
+                background: meta.accent,
+                borderLeft: "6px solid var(--nm-ink)",
+                marginBottom: "2px",
+              }}
+            >
+              <Layers
+                size={14}
+                style={{ color: meta.textColor, flexShrink: 0 }}
+                strokeWidth={2.5}
+              />
+              <span
+                className="font-mono text-[10px] font-bold uppercase tracking-wider flex-1 whitespace-nowrap overflow-hidden"
+                style={{ color: meta.textColor }}
+              >
+                {meta.label}
+              </span>
+              <div className="w-5 h-5 flex items-center justify-center bg-[var(--nm-ink)] flex-shrink-0">
+                <Check size={10} color="#fff" strokeWidth={4} />
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Add Custom Section button */}
+        <button
+          type="button"
+          onClick={onAddCustomSection}
+          title={sidebarOpen ? undefined : "Add Custom Section"}
+          className="w-full flex items-center transition-all"
+          style={{
+            gap: sidebarOpen ? 12 : 0,
+            padding: sidebarOpen ? "12px 20px" : "16px 0",
+            justifyContent: sidebarOpen ? "flex-start" : "center",
+            background: "transparent",
+            borderLeft: "6px solid transparent",
+            marginTop: 4,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "var(--nm-surface-high)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+          }}
+        >
+          <Plus
+            size={16}
+            style={{ color: "var(--nm-primary)", flexShrink: 0 }}
+            strokeWidth={2.5}
+          />
+          {sidebarOpen && (
+            <span
+              className="font-mono text-[11px] font-bold uppercase tracking-wider flex-1 whitespace-nowrap"
+              style={{ color: "var(--nm-primary)" }}
+            >
+              Add Custom Section
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Sidebar footer */}
@@ -134,10 +222,11 @@ export default function Sidebar({
             <span className="font-black text-[var(--nm-text-primary)]">
               {activeSections.length}
             </span>{" "}
-            / {ALL_SECTIONS.length} ACTIVE BLOCKS
+            / {standardSections.length + activeCustomKeys.length} Active
           </p>
         </div>
       )}
     </div>
   );
 }
+

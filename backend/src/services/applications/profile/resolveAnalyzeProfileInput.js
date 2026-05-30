@@ -1,6 +1,7 @@
 import CV from "../../../models/CV.js";
 import AppError from "../../../utils/appError.js";
 import { analyzeApplicationCV } from "../../../integrations/ai/openai.js";
+import { resolveUploadedFilePath } from "../../../utils/resolveUploadedFilePath.js";
 import { assertCvOwnership } from "../../shared/ownershipService.js";
 import { mapExistingCvToNormalizedProfile, mapParsedPdfToNormalizedProfile } from "../../shared/profileInputMapper.js";
 import { normalizeAiApplicationAnalysis } from "../../shared/aiResponseParser.js";
@@ -11,17 +12,22 @@ export const resolveAnalyzeProfileInput = async ({ user, cvId, file, jobDescript
     }
 
     if (file) {
-        const aiRaw = await analyzeApplicationCV(file.path, jobDescription || "");
-        const parsedPdfAnalysis = normalizeAiApplicationAnalysis(aiRaw);
-        const normalizedProfile = mapParsedPdfToNormalizedProfile({ parsedPdfAnalysis, user });
+        const { filePath, cleanup } = await resolveUploadedFilePath(file);
+        try {
+            const aiRaw = await analyzeApplicationCV(filePath, jobDescription || "");
+            const parsedPdfAnalysis = normalizeAiApplicationAnalysis(aiRaw);
+            const normalizedProfile = mapParsedPdfToNormalizedProfile({ parsedPdfAnalysis, user });
 
-        return {
-            normalizedProfile,
-            applicationMethod: "uploadPdf",
-            cvData: null,
-            parsedPdfAnalysis,
-            isManualApplication: false,
-        };
+            return {
+                normalizedProfile,
+                applicationMethod: "uploadPdf",
+                cvData: null,
+                parsedPdfAnalysis,
+                isManualApplication: false,
+            };
+        } finally {
+            if (cleanup) await cleanup();
+        }
     }
 
     const cvData = await CV.findById(cvId);

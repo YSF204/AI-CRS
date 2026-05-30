@@ -120,8 +120,8 @@ export default function JobsList({
               type={mode === "browse" ? "empty" : "no-results"}
               title={
                 mode === "browse"
-                  ? "No jobs match current filters"
-                  : "No matches yet"
+                   ? "No jobs match current filters"
+                   : "No matches"
               }
               description={
                 mode === "browse"
@@ -165,13 +165,33 @@ export default function JobsList({
         </div>
       </section>
 
-      <aside className="sticky top-10 h-[calc(100vh-80px)] flex flex-col overflow-hidden">
+      <aside className="hidden lg:flex sticky top-10 h-[calc(100vh-80px)] flex-col overflow-hidden">
         <JobDetailsPanel
           job={selectedJob}
           onApply={onApply}
           onClose={onCloseJob}
         />
       </aside>
+
+      {/* Responsive Popup Modal for Mobile/Tablet */}
+      {selectedJob && (
+        <div
+          className="lg:hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              onCloseJob();
+            }
+          }}
+        >
+          <div className="w-full max-w-2xl h-[85vh] flex flex-col relative bg-[var(--nm-surface)] overflow-hidden">
+            <JobDetailsPanel
+              job={selectedJob}
+              onApply={onApply}
+              onClose={onCloseJob}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

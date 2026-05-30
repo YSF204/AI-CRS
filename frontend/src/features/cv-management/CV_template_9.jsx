@@ -1,4 +1,5 @@
 import React from "react";
+import { getSocialName } from "./SocialIcons";
 
 const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
@@ -30,6 +31,17 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
   }
   if (cvData.contact?.linkedin) contactItems.push(cvData.contact.linkedin);
   if (cvData.contact?.github) contactItems.push(cvData.contact.github);
+  if (cvData.contact?.customLinks) {
+    cvData.contact.customLinks.forEach(link => {
+      if (link.url) {
+        contactItems.push(
+          <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+            {getSocialName(link.icon)}
+          </a>
+        );
+      }
+    });
+  }
 
   const SectionHeader = ({ title }) => (
     <h2 className="text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-2 border-b-[1px] border-gray-400 pb-1">
@@ -81,12 +93,39 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
           experience:
             cvData.experience && cvData.experience.length > 0 ? (
               <section key="experience" className="cv-page-group mb-5">
-                <SectionHeader title="Experience" />
-                <div className="space-y-4 block">
-                  {cvData.experience.map((exp, index) => {
+                <div className="break-inside-avoid">
+                  <SectionHeader title="Experience" />
+                  {cvData.experience.slice(0, 1).map((exp, index) => {
                     const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                     return (
-                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
+                      <div key={index} style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
+                        <div className="flex justify-between items-baseline mb-0.5">
+                          <h3 className="text-[14px] font-bold text-gray-900">
+                            {exp.position}
+                            {exp.institutionName && (
+                              <span className="font-normal text-gray-600">, {exp.institutionName}</span>
+                            )}
+                          </h3>
+                          {dur && (
+                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap">
+                              {dur}
+                            </span>
+                          )}
+                        </div>
+                        {exp.summary && (
+                          <div className="text-[13px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1">
+                            {exp.summary}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="space-y-4 block">
+                  {cvData.experience.slice(1).map((exp, index) => {
+                    const dur = fmtDuration(exp.durationFrom, exp.durationTo);
+                    return (
+                      <div key={index + 1} className="break-inside-avoid" style={getHighlightStyle(`experience_${index + 1}_institutionName`, `experience_${index + 1}_position`, `experience_${index + 1}_summary`)}>
                         <div className="flex justify-between items-baseline mb-0.5">
                           <h3 className="text-[14px] font-bold text-gray-900">
                             {exp.position}
@@ -114,12 +153,39 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
           education:
             cvData.education && cvData.education.length > 0 ? (
               <section key="education" className="cv-page-group mb-5">
-                <SectionHeader title="Education" />
-                <div className="space-y-3 block">
-                  {cvData.education.map((edu, index) => {
+                <div className="break-inside-avoid">
+                  <SectionHeader title="Education" />
+                  {cvData.education.slice(0, 1).map((edu, index) => {
                     const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                     return (
-                      <div key={index} className="break-inside-avoid" style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}>
+                      <div key={index} style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}>
+                        <div className="flex justify-between items-baseline mb-0.5">
+                          <h3 className="text-[14px] font-bold text-gray-900">
+                            {edu.institutionName}
+                          </h3>
+                          {dur && (
+                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap">
+                              {dur}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[14px] text-gray-800">
+                          {edu.certification}
+                        </div>
+                        {edu.summary && (
+                          <div className="text-[13px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                            {edu.summary}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="space-y-3 block">
+                  {cvData.education.slice(1).map((edu, index) => {
+                    const dur = fmtDuration(edu.durationFrom, edu.durationTo);
+                    return (
+                      <div key={index + 1} className="break-inside-avoid" style={getHighlightStyle(`education_${index + 1}_institutionName`, `education_${index + 1}_certification`, `education_${index + 1}_summary`)}>
                         <div className="flex justify-between items-baseline mb-0.5">
                           <h3 className="text-[14px] font-bold text-gray-900">
                             {edu.institutionName}
@@ -193,20 +259,25 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
         ];
 
         return sectionOrder.map((key) => {
-          if (key === "customSections" && cvData.customSections?.length > 0) {
-            return cvData.customSections.map((section, sectionIndex) => (
+          const isCustom = key.startsWith("customSection__");
+          const isLegacyCustom = key === "customSections";
+          if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
+            const sectionIdx = isCustom ? parseInt(key.replace("customSection__", ""), 10) : -1;
+            const sectionsToRender = isCustom ? [cvData.customSections[sectionIdx]].filter(Boolean) : cvData.customSections;
+            return sectionsToRender.map((section, loopIdx) => {
+              const sectionIndex = isCustom ? sectionIdx : loopIdx;
+              return (
               <section
                 key={`custom-${sectionIndex}`}
                 className="cv-page-group mb-5"
               >
-                <SectionHeader title={section.title} />
-                <div className="space-y-4 block">
-                  {section.items.map((item, itemIndex) => {
+                <div className="break-inside-avoid">
+                  <SectionHeader title={section.title} />
+                  {section.items.slice(0, 1).map((item, itemIndex) => {
                     const dur = fmtDuration(item.durationFrom, item.durationTo);
                     return (
                       <div
                         key={itemIndex}
-                        className="break-inside-avoid"
                         style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
                       >
                         <div className="flex justify-between items-baseline mb-0.5">
@@ -239,11 +310,49 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
                     );
                   })}
                 </div>
+                <div className="space-y-4 block">
+                  {section.items.slice(1).map((item, itemIndex) => {
+                    const dur = fmtDuration(item.durationFrom, item.durationTo);
+                    return (
+                      <div
+                        key={itemIndex + 1}
+                        className="break-inside-avoid"
+                        style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex + 1}_description`)}
+                      >
+                        <div className="flex justify-between items-baseline mb-0.5">
+                          <h3 className="text-[14px] font-bold text-gray-900">
+                            {item.link ? (
+                              <a
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="hover:underline"
+                              >
+                                {item.name}
+                              </a>
+                            ) : (
+                              item.name
+                            )}
+                          </h3>
+                          {dur && (
+                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap">
+                              {dur}
+                            </span>
+                          )}
+                        </div>
+                        {item.description && (
+                          <div className="text-[13px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1">
+                            {item.description}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </section>
-            ));
+              );
+            });
           }
-          if (key.includes("Skills") || key === "language")
-            return sectionBlocks[key];
           return sectionBlocks[key];
         });
       })()}

@@ -1,4 +1,5 @@
 import { analyzeApplicationCV } from "../../../integrations/ai/openai.js";
+import { resolveUploadedFilePath } from "../../../utils/resolveUploadedFilePath.js";
 import { normalizeAiApplicationAnalysis } from "../../shared/aiResponseParser.js";
 import { runDeferredAnalysis } from "../scoring/runDeferredAnalysis.js";
 import { sendEmployerNotification } from "./sendEmployerNotification.js";
@@ -47,8 +48,13 @@ export const runPostSubmitWork = async ({
         skipAnalysis,
         parsePdfInBackground: file
             ? async () => {
-                const raw = await analyzeApplicationCV(file.path, job.description || "");
-                return normalizeAiApplicationAnalysis(raw);
+                const { filePath, cleanup } = await resolveUploadedFilePath(file);
+                try {
+                    const raw = await analyzeApplicationCV(filePath, job.description || "");
+                    return normalizeAiApplicationAnalysis(raw);
+                } finally {
+                    if (cleanup) await cleanup();
+                }
             }
             : null,
     });

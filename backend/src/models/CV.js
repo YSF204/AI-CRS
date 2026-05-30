@@ -15,8 +15,8 @@ const cvSchema = new mongoose.Schema(
     },
     jobTitle: {
       type: String,
-      required: true,
       trim: true,
+      default: "Untitled CV",
     },
     summary: {
       type: String,
@@ -45,6 +45,13 @@ const cvSchema = new mongoose.Schema(
         type: String,
         trim: true,
       },
+      customLinks: [
+        {
+          label: { type: String, trim: true },
+          url: { type: String, trim: true },
+          icon: { type: String, trim: true },
+        }
+      ],
     },
     address: {
       city: {
@@ -62,8 +69,8 @@ const cvSchema = new mongoose.Schema(
       {
         institutionName: {
           type: String,
-          required: true,
           trim: true,
+          default: "",
         },
         durationFrom: {
           type: String,
@@ -77,8 +84,8 @@ const cvSchema = new mongoose.Schema(
         },
         position: {
           type: String,
-          required: true,
           trim: true,
+          default: "",
         },
         summary: {
           type: String,
@@ -90,8 +97,8 @@ const cvSchema = new mongoose.Schema(
       {
         institutionName: {
           type: String,
-          required: true,
           trim: true,
+          default: "",
         },
         durationFrom: {
           type: String,
@@ -105,8 +112,8 @@ const cvSchema = new mongoose.Schema(
         },
         certification: {
           type: String,
-          required: true,
           trim: true,
+          default: "",
         },
         summary: {
           type: String,

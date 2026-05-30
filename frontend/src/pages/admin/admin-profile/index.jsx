@@ -4,6 +4,7 @@ import DashboardNav from '../../../components/shared/DashboardNav';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../context/ThemeContext';
 import api from '../../../services/api';
+import { toApiAssetUrl } from '../../../utils/apiConfig';
 import AdminProfileForm from './ProfileForm';
 
 export default function AdminProfile() {
@@ -45,9 +46,10 @@ export default function AdminProfile() {
         return value || 'Administrator';
     }, [form.firstName, form.lastName]);
 
+    const safeSplit = (value, separator = ' ') => String(value || '').split(separator);
+
     const initials = useMemo(() => {
-        return fullName
-            .split(' ')
+        return safeSplit(fullName)
             .map((part) => part[0])
             .slice(0, 2)
             .join('')
@@ -55,9 +57,7 @@ export default function AdminProfile() {
     }, [fullName]);
 
     const profilePicUrl = user?.profilePic
-        ? (user.profilePic.startsWith('http')
-            ? user.profilePic
-            : `http://localhost:3001${user.profilePic}`)
+        ? toApiAssetUrl(user.profilePic)
         : null;
 
     const panelStyles = useMemo(() => {
@@ -116,7 +116,7 @@ export default function AdminProfile() {
         setError('');
 
         const originalUser = { ...user };
-        
+
         try {
             const targetId = user.id || user._id;
             const payload = {
@@ -198,7 +198,7 @@ export default function AdminProfile() {
                             <input
                                 ref={fileInputRef}
                                 type="file"
-                                accept="image/*"
+                                accept="image/jpeg,image/png,image/webp"
                                 onChange={handlePhotoChange}
                                 style={{ display: 'none' }}
                             />

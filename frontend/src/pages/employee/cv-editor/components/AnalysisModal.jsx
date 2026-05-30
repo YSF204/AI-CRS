@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { X, Sparkles } from "lucide-react";
+import { useMediaQuery } from "../../../../hooks/useMediaQuery";
 import LivePreview from "./LivePreview";
 import AnalysisResults from "./AnalysisResults";
 
@@ -12,6 +13,7 @@ export default function AnalysisModal({
   onClose,
   onApply,
 }) {
+  const isMobile = useMediaQuery("(max-width: 767px)");
   const [selectedUpdates, setSelectedUpdates] = useState({});
   const [showImprovements, setShowImprovements] = useState(false);
 
@@ -79,20 +81,20 @@ export default function AnalysisModal({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "20px",
+        padding: isMobile ? "10px" : "20px",
       }}
       onClick={onClose}
     >
       <div
         style={{
           width: "100%",
-          maxWidth: "1400px",
-          height: "90vh",
+          maxWidth: isMobile ? "100%" : "1400px",
+          height: isMobile ? "95vh" : "90vh",
           background: "var(--nm-bg)",
           border: "4px solid var(--nm-ink)",
-          boxShadow: "12px 12px 0 var(--nm-ink)",
+          boxShadow: isMobile ? "6px 6px 0 var(--nm-ink)" : "12px 12px 0 var(--nm-ink)",
           display: "flex",
-          flexDirection: "row",
+          flexDirection: isMobile ? "column" : "row",
           overflow: "hidden",
           position: "relative",
         }}
@@ -100,15 +102,15 @@ export default function AnalysisModal({
       >
         <div
           style={{
-            width: "35%",
+            width: isMobile ? "100%" : "35%",
             height: "100%",
             overflowY: "auto",
-            borderRight: "4px solid var(--nm-ink)",
+            borderRight: isMobile ? "none" : "4px solid var(--nm-ink)",
             display: "flex",
             flexDirection: "column",
           }}
         >
-          <div style={{ padding: "28px" }}>
+          <div style={{ padding: isMobile ? "18px" : "28px" }}>
             <div
               style={{
                 display: "flex",
@@ -123,8 +125,8 @@ export default function AnalysisModal({
               <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
                 <div
                   style={{
-                    width: 44,
-                    height: 44,
+                    width: isMobile ? 38 : 44,
+                    height: isMobile ? 38 : 44,
                     background: "var(--nm-primary)",
                     border: "4px solid var(--nm-ink)",
                     display: "flex",
@@ -133,10 +135,10 @@ export default function AnalysisModal({
                     flexShrink: 0,
                   }}
                 >
-                  <Sparkles size={22} color="#fff" strokeWidth={2.5} />
+                  <Sparkles size={isMobile ? 18 : 22} color="#fff" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: "1.4rem", margin: 0 }}>
+                  <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: isMobile ? "1.1rem" : "1.4rem", margin: 0 }}>
                     CV Analysis
                   </h2>
                   <p style={{ margin: 0, color: "var(--nm-text-secondary)", fontSize: "0.85rem", fontFamily: "Manrope, sans-serif", fontWeight: 500, marginTop: 2 }}>
@@ -151,8 +153,8 @@ export default function AnalysisModal({
                   border: "4px solid var(--nm-ink)",
                   cursor: "pointer",
                   padding: "8px",
-                  width: 40,
-                  height: 40,
+                  width: 36,
+                  height: 36,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -160,7 +162,7 @@ export default function AnalysisModal({
                   borderRadius: "0px",
                 }}
               >
-                <X size={18} strokeWidth={2.5} />
+                <X size={16} strokeWidth={2.5} />
               </button>
             </div>
 
@@ -177,24 +179,26 @@ export default function AnalysisModal({
           </div>
         </div>
 
-        <div
-          style={{
-            width: "65%",
-            height: "100%",
-            background: "var(--nm-surface-high)",
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <LivePreview
-            formData={currentData}
-            userName={userName}
-            templateId={templateId}
-            highlights={highlights}
-            zoom={0.72}
-          />
-        </div>
+        {!isMobile && (
+          <div
+            style={{
+              width: "65%",
+              height: "100%",
+              background: "var(--nm-surface-high)",
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <LivePreview
+              formData={currentData}
+              userName={userName}
+              templateId={templateId}
+              highlights={highlights}
+              zoom={0.72}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

@@ -27,6 +27,8 @@ import {
   calculateMatchPercentage,
   generateAIMatchAnalysis,
 } from "../services/matching/matchingService.js";
+import { uploadApplicationCvToSupabase } from "../services/applications/helpers/uploadApplicationCv.js";
+import { resolveUploadedFilePath } from "../utils/resolveUploadedFilePath.js";
 // ================================== //
 //      ANALYZE CV FOR A JOB          //
 // ================================== //
@@ -239,6 +241,7 @@ export const updateApplication = catchAsync(async (req, res, next) => {
   let isManualApplication = false;
   let parsedPdfAnalysis = null;
   let applicationMethod = null;
+  let uploadedCv = null;
 
   const application = await Application.findById(id);
   if (!application) {
@@ -262,14 +265,19 @@ export const updateApplication = catchAsync(async (req, res, next) => {
   if (req.file) {
     applicationMethod = "uploadPdf";
     isManualApplication = false;
+    const { filePath, cleanup } = await resolveUploadedFilePath(req.file);
     try {
-      const aiAnalysis = await analyzeApplicationCV(
-        req.file.path,
-        job.description || "",
-      );
-      parsedPdfAnalysis = JSON.parse(aiAnalysis);
-    } catch (err) {
-      console.error("PDF analysis failed", err);
+      try {
+        const aiAnalysis = await analyzeApplicationCV(
+          filePath,
+          job.description || "",
+        );
+        parsedPdfAnalysis = JSON.parse(aiAnalysis);
+      } catch (err) {
+        console.error("PDF analysis failed", err);
+      }
+    } finally {
+      if (cleanup) await cleanup();
     }
   }
   // Handle existing CV selection
@@ -437,9 +445,13 @@ export const updateApplication = catchAsync(async (req, res, next) => {
 
   // FIX #4: Handle PDF file update
   if (req.file) {
+    uploadedCv = await uploadApplicationCvToSupabase({
+      file: req.file,
+      userId,
+    });
     application.cvFile = {
       filename: req.file.originalname,
-      path: req.file.path,
+      path: uploadedCv?.publicUrl || "",
     };
   }
 

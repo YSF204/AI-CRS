@@ -7,27 +7,32 @@ import { requestAccountDeletion as requestDelete } from "../services/users/accou
 import { confirmAccountDeletion as confirmDeleteService } from "../services/users/account/confirmAccountDeletion.js";
 import multer from "multer";
 import path from "path";
+import crypto from "crypto";
 import { delCache } from "../utils/redisHelper.js";
+import { getSupabaseClient, SUPABASE_BUCKET } from "../config/supabase.js";
+
+const ALLOWED_PROFILE_IMAGE_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
+const ALLOWED_PROFILE_IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 
 // ================================== //
 //  PROFILE PICTURE UPLOAD CONFIG     //
 // ================================== //
 
-const profileStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "src/uploads/profile");
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${req.user._id}-${Date.now()}${ext}`);
-  },
-});
+const profileStorage = multer.memoryStorage();
 
 const profileFileFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image/")) {
+  const extension = path.extname(file.originalname || "").toLowerCase();
+  const isAllowedMime = ALLOWED_PROFILE_IMAGE_MIME_TYPES.includes(file.mimetype);
+  const isAllowedExtension = ALLOWED_PROFILE_IMAGE_EXTENSIONS.has(extension);
+
+  if (isAllowedMime && isAllowedExtension) {
     cb(null, true);
   } else {
-    cb(new AppError("Only image files are allowed", 400), false);
+    cb(new AppError("Only JPG, PNG, and WebP images are allowed", 400), false);
   }
 };
 
@@ -72,8 +77,6 @@ export const updateMe = catchAsync(async (req, res, next) => {
 export const deleteMe = catchAsync(async (req, res, next) => {
   await requestDelete({
     userId: req.user.id,
-    protocol: req.protocol,
-    host: req.get("host"),
   });
 
   res.status(200).json({
@@ -100,8 +103,27 @@ export const uploadProfilePicture = catchAsync(async (req, res, next) => {
     return next(new AppError("Please upload an image file", 400));
   }
 
-  // Build the URL path to the uploaded file
-  const profilePicUrl = `/uploads/profile/${req.file.filename}`;
+  const extension = path.extname(req.file.originalname || ".jpg") || ".jpg";
+  const fileName = `${req.user._id}-${Date.now()}-${crypto.randomBytes(6).toString("hex")}${extension}`;
+  const filePath = `profile/${fileName}`;
+  const supabase = getSupabaseClient();
+
+  const { error: uploadError } = await supabase.storage
+    .from(SUPABASE_BUCKET)
+    .upload(filePath, req.file.buffer, {
+      contentType: req.file.mimetype,
+      upsert: true,
+    });
+
+  if (uploadError) {
+    return next(new AppError(`Failed to upload profile picture: ${uploadError.message}`, 500));
+  }
+
+  const { data: publicData } = supabase.storage
+    .from(SUPABASE_BUCKET)
+    .getPublicUrl(filePath);
+
+  const profilePicUrl = publicData?.publicUrl || "";
 
   const user = await User.findByIdAndUpdate(
     req.user._id,

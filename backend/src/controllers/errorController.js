@@ -4,6 +4,7 @@ import { handleDuplicateFieldError } from "../services/errors/transformers/handl
 import { handleValidationError } from "../services/errors/transformers/handleValidationError.js";
 import { handleInvalidJwtError } from "../services/errors/transformers/handleInvalidJwtError.js";
 import { handleExpiredJwtError } from "../services/errors/transformers/handleExpiredJwtError.js";
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -20,7 +21,6 @@ const sendErrorProd = (err, res) => {
     });
   } else {
     console.error("ERROR", err);
-
     res.status(500).json({
       status: "error",
       message: "Something went very wrong!",
@@ -34,7 +34,6 @@ const normalizeProductionError = (error) => {
   if (error.name === "ValidationError") return handleValidationError(error);
   if (error.name === "JsonWebTokenError") return handleInvalidJwtError();
   if (error.name === "TokenExpiredError") return handleExpiredJwtError();
-
   return error;
 };
 
@@ -45,7 +44,13 @@ const errorHandler = (err, req, res, next) => {
   if (process.env.NODE_ENV === "development") {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === "production") {
-    const error = normalizeProductionError({ ...err });
+    const error = normalizeProductionError(err);
+    sendErrorProd(error, res);
+  } else {
+    // FIX: Fallback for unset or unknown NODE_ENV (e.g. "test", missing).
+    // Without this, the request hangs with no response, which is worse than
+    // a safe generic error. We behave like production — safe, no stack leaks.
+    const error = normalizeProductionError(err);
     sendErrorProd(error, res);
   }
 };

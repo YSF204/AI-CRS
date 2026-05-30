@@ -76,8 +76,14 @@ export const DEFAULT_SECTION_ORDER = [
   "technicalSkills",
   "softSkills",
   "language",
-  "customSections",
 ];
+
+// ─── Custom section key helpers ───────────────────────────────────────────────
+// Each individual custom section gets its own key: "customSection__<index>"
+export const CUSTOM_SECTION_KEY_PREFIX = "customSection__";
+export const makeCustomSectionKey = (index) => `${CUSTOM_SECTION_KEY_PREFIX}${index}`;
+export const isCustomSectionKey = (key) => key && key.startsWith(CUSTOM_SECTION_KEY_PREFIX);
+export const getCustomSectionIndex = (key) => parseInt(key.replace(CUSTOM_SECTION_KEY_PREFIX, ""), 10);
 
 // ─── All available sections (palette) ─────────────────────────────────────────
 export const ALL_SECTIONS = [
@@ -146,8 +152,24 @@ export const ALL_SECTIONS = [
   },
 ];
 
-export const getSectionMeta = (key) =>
-  ALL_SECTIONS.find((s) => s.key === key) || ALL_SECTIONS[0];
+// customSections block entry kept for backwards compat display
+const CUSTOM_SECTION_META_BASE = {
+  key: "customSection__",
+  label: "Custom Section",
+  icon: Layers,
+  accent: "var(--nm-primary)",
+  textColor: "#ffffff",
+};
+
+export const getSectionMeta = (key, form) => {
+  if (key && key.startsWith(CUSTOM_SECTION_KEY_PREFIX)) {
+    const idx = parseInt(key.replace(CUSTOM_SECTION_KEY_PREFIX, ""), 10);
+    const section = form?.customSections?.[idx];
+    const label = section?.title?.trim() || `Custom Section ${idx + 1}`;
+    return { ...CUSTOM_SECTION_META_BASE, key, label };
+  }
+  return ALL_SECTIONS.find((s) => s.key === key) || ALL_SECTIONS[0];
+};
 
 // ─── Shared CSS class strings ─────────────────────────────────────────────────
 export const inpCls = "nm-input";

@@ -19,7 +19,8 @@ export default function ForgotPasswordForm({ onSuccess, onError }) {
 
       if (response.data.status === "success") {
         onSuccess(
-          response.data.message || "Password reset link sent to your email.",
+          response.data.message ||
+            "If an account exists for that email, a reset link will arrive shortly.",
         );
       }
     } catch (error) {

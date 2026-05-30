@@ -8,38 +8,38 @@ const JobDiscoveryState = ({ type, title, description, action, onAction }) => {
         return {
           icon: Loader2,
           iconProps: { className: "animate-spin" },
-          defaultTitle: "SYNCHRONIZING_MATRIX",
-          defaultDescription: "Fetching available positions from the central database..."
+          defaultTitle: "Loading Jobs",
+          defaultDescription: "Fetching available jobs..."
         };
       case "error":
         return {
           icon: AlertCircle,
-          defaultTitle: "CRITICAL_SYSTEM_ERROR",
-          defaultDescription: "The job retrieval protocol encountered an unexpected anomaly."
+          defaultTitle: "Error",
+          defaultDescription: "Failed to load jobs. Please try again."
         };
       case "empty":
         return {
           icon: Search,
-          defaultTitle: "ZERO_MATCHES_DETECTED",
-          defaultDescription: "No available positions align with your current search parameters."
+          defaultTitle: "No Jobs Found",
+          defaultDescription: "Try adjusting your search filters."
         };
       case "no-results":
         return {
           icon: Inbox,
-          defaultTitle: "EMPTY_RESULT_SET",
-          defaultDescription: "The matching engine has exhausted all available possibilities."
+          defaultTitle: "No Results",
+          defaultDescription: "No jobs match your criteria."
         };
       case "no-cv":
         return {
           icon: FileText,
-          defaultTitle: "ASSET_MISSING",
-          defaultDescription: "Upload a CV profile to initialize the personalized matching engine."
+          defaultTitle: "CV Missing",
+          defaultDescription: "Upload a CV to see jobs that match your skills."
         };
       default:
         return {
           icon: Inbox,
-          defaultTitle: "NULL_STATE",
-          defaultDescription: "No data available in the current context."
+          defaultTitle: "No Data",
+          defaultDescription: "No information available."
         };
     }
   };
@@ -48,15 +48,15 @@ const JobDiscoveryState = ({ type, title, description, action, onAction }) => {
   const Icon = config.icon;
 
   return (
-    <div className="p-12 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface-low)] text-left shadow-[8px_8px_0_var(--nm-ink)]">
-      <div className="flex items-center gap-4 mb-6">
+    <div className="p-12 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface-low)] text-center flex flex-col items-center justify-center shadow-[8px_8px_0_var(--nm-ink)]">
+      <div className="flex items-center gap-4 mb-6 justify-center">
         <div className="w-16 h-16 flex items-center justify-center bg-[var(--nm-ink)] text-white shadow-[6px_6px_0_var(--nm-primary)]">
           <Icon size={32} strokeWidth={2.5} {...config.iconProps} />
         </div>
         <div className="w-2 h-2 bg-[var(--nm-primary)] animate-pulse" />
       </div>
       <h3 className="font-[var(--font-display)] text-2xl font-black uppercase tracking-tighter text-[var(--nm-text-primary)] leading-none mb-3">
-        {title ? title.toUpperCase().replace(/\s+/g, '_') : config.defaultTitle}
+        {title ? title.toUpperCase() : config.defaultTitle}
       </h3>
       <p className="font-[var(--font-body)] text-[var(--nm-text-secondary)] font-bold text-sm max-w-md mb-8">
         {description || config.defaultDescription}

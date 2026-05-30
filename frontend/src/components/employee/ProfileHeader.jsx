@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 import { User, Mail, Briefcase, MapPin, Camera } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
+import { toApiAssetUrl } from '../../utils/apiConfig';
 
 /**
  * ProfileHeader — displays the user's avatar (initials or photo), name, role,
@@ -11,19 +12,17 @@ export default function ProfileHeader({ user }) {
   const { updateUserState } = useAuth();
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
+  const safeSplit = (value, separator = ' ') => String(value || '').split(separator);
 
   const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
-  const initials = (fullName || user?.email || 'U')
-    .split(' ')
+  const initials = safeSplit(fullName || user?.email || 'U')
     .map((w) => w[0])
     .slice(0, 2)
     .join('')
     .toUpperCase();
 
   const profilePicUrl = user?.profilePic
-    ? (user.profilePic.startsWith('http')
-      ? user.profilePic
-      : `http://localhost:3001${user.profilePic}`)
+    ? toApiAssetUrl(user.profilePic)
     : null;
 
   const handleCameraClick = () => {
@@ -90,7 +89,7 @@ export default function ProfileHeader({ user }) {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp"
             onChange={handleFileChange}
             style={{ display: 'none' }}
           />

@@ -32,9 +32,11 @@ export default function Applications() {
     data: applications = [],
     loading,
     error,
+    refetch,
+    setData: setApplications,
   } = useFetch(
     async () => {
-      const res = await api.get("/applications/my-applications");
+      const res = await api.get("/applications/my-applications", { __noCache: true });
       return res.data?.data?.applications || [];
     },
     { initialData: [] },
@@ -52,10 +54,11 @@ export default function Applications() {
   const [localDeleted, setLocalDeleted] = useState(new Set());
 
   useEffect(() => {
-    if (applications.length > 0 && !selectedApp) {
+    const isDesktop = typeof window !== "undefined" && window.innerWidth >= 1024;
+    if (isDesktop && applications.length > 0 && !selectedApp) {
       setSelectedApp(applications[0]);
     }
-  }, [applications]);
+  }, [applications, selectedApp]);
 
   const handleEditApplication = (app) => {
     setEditJobId(app.jobId?._id || app.jobId);
@@ -65,6 +68,7 @@ export default function Applications() {
   const handleCloseModal = () => {
     setEditJobId(null);
     setEditAppId(null);
+    refetch();
   };
 
   const handleDeleteApplication = (app) => {
@@ -78,6 +82,7 @@ export default function Applications() {
     try {
       await api.delete(`/applications/${app._id}`);
       setLocalDeleted((prev) => new Set([...prev, app._id]));
+      setApplications((prev = []) => prev.filter((item) => item._id !== app._id));
       if (selectedApp?._id === app._id) setSelectedApp(null);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to delete application.");
@@ -156,6 +161,7 @@ export default function Applications() {
         ).length;
       }
     });
+
     return counts;
   }, [applications, localDeleted]);
 
@@ -187,7 +193,7 @@ export default function Applications() {
       </div>
 
       <div className="dashboard-shell jd-shell py-8">
-        <div className="jd-surface-stack mb-8 p-5 flex flex-col xl:flex-row items-center justify-between gap-6">
+        <div className="jd-surface-stack mb-8 p-5 flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-6">
           <div className="flex flex-wrap gap-2">
             {STATUS_OPTIONS.map((opt) => (
               <button
@@ -195,11 +201,10 @@ export default function Applications() {
                 onClick={() =>
                   updateParam("status", opt.value === "all" ? "" : opt.value)
                 }
-                className={`px-4 py-2 text-xs font-bold uppercase tracking-tight border-2 transition-all ${
-                  statusFilter === opt.value
-                    ? "bg-[var(--nm-ink)] text-white border-[var(--nm-ink)]"
-                    : "bg-[var(--nm-surface)] text-[var(--nm-text-primary)] border-[var(--nm-ink)]/10 hover:border-[var(--nm-ink)]"
-                }`}
+                className={`px-4 py-2 text-xs font-bold uppercase tracking-tight border-2 transition-all ${statusFilter === opt.value
+                  ? "bg-[var(--nm-ink)] text-white border-[var(--nm-ink)]"
+                  : "bg-[var(--nm-surface)] text-[var(--nm-text-primary)] border-[var(--nm-ink)]/10 hover:border-[var(--nm-ink)]"
+                  }`}
               >
                 {opt.label} ({statusCounts[opt.value] || 0})
               </button>
@@ -237,23 +242,26 @@ export default function Applications() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,400px)_1fr] gap-6 lg:gap-8 items-start">
-          <ApplicationsList
-            paginatedApps={paginatedApps}
-            selectedApp={selectedApp}
-            onSelectApp={setSelectedApp}
-            getStatusInfo={getStatusInfo}
-            loading={loading}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={(page) => updateParam("page", page)}
-          />
+          <div className={selectedApp ? "hidden lg:block" : "block"}>
+            <ApplicationsList
+              paginatedApps={paginatedApps}
+              selectedApp={selectedApp}
+              onSelectApp={setSelectedApp}
+              getStatusInfo={getStatusInfo}
+              loading={loading}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => updateParam("page", page)}
+            />
+          </div>
 
-          <div className="lg:sticky lg:top-8">
+          <div className={`lg:sticky lg:top-8 ${selectedApp ? "block" : "hidden lg:block"}`}>
             <ApplicationDetails
               selectedApp={selectedApp}
               onEdit={handleEditApplication}
               onDelete={handleDeleteApplication}
               deletingId={deletingId}
+              onBack={() => setSelectedApp(null)}
             />
           </div>
         </div>

@@ -8,6 +8,7 @@ import hpp from "hpp";
 import mongoSanitize from "express-mongo-sanitize";
 import connectDB from "./src/config/dbConnect.js";
 import { initRedis } from "./src/config/redis.js";
+import { getAllowedOrigins } from "./src/config/security.js";
 
 const envPath = path.resolve(process.cwd(), ".env");
 dotenv.config({ path: envPath });
@@ -32,6 +33,10 @@ import suggestionRouter from "./src/routes/suggestionRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const allowedOrigins = getAllowedOrigins();
+
+// Render sits behind a proxy, so trust one hop for correct client IPs.
+app.set("trust proxy", 1);
 
 app.use(
   helmet({
@@ -40,29 +45,57 @@ app.use(
       useDefaults: true,
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        "frame-ancestors": [
-          "'self'",
-          "http://localhost:5173",
-          "http://127.0.0.1:5173",
-        ],
+        "frame-ancestors": ["'self'", ...allowedOrigins],
       },
     },
   })
 );
 
-app.use(cors({ origin: true, credentials: true }));
-app.use("/uploads", express.static(path.join(process.cwd(), "src", "uploads")));
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("CORS origin not allowed"));
+    },
+    credentials: true,
+  }),
+);
+
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "src", "uploads"), {
+    dotfiles: "ignore",
+    fallthrough: false,
+    index: false,
+  }),
+);
+
+// FIX: Default body limit is 1 MB — sufficient for all auth/API payloads.
+// The old 50 MB limit on public auth routes was a DoS vector (memory exhaustion).
+// CV/file upload routes override this with their own multer limits.
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ limit: "1mb", extended: true }));
+
 app.use(mongoSanitize());
 app.use(hpp());
 
-
+// ── Rate Limiting ──────────────────────────────────────────────────────────
+// General API traffic: 500 req / hour
 app.use("/api", regularLimiter);
-app.use("/api/auth/login", regularLimiter);
-app.use("/api/auth/register", regularLimiter);
-app.use("/api/auth/forgotPassword", regularLimiter);
+
+// FIX: Auth endpoints that are brute-force / abuse targets must use the
+// strict limiter (50 req/hr) rather than the loose one (500 req/hr).
+// Previously login and register were re-applying regularLimiter (no effect),
+// and resend-verification + verify-email had NO specific limiter at all.
+app.use("/api/auth/login", sensitiveLimiter);
+app.use("/api/auth/register", sensitiveLimiter);
+app.use("/api/auth/forgotPassword", sensitiveLimiter);
+app.use("/api/auth/resend-verification-email", sensitiveLimiter);
+app.use("/api/auth/verify-email", sensitiveLimiter);
 app.use("/api/auth/google", sensitiveLimiter);
+// ──────────────────────────────────────────────────────────────────────────
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRouter);

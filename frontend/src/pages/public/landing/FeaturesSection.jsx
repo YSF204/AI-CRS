@@ -42,12 +42,6 @@ export default function FeaturesSection() {
     >
       {/* Section header */}
       <div className="text-center" style={{ marginBottom: 'clamp(4rem, 8%, 6rem)' }}>
-        <span 
-          className="nm-status-pill active" 
-          style={{ marginBottom: '1.25rem', borderWidth: '4px' }}
-        >
-          Features
-        </span>
         <h2
           style={{
             fontFamily: 'var(--font-display)',

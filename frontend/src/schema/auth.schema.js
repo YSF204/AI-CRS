@@ -1,15 +1,16 @@
 import { z } from "zod";
 
+// Login: only validate that email is valid and a password was supplied.
+// Enforcing complexity rules here locks out users whose valid passwords
+// predate the current rules — this is a UX and security issue.
 export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase character")
-    .regex(/[a-z]/, "Password must contain at least one lowercase character")
-    .regex(/[0-9]/, "Password must contain at least one number"),
+  password: z.string().min(1, "Password is required"),
 });
 
+// Signup: ADMIN is intentionally excluded from the public role list.
+// Admins are provisioned directly in the DB — allowing self-registration as
+// ADMIN is a privilege-escalation vulnerability.
 export const signupSchema = z
   .object({
     firstName: z
@@ -33,7 +34,7 @@ export const signupSchema = z
     gender: z.enum(["MALE", "FEMALE"], {
       errorMap: () => ({ message: "Please select a gender" }),
     }),
-    role: z.enum(["EMPLOYEE", "EMPLOYER", "ADMIN"], {
+    role: z.enum(["EMPLOYEE", "EMPLOYER"], {
       errorMap: () => ({ message: "Please select a role" }),
     }),
     age: z.coerce.number().min(18, "Min age 18").max(119, "Max age 119"),

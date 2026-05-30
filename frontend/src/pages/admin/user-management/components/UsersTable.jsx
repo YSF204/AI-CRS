@@ -44,7 +44,8 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
 
   return (
     <>
-      <div className="table-scroll-container">
+      {/* ── Desktop / Tablet: scrollable table ── */}
+      <div className="table-scroll-container users-desktop-table">
         <table className="admin-table">
         <thead>
           <tr>
@@ -105,7 +106,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
                     fontSize: 'var(--text-sm)',
                     color: 'var(--nm-text-primary)'
                   }}>
-                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
                   </div>
                 </td>
                 <td>
@@ -156,6 +157,87 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
           })}
         </tbody>
       </table>
+      </div>
+
+      {/* ── Mobile: card view ── */}
+      <div className="users-mobile-cards">
+        {users.map((user) => {
+          const userId = user._id || user.id;
+          const isUpdating = updatingStatus === userId;
+          const canUpdateStatus = user.role !== 'ADMIN' && user.accountStatus !== 'PENDING';
+
+          return (
+            <div key={userId} className="user-mobile-card">
+              {/* Card header */}
+              <div className="user-mobile-card-header">
+                <div className="user-mobile-card-name">
+                  {user.firstName} {user.lastName}
+                </div>
+                <span className={statusClass(user.accountStatus)}>
+                  {user.accountStatus}
+                </span>
+              </div>
+
+              {/* Card body */}
+              <div className="user-mobile-card-body">
+                <div className="user-mobile-card-row">
+                  <span className="user-mobile-card-label">Email</span>
+                  <span className="user-mobile-card-value">{user.email}</span>
+                </div>
+                <div className="user-mobile-card-row">
+                  <span className="user-mobile-card-label">Role</span>
+                  <span className="admin-status-chip" style={{ fontSize: '10px', padding: '2px 8px' }}>{user.role}</span>
+                </div>
+                <div className="user-mobile-card-row">
+                  <span className="user-mobile-card-label">Joined</span>
+                  <span className="user-mobile-card-value">
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
+                  </span>
+                </div>
+                <div className="user-mobile-card-row">
+                  <span className="user-mobile-card-label">ID</span>
+                  <span className="user-mobile-card-value user-mobile-card-id">{userId}</span>
+                </div>
+              </div>
+
+              {/* Card actions */}
+              <div className="user-mobile-card-actions">
+                <button
+                  onClick={() => navigate(`/admin/users/${userId}/edit`)}
+                  className="admin-action-btn user-mobile-action-btn"
+                >
+                  Edit
+                </button>
+
+                {canUpdateStatus && user.accountStatus !== 'ACTIVE' && (
+                  <button
+                    onClick={() => handleStatusUpdate(userId, 'ACTIVE')}
+                    className="admin-action-btn status-active user-mobile-action-btn"
+                    disabled={isUpdating}
+                  >
+                    Activate
+                  </button>
+                )}
+                {canUpdateStatus && user.accountStatus !== 'INACTIVE' && (
+                  <button
+                    onClick={() => handleStatusUpdate(userId, 'INACTIVE')}
+                    className="admin-action-btn status-inactive user-mobile-action-btn"
+                    disabled={isUpdating}
+                  >
+                    Deactivate
+                  </button>
+                )}
+
+                <button
+                  onClick={() => openDeleteDialog(user)}
+                  className="admin-action-btn status-delete user-mobile-action-btn"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Pagination */}

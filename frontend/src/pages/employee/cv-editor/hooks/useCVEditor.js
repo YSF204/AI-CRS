@@ -2,7 +2,12 @@ import { useReducer, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../../../context/AuthContext";
 import api from "../../../../services/api";
-import { DEFAULT_SECTION_ORDER } from "../constants";
+import {
+  DEFAULT_SECTION_ORDER,
+  makeCustomSectionKey,
+  isCustomSectionKey,
+  getCustomSectionIndex,
+} from "../constants";
 import useCVForm from "./useCVForm";
 import useCVAnalysis from "./useCVAnalysis";
 
@@ -70,6 +75,40 @@ function editorReducer(state, action) {
       arr.splice(toIdx, 0, fromKey);
       return { ...state, activeSections: arr, dragOverKey: null };
     }
+    case "MOVE_SECTION_UP": {
+      const arr = [...state.activeSections];
+      const idx = arr.indexOf(action.payload);
+      if (idx <= 0) return state;
+      [arr[idx - 1], arr[idx]] = [arr[idx], arr[idx - 1]];
+      return { ...state, activeSections: arr };
+    }
+    case "MOVE_SECTION_DOWN": {
+      const arr = [...state.activeSections];
+      const idx = arr.indexOf(action.payload);
+      if (idx < 0 || idx >= arr.length - 1) return state;
+      [arr[idx + 1], arr[idx]] = [arr[idx], arr[idx + 1]];
+      return { ...state, activeSections: arr };
+    }
+    // Add a new per-custom-section key at the end of activeSections
+    case "ADD_CUSTOM_SECTION_KEY": {
+      return { ...state, activeSections: [...state.activeSections, action.payload] };
+    }
+    // Remove a custom section key and re-index remaining ones
+    case "REMOVE_CUSTOM_SECTION_KEY": {
+      const { removedIndex, newLength } = action.payload;
+      // Remove the key for the removed section, then re-index all remaining customSection__ keys
+      const updatedActive = state.activeSections
+        .filter((k) => !(isCustomSectionKey(k) && getCustomSectionIndex(k) === removedIndex))
+        .map((k) => {
+          if (isCustomSectionKey(k)) {
+            const idx = getCustomSectionIndex(k);
+            // Shift down keys that were after the removed index
+            return idx > removedIndex ? makeCustomSectionKey(idx - 1) : k;
+          }
+          return k;
+        });
+      return { ...state, activeSections: updatedActive };
+    }
     default:
       return state;
   }
@@ -92,10 +131,19 @@ export default function useCVEditor() {
     toastTimerRef.current = setTimeout(() => dispatch({ type: "TOAST", payload: null }), 3500);
   }, []);
 
+  // Callbacks injected into form handlers to keep activeSections in sync
+  const onAddCustomSectionKey = useCallback((key) => {
+    dispatch({ type: "ADD_CUSTOM_SECTION_KEY", payload: key });
+  }, []);
+
+  const onRemoveCustomSectionKey = useCallback((removedIndex, newLength) => {
+    dispatch({ type: "REMOVE_CUSTOM_SECTION_KEY", payload: { removedIndex, newLength } });
+  }, []);
+
   const {
     form,
     setForm,
-    handlers,
+    handlers: baseHandlers,
     getFilteredFormData,
     handleImageUpload,
     removeProfileImage,
@@ -110,26 +158,33 @@ export default function useCVEditor() {
     showToast,
     id !== "new"
       ? async (formData) => {
-          try {
-            const visibleSections = {};
-            ui.activeSections.forEach((k) => { visibleSections[k] = true; });
-            const payload = {
-              ...formData,
-              experience: formData.experience.map((e) => ({ ...e })),
-              education: formData.education.map((e) => ({ ...e })),
-              customSections: formData.customSections
-                .filter((s) => s.title?.trim() || (s.items && s.items.length > 0))
-                .map((s) => ({ ...s, items: s.items.map((it) => ({ ...it })) })),
-              layout: { sectionOrder: [...ui.activeSections], visibleSections },
-            };
-            await api.patch(`/cvs/${id}`, payload);
-          } catch (err) {
-            console.error("Auto-save failed:", err);
-          }
+        try {
+          const visibleSections = {};
+          ui.activeSections.forEach((k) => { visibleSections[k] = true; });
+          const payload = {
+            ...formData,
+            experience: formData.experience.map((e) => ({ ...e })),
+            education: formData.education.map((e) => ({ ...e })),
+            customSections: formData.customSections
+              .filter((s) => s.title?.trim() || (s.items && s.items.length > 0))
+              .map((s) => ({ ...s, items: s.items.map((it) => ({ ...it })) })),
+            layout: { sectionOrder: [...ui.activeSections], visibleSections },
+          };
+          await api.patch(`/cvs/${id}`, payload);
+        } catch (err) {
+          console.error("Auto-save failed:", err);
         }
+      }
       : null,
     user,
   );
+
+  // Wrap handlers to inject the key-sync callbacks
+  const handlers = {
+    ...baseHandlers,
+    addCustomSection: () => baseHandlers.addCustomSection(onAddCustomSectionKey),
+    removeCustomSection: (si) => baseHandlers.removeCustomSection(si, onRemoveCustomSectionKey),
+  };
 
   const userName =
     form.fullName?.trim() ||
@@ -154,7 +209,27 @@ export default function useCVEditor() {
   useEffect(() => {
     const normalizeMonth = (value) => {
       if (!value) return "";
-      return /^\d{4}$/.test(value) ? `${value}-01` : value;
+
+      const stringValue = String(value).trim();
+
+      if (/^\d{4}-\d{2}$/.test(stringValue)) {
+        return stringValue;
+      }
+
+      if (/^\d{2}\/\d{4}$/.test(stringValue)) {
+        const [month, year] = stringValue.split("/");
+        return `${year}-${month}`;
+      }
+
+      if (/^\d{4}$/.test(stringValue)) {
+        return `${stringValue}-01`;
+      }
+
+      if (/^\d{4}-\d{2}-\d{2}$/.test(stringValue)) {
+        return stringValue.slice(0, 7);
+      }
+
+      return stringValue;
     };
 
     const load = async () => {
@@ -234,8 +309,41 @@ export default function useCVEditor() {
         if (d.technicalSkills?.length) auto.push("technicalSkills");
         if (d.softSkills?.length) auto.push("softSkills");
         if (d.language?.length) auto.push("language");
-        if (d.customSections?.length) auto.push("customSections");
-        dispatch({ type: "SET_ACTIVE_SECTIONS", payload: auto.length ? [...new Set(["summary", ...auto])] : ["summary"] });
+
+        // Build saved section order, replacing legacy "customSections" with per-section keys
+        const savedOrder = d.layout?.sectionOrder || [];
+        let resolvedOrder = savedOrder.flatMap((k) => {
+          if (k === "customSections") {
+            // Legacy: expand to individual keys
+            return (d.customSections || []).map((_, i) => makeCustomSectionKey(i));
+          }
+          return [k];
+        });
+
+        // Add any per-section custom keys not already in the saved order
+        if (d.customSections?.length) {
+          d.customSections.forEach((_, i) => {
+            const key = makeCustomSectionKey(i);
+            if (!resolvedOrder.includes(key)) resolvedOrder.push(key);
+          });
+        }
+
+        // If no saved order, build from auto-detected sections
+        if (!resolvedOrder.length) {
+          resolvedOrder = [
+            ...auto,
+            ...(d.customSections || []).map((_, i) => makeCustomSectionKey(i)),
+          ];
+        }
+
+        // Only keep keys that correspond to actual data
+        const validKeys = new Set([
+          ...auto,
+          ...(d.customSections || []).map((_, i) => makeCustomSectionKey(i)),
+        ]);
+        resolvedOrder = resolvedOrder.filter((k) => validKeys.has(k));
+
+        dispatch({ type: "SET_ACTIVE_SECTIONS", payload: resolvedOrder.length ? [...new Set(["summary", ...resolvedOrder])] : ["summary"] });
       } catch {
         showToast("error", "Failed to load CV.");
       } finally {
@@ -283,10 +391,6 @@ export default function useCVEditor() {
   }, [ui.activeSections, ui.cv?.templateId, form.profileImage]);
 
   const handleSave = async () => {
-    if (id === "new" && !isComplete()) {
-      showToast("error", "Please complete all required fields before saving your CV.");
-      return;
-    }
     dispatch({ type: "SET_SAVING", payload: true });
     try {
       const payload = buildPayload(filteredFormData());
@@ -322,11 +426,18 @@ export default function useCVEditor() {
         technicalSkills: { technicalSkills: [] },
         softSkills: { softSkills: [] },
         language: { language: [] },
-        customSections: { customSections: [] },
       };
       for (const [section, clear] of Object.entries(sectionClearMap)) {
         if (!activeSections.includes(section)) Object.assign(f, clear);
       }
+      // Filter customSections by per-section active keys
+      const activeCustomKeys = activeSections.filter((k) => k && k.startsWith("customSection__"));
+      f.customSections = activeCustomKeys
+        .map((k) => {
+          const idx = parseInt(k.replace("customSection__", ""), 10);
+          return f.customSections?.[idx];
+        })
+        .filter(Boolean);
       f.layout = { ...(f.layout || {}), sectionOrder: activeSections };
 
       const payload = buildPayload(f);
@@ -351,6 +462,15 @@ export default function useCVEditor() {
   };
   const onDragEnd = () => { dragItemRef.current = null; dispatch({ type: "SET_DRAG_OVER", payload: null }); };
 
+  // Mobile touch reorder — swap section up or down in the active list
+  const onMoveUp = useCallback((key) => {
+    dispatch({ type: "MOVE_SECTION_UP", payload: key });
+  }, []);
+
+  const onMoveDown = useCallback((key) => {
+    dispatch({ type: "MOVE_SECTION_DOWN", payload: key });
+  }, []);
+
   const handleDownloadPdf = async () => {
     if (id === "new") { showToast("error", "Please save the CV first to download it as PDF."); return; }
     dispatch({ type: "SET_DOWNLOADING_PDF", payload: true });
@@ -363,8 +483,25 @@ export default function useCVEditor() {
         if (s.outline && s.outline.includes("dashed")) { s.outline = ""; s.outlineOffset = ""; s.backgroundColor = ""; s.borderRadius = ""; }
       });
       clone.querySelectorAll(".break-inside-avoid").forEach((node) => node.classList.remove("break-inside-avoid"));
-      const styles = Array.from(document.querySelectorAll("style")).map((s) => s.outerHTML).join("\n");
-      const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8">${styles}<style>html,body{margin:0;padding:0;background:#fff!important}*{print-color-adjust:exact;-webkit-print-color-adjust:exact;box-shadow:none!important;text-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;filter:none!important;animation:none!important;transition:none!important;will-change:auto!important}[style*="dashed"]{outline:none!important;background:transparent!important}</style></head><body><div style="width:794px;margin:0 auto;background:#fff">${clone.innerHTML}</div></body></html>`;
+
+      const collectCssText = () => {
+        const cssChunks = [];
+        Array.from(document.styleSheets).forEach((sheet) => {
+          try {
+            const rules = sheet.cssRules;
+            if (!rules) return;
+            cssChunks.push(Array.from(rules).map((rule) => rule.cssText).join("\n"));
+          } catch {
+            // Ignore cross-origin stylesheets (fonts/CDNs).
+          }
+        });
+        return cssChunks.join("\n");
+      };
+
+      const baseTag = `<base href="${window.location.origin}/">`;
+      const allStyles = `<style>${collectCssText()}</style>`;
+
+      const htmlContent = `<!DOCTYPE html><html><head><meta charset="utf-8">${baseTag}${allStyles}<style>html,body{margin:0;padding:0;background:#fff!important}*{print-color-adjust:exact;-webkit-print-color-adjust:exact;box-shadow:none!important;text-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;filter:none!important;animation:none!important;transition:none!important;will-change:auto!important}[style*="dashed"]{outline:none!important;background:transparent!important}</style></head><body><div style="width:794px;margin:0 auto;background:#fff">${clone.innerHTML}</div></body></html>`;
       const res = await api.post(`/cvs/${id}/download-pdf`, { html: htmlContent }, { responseType: "blob" });
       const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
       const a = document.createElement("a");
@@ -446,6 +583,8 @@ export default function useCVEditor() {
     onDragLeave,
     onDrop,
     onDragEnd,
+    onMoveUp,
+    onMoveDown,
     handleDownloadPdf,
     handleChangeTemplate,
     showAnalysis,

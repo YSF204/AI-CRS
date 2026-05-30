@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import Stepper from './components/Stepper';
 import ErrorBanner from './components/ErrorBanner';
+import CheckYourEmailPage from './CheckYourEmailPage';
 import api from '../../../services/api';
 import RoleStep    from './components/steps/RoleStep';
 import ProfileStep from './components/steps/ProfileStep';
@@ -22,6 +23,7 @@ export default function GoogleSignupForm({ googleData, onClear }) {
   const [role, setRole] = useState('');
   const [form, setForm] = useState(EMPTY_FORM);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [verificationEmail, setVerificationEmail] = useState(null);
   const advanceRef = useRef(null);
 
   const set   = (name) => (e) => setForm((prev) => ({ ...prev, [name]: e.target.value }));
@@ -100,13 +102,8 @@ export default function GoogleSignupForm({ googleData, onClear }) {
     }
 
     try {
-      // Send the Google profile data directly instead of re-verifying the token
-      // (Google ID tokens expire after ~1 hour, so re-verification often fails)
       const body = {
-        email: googleData.email,
-        firstName: googleData.firstName,
-        lastName: googleData.lastName,
-        profilePic: googleData.profilePic,
+        token: googleData.token,
         role:  role.toUpperCase(),
         gender: form.gender,
         age:    parseInt(form.age),
@@ -122,6 +119,12 @@ export default function GoogleSignupForm({ googleData, onClear }) {
       }
 
       const res = await api.post('/auth/google/complete-profile', body);
+
+      if (res.data.requiresEmailVerification) {
+        setVerificationEmail(res.data.data.user.email);
+        return;
+      }
+
       onClear?.();
 
       const { token, data } = res.data;
@@ -141,6 +144,13 @@ export default function GoogleSignupForm({ googleData, onClear }) {
 
   return (
     <>
+      {verificationEmail ? (
+        <CheckYourEmailPage
+          email={verificationEmail}
+          onBackClick={() => setVerificationEmail(null)}
+        />
+      ) : (
+        <>
       {/* Show which Google account is being used */}
       <div style={{
         marginBottom: 16,
@@ -193,6 +203,8 @@ export default function GoogleSignupForm({ googleData, onClear }) {
       >
         {steps}
       </Stepper>
+        </>
+      )}
     </>
   );
 }

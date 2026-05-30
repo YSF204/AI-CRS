@@ -15,6 +15,10 @@ export default function PostJob() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const parseList = (value) => String(value || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   const set = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
 
@@ -27,8 +31,8 @@ export default function PostJob() {
         ...form,
         salary: Number(form.salary),
         yearsOfExperience: Number(form.yearsOfExperience),
-        technicalSkills: form.technicalSkills.split(',').map((s) => s.trim()).filter(Boolean),
-        softSkills: form.softSkills.split(',').map((s) => s.trim()).filter(Boolean),
+        technicalSkills: parseList(form.technicalSkills),
+        softSkills: parseList(form.softSkills),
       });
       navigate('/employer');
     } catch (err) {
@@ -43,9 +47,9 @@ export default function PostJob() {
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      backgroundColor: 'var(--nm-bg)', 
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: 'var(--nm-bg)',
       color: 'var(--nm-text-primary)',
       fontFamily: 'var(--font-body)',
       overflowX: 'hidden'
@@ -57,44 +61,44 @@ export default function PostJob() {
       <div className="dashboard-shell" style={{ padding: 'var(--spacing-4)' }}>
         <style>{`@media (min-width: 768px) { .dashboard-shell { padding: var(--spacing-8) !important; } }`}</style>
 
-        <div 
+        <div
           className="nm-card"
           style={{
-            background: 'var(--nm-surface)', 
+            background: 'var(--nm-surface)',
             borderWidth: '4px',
-            boxShadow: '12px 12px 0 var(--nm-ink)', 
+            boxShadow: '12px 12px 0 var(--nm-ink)',
             padding: 'clamp(2rem, 6vw, 4rem)',
             borderRadius: '0px',
           }}
         >
-          <div style={{ 
-            fontFamily: 'var(--font-display)', 
-            fontSize: 14, 
-            color: 'var(--nm-primary)', 
-            fontWeight: 900, 
-            textTransform: 'uppercase', 
-            letterSpacing: '0.2em', 
-            marginBottom: 8 
+          <div style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 14,
+            color: 'var(--nm-primary)',
+            fontWeight: 900,
+            textTransform: 'uppercase',
+            letterSpacing: '0.2em',
+            marginBottom: 8
           }}>
             Asset Deployment
           </div>
-          <h1 style={{ 
-            fontFamily: 'var(--font-display)', 
-            fontWeight: 900, 
-            fontSize: 'clamp(2.5rem, 6vw, 4rem)', 
-            color: 'var(--nm-text-primary)', 
-            textTransform: 'uppercase', 
-            letterSpacing: '-0.04em', 
-            marginBottom: 12, 
+          <h1 style={{
+            fontFamily: 'var(--font-display)',
+            fontWeight: 900,
+            fontSize: 'clamp(2.5rem, 6vw, 4rem)',
+            color: 'var(--nm-text-primary)',
+            textTransform: 'uppercase',
+            letterSpacing: '-0.04em',
+            marginBottom: 12,
             lineHeight: 1,
             margin: 0
           }}>
             Publish Listing
           </h1>
-          <p style={{ 
-            fontFamily: 'var(--font-body)', 
-            fontSize: 16, 
-            color: 'var(--nm-text-secondary)', 
+          <p style={{
+            fontFamily: 'var(--font-body)',
+            fontSize: 16,
+            color: 'var(--nm-text-secondary)',
             marginBottom: '4rem',
             maxWidth: '600px',
             lineHeight: 1.6
@@ -103,16 +107,16 @@ export default function PostJob() {
           </p>
 
           {error && (
-            <div style={{ 
-              padding: '20px 24px', 
-              background: 'var(--nm-error)', 
-              color: '#fff', 
-              border: '4px solid var(--nm-ink)', 
-              fontFamily: 'var(--font-display)', 
-              fontWeight: 900, 
-              fontSize: 14, 
-              textTransform: 'uppercase', 
-              letterSpacing: '0.1em', 
+            <div style={{
+              padding: '20px 24px',
+              background: 'var(--nm-error)',
+              color: '#fff',
+              border: '4px solid var(--nm-ink)',
+              fontFamily: 'var(--font-display)',
+              fontWeight: 900,
+              fontSize: 14,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
               marginBottom: 32,
               boxShadow: '4px 4px 0 var(--nm-ink)'
             }}>
