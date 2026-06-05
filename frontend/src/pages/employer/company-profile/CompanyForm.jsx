@@ -34,59 +34,63 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
       
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={LABEL}>Company Name *</label>
-          <input 
-            style={INPUT} 
-            value={form.name} 
-            onChange={setField('name')} 
-            placeholder="e.g. ACME GLOBAL OPERATIONS" 
-            required 
+          <label htmlFor="cf-name" style={LABEL}>Company Name *</label>
+          <input
+            id="cf-name"
+            style={INPUT}
+            value={form.name}
+            onChange={setField('name')}
+            placeholder="e.g. ACME GLOBAL OPERATIONS"
+            required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
         <div style={{ position: 'relative' }}>
-          <label style={LABEL}>
-            License Number * 
+          <label htmlFor="cf-license" style={LABEL}>
+            License Number *
             {isEditing && <span style={{ textTransform: 'none', fontWeight: 800, color: 'var(--nm-error)', marginLeft: 8 }}>(LOCKED)</span>}
           </label>
-          <input 
-            style={{ 
-              ...INPUT, 
-              background: isEditing ? 'var(--nm-bg)' : 'var(--nm-bg)', 
-              color: isEditing ? 'var(--nm-text-tertiary)' : 'var(--nm-text-primary)', 
+          <input
+            id="cf-license"
+            style={{
+              ...INPUT,
+              background: isEditing ? 'var(--nm-bg)' : 'var(--nm-bg)',
+              color: isEditing ? 'var(--nm-text-tertiary)' : 'var(--nm-text-primary)',
               cursor: isEditing ? 'not-allowed' : 'text',
               borderColor: isEditing ? 'var(--nm-ink)' : 'var(--nm-ink)',
-              opacity: isEditing ? 0.7 : 1
-            }} 
-            value={form.license} 
-            onChange={setField('license')} 
-            placeholder="REGISTRATION_ID" 
-            required 
-            disabled={isEditing} 
+              opacity: isEditing ? 0.7 : 1,
+            }}
+            value={form.license}
+            onChange={setField('license')}
+            placeholder="REGISTRATION_ID"
+            required
+            disabled={isEditing}
           />
         </div>
         <div>
-          <label style={LABEL}>Contact Email *</label>
-          <input 
-            style={INPUT} 
-            type="email" 
-            value={form.contactEmail} 
-            onChange={setField('contactEmail')} 
-            placeholder="hr@acme.corp" 
-            required 
+          <label htmlFor="cf-contactEmail" style={LABEL}>Contact Email *</label>
+          <input
+            id="cf-contactEmail"
+            style={INPUT}
+            type="email"
+            value={form.contactEmail}
+            onChange={setField('contactEmail')}
+            placeholder="hr@acme.corp"
+            required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={LABEL}>Website URL <span style={{ textTransform: 'none', fontWeight: 500, color: 'var(--nm-text-tertiary)' }}>(OPTIONAL)</span></label>
-          <input 
-            style={INPUT} 
-            type="url" 
-            value={form.website} 
-            onChange={setField('website')} 
-            placeholder="https://acme.io" 
+          <label htmlFor="cf-website" style={LABEL}>Website URL <span style={{ textTransform: 'none', fontWeight: 500, color: 'var(--nm-text-tertiary)' }}>(OPTIONAL)</span></label>
+          <input
+            id="cf-website"
+            style={INPUT}
+            type="url"
+            value={form.website}
+            onChange={setField('website')}
+            placeholder="https://acme.io"
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
@@ -123,27 +127,27 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           {form.branches.map((branch, i) => (
-            <div key={i} style={{ 
-              display: 'flex', 
-              gap: 20, 
-              alignItems: 'flex-start', 
-              background: 'var(--nm-bg)', 
-              padding: '24px', 
+            <div key={branch._id || i} style={{
+              display: 'flex',
+              gap: 20,
+              alignItems: 'flex-start',
+              background: 'var(--nm-bg)',
+              padding: '24px',
               border: '4px solid var(--nm-ink)',
-              boxShadow: '6px 6px 0 var(--nm-ink)'
+              boxShadow: '6px 6px 0 var(--nm-ink)',
             }}>
               <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 20 }}>
                 <div>
-                  <label style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>BRANCH NAME</label>
-                  <input style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none', borderSize: '3px' }} value={branch.name} onChange={(e) => updateBranch(i, 'name', e.target.value)} placeholder="e.g. SECTOR_HQ" required />
+                  <label htmlFor={`cf-branch-${i}-name`} style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>BRANCH NAME</label>
+                  <input id={`cf-branch-${i}-name`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.name} onChange={(e) => updateBranch(i, 'name', e.target.value)} placeholder="e.g. SECTOR_HQ" required />
                 </div>
                 <div>
-                  <label style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>CITY</label>
-                  <input style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none', borderSize: '3px' }} value={branch.city} onChange={(e) => updateBranch(i, 'city', e.target.value)} placeholder="e.g. LONDON" required />
+                  <label htmlFor={`cf-branch-${i}-city`} style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>CITY</label>
+                  <input id={`cf-branch-${i}-city`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.city} onChange={(e) => updateBranch(i, 'city', e.target.value)} placeholder="e.g. LONDON" required />
                 </div>
                 <div>
-                  <label style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>ADDRESS</label>
-                  <input style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none', borderSize: '3px' }} value={branch.street} onChange={(e) => updateBranch(i, 'street', e.target.value)} placeholder="123 VECTOR ST" required />
+                  <label htmlFor={`cf-branch-${i}-street`} style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>ADDRESS</label>
+                  <input id={`cf-branch-${i}-street`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.street} onChange={(e) => updateBranch(i, 'street', e.target.value)} placeholder="123 VECTOR ST" required />
                 </div>
               </div>
               {form.branches.length > 1 && (

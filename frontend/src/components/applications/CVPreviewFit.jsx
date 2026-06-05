@@ -44,6 +44,7 @@ export default function CVPreviewFit({ application, cv, loadingCv }) {
         <iframe
           src={fileUrl}
           title="CV PDF"
+          sandbox="allow-same-origin"
           style={{ width: '100%', height: '100%', minHeight: 500, border: 'none' }}
         />
       </div>

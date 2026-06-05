@@ -1,6 +1,14 @@
 import React from "react";
 import { getSocialIcon, getSocialName } from "./SocialIcons";
 
+const SectionHeader = ({ title }) => (
+  <div className="border-y-[1.5px] border-blue-400/60 py-1 mb-2 mt-4">
+    <h2 className="text-[13px] md:text-[14px] font-bold uppercase text-blue-600 tracking-wider">
+      {title}
+    </h2>
+  </div>
+);
+
 const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlights = {} }) => {
   if (!cvData) return null;
 
@@ -42,14 +50,6 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
       }
     });
   }
-
-  const SectionHeader = ({ title }) => (
-    <div className="border-y-[1.5px] border-blue-400/60 py-1 mb-2 mt-4">
-      <h2 className="text-[13px] md:text-[14px] font-bold uppercase text-blue-600 tracking-wider">
-        {title}
-      </h2>
-    </div>
-  );
 
   return (
     <div

@@ -1,6 +1,16 @@
 import React from "react";
 import { getSocialIcon, getSocialName } from "./SocialIcons";
 
+const SectionHeader = ({ title }) => (
+  <div className="my-3">
+    <hr className="border-t-2 border-gray-300 mb-2" />
+    <h2 className="text-center text-xs md:text-sm font-bold uppercase tracking-widest text-gray-800">
+      {title}
+    </h2>
+    <hr className="border-t-2 border-gray-300 mt-2" />
+  </div>
+);
+
 const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
 
@@ -42,16 +52,6 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
       }
     });
   }
-
-  const SectionHeader = ({ title }) => (
-    <div className="my-3">
-      <hr className="border-t-2 border-gray-300 mb-2" />
-      <h2 className="text-center text-xs md:text-sm font-bold uppercase tracking-widest text-gray-800">
-        {title}
-      </h2>
-      <hr className="border-t-2 border-gray-300 mt-2" />
-    </div>
-  );
 
   return (
     <div

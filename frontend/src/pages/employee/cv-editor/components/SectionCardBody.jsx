@@ -92,9 +92,9 @@ export default function SectionCardBody({ sectionKey, form, handlers }) {
           </div>
 
           <div className="mt-4">
-            <label className="font-mono text-[11px] uppercase font-bold tracking-widest text-[var(--nm-text-primary)] mb-2 block">
+            <div className="font-mono text-[11px] uppercase font-bold tracking-widest text-[var(--nm-text-primary)] mb-2 block">
               Custom Links
-            </label>
+            </div>
             <div className="flex flex-col gap-2">
               {(form.contact.customLinks || []).map((link, i) => (
                 <div key={i} className="flex gap-2 items-center">
@@ -381,10 +381,11 @@ export default function SectionCardBody({ sectionKey, form, handlers }) {
             {/* Section header: type selector + title input */}
             <div className="flex items-center gap-2.5 p-3 border-2 border-[var(--border-color)] bg-[var(--card-bg)]">
               <div className="flex flex-col gap-1 flex-1">
-                <label className="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--nm-text-tertiary)]">
+                <label htmlFor={`section-type-${si}`} className="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--nm-text-tertiary)]">
                   Section Type
                 </label>
                 <select
+                  id={`section-type-${si}`}
                   className="bg-[var(--nm-bg)] border-2 border-[var(--nm-ink)] text-[var(--nm-text-primary)] px-2 py-1.5 font-mono text-xs outline-none focus:border-[var(--nm-primary)] nm-input"
                   value={section.sectionType || "other"}
                   onChange={(e) => {
@@ -411,10 +412,11 @@ export default function SectionCardBody({ sectionKey, form, handlers }) {
                 </select>
               </div>
               <div className="flex flex-col gap-1 flex-1">
-                <label className="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--nm-text-tertiary)]">
+                <label htmlFor={`section-title-${si}`} className="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--nm-text-tertiary)]">
                   Section Title
                 </label>
                 <input
+                  id={`section-title-${si}`}
                   className="nm-input"
                   value={section.title}
                   onChange={(e) => updateCustomSectionTitle(si, e.target.value)}

@@ -15,7 +15,7 @@ export default function SummarySection({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center">
-        <label className="font-mono text-[11px] uppercase font-bold tracking-widest text-[var(--nm-text-primary)]">
+        <label htmlFor="summary-textarea" className="font-mono text-[11px] uppercase font-bold tracking-widest text-[var(--nm-text-primary)]">
           Professional Narrative
         </label>
         <button
@@ -45,6 +45,7 @@ export default function SummarySection({
 
       <div className="relative">
         <textarea
+          id="summary-textarea"
           className="min-h-[120px] w-full p-4 nm-input font-sans text-sm leading-relaxed"
           value={form.summary}
           onChange={(e) => {

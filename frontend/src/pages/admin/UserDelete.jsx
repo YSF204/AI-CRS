@@ -23,7 +23,7 @@ export default function UserDelete() {
     data: fetchedUser,
     loading: fetchLoading,
     error: fetchError,
-  } = useFetch(fetchUser, { enabled: Boolean(id), deps: [id], initialData: null });
+  } = useFetch(fetchUser, { enabled: Boolean(id), key: id, initialData: null });
 
   useEffect(() => {
     setLoading(fetchLoading);

@@ -17,10 +17,11 @@ export default function ContactSection({ form, handlers }) {
       <div className="space-y-3">
         {/* Email Field */}
         <div className="brutal-card bg-[var(--nav-bg)] border-2 border-[var(--border-color)] p-4">
-          <label className="block font-mono text-xs font-bold mb-2 uppercase tracking-wider text-[var(--fg)]">
+          <label htmlFor="contact-email" className="block font-mono text-xs font-bold mb-2 uppercase tracking-wider text-[var(--fg)]">
             Email *
           </label>
           <input
+            id="contact-email"
             type="email"
             value={form.contact?.email || ""}
             onChange={(e) =>
@@ -33,10 +34,11 @@ export default function ContactSection({ form, handlers }) {
 
         {/* Phone Field */}
         <div className="brutal-card bg-[var(--nav-bg)] border-2 border-[var(--border-color)] p-4">
-          <label className="block font-mono text-xs font-bold mb-2 uppercase tracking-wider text-[var(--fg)]">
+          <label htmlFor="contact-phone" className="block font-mono text-xs font-bold mb-2 uppercase tracking-wider text-[var(--fg)]">
             Phone
           </label>
           <input
+            id="contact-phone"
             type="tel"
             value={form.contact?.phone || ""}
             onChange={(e) =>
@@ -49,10 +51,11 @@ export default function ContactSection({ form, handlers }) {
 
         {/* LinkedIn Field */}
         <div className="brutal-card bg-[var(--nav-bg)] border-2 border-[var(--border-color)] p-4">
-          <label className="block font-mono text-xs font-bold mb-2 uppercase tracking-wider text-[var(--fg)]">
+          <label htmlFor="contact-linkedin" className="block font-mono text-xs font-bold mb-2 uppercase tracking-wider text-[var(--fg)]">
             LinkedIn
           </label>
           <input
+            id="contact-linkedin"
             type="url"
             value={form.contact?.linkedin || ""}
             onChange={(e) =>
@@ -65,10 +68,11 @@ export default function ContactSection({ form, handlers }) {
 
         {/* GitHub Field */}
         <div className="brutal-card bg-[var(--nav-bg)] border-2 border-[var(--border-color)] p-4">
-          <label className="block font-mono text-xs font-bold mb-2 uppercase tracking-wider text-[var(--fg)]">
+          <label htmlFor="contact-github" className="block font-mono text-xs font-bold mb-2 uppercase tracking-wider text-[var(--fg)]">
             GitHub
           </label>
           <input
+            id="contact-github"
             type="url"
             value={form.contact?.github || ""}
             onChange={(e) =>

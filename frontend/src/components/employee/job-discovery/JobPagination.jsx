@@ -22,7 +22,6 @@ const JobPagination = ({ currentPage, totalPages, onPageChange, disabled = false
   return (
     <nav
       className="jd-card flex items-center justify-between gap-4"
-      role="navigation"
       aria-label="Job list pagination"
     >
       <div className="text-sm text-[var(--nm-text-secondary)] font-[var(--font-body)]">

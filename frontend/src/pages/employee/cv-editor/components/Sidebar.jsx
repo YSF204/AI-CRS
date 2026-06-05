@@ -1,6 +1,6 @@
 import React from "react";
 import { PanelLeftClose, Check, Plus, Layers } from "lucide-react";
-import { ALL_SECTIONS, isCustomSectionKey, getSectionMeta } from "../constants";
+import { ALL_SECTIONS, isCustomSectionKey, getSectionMeta, makeCustomSectionKey } from "../constants";
 
 export default function Sidebar({
   sidebarOpen,
@@ -12,6 +12,8 @@ export default function Sidebar({
 }) {
   // Standard sections (excluding legacy "customSections" block)
   const standardSections = ALL_SECTIONS.filter((s) => s.key !== "customSections");
+  // ALL custom section keys derived from form data (whether active or not)
+  const allCustomKeys = (form?.customSections || []).map((_, i) => makeCustomSectionKey(i));
   // Per-section custom section keys currently active
   const activeCustomKeys = activeSections.filter(isCustomSectionKey);
 
@@ -146,35 +148,47 @@ export default function Sidebar({
         )}
 
         {/* Active custom section entries */}
-        {sidebarOpen && activeCustomKeys.map((key) => {
+        {sidebarOpen && allCustomKeys.map((key) => {
           const meta = getSectionMeta(key, form);
+          const active = activeSections.includes(key);
           return (
-            <div
+            <button
               key={key}
-              className="w-full flex items-center text-left relative"
+              type="button"
+              onClick={() => toggleSection(key)}
+              title={active ? "Click to hide from CV" : "Click to show on CV"}
+              className="w-full flex items-center text-left relative transition-all"
               style={{
                 gap: 12,
                 padding: "10px 20px",
-                background: meta.accent,
-                borderLeft: "6px solid var(--nm-ink)",
+                background: active ? meta.accent : "transparent",
+                borderLeft: active ? "6px solid var(--nm-ink)" : "6px solid transparent",
                 marginBottom: "2px",
+              }}
+              onMouseEnter={(e) => {
+                if (!active) e.currentTarget.style.background = "var(--nm-surface-high)";
+              }}
+              onMouseLeave={(e) => {
+                if (!active) e.currentTarget.style.background = "transparent";
               }}
             >
               <Layers
                 size={14}
-                style={{ color: meta.textColor, flexShrink: 0 }}
+                style={{ color: active ? meta.textColor : "var(--nm-text-tertiary)", flexShrink: 0 }}
                 strokeWidth={2.5}
               />
               <span
                 className="font-mono text-[10px] font-bold uppercase tracking-wider flex-1 whitespace-nowrap overflow-hidden"
-                style={{ color: meta.textColor }}
+                style={{ color: active ? meta.textColor : "var(--nm-text-primary)" }}
               >
                 {meta.label}
               </span>
-              <div className="w-5 h-5 flex items-center justify-center bg-[var(--nm-ink)] flex-shrink-0">
-                <Check size={10} color="#fff" strokeWidth={4} />
-              </div>
-            </div>
+              {active && (
+                <div className="w-5 h-5 flex items-center justify-center bg-[var(--nm-ink)] flex-shrink-0">
+                  <Check size={10} color="#fff" strokeWidth={4} />
+                </div>
+              )}
+            </button>
           );
         })}
 
@@ -222,7 +236,7 @@ export default function Sidebar({
             <span className="font-black text-[var(--nm-text-primary)]">
               {activeSections.length}
             </span>{" "}
-            / {standardSections.length + activeCustomKeys.length} Active
+            / {standardSections.length + allCustomKeys.length} Active
           </p>
         </div>
       )}

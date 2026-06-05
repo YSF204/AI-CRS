@@ -78,7 +78,7 @@ export default function useAdminDashboard() {
     let cancelled = false;
 
     async function loadStats({ silent = false } = {}) {
-      if (!silent && !stats) {
+      if (!silent && !statsRef.current) {
         setLoading(true);
       }
 

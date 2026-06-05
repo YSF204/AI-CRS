@@ -85,7 +85,6 @@ export default function ManualForm({
             background: "var(--teal)",
             color: "#0a0a0a",
           }}
-          title="Submit the application immediately without AI analysis"
         >
           {isEdit ? "Update Directly" : "Apply Directly"}
         </button>

@@ -1,6 +1,12 @@
 import React from "react";
 import { getSocialName } from "./SocialIcons";
 
+const SectionHeader = ({ title }) => (
+  <h2 className="text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-2 border-b-[1px] border-gray-400 pb-1">
+    {title}
+  </h2>
+);
+
 const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
 
@@ -42,12 +48,6 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
       }
     });
   }
-
-  const SectionHeader = ({ title }) => (
-    <h2 className="text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-2 border-b-[1px] border-gray-400 pb-1">
-      {title}
-    </h2>
-  );
 
   return (
     <div

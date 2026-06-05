@@ -21,10 +21,11 @@ export default function SummarySection({ form, handlers, fetchSuggestions, handl
 
       {/* Full Name Field */}
       <div className="brutal-card bg-[var(--nav-bg)] border-2 border-[var(--border-color)] p-4">
-        <label className="block font-mono text-xs font-bold mb-3 uppercase tracking-wider text-[var(--fg)]">
+        <label htmlFor="summary-fullname" className="block font-mono text-xs font-bold mb-3 uppercase tracking-wider text-[var(--fg)]">
           Full Name *
         </label>
         <input
+          id="summary-fullname"
           type="text"
           value={form.fullName || ""}
           onChange={(e) => handlers.updateField("fullName", e.target.value)}
@@ -35,10 +36,11 @@ export default function SummarySection({ form, handlers, fetchSuggestions, handl
 
       {/* Summary Field with Suggestions */}
       <div className="brutal-card bg-[var(--nav-bg)] border-2 border-[var(--border-color)] p-4">
-        <label className="block font-mono text-xs font-bold mb-3 uppercase tracking-wider text-[var(--fg)]">
+        <label htmlFor="summary-text" className="block font-mono text-xs font-bold mb-3 uppercase tracking-wider text-[var(--fg)]">
           Professional Summary *
         </label>
         <textarea
+          id="summary-text"
           value={form.summary || ""}
           onChange={(e) => {
             handlers.updateField("summary", e.target.value);

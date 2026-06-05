@@ -368,6 +368,7 @@ export default function ViewerContent({ application, cv, loadingCv, showAnalysis
                 <iframe
                   src={fileUrl}
                   title="CV PDF"
+                  sandbox="allow-same-origin"
                   style={{ width: "100%", height: "100%", border: "none" }}
                 />
               </div>

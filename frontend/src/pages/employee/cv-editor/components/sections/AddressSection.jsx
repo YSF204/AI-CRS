@@ -15,10 +15,11 @@ export default function AddressSection({ form, handlers }) {
 
       {/* Address Field */}
       <div className="brutal-card bg-[var(--nav-bg)] border-2 border-[var(--border-color)] p-4">
-        <label className="block font-mono text-xs font-bold mb-3 uppercase tracking-wider text-[var(--fg)]">
+        <label htmlFor="address-street" className="block font-mono text-xs font-bold mb-3 uppercase tracking-wider text-[var(--fg)]">
           Address
         </label>
         <textarea
+          id="address-street"
           value={form.address?.street || ""}
           onChange={(e) => handlers.setAddress("street")(e)}
           className="brutal-input w-full h-24 resize-none"
@@ -26,10 +27,11 @@ export default function AddressSection({ form, handlers }) {
         />
       </div>
       <div className="brutal-card bg-[var(--nav-bg)] border-2 border-[var(--border-color)] p-4">
-        <label className="block font-mono text-xs font-bold mb-3 uppercase tracking-wider text-[var(--fg)]">
+        <label htmlFor="address-city" className="block font-mono text-xs font-bold mb-3 uppercase tracking-wider text-[var(--fg)]">
           City
         </label>
         <input
+          id="address-city"
           type="text"
           value={form.address?.city || ""}
           onChange={(e) => handlers.setAddress("city")(e)}

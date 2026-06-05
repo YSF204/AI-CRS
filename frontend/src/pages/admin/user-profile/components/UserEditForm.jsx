@@ -10,8 +10,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
     <form onSubmit={handleSubmit} className="grid gap-6">
       <div className="form-section grid gap-5 lg:grid-cols-2">
         <div>
-          <label className="form-label">First Name</label>
+          <label htmlFor="uf-firstName" className="form-label">First Name</label>
           <input
+            id="uf-firstName"
             name="firstName"
             value={formData.firstName}
             onChange={handleInputChange}
@@ -21,8 +22,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           />
         </div>
         <div>
-          <label className="form-label">Last Name</label>
+          <label htmlFor="uf-lastName" className="form-label">Last Name</label>
           <input
+            id="uf-lastName"
             name="lastName"
             value={formData.lastName}
             onChange={handleInputChange}
@@ -32,8 +34,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           />
         </div>
         <div>
-          <label className="form-label">Email</label>
+          <label htmlFor="uf-email" className="form-label">Email</label>
           <input
+            id="uf-email"
             name="email"
             type="email"
             value={formData.email}
@@ -44,8 +47,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           />
         </div>
         <div>
-          <label className="form-label">Telephone</label>
+          <label htmlFor="uf-telephone" className="form-label">Telephone</label>
           <input
+            id="uf-telephone"
             name="telephone"
             value={formData.telephone}
             onChange={handleInputChange}
@@ -54,8 +58,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           />
         </div>
         <div>
-          <label className="form-label">Password</label>
+          <label htmlFor="uf-password" className="form-label">Password</label>
           <input
+            id="uf-password"
             name="password"
             type="password"
             value={formData.password}
@@ -70,8 +75,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           />
         </div>
         <div>
-          <label className="form-label">Confirm Password</label>
+          <label htmlFor="uf-passwordConfirm" className="form-label">Confirm Password</label>
           <input
+            id="uf-passwordConfirm"
             name="passwordConfirm"
             type="password"
             value={formData.passwordConfirm}
@@ -86,8 +92,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           />
         </div>
         <div>
-          <label className="form-label">Role</label>
+          <label htmlFor="uf-role" className="form-label">Role</label>
           <select
+            id="uf-role"
             name="role"
             value={formData.role}
             onChange={handleInputChange}
@@ -103,8 +110,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
         </div>
         {isEdit && (
           <div>
-            <label className="form-label">Account Status</label>
+            <label htmlFor="uf-accountStatus" className="form-label">Account Status</label>
             <select
+              id="uf-accountStatus"
               name="accountStatus"
               value={accountStatus}
               onChange={(e) => setAccountStatus(e.target.value)}
@@ -120,8 +128,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           </div>
         )}
         <div>
-          <label className="form-label">Gender</label>
+          <label htmlFor="uf-gender" className="form-label">Gender</label>
           <select
+            id="uf-gender"
             name="gender"
             value={formData.gender}
             onChange={handleInputChange}
@@ -136,8 +145,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           </select>
         </div>
         <div>
-          <label className="form-label">Age</label>
+          <label htmlFor="uf-age" className="form-label">Age</label>
           <input
+            id="uf-age"
             name="age"
             type="number"
             value={formData.age}
@@ -156,8 +166,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           <h2 className="text-xl font-bold">Company Details</h2>
           <div className="grid gap-4 lg:grid-cols-2">
             <div>
-              <label className="form-label">Company Name</label>
+              <label htmlFor="uf-companyName" className="form-label">Company Name</label>
               <input
+                id="uf-companyName"
                 name="companyName"
                 value={formData.companyName}
                 onChange={handleInputChange}
@@ -167,8 +178,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
               />
             </div>
             <div>
-              <label className="form-label">License Number</label>
+              <label htmlFor="uf-companyLicense" className="form-label">License Number</label>
               <input
+                id="uf-companyLicense"
                 name="companyLicense"
                 value={formData.companyLicense}
                 onChange={handleInputChange}
@@ -178,8 +190,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
               />
             </div>
             <div>
-              <label className="form-label">Contact Email</label>
+              <label htmlFor="uf-contactEmail" className="form-label">Contact Email</label>
               <input
+                id="uf-contactEmail"
                 name="contactEmail"
                 type="email"
                 value={formData.contactEmail}
@@ -190,8 +203,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
               />
             </div>
             <div>
-              <label className="form-label">Website</label>
+              <label htmlFor="uf-website" className="form-label">Website</label>
               <input
+                id="uf-website"
                 name="website"
                 type="url"
                 value={formData.website}
@@ -203,8 +217,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           </div>
           <div className="grid gap-4 lg:grid-cols-3">
             <div>
-              <label className="form-label">Branch Name</label>
+              <label htmlFor="uf-branchName" className="form-label">Branch Name</label>
               <input
+                id="uf-branchName"
                 name="branchName"
                 value={formData.branchName}
                 onChange={handleInputChange}
@@ -214,8 +229,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
               />
             </div>
             <div>
-              <label className="form-label">Branch City</label>
+              <label htmlFor="uf-branchCity" className="form-label">Branch City</label>
               <input
+                id="uf-branchCity"
                 name="branchCity"
                 value={formData.branchCity}
                 onChange={handleInputChange}
@@ -225,8 +241,9 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
               />
             </div>
             <div>
-              <label className="form-label">Branch Street</label>
+              <label htmlFor="uf-branchStreet" className="form-label">Branch Street</label>
               <input
+                id="uf-branchStreet"
                 name="branchStreet"
                 value={formData.branchStreet}
                 onChange={handleInputChange}

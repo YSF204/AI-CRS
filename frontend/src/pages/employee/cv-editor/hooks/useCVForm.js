@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import {
   DEFAULT_SECTION_ORDER,
   newCustomSection,
@@ -73,11 +73,11 @@ export default function useCVForm(showToast, autoSaveFunction = null, user = nul
       triggerAutoSave();
     },
     moveUp: (i) => {
-      setForm((f) => { if (!i) return f; const a = [...f[key]]; [a[i - 1], a[i]] = [a[i], a[i - 1]]; return { ...f, [key]: a }; });
+      setForm((f) => { if (!i) return f; const a = [...f[key]];[a[i - 1], a[i]] = [a[i], a[i - 1]]; return { ...f, [key]: a }; });
       triggerAutoSave();
     },
     moveDown: (i) => {
-      setForm((f) => { if (i >= f[key].length - 1) return f; const a = [...f[key]]; [a[i], a[i + 1]] = [a[i + 1], a[i]]; return { ...f, [key]: a }; });
+      setForm((f) => { if (i >= f[key].length - 1) return f; const a = [...f[key]];[a[i], a[i + 1]] = [a[i + 1], a[i]]; return { ...f, [key]: a }; });
       triggerAutoSave();
     },
   });
@@ -175,9 +175,12 @@ export default function useCVForm(showToast, autoSaveFunction = null, user = nul
     }
   }, [form]);
 
-  const debouncedFetchSuggestions = useCallback(
-    debounce((field, context) => { fetchSuggestions(field, context); }, 2000),
-    [fetchSuggestions],
+  const fetchSuggestionsRef = useRef(fetchSuggestions);
+  fetchSuggestionsRef.current = fetchSuggestions;
+
+  const debouncedFetchSuggestions = useMemo(
+    () => debounce((field, context) => { fetchSuggestionsRef.current(field, context); }, 2000),
+    [],
   );
 
   const fetchSingleSummarySuggestion = useCallback(() => {

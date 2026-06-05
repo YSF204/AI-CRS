@@ -159,12 +159,6 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
     loadApplication();
   }, [isEdit, appId, editMethod, forceFresh]);
 
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    };
-  }, []);
-
   const handleFileUpload = (e) => {
     const file = e.target.files?.[0];
     if (file && file.type === "application/pdf") {

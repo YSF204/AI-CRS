@@ -62,10 +62,11 @@ export default function EditorContent({
           </span>
         </div>
         <div className="p-6 flex flex-col gap-4">
-          <label className="font-mono text-[11px] uppercase font-bold tracking-widest text-[var(--nm-text-tertiary)]">
+          <label htmlFor="cv-name-override" className="font-mono text-[11px] uppercase font-bold tracking-widest text-[var(--nm-text-tertiary)]">
             Override System Designation
           </label>
           <input
+            id="cv-name-override"
             className="nm-input"
             placeholder={
               user

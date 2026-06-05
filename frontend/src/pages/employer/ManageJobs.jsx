@@ -13,7 +13,7 @@ export default function ManageJobs() {
   const { data: fetchedJobs = [], loading } = useFetch(async () => {
     const res = await api.get('/jobs/employer/me');
     return res.data?.data?.jobs || [];
-  }, { initialData: [], deps: [user?.id || user?._id] });
+  }, { initialData: [], key: user?.id || user?._id });
 
   const [jobs, setJobs] = useState([]);
 

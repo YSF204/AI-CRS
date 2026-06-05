@@ -98,8 +98,9 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
       <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
           <div>
-            <label style={LABEL}>Job Title *</label>
+            <label htmlFor="search-title" style={LABEL}>Job Title *</label>
             <input
+              id="search-title"
               style={INPUT}
               value={form.position}
               onChange={set('position')}
@@ -110,8 +111,9 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
             />
           </div>
           <div>
-            <label style={LABEL}>Minimum Experience (Years)</label>
+            <label htmlFor="search-exp" style={LABEL}>Minimum Experience (Years)</label>
             <input
+              id="search-exp"
               style={INPUT}
               type="number"
               min="0"
@@ -125,8 +127,9 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
         </div>
 
         <div>
-          <label style={LABEL}>Job Description</label>
+          <label htmlFor="search-desc" style={LABEL}>Job Description</label>
           <textarea
+            id="search-desc"
             style={{ ...INPUT, minHeight: 140, resize: 'vertical' }}
             value={form.description}
             onChange={set('description')}
@@ -138,8 +141,9 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
           <div>
-            <label style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(comma separated)</span></label>
+            <label htmlFor="search-tech" style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(comma separated)</span></label>
             <input
+              id="search-tech"
               style={INPUT}
               value={form.technicalSkills}
               onChange={set('technicalSkills')}
@@ -149,8 +153,9 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
             />
           </div>
           <div>
-            <label style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(comma separated)</span></label>
+            <label htmlFor="search-soft" style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(comma separated)</span></label>
             <input
+              id="search-soft"
               style={INPUT}
               value={form.softSkills}
               onChange={set('softSkills')}
@@ -163,8 +168,9 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
           <div>
-            <label style={LABEL}>Languages <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(comma separated)</span></label>
+            <label htmlFor="search-lang" style={LABEL}>Languages <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(comma separated)</span></label>
             <input
+              id="search-lang"
               style={INPUT}
               value={form.language}
               onChange={set('language')}
@@ -174,8 +180,9 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
             />
           </div>
           <div>
-            <label style={LABEL}>Additional Requirements</label>
+            <label htmlFor="search-notes" style={LABEL}>Additional Requirements</label>
             <input
+              id="search-notes"
               style={INPUT}
               value={form.additionalNotes}
               onChange={set('additionalNotes')}

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useCallback } from 'react';
 import gsap from 'gsap';
 
 const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()1234567890';
@@ -22,12 +22,11 @@ export default function Shuffle({
   const charsRef = useRef([]);
   const triggeredRef = useRef(false);
 
-  const initScramble = () => {
+  const initScramble = useCallback(() => {
     if (respectReducedMotion && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
 
-    // Filter out null refs and spaces
     const elements = charsRef.current.filter((el) => el && el.dataset.char !== ' ');
 
     let sortedEls = [...elements];
@@ -59,7 +58,7 @@ export default function Shuffle({
         }
       });
     });
-  };
+  }, [respectReducedMotion, shuffleDirection, shuffleTimes, duration, ease, stagger]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -77,7 +76,7 @@ export default function Shuffle({
     if (containerRef.current) observer.observe(containerRef.current);
 
     return () => observer.disconnect();
-  }, [threshold, triggerOnce]);
+  }, [threshold, triggerOnce, initScramble]);
 
   useEffect(() => {
     if (loop) {
@@ -86,7 +85,7 @@ export default function Shuffle({
       }, (duration * 1000) + (text.length * stagger * 1000) + loopDelay);
       return () => clearInterval(interval);
     }
-  }, [loop, loopDelay, duration, stagger, text.length]);
+  }, [loop, loopDelay, duration, stagger, text.length, initScramble]);
 
   return (
     <span

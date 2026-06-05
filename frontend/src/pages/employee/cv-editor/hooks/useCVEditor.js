@@ -351,7 +351,7 @@ export default function useCVEditor() {
       }
     };
     load();
-  }, [id]);
+  }, [id, location.state, dispatch, setForm, showToast]);
 
   const {
     showAnalysis,

@@ -33,35 +33,38 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
       
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={LABEL}>Job Title *</label>
-          <input 
-            style={INPUT} 
-            value={form.position} 
-            onChange={setField('position')} 
-            required 
+          <label htmlFor="jf-position" style={LABEL}>Job Title *</label>
+          <input
+            id="jf-position"
+            style={INPUT}
+            value={form.position}
+            onChange={setField('position')}
+            required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
 
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={LABEL}>Description *</label>
-          <textarea 
-            style={{ ...INPUT, minHeight: 180, resize: 'vertical', lineHeight: 1.7 }} 
-            value={form.description} 
-            onChange={setField('description')} 
-            required 
+          <label htmlFor="jf-description" style={LABEL}>Description *</label>
+          <textarea
+            id="jf-description"
+            style={{ ...INPUT, minHeight: 180, resize: 'vertical', lineHeight: 1.7 }}
+            value={form.description}
+            onChange={setField('description')}
+            required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
 
         <div>
-          <label style={LABEL}>Work Mode *</label>
-          <select 
-            style={{ ...INPUT, cursor: 'pointer' }} 
-            value={form.workSite} 
-            onChange={setField('workSite')} 
+          <label htmlFor="jf-workSite" style={LABEL}>Work Mode *</label>
+          <select
+            id="jf-workSite"
+            style={{ ...INPUT, cursor: 'pointer' }}
+            value={form.workSite}
+            onChange={setField('workSite')}
             required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
@@ -73,11 +76,12 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div>
-          <label style={LABEL}>Job Type *</label>
-          <select 
-            style={{ ...INPUT, cursor: 'pointer' }} 
-            value={form.workDuration} 
-            onChange={setField('workDuration')} 
+          <label htmlFor="jf-workDuration" style={LABEL}>Job Type *</label>
+          <select
+            id="jf-workDuration"
+            style={{ ...INPUT, cursor: 'pointer' }}
+            value={form.workDuration}
+            onChange={setField('workDuration')}
             required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
@@ -90,52 +94,56 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div>
-          <label style={LABEL}>Experience Required (Y) *</label>
-          <input 
-            style={INPUT} 
-            type="number" 
-            min="0" 
-            value={form.yearsOfExperience} 
-            onChange={setField('yearsOfExperience')} 
-            required 
+          <label htmlFor="jf-yearsOfExperience" style={LABEL}>Experience Required (Y) *</label>
+          <input
+            id="jf-yearsOfExperience"
+            style={INPUT}
+            type="number"
+            min="0"
+            value={form.yearsOfExperience}
+            onChange={setField('yearsOfExperience')}
+            required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
 
         <div>
-          <label style={LABEL}>Salary ($/YR)</label>
-          <input 
-            style={INPUT} 
-            type="number" 
-            min="0" 
-            value={form.salary} 
-            onChange={setField('salary')} 
-            placeholder="e.g. 75000" 
+          <label htmlFor="jf-salary" style={LABEL}>Salary ($/YR)</label>
+          <input
+            id="jf-salary"
+            style={INPUT}
+            type="number"
+            min="0"
+            value={form.salary}
+            onChange={setField('salary')}
+            placeholder="e.g. 75000"
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
 
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
-          <input 
-            style={INPUT} 
-            value={form.technicalSkills} 
-            onChange={setField('technicalSkills')} 
-            placeholder="React, Node.js, MongoDB" 
+          <label htmlFor="jf-technicalSkills" style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+          <input
+            id="jf-technicalSkills"
+            style={INPUT}
+            value={form.technicalSkills}
+            onChange={setField('technicalSkills')}
+            placeholder="React, Node.js, MongoDB"
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
 
         <div style={{ gridColumn: '1 / -1' }}>
-          <label style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
-          <input 
-            style={INPUT} 
-            value={form.softSkills} 
-            onChange={setField('softSkills')} 
-            placeholder="Communication, Leadership" 
+          <label htmlFor="jf-softSkills" style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+          <input
+            id="jf-softSkills"
+            style={INPUT}
+            value={form.softSkills}
+            onChange={setField('softSkills')}
+            placeholder="Communication, Leadership"
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />

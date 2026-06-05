@@ -32,26 +32,28 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
         <div>
-          <label style={LABEL}>Job Title *</label>
-          <input 
-            style={INPUT} 
-            value={form.position} 
-            onChange={set('position')} 
-            placeholder="e.g. OPERATIONS ANALYST" 
-            required 
+          <label htmlFor="pjf-position" style={LABEL}>Job Title *</label>
+          <input
+            id="pjf-position"
+            style={INPUT}
+            value={form.position}
+            onChange={set('position')}
+            placeholder="e.g. OPERATIONS ANALYST"
+            required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
         <div>
-          <label style={LABEL}>Salary ($/YR) *</label>
-          <input 
-            style={INPUT} 
-            type="number" 
-            value={form.salary} 
-            onChange={set('salary')} 
-            placeholder="e.g. 85000" 
-            required 
+          <label htmlFor="pjf-salary" style={LABEL}>Salary ($/YR) *</label>
+          <input
+            id="pjf-salary"
+            style={INPUT}
+            type="number"
+            value={form.salary}
+            onChange={set('salary')}
+            placeholder="e.g. 85000"
+            required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
@@ -59,13 +61,14 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
       </div>
 
       <div>
-        <label style={LABEL}>Description *</label>
-        <textarea 
-          style={{ ...INPUT, minHeight: 180, resize: 'vertical', lineHeight: 1.7 }} 
-          value={form.description} 
-          onChange={set('description')} 
-          placeholder="Detail the operational scope and mission objectives..." 
-          required 
+        <label htmlFor="pjf-description" style={LABEL}>Description *</label>
+        <textarea
+          id="pjf-description"
+          style={{ ...INPUT, minHeight: 180, resize: 'vertical', lineHeight: 1.7 }}
+          value={form.description}
+          onChange={set('description')}
+          placeholder="Detail the operational scope and mission objectives..."
+          required
           onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
           onBlur={e => e.target.style.transform = 'none'}
         />
@@ -73,10 +76,11 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32 }}>
         <div>
-          <label style={LABEL}>Work Mode *</label>
-          <select 
-            style={{ ...INPUT, cursor: 'pointer' }} 
-            value={form.workSite} 
+          <label htmlFor="pjf-workSite" style={LABEL}>Work Mode *</label>
+          <select
+            id="pjf-workSite"
+            style={{ ...INPUT, cursor: 'pointer' }}
+            value={form.workSite}
             onChange={set('workSite')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
@@ -87,10 +91,11 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
           </select>
         </div>
         <div>
-          <label style={LABEL}>Job Type *</label>
-          <select 
-            style={{ ...INPUT, cursor: 'pointer' }} 
-            value={form.workDuration} 
+          <label htmlFor="pjf-workDuration" style={LABEL}>Job Type *</label>
+          <select
+            id="pjf-workDuration"
+            style={{ ...INPUT, cursor: 'pointer' }}
+            value={form.workDuration}
             onChange={set('workDuration')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
@@ -102,15 +107,16 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
           </select>
         </div>
         <div>
-          <label style={LABEL}>Experience Required (Y) *</label>
-          <input 
-            style={INPUT} 
-            type="number" 
-            min="0" 
-            value={form.yearsOfExperience} 
-            onChange={set('yearsOfExperience')} 
-            placeholder="e.g. 3" 
-            required 
+          <label htmlFor="pjf-yearsOfExperience" style={LABEL}>Experience Required (Y) *</label>
+          <input
+            id="pjf-yearsOfExperience"
+            style={INPUT}
+            type="number"
+            min="0"
+            value={form.yearsOfExperience}
+            onChange={set('yearsOfExperience')}
+            placeholder="e.g. 3"
+            required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
@@ -119,23 +125,25 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
         <div>
-          <label style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
-          <input 
-            style={INPUT} 
-            value={form.technicalSkills} 
-            onChange={set('technicalSkills')} 
-            placeholder="e.g. PYTHON, AWS, SQL" 
+          <label htmlFor="pjf-technicalSkills" style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+          <input
+            id="pjf-technicalSkills"
+            style={INPUT}
+            value={form.technicalSkills}
+            onChange={set('technicalSkills')}
+            placeholder="e.g. PYTHON, AWS, SQL"
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
         <div>
-          <label style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
-          <input 
-            style={INPUT} 
-            value={form.softSkills} 
-            onChange={set('softSkills')} 
-            placeholder="e.g. STRATEGIC, AGILE" 
+          <label htmlFor="pjf-softSkills" style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+          <input
+            id="pjf-softSkills"
+            style={INPUT}
+            value={form.softSkills}
+            onChange={set('softSkills')}
+            placeholder="e.g. STRATEGIC, AGILE"
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />

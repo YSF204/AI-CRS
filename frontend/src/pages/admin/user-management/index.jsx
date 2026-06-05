@@ -44,7 +44,7 @@ export default function UserManagement() {
     refetch: refetchUsers,
   } = useFetch(fetchUsersApi, {
     initialData: { users: [], pagination: {} },
-    deps: [debouncedSearch, debouncedRoleFilter, debouncedStatusFilter, page],
+    key: `${debouncedSearch}|${debouncedRoleFilter}|${debouncedStatusFilter}|${page}`,
   });
 
   useEffect(() => {

@@ -8,9 +8,10 @@ export default function FilterBar({ search, setSearch, setPage, roleFilter, setR
   return (
     <div className="admin-filter-bar">
       <div className="admin-filter-group">
-        <label className="admin-filter-label">Search</label>
+        <label htmlFor="um-filter-search" className="admin-filter-label">Search</label>
         <div style={{ display: 'flex', gap: 'var(--spacing-2)' }}>
           <input
+            id="um-filter-search"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -32,9 +33,10 @@ export default function FilterBar({ search, setSearch, setPage, roleFilter, setR
       </div>
 
       <div className="admin-filter-group">
-        <label className="admin-filter-label">Role</label>
+        <label htmlFor="um-filter-role" className="admin-filter-label">Role</label>
         <div className="admin-filter-select-wrap">
           <select
+            id="um-filter-role"
             value={roleFilter}
             onChange={(e) => {
               setRoleFilter(e.target.value);
@@ -52,9 +54,10 @@ export default function FilterBar({ search, setSearch, setPage, roleFilter, setR
       </div>
 
       <div className="admin-filter-group">
-        <label className="admin-filter-label">Status</label>
+        <label htmlFor="um-filter-status" className="admin-filter-label">Status</label>
         <div className="admin-filter-select-wrap">
           <select
+            id="um-filter-status"
             value={statusFilter}
             onChange={(e) => {
               setStatusFilter(e.target.value);

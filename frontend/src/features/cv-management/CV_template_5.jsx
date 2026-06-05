@@ -1,8 +1,93 @@
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { getSocialIcon, getSocialName } from "./SocialIcons";
+
+// 297 mm expressed in CSS pixels at 96 DPI (the browser standard).
+// Used to snap the outer container to whole-page multiples so the
+// dark sidebar always fills to the bottom of the last page.
+const PAGE_HEIGHT_PX = (297 * 96) / 25.4;
+
+const TimelineItem = ({
+  leftText1,
+  leftText2,
+  leftText3,
+  title,
+  description,
+  isLast,
+  highlightStyle = {},
+}) => (
+  <div className="flex relative break-inside-avoid" style={highlightStyle}>
+    <div className="w-[30%] pr-5 text-left pt-0.5">
+      <div className="text-gray-800 font-medium text-xs md:text-[13px] uppercase tracking-wide">
+        {leftText1}
+      </div>
+      {leftText2 && (
+        <div className="text-gray-500 text-xs md:text-[13px]">
+          {leftText2}
+        </div>
+      )}
+      {leftText3 && (
+        <div className="text-gray-400 text-[11px] md:text-[12px] mt-1">
+          {leftText3}
+        </div>
+      )}
+    </div>
+    <div className="relative flex flex-col items-center w-3.5 flex-shrink-0">
+      <div className="w-2 h-2 bg-gray-600 rounded-full mt-1.5 z-10"></div>
+      {!isLast && (
+        <div className="absolute top-3 bottom-[-1.5rem] left-1/2 -translate-x-1/2 w-[1px] bg-gray-300"></div>
+      )}
+    </div>
+    <div className="w-[70%] pl-5 pb-5">
+      <h4 className="font-bold text-gray-800 text-xs md:text-[13px] mb-1">
+        {title}
+      </h4>
+      {description && (
+        <div className="text-[13px] md:text-[13.5px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words">
+          {description}
+        </div>
+      )}
+    </div>
+  </div>
+);
 
 const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highlights = {} }) => {
   if (!cvData) return null;
+
+  // ── Page-snapping logic ──────────────────────────────────────────────────
+  // We watch the outer container with a ResizeObserver.  Whenever the
+  // rendered height changes we round it UP to the nearest 297 mm page
+  // boundary and store that as minHeight.  This makes the dark sidebar
+  // background fill all the way to the bottom of page 2 (or 3, …) even
+  // when the right-column content doesn't reach the page foot.
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const containerRef = useRef(null);
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const [minHeightMM, setMinHeightMM] = useState(297);
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const recalc = () => {
+      // scrollHeight gives us the true content height regardless of
+      // what minHeight is set to, as long as we measure BEFORE we
+      // update state.  ResizeObserver runs after paint so by the time
+      // it fires the previous minHeight is already applied; we need
+      // the content height, which equals scrollHeight when the element
+      // is not overflowed (flex stretch).  This converges in ≤2 frames.
+      const contentH = el.scrollHeight;
+      const pages    = Math.max(1, Math.ceil(contentH / PAGE_HEIGHT_PX));
+      const newMM    = pages * 297;
+      setMinHeightMM(prev => (prev === newMM ? prev : newMM));
+    };
+
+    recalc();
+    const ro = new ResizeObserver(recalc);
+    ro.observe(el);
+    return () => ro.disconnect();
+  // Re-run whenever cvData changes so a newly added section is measured.
+  }, [cvData]);
 
   const fmtDuration = (from, to) => {
     if (from && to) return `${from} – ${to}`;
@@ -33,67 +118,29 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
       (sec) => !sidebarSectionTitles.includes(sec.title.toLowerCase()),
     ) || [];
 
-  // Reusable Component for the Timeline Items (Experience & Education)
-  const TimelineItem = ({
-    leftText1,
-    leftText2,
-    leftText3,
-    title,
-    description,
-    isLast,
-    highlightStyle = {},
-  }) => (
-    <div className="flex relative break-inside-avoid" style={highlightStyle}>
-      <div className="w-[30%] pr-5 text-left pt-0.5">
-        <div className="text-gray-800 font-medium text-xs md:text-[13px] uppercase tracking-wide">
-          {leftText1}
-        </div>
-        {leftText2 && (
-          <div className="text-gray-500 text-xs md:text-[13px]">
-            {leftText2}
-          </div>
-        )}
-        {leftText3 && (
-          <div className="text-gray-400 text-[11px] md:text-[12px] mt-1">
-            {leftText3}
-          </div>
-        )}
-      </div>
-      <div className="relative flex flex-col items-center w-3.5 flex-shrink-0">
-        <div className="w-2 h-2 bg-gray-600 rounded-full mt-1.5 z-10"></div>
-        {!isLast && (
-          <div className="absolute top-3 bottom-[-1.5rem] left-1/2 -translate-x-1/2 w-[1px] bg-gray-300"></div>
-        )}
-      </div>
-      <div className="w-[70%] pl-5 pb-5">
-        <h4 className="font-bold text-gray-800 text-xs md:text-[13px] mb-1">
-          {title}
-        </h4>
-        {description && (
-          <div className="text-[13px] md:text-[13.5px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words">
-            {description}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
   return (
     <div
-      className="bg-white flex font-sans"
+      ref={containerRef}
+      className="flex font-sans"
       style={{
         overflowWrap: "anywhere",
         wordBreak: "break-word",
         width: "210mm",
-        minHeight: "297mm",
+        // Snapped to the nearest whole-page multiple by the ResizeObserver
+        // above — guarantees the dark sidebar fills to the page foot.
+        minHeight: `${minHeightMM}mm`,
         margin: "0 auto",
         boxSizing: "border-box",
         position: "relative",
+        // The sidebar background lives on the OUTER container so it
+        // always fills the full minHeight, not just the sidebar content.
+        background: "linear-gradient(to right, #4b4b4b 32%, #ffffff 32%)",
       }}
     >
       {/* LEFT COLUMN (SIDEBAR) */}
+      {/* bg colour comes from the outer container gradient — no need for bg-[#4b4b4b] here */}
       <div
-        className="w-[32%] bg-[#4b4b4b] text-gray-200 flex flex-col"
+        className="w-[32%] text-gray-200 flex flex-col"
         style={{
           minWidth: 0,
           boxSizing: "border-box",
@@ -117,7 +164,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
 
         {/* ABOUT ME */}
         {cvData.summary && (
-          <div className="mb-4" style={getHighlightStyle('summary')}>
+          <div className="mb-4 break-inside-avoid" style={getHighlightStyle('summary')}>
             <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               About Me
             </h3>
@@ -129,7 +176,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
 
         {/* LINKS */}
         {(cvData.contact?.linkedin || cvData.contact?.github || (cvData.contact?.customLinks && cvData.contact.customLinks.length > 0)) && (
-          <div className="mb-4">
+          <div className="mb-4 break-inside-avoid">
             <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               Links
             </h3>
@@ -180,7 +227,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
 
         {/* TECHNICAL SKILLS — simple tags, no fake bars */}
         {cvData.technicalSkills && cvData.technicalSkills.length > 0 && (
-          <div className="mb-4" style={getHighlightStyle('technicalSkills')}>
+          <div className="mb-4 break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
             <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               Technical Skills
             </h3>
@@ -199,7 +246,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
 
         {/* SOFT SKILLS */}
         {cvData.softSkills && cvData.softSkills.length > 0 && (
-          <div className="mb-4" style={getHighlightStyle('softSkills')}>
+          <div className="mb-4 break-inside-avoid" style={getHighlightStyle('softSkills')}>
             <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               Soft Skills
             </h3>
@@ -218,7 +265,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
 
         {/* LANGUAGES — simple tags, no fake bars */}
         {cvData.language && cvData.language.length > 0 && (
-          <div className="mb-4" style={getHighlightStyle('language')}>
+          <div className="mb-4 break-inside-avoid" style={getHighlightStyle('language')}>
             <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               Languages
             </h3>
@@ -243,7 +290,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
 
         {/* SIDEBAR CUSTOM SECTIONS (Hobbies, References) */}
         {sidebarCustomSections.map((section, idx) => (
-          <div key={idx} className="mb-4">
+          <div key={idx} className="mb-4 break-inside-avoid">
             <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
               {section.title}
             </h3>

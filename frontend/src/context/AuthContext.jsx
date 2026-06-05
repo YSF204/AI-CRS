@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../services/api';
 import { clearStoredToken, getStoredToken, setStoredToken } from '../utils/authStorage';
 
@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
       const res = await api.get('/auth/me');
       setUser(res.data.data.user);
@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const token = getStoredToken();
@@ -32,33 +32,33 @@ export function AuthProvider({ children }) {
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [fetchUser]);
 
-  const login = (token, userData) => {
+  const login = useCallback((token, userData) => {
     setStoredToken(token);
     setUser(userData);
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     clearStoredToken();
     setUser(null);
-  };
+  }, []);
 
-  const updateUserState = (nextUser) => {
+  const updateUserState = useCallback((nextUser) => {
     setUser(nextUser);
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    user,
+    loading,
+    login,
+    logout,
+    refreshUser: fetchUser,
+    updateUserState,
+  }), [user, loading, login, logout, fetchUser, updateUserState]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        loading,
-        login,
-        logout,
-        refreshUser: fetchUser,
-        updateUserState,
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

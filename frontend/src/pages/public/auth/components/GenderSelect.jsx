@@ -1,7 +1,7 @@
 export default function GenderSelect({ value, onChange }) {
   return (
     <div style={{ marginBottom: 20 }}>
-      <label 
+      <span 
         style={{ 
           display: 'block', 
           fontFamily: 'var(--font-display)', 
@@ -14,7 +14,7 @@ export default function GenderSelect({ value, onChange }) {
         }}
       >
         Gender
-      </label>
+      </span>
       <div style={{ display: 'flex', gap: 8 }}>
         {['MALE', 'FEMALE'].map((g) => (
           <button

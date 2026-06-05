@@ -61,6 +61,7 @@ export default function ForgotPasswordForm({ onSuccess, onError }) {
       <form onSubmit={handleSubmit} style={{ marginTop: 24 }}>
         <div style={{ marginBottom: 16 }}>
           <label
+            htmlFor="forgot-password-email"
             style={{
               fontFamily: "'DM Mono', monospace",
               fontSize: 12,
@@ -75,6 +76,7 @@ export default function ForgotPasswordForm({ onSuccess, onError }) {
             Email Address
           </label>
           <input
+            id="forgot-password-email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}

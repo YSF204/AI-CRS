@@ -15,7 +15,6 @@ const ScrollStack = ({
   stackPosition = '20%',
   scaleEndPosition = '10%',
   baseScale = 0.85,
-  scaleDuration = 0.5,
   rotationAmount = 0,
   blurAmount = 0,
   useWindowScroll = false,
@@ -240,6 +239,7 @@ const ScrollStack = ({
     }
   }, [handleScroll, useWindowScroll]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
@@ -284,18 +284,16 @@ const ScrollStack = ({
     };
   }, [
     itemDistance,
-    itemScale,
-    itemStackDistance,
-    stackPosition,
-    scaleEndPosition,
-    baseScale,
-    scaleDuration,
-    rotationAmount,
-    blurAmount,
     useWindowScroll,
-    onStackComplete,
     setupLenis,
-    updateCardTransforms
+    updateCardTransforms,
+    scrollerRef,
+    cardsRef,
+    lastTransformsRef,
+    animationFrameRef,
+    lenisRef,
+    stackCompletedRef,
+    isUpdatingRef
   ]);
 
   return (

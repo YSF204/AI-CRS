@@ -105,6 +105,7 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
         {/* Password */}
         <div style={{ marginBottom: 16 }}>
           <label
+            htmlFor="reset-new-password"
             style={{
               fontFamily: "'DM Mono', monospace",
               fontSize: 12,
@@ -120,6 +121,7 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
           </label>
           <div style={{ position: "relative" }}>
             <input
+              id="reset-new-password"
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -182,6 +184,7 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
         {/* Confirm Password */}
         <div style={{ marginBottom: 24 }}>
           <label
+            htmlFor="reset-confirm-password"
             style={{
               fontFamily: "'DM Mono', monospace",
               fontSize: 12,
@@ -197,6 +200,7 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
           </label>
           <div style={{ position: "relative" }}>
             <input
+              id="reset-confirm-password"
               type={showPasswordConfirm ? "text" : "password"}
               value={passwordConfirm}
               onChange={(e) => setPasswordConfirm(e.target.value)}

@@ -451,7 +451,7 @@ export default function LivePreview({ formData, userName, templateId, highlights
     // ⑤ Final page count
     void container.offsetHeight;
     setPages(Math.max(1, Math.ceil(container.scrollHeight / A4_HEIGHT)));
-  }, []);
+  }, [ZOOM]);
 
   useEffect(() => {
     if (!contentRef.current) return;

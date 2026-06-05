@@ -1,6 +1,16 @@
 import React from "react";
 import { getSocialIcon } from "./SocialIcons";
 
+const SectionHeader = ({ title }) => (
+  <div className="my-3">
+    <hr className="border-t-[1.5px] border-gray-300 mb-1" />
+    <h2 className="text-center text-[13px] md:text-sm font-bold uppercase tracking-[0.15em] text-gray-800">
+      {title}
+    </h2>
+    <hr className="border-t-[1.5px] border-gray-300 mt-1" />
+  </div>
+);
+
 const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
 
@@ -68,16 +78,6 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
       }
     });
   }
-
-  const SectionHeader = ({ title }) => (
-    <div className="my-3">
-      <hr className="border-t-[1.5px] border-gray-300 mb-1" />
-      <h2 className="text-center text-[13px] md:text-sm font-bold uppercase tracking-[0.15em] text-gray-800">
-        {title}
-      </h2>
-      <hr className="border-t-[1.5px] border-gray-300 mt-1" />
-    </div>
-  );
 
   return (
     <div

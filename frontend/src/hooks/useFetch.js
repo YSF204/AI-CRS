@@ -2,11 +2,16 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * Generic async data loader hook.
- * @param {() => Promise<any>} fetcher
- * @param {{ initialData?: any, enabled?: boolean, deps?: any[] }} options
+ *
+ * @param {() => Promise<any>} fetcher - Async function that returns data.
+ * @param {{ initialData?: any, enabled?: boolean, key?: string|number }} options
+ *   - `key`: a single primitive (string or number) that changes whenever you
+ *     want the fetch to re-run (e.g. `key: id` or `key: \`${page}-${filter}\``).
+ *     Replaces the old `deps` array to avoid an un-analysable spread in the
+ *     useEffect dependency list.
  */
 export default function useFetch(fetcher, options = {}) {
-  const { initialData = null, enabled = true, deps = [] } = options;
+  const { initialData = null, enabled = true, key = 0 } = options;
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(Boolean(enabled));
   const [error, setError] = useState(null);
@@ -61,7 +66,7 @@ export default function useFetch(fetcher, options = {}) {
     return () => {
       cancelled = true;
     };
-  }, [enabled, ...deps]);
+  }, [enabled, key]);
 
   return { data, setData, loading, error, refetch };
 }

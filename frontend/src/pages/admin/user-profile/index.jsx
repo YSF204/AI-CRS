@@ -71,7 +71,7 @@ export default function UserProfile() {
     error: fetchError,
   } = useFetch(fetchUser, {
     enabled: Boolean(userId) && !isCreate,
-    deps: [userId, isCreate],
+    key: `${userId}|${String(isCreate)}`,
     initialData: null,
   });
 

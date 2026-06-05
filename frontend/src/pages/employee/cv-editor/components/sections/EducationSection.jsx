@@ -70,10 +70,11 @@ export default function EducationSection({ form, handlers }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
+            <label htmlFor="edu-inst" className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
               Institution Name *
             </label>
             <input
+              id="edu-inst"
               type="text"
               value={currentItem.institutionName}
               onChange={(e) =>
@@ -88,10 +89,11 @@ export default function EducationSection({ form, handlers }) {
           </div>
 
           <div>
-            <label className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
+            <label htmlFor="edu-cert" className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
               Degree/Certification *
             </label>
             <input
+              id="edu-cert"
               type="text"
               value={currentItem.certification}
               onChange={(e) =>
@@ -106,10 +108,11 @@ export default function EducationSection({ form, handlers }) {
           </div>
 
           <div>
-            <label className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
+            <label htmlFor="edu-from" className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
               From
             </label>
             <input
+              id="edu-from"
               type="month"
               value={currentItem.durationFrom}
               onChange={(e) =>
@@ -120,10 +123,11 @@ export default function EducationSection({ form, handlers }) {
           </div>
 
           <div>
-            <label className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
+            <label htmlFor="edu-to" className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
               To
             </label>
             <input
+              id="edu-to"
               type="month"
               value={currentItem.durationTo}
               onChange={(e) =>
@@ -135,10 +139,11 @@ export default function EducationSection({ form, handlers }) {
         </div>
 
         <div>
-          <label className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
+          <label htmlFor="edu-desc" className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
             Description
           </label>
           <textarea
+            id="edu-desc"
             value={currentItem.summary}
             onChange={(e) =>
               setCurrentItem({ ...currentItem, summary: e.target.value })

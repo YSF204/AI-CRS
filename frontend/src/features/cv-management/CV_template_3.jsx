@@ -1,6 +1,14 @@
 import React from "react";
 import { getSocialIcon, getSocialName } from "./SocialIcons";
 
+const SectionHeader = ({ title }) => (
+  <div className="border-y-[1.5px] border-gray-300 py-1.5 mb-2 mt-4">
+    <h2 className="text-[13px] md:text-[14px] font-bold uppercase text-gray-800 tracking-wide">
+      {title}
+    </h2>
+  </div>
+);
+
 const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
 
@@ -42,14 +50,6 @@ const ExecutiveResumeTemplate = ({ userName = "", cvData, highlights = {} }) => 
       }
     });
   }
-
-  const SectionHeader = ({ title }) => (
-    <div className="border-y-[1.5px] border-gray-300 py-1.5 mb-2 mt-4">
-      <h2 className="text-[13px] md:text-[14px] font-bold uppercase text-gray-800 tracking-wide">
-        {title}
-      </h2>
-    </div>
-  );
 
   return (
     <div

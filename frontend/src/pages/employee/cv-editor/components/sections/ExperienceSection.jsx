@@ -70,10 +70,11 @@ export default function ExperienceSection({ form, handlers }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
+            <label htmlFor="exp-company" className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
               Company Name *
             </label>
             <input
+              id="exp-company"
               type="text"
               value={currentItem.institutionName}
               onChange={(e) =>
@@ -88,10 +89,11 @@ export default function ExperienceSection({ form, handlers }) {
           </div>
 
           <div>
-            <label className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
+            <label htmlFor="exp-position" className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
               Position *
             </label>
             <input
+              id="exp-position"
               type="text"
               value={currentItem.position}
               onChange={(e) =>
@@ -103,10 +105,11 @@ export default function ExperienceSection({ form, handlers }) {
           </div>
 
           <div>
-            <label className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
+            <label htmlFor="exp-from" className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
               From
             </label>
             <input
+              id="exp-from"
               type="month"
               value={currentItem.durationFrom}
               onChange={(e) =>
@@ -117,10 +120,11 @@ export default function ExperienceSection({ form, handlers }) {
           </div>
 
           <div>
-            <label className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
+            <label htmlFor="exp-to" className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
               To
             </label>
             <input
+              id="exp-to"
               type="month"
               value={currentItem.durationTo}
               onChange={(e) =>
@@ -132,10 +136,11 @@ export default function ExperienceSection({ form, handlers }) {
         </div>
 
         <div>
-          <label className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
+          <label htmlFor="exp-desc" className="block font-mono text-sm font-bold mb-2 uppercase tracking-wider">
             Description
           </label>
           <textarea
+            id="exp-desc"
             value={currentItem.summary}
             onChange={(e) =>
               setCurrentItem({ ...currentItem, summary: e.target.value })

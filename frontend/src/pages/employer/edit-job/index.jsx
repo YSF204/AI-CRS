@@ -29,7 +29,7 @@ export default function EditJob() {
   const { data: jobData, error: jobError, loading: jobLoading } = useFetch(async () => {
     const res = await api.get(`/jobs/${id}`);
     return res.data?.data?.job || null;
-  }, { initialData: null, deps: [id] });
+  }, { initialData: null, key: id });
 
   useEffect(() => {
     if (jobLoading) return;
