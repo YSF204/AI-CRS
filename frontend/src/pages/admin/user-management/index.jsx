@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { PlusCircle } from 'lucide-react';
 import { useDebounce } from '@uidotdev/usehooks';
 import DashboardNav from '../../../components/shared/DashboardNav';
+import '../../../styles/admin.css';
 import api from '../../../services/api';
 import useFetch from '../../../hooks/useFetch';
 import FilterBar from './components/FilterBar';

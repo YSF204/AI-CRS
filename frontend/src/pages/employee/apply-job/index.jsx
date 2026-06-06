@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "../../../styles/job-discovery.css";
 import { X, Loader } from "lucide-react";
 import { useLocation, useParams } from "react-router-dom";
 import { useApplyJob } from "./hooks/useApplyJob";

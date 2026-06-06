@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from "react";
+import "../../../styles/job-discovery.css";
 import { useDebounce } from "@uidotdev/usehooks";
 import DashboardNav from "../../../components/shared/DashboardNav";
 import { useTranslation } from "../../../context/LanguageContext";

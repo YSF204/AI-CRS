@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import "../../../styles/job-discovery.css";
 import { Search, XCircle, CheckCircle2, Clock, Trash2 } from "lucide-react";
 import DashboardNav from "../../../components/shared/DashboardNav";
 import useFetch from "../../../hooks/useFetch";

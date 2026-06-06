@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { ArrowLeft, Edit3 } from "lucide-react";
 import DashboardNav from "../../../components/shared/DashboardNav";
+import "../../../styles/admin.css";
 import api from "../../../services/api";
 import useFetch from "../../../hooks/useFetch";
 import UserViewMode from "./components/UserViewMode";

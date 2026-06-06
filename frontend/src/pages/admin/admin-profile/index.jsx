@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Camera } from 'lucide-react';
 import DashboardNav from '../../../components/shared/DashboardNav';
+import '../../../styles/admin.css';
 import { useAuth } from '../../../context/AuthContext';
 import { useTheme } from '../../../context/ThemeContext';
 import api from '../../../services/api';

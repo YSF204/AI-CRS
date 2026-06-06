@@ -1,4 +1,6 @@
 import React, { useState, useRef, useMemo } from "react";
+import "../../../styles/job-discovery.css";
+import "../../../styles/ats-gallery.css";
 import { useNavigate } from "react-router-dom";
 import {
   FileText,

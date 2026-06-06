@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Calendar, Zap, LayoutTemplate, Loader2 } from 'lucide-react';
 import { getTemplateById } from '../../../features/cv-management/index.js';
 import { useTranslation } from '../../../context/LanguageContext';
+import '../../../styles/ats-gallery.css';
+import '../../../styles/job-discovery.css';
 
 const A4_WIDTH_PX = 794;
 const A4_HEIGHT_PX = 1123;

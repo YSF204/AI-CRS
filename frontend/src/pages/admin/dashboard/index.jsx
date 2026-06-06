@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Bar, Doughnut, Line } from 'react-chartjs-2';
 import DashboardNav from '../../../components/shared/DashboardNav';
 import useAdminDashboard from './hooks/useAdminDashboard';
+import '../../../styles/admin.css';
 import StatCard from './components/StatCard';
 import ChartPanel from './components/ChartPanel';
 import PendingEmployersQueue from './components/PendingEmployersQueue';

@@ -1,5 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import { BarChart3 } from "lucide-react";
+import "../../styles/job-discovery.css";
+import "../../styles/ats-gallery.css";
 import DashboardNav from "../../components/shared/DashboardNav";
 import { useTranslation } from "../../context/LanguageContext";
 import useFetch from "../../hooks/useFetch";
