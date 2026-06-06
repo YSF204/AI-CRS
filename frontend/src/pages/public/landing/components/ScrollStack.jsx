@@ -27,6 +27,7 @@ const ScrollStack = ({
   const cardsRef = useRef([]);
   const lastTransformsRef = useRef(new Map());
   const isUpdatingRef = useRef(false);
+  const offsetsRef = useRef({ endTop: 0, cardOffsets: [] });
 
   const calculateProgress = useCallback((scrollTop, start, end) => {
     if (scrollTop < start) return 0;
@@ -58,17 +59,29 @@ const ScrollStack = ({
     }
   }, [useWindowScroll]);
 
-  const getElementOffset = useCallback(
-    element => {
-      if (useWindowScroll) {
-        const rect = element.getBoundingClientRect();
-        return rect.top + window.scrollY;
-      } else {
-        return element.offsetTop;
-      }
-    },
-    [useWindowScroll]
-  );
+  const calculateOffsets = useCallback(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return { endTop: 0, cardOffsets: [] };
+
+    const endElement = useWindowScroll
+      ? document.querySelector('.scroll-stack-end')
+      : scroller.querySelector('.scroll-stack-end');
+
+    const endTop = endElement
+      ? (useWindowScroll
+          ? endElement.getBoundingClientRect().top + window.scrollY
+          : endElement.offsetTop)
+      : 0;
+
+    const cardOffsets = cardsRef.current.map(card => {
+      if (!card) return 0;
+      return useWindowScroll
+        ? card.getBoundingClientRect().top + window.scrollY
+        : card.offsetTop;
+    });
+
+    return { endTop, cardOffsets };
+  }, [useWindowScroll]);
 
   const updateCardTransforms = useCallback(() => {
     if (!cardsRef.current.length || isUpdatingRef.current) return;
@@ -79,16 +92,12 @@ const ScrollStack = ({
     const stackPositionPx = parsePercentage(stackPosition, containerHeight);
     const scaleEndPositionPx = parsePercentage(scaleEndPosition, containerHeight);
 
-    const endElement = useWindowScroll
-      ? document.querySelector('.scroll-stack-end')
-      : scrollerRef.current?.querySelector('.scroll-stack-end');
-
-    const endElementTop = endElement ? getElementOffset(endElement) : 0;
+    const { endTop: endElementTop, cardOffsets } = offsetsRef.current;
 
     cardsRef.current.forEach((card, i) => {
       if (!card) return;
 
-      const cardTop = getElementOffset(card);
+      const cardTop = cardOffsets[i] || 0;
       const triggerStart = cardTop - stackPositionPx - itemStackDistance * i;
       const triggerEnd = cardTop - scaleEndPositionPx;
       const pinStart = cardTop - stackPositionPx - itemStackDistance * i;
@@ -103,7 +112,7 @@ const ScrollStack = ({
       if (blurAmount) {
         let topCardIndex = 0;
         for (let j = 0; j < cardsRef.current.length; j++) {
-          const jCardTop = getElementOffset(cardsRef.current[j]);
+          const jCardTop = cardOffsets[j] || 0;
           const jTriggerStart = jCardTop - stackPositionPx - itemStackDistance * j;
           if (scrollTop >= jTriggerStart) {
             topCardIndex = j;
@@ -170,12 +179,10 @@ const ScrollStack = ({
     baseScale,
     rotationAmount,
     blurAmount,
-    useWindowScroll,
     onStackComplete,
     calculateProgress,
     parsePercentage,
-    getScrollData,
-    getElementOffset
+    getScrollData
   ]);
 
   const handleScroll = useCallback(() => {
@@ -268,7 +275,16 @@ const ScrollStack = ({
 
     setupLenis();
 
+    offsetsRef.current = calculateOffsets();
     updateCardTransforms();
+
+    const handleResize = () => {
+      offsetsRef.current = calculateOffsets();
+      updateCardTransforms();
+    };
+
+    window.addEventListener('resize', handleResize);
+    const timer = setTimeout(handleResize, 500);
 
     return () => {
       if (animationFrameRef.current) {
@@ -277,6 +293,8 @@ const ScrollStack = ({
       if (lenisRef.current) {
         lenisRef.current.destroy();
       }
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timer);
       stackCompletedRef.current = false;
       cardsRef.current = [];
       transformsCache.clear();
@@ -287,6 +305,7 @@ const ScrollStack = ({
     useWindowScroll,
     setupLenis,
     updateCardTransforms,
+    calculateOffsets,
     scrollerRef,
     cardsRef,
     lastTransformsRef,

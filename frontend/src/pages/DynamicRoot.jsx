@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LandingPage from './public/landing/LandingPage';
-import AdminDash from './admin/dashboard';
-import EmployerDash from './employer/EmployerDash';
-import EmployeeDash from './employee/dashboard';
+
+const AdminDash = React.lazy(() => import('./admin/dashboard'));
+const EmployerDash = React.lazy(() => import('./employer/EmployerDash'));
 
 export default function DynamicRoot() {
   const { user, loading } = useAuth();
@@ -22,11 +22,36 @@ export default function DynamicRoot() {
 
   // If user is logged in, render their respective dashboard WITHOUT changing the URL
   if (user) {
-    if (user.role === 'ADMIN') return <AdminDash />;
-    if (user.role === 'EMPLOYER') return <EmployerDash />;
+    if (user.role === 'ADMIN') {
+      return (
+        <Suspense fallback={
+          <div className="min-h-screen flex items-center justify-center bg-(--bg) text-(--fg)">
+            <div className="font-['Space_Grotesk'] font-bold text-2xl animate-pulse">
+              LOADING DASHBOARD...
+            </div>
+          </div>
+        }>
+          <AdminDash />
+        </Suspense>
+      );
+    }
+    if (user.role === 'EMPLOYER') {
+      return (
+        <Suspense fallback={
+          <div className="min-h-screen flex items-center justify-center bg-(--bg) text-(--fg)">
+            <div className="font-['Space_Grotesk'] font-bold text-2xl animate-pulse">
+              LOADING DASHBOARD...
+            </div>
+          </div>
+        }>
+          <EmployerDash />
+        </Suspense>
+      );
+    }
     if (user.role === 'EMPLOYEE') return <Navigate to="/employee/cvs" replace />;
   }
 
   // If not logged in, just show the Landing Page
   return <LandingPage />;
 }
+

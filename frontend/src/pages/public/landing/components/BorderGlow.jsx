@@ -63,48 +63,58 @@ const BorderGlow = ({
   fillOpacity = 0.5,
 }) => {
   const cardRef = useRef(null);
+  const rectRef = useRef(null);
+  const centerRef = useRef(null);
 
-  const getCenterOfElement = useCallback((el) => {
-    const { width, height } = el.getBoundingClientRect();
-    return [width / 2, height / 2];
+  const handlePointerEnter = useCallback(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    rectRef.current = rect;
+    centerRef.current = [rect.width / 2, rect.height / 2];
   }, []);
 
-  const getEdgeProximity = useCallback((el, x, y) => {
-    const [cx, cy] = getCenterOfElement(el);
-    const dx = x - cx;
-    const dy = y - cy;
-    let kx = Infinity;
-    let ky = Infinity;
-    if (dx !== 0) kx = cx / Math.abs(dx);
-    if (dy !== 0) ky = cy / Math.abs(dy);
-    return Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
-  }, [getCenterOfElement]);
-
-  const getCursorAngle = useCallback((el, x, y) => {
-    const [cx, cy] = getCenterOfElement(el);
-    const dx = x - cx;
-    const dy = y - cy;
-    if (dx === 0 && dy === 0) return 0;
-    const radians = Math.atan2(dy, dx);
-    let degrees = radians * (180 / Math.PI) + 90;
-    if (degrees < 0) degrees += 360;
-    return degrees;
-  }, [getCenterOfElement]);
+  const handlePointerLeave = useCallback(() => {
+    rectRef.current = null;
+    centerRef.current = null;
+  }, []);
 
   const handlePointerMove = useCallback((e) => {
     const card = cardRef.current;
     if (!card) return;
 
-    const rect = card.getBoundingClientRect();
+    let rect = rectRef.current;
+    let center = centerRef.current;
+    if (!rect || !center) {
+      rect = card.getBoundingClientRect();
+      rectRef.current = rect;
+      center = [rect.width / 2, rect.height / 2];
+      centerRef.current = center;
+    }
+
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    const edge = getEdgeProximity(card, x, y);
-    const angle = getCursorAngle(card, x, y);
+    const [cx, cy] = center;
+    const dx = x - cx;
+    const dy = y - cy;
+    
+    let kx = Infinity;
+    let ky = Infinity;
+    if (dx !== 0) kx = cx / Math.abs(dx);
+    if (dy !== 0) ky = cy / Math.abs(dy);
+    const edge = Math.min(Math.max(1 / Math.min(kx, ky), 0), 1);
+
+    let angle = 0;
+    if (dx !== 0 || dy !== 0) {
+      const radians = Math.atan2(dy, dx);
+      angle = radians * (180 / Math.PI) + 90;
+      if (angle < 0) angle += 360;
+    }
 
     card.style.setProperty('--edge-proximity', `${(edge * 100).toFixed(3)}`);
     card.style.setProperty('--cursor-angle', `${angle.toFixed(3)}deg`);
-  }, [getEdgeProximity, getCursorAngle]);
+  }, []);
 
   useEffect(() => {
     if (!animated || !cardRef.current) return;
@@ -132,6 +142,8 @@ const BorderGlow = ({
   return (
     <div
       ref={cardRef}
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
       onPointerMove={handlePointerMove}
       className={`border-glow-card ${className}`}
       style={{
