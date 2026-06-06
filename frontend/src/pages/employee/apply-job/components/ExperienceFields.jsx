@@ -42,7 +42,7 @@ export default function ExperienceFields({
                 handleAddSkill("technical");
               }
             }}
-            placeholder="Add a skill (e.g., React, Node.js)..."
+            placeholder="أضف مهارة (مثال: React, Node.js)..."
             className="flex-1 border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)]"
           />
           <button
@@ -88,7 +88,7 @@ export default function ExperienceFields({
                 handleAddSkill("soft");
               }
             }}
-            placeholder="Add a soft skill (e.g., Communication, Leadership)..."
+            placeholder="أضف مهارة شخصية (مثال: التواصل, القيادة)..."
             className="flex-1 border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)]"
           />
           <button
@@ -134,7 +134,7 @@ export default function ExperienceFields({
                 handleAddLanguage();
               }
             }}
-            placeholder="Add a language..."
+            placeholder="أضف لغة (مثال: عربي, إنجليزي)..."
             className="flex-1 border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)]"
           />
           <button
@@ -185,7 +185,7 @@ export default function ExperienceFields({
                 handleAddCertification();
               }
             }}
-            placeholder="Add certification (e.g., AWS Certified Solutions Architect)"
+            placeholder="أضف شهادة (مثال: شهادة Oracle, AWS Certified Solutions Architect)"
             className="flex-1 border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)]"
           />
           <button
@@ -227,7 +227,7 @@ export default function ExperienceFields({
             onChange={(e) =>
               handleEducationDraftChange("institutionName", e.target.value)
             }
-            placeholder="Institution name *"
+            placeholder="اسم المؤسسة التعليمية *"
             className="border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)]"
           />
           <input
@@ -236,7 +236,7 @@ export default function ExperienceFields({
             onChange={(e) =>
               handleEducationDraftChange("certification", e.target.value)
             }
-            placeholder="Degree / Certification *"
+            placeholder="الدرجة / الشهادة *"
             className="border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)]"
           />
           <input
@@ -245,7 +245,7 @@ export default function ExperienceFields({
             onChange={(e) =>
               handleEducationDraftChange("durationFrom", e.target.value)
             }
-            placeholder="From (e.g., 2018)"
+            placeholder="من (مثال: 2018)"
             className="border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)]"
           />
           <input
@@ -254,7 +254,7 @@ export default function ExperienceFields({
             onChange={(e) =>
               handleEducationDraftChange("durationTo", e.target.value)
             }
-            placeholder="To (e.g., 2022 or Present)"
+            placeholder="إلى (مثال: 2022 أو حتى الآن)"
             className="border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)]"
           />
           <textarea
@@ -262,7 +262,7 @@ export default function ExperienceFields({
             onChange={(e) =>
               handleEducationDraftChange("summary", e.target.value)
             }
-            placeholder="Optional notes (honors, GPA, focus area...)"
+            placeholder="ملاحظات اختيارية (المعدل, التخصص, التكريمات...)"
             className="md:col-span-2 border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)] resize-y min-h-16"
           />
         </div>

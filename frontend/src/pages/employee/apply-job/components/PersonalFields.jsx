@@ -25,7 +25,7 @@ export default function PersonalFields({
             className={`w-full border-2 px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)] bg-[var(--bg)] text-[var(--fg)] ${
               validationErrors.firstName ? "border-[var(--coral)]" : "border-[var(--border-color)]"
             }`}
-            placeholder="John"
+            placeholder="محمد"
           />
           {validationErrors.firstName && (
             <p className="text-[var(--coral)] font-mono text-xs mt-1">{validationErrors.firstName}</p>
@@ -46,7 +46,7 @@ export default function PersonalFields({
             className={`w-full border-2 px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)] bg-[var(--bg)] text-[var(--fg)] ${
               validationErrors.lastName ? "border-[var(--coral)]" : "border-[var(--border-color)]"
             }`}
-            placeholder="Doe"
+            placeholder="أبو خضر"
           />
           {validationErrors.lastName && (
             <p className="text-[var(--coral)] font-mono text-xs mt-1">{validationErrors.lastName}</p>
@@ -67,7 +67,7 @@ export default function PersonalFields({
             className={`w-full border-2 px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)] bg-[var(--bg)] text-[var(--fg)] ${
               validationErrors.email ? "border-[var(--coral)]" : "border-[var(--border-color)]"
             }`}
-            placeholder="john@example.com"
+            placeholder="mohammed@example.ps"
           />
           {validationErrors.email && (
             <p className="text-[var(--coral)] font-mono text-xs mt-1">{validationErrors.email}</p>
@@ -86,7 +86,7 @@ export default function PersonalFields({
               setManualFormData({ ...manualFormData, phone: e.target.value })
             }
             className="w-full border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)]"
-            placeholder="+1234567890"
+            placeholder="+970 59 000 0000"
           />
         </div>
 
@@ -134,7 +134,7 @@ export default function PersonalFields({
             setManualFormData({ ...manualFormData, summary: e.target.value })
           }
           className="w-full border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)] resize-y min-h-20"
-          placeholder="Brief summary of your background and experience..."
+          placeholder="نبذة مختصرة عن خلفيتك وخبراتك..."
         />
       </div>
 
@@ -149,7 +149,7 @@ export default function PersonalFields({
             setManualFormData({ ...manualFormData, additionalInformation: e.target.value })
           }
           className="w-full border-2 border-[var(--border-color)] bg-[var(--bg)] text-[var(--fg)] px-3 py-2 font-mono text-sm outline-none focus:border-[var(--yellow)] resize-y min-h-16"
-          placeholder="Anything else you'd like to share (certifications, portfolio links, preferences)..."
+          placeholder="أي معلومات إضافية تود مشاركتها (شهادات, روابط المحفظة...)..."
         />
       </div>
 

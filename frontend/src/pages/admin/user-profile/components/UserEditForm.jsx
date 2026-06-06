@@ -58,7 +58,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
             value={formData.email}
             onChange={handleInputChange}
             className="form-field"
-            placeholder="user@example.com"
+            placeholder="mohammed@example.ps"
             required
           />
         </div>
@@ -70,7 +70,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
             value={formData.telephone}
             onChange={handleInputChange}
             className="form-field"
-            placeholder="1234567890"
+            placeholder="+970 59 000 0000"
           />
         </div>
         <div>
@@ -189,7 +189,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
                 value={formData.companyName}
                 onChange={handleInputChange}
                 className="form-field"
-                placeholder="Acme Corp"
+                placeholder="شركة القدس للبرمجيات"
                 required
               />
             </div>
@@ -201,7 +201,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
                 value={formData.companyLicense}
                 onChange={handleInputChange}
                 className="form-field"
-                placeholder="BR-12345"
+                placeholder="PS-123456"
                 required
               />
             </div>
@@ -214,7 +214,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
                 value={formData.contactEmail}
                 onChange={handleInputChange}
                 className="form-field"
-                placeholder="hr@company.com"
+                placeholder="hr@quds-tech.ps"
                 required
               />
             </div>
@@ -227,7 +227,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
                 value={formData.website}
                 onChange={handleInputChange}
                 className="form-field"
-                placeholder="https://company.com"
+                placeholder="https://quds-tech.ps"
               />
             </div>
           </div>
@@ -240,7 +240,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
                 value={formData.branchName}
                 onChange={handleInputChange}
                 className="form-field"
-                placeholder="HQ"
+                placeholder="المقر الرئيسي"
                 required
               />
             </div>
@@ -252,7 +252,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
                 value={formData.branchCity}
                 onChange={handleInputChange}
                 className="form-field"
-                placeholder="Hebron"
+                placeholder="رام الله"
                 required
               />
             </div>
@@ -264,7 +264,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
                 value={formData.branchStreet}
                 onChange={handleInputChange}
                 className="form-field"
-                placeholder="Main St"
+                placeholder="شارع الإرسال"
                 required
               />
             </div>

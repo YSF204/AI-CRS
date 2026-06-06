@@ -107,7 +107,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
               style={INPUT}
               value={form.position}
               onChange={set('position')}
-              placeholder={t('employer.jobTitlePlaceholder', {}, 'e.g. SYSTEMS ARCHITECT')}
+              placeholder={t('employer.jobTitlePlaceholder', {}, 'مثال: مهندس برمجيات')}
               required
               onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
               onBlur={e => e.target.style.transform = 'none'}
@@ -122,7 +122,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
               min="0"
               value={form.yearsOfExperience}
               onChange={set('yearsOfExperience')}
-              placeholder={t('employer.experiencePlaceholder', {}, 'e.g. 5')}
+              placeholder={t('employer.experiencePlaceholder', {}, 'مثال: 3')}
               onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
               onBlur={e => e.target.style.transform = 'none'}
             />
@@ -136,7 +136,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
             style={{ ...INPUT, minHeight: 140, resize: 'vertical' }}
             value={form.description}
             onChange={set('description')}
-            placeholder={t('employer.jobDescriptionPlaceholder', {}, 'Describe the role, responsibilities, and key requirements...')}
+            placeholder={t('employer.jobDescriptionPlaceholder', {}, 'صف دور الوظيفة والمهام والمتطلبات...')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
@@ -153,7 +153,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
               style={INPUT}
               value={form.technicalSkills}
               onChange={set('technicalSkills')}
-              placeholder="React, Docker, Kubernetes"
+              placeholder="مثال: React, Docker, Kubernetes"
               onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
               onBlur={e => e.target.style.transform = 'none'}
             />
@@ -168,7 +168,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
               style={INPUT}
               value={form.softSkills}
               onChange={set('softSkills')}
-              placeholder="Strategic Thinking, Resilience"
+              placeholder="مثال: التفكير الإستراتيجي, المرونة"
               onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
               onBlur={e => e.target.style.transform = 'none'}
             />
@@ -186,7 +186,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
               style={INPUT}
               value={form.language}
               onChange={set('language')}
-              placeholder="English (Fluent), German"
+              placeholder="عربي (طلاق), إنجليزي"
               onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
               onBlur={e => e.target.style.transform = 'none'}
             />
@@ -198,7 +198,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
               style={INPUT}
               value={form.additionalNotes}
               onChange={set('additionalNotes')}
-              placeholder={t('employer.additionalInfoPlaceholder', {}, 'Specific timezone, clearance, or relocation...')}
+              placeholder={t('employer.additionalInfoPlaceholder', {}, 'متطلبات خاصة بالوظيفة...')}
               onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
               onBlur={e => e.target.style.transform = 'none'}
             />

@@ -80,7 +80,7 @@ export default function ProfileForm({ user, onSave }) {
             icon={User}
             value={form.firstName}
             onChange={set('firstName')}
-            placeholder="John"
+            placeholder="محمد"
           />
           <FormField
             label={t('auth.lastName')}
@@ -88,7 +88,7 @@ export default function ProfileForm({ user, onSave }) {
             icon={User}
             value={form.lastName}
             onChange={set('lastName')}
-            placeholder="Doe"
+            placeholder="أبو خضر"
           />
           <FormField
             label={t('auth.email')}
@@ -97,7 +97,7 @@ export default function ProfileForm({ user, onSave }) {
             type="email"
             value={form.email}
             onChange={set('email')}
-            placeholder="you@example.com"
+            placeholder="mohammed@example.ps"
           />
           <FormField
             label={t('auth.phoneNumber')}
@@ -106,7 +106,7 @@ export default function ProfileForm({ user, onSave }) {
             type="tel"
             value={form.phone}
             onChange={set('phone')}
-            placeholder="+20 100 000 0000"
+            placeholder="+970 59 000 0000"
           />
           <FormField
             label={t('auth.age')}

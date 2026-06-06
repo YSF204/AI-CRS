@@ -43,7 +43,7 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
             style={INPUT}
             value={form.name}
             onChange={setField('name')}
-            placeholder={t('employer.companyNamePlaceholder', {}, 'e.g. ACME GLOBAL OPERATIONS')}
+            placeholder={t('employer.companyNamePlaceholder', {}, 'مثال: شركة الكرمل للتقنية')}
             required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
@@ -66,7 +66,7 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
             }}
             value={form.license}
             onChange={setField('license')}
-            placeholder={t('employer.licensePlaceholder', {}, 'REGISTRATION_ID')}
+            placeholder={t('employer.licensePlaceholder', {}, 'PS-123456')}
             required
             disabled={isEditing}
           />
@@ -79,7 +79,7 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
             type="email"
             value={form.contactEmail}
             onChange={setField('contactEmail')}
-            placeholder={t('employer.contactEmailPlaceholder', {}, 'hr@acme.corp')}
+            placeholder={t('employer.contactEmailPlaceholder', {}, 'hr@karmel-tech.ps')}
             required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
@@ -98,7 +98,7 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
             type="url"
             value={form.website}
             onChange={setField('website')}
-            placeholder={t('employer.websitePlaceholder', {}, 'https://acme.io')}
+            placeholder={t('employer.websitePlaceholder', {}, 'https://karmel-tech.ps')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
@@ -151,15 +151,15 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
               <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 20 }}>
                 <div>
                   <label htmlFor={`cf-branch-${i}-name`} style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>{t('employer.branchName', {}, 'BRANCH NAME')}</label>
-                  <input id={`cf-branch-${i}-name`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.name} onChange={(e) => updateBranch(i, 'name', e.target.value)} placeholder={t('employer.branchNamePlaceholder', {}, 'e.g. SECTOR_HQ')} required />
+                  <input id={`cf-branch-${i}-name`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.name} onChange={(e) => updateBranch(i, 'name', e.target.value)} placeholder={t('employer.branchNamePlaceholder', {}, 'مثال: المقر الرئيسي')} required />
                 </div>
                 <div>
                   <label htmlFor={`cf-branch-${i}-city`} style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>{t('employer.city', {}, 'CITY')}</label>
-                  <input id={`cf-branch-${i}-city`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.city} onChange={(e) => updateBranch(i, 'city', e.target.value)} placeholder={t('employer.cityPlaceholder', {}, 'e.g. LONDON')} required />
+                  <input id={`cf-branch-${i}-city`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.city} onChange={(e) => updateBranch(i, 'city', e.target.value)} placeholder={t('employer.cityPlaceholder', {}, 'مثال: رام الله')} required />
                 </div>
                 <div>
                   <label htmlFor={`cf-branch-${i}-street`} style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>{t('employer.companyAddress', {}, 'ADDRESS')}</label>
-                  <input id={`cf-branch-${i}-street`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.street} onChange={(e) => updateBranch(i, 'street', e.target.value)} placeholder={t('employer.addressPlaceholder', {}, '123 VECTOR ST')} required />
+                  <input id={`cf-branch-${i}-street`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.street} onChange={(e) => updateBranch(i, 'street', e.target.value)} placeholder={t('employer.addressPlaceholder', {}, 'مثال: شارع الإرسال')} required />
                 </div>
               </div>
               {form.branches.length > 1 && (

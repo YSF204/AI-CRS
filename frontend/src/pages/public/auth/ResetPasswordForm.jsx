@@ -58,7 +58,7 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
     }
 
     try {
-      const response = await api.post(`/auth/resetPassword/${token}`, {
+      const response = await api.patch(`/auth/resetPassword/${token}`, {
         password,
         passwordConfirm,
       });
