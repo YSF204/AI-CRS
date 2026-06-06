@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, Loader } from "lucide-react";
 import { useLocation, useParams } from "react-router-dom";
 import { useApplyJob } from "./hooks/useApplyJob";
+import { useTranslation } from "../../../context/LanguageContext";
 
 // Subcomponents
 import MethodSelector from "./components/MethodSelector";
@@ -10,6 +11,7 @@ import PdfUploader from "./components/PdfUploader";
 import ApplicationViewer from "../../../components/applications/ApplicationViewer";
 
 export default function ApplyJobModal({ jobId, appId, onClose }) {
+  const { t } = useTranslation();
   const { jobId: routeJobId } = useParams();
   const resolvedJobId = jobId || routeJobId;
   // handleAutoClose: fallback if no onClose prop (standalone page mode)
@@ -76,7 +78,7 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
         <div className="bg-[var(--nm-bg)] p-12 flex flex-col items-center border-4 border-[var(--nm-ink)] shadow-[12px_12px_0_var(--nm-ink)]">
           <Loader className="animate-spin mb-6" size={40} color="var(--nm-primary)" />
           <p className="font-['Space_Grotesk'] font-bold uppercase tracking-widest text-[var(--nm-text-primary)]">
-            Checking application status...
+            {t('applyJob.checkingStatus')}
           </p>
         </div>
       </div>
@@ -90,23 +92,23 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
         <div className="bg-[var(--nm-bg)] p-10 max-w-md w-full text-center border-4 border-[var(--nm-ink)] shadow-[12px_12px_0_var(--nm-ink)] relative">
           <div className="absolute top-0 left-0 w-full h-3 bg-[var(--nm-error)]"></div>
           <p className="font-['Space_Grotesk'] font-black text-2xl uppercase text-[var(--nm-error)] mt-4 mb-3 tracking-wider">
-            Already Applied
+            {t('applyJob.alreadyApplied')}
           </p>
           <p className="font-['Manrope'] text-sm text-[var(--nm-text-secondary)] mb-6">
-            You have already applied for this position.
+            {t('applyJob.alreadyAppliedDesc')}
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <button
               onClick={() => navigate("/employee/applications")}
               className="jd-btn jd-btn-primary w-full py-4 font-black"
             >
-              View My Applications
+              {t('applyJob.viewMyApplications')}
             </button>
             <button
               onClick={handleClose}
               className="jd-btn jd-btn-secondary w-full py-4 font-black"
             >
-              Browse Other Jobs
+              {t('applyJob.browseOtherJobs')}
             </button>
           </div>
         </div>
@@ -136,7 +138,7 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
             boxShadow: "6px 6px 0 var(--nm-ink)",
           }}
         >
-          {toastNotice.message}
+          {t(toastNotice.message)}
         </div>
       </div>
     </>
@@ -150,7 +152,7 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
         <div className="bg-[var(--nm-bg)] p-12 flex flex-col items-center border-4 border-[var(--nm-ink)] shadow-[12px_12px_0_var(--nm-ink)]">
           <Loader className="animate-spin mb-6" size={40} color="var(--nm-primary)" />
           <p className="font-['Space_Grotesk'] font-bold uppercase tracking-widest text-[var(--nm-text-primary)]">
-            Loading job details...
+            {t('applyJob.loadingJobDetails')}
           </p>
         </div>
       </div>
@@ -165,17 +167,16 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
         <div className="bg-[var(--nm-bg)] p-10 max-w-md w-full text-center border-4 border-[var(--nm-ink)] shadow-[12px_12px_0_var(--nm-ink)] relative">
           <div className="absolute top-0 left-0 w-full h-3 bg-[var(--nm-error)]"></div>
           <p className="font-['Space_Grotesk'] font-black text-2xl uppercase text-[var(--nm-error)] mt-4 mb-3 tracking-wider">
-            Job not found
+            {t('applyJob.jobNotFound')}
           </p>
           <p className="font-['Manrope'] text-sm text-[var(--nm-text-secondary)] mb-6">
-            This job may have been removed or the link is invalid. Please try
-            another job.
+            {t('applyJob.jobNotFoundDesc')}
           </p>
           <button
             onClick={handleClose}
             className="jd-btn jd-btn-primary w-full py-4 font-black"
           >
-            Close Window
+            {t('applyJob.closeWindow')}
           </button>
         </div>
       </div>
@@ -196,10 +197,10 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
                 color="var(--nm-primary)"
               />
               <p className="font-['Space_Grotesk'] font-black uppercase text-xl text-[var(--nm-text-primary)] tracking-widest">
-                Processing
+                {t('applyJob.processing')}
               </p>
               <p className="font-['Manrope'] text-sm text-[var(--nm-text-secondary)] mt-2">
-                Submitting your application...
+                {t('applyJob.submittingApp')}
               </p>
             </div>
           </div>
@@ -208,7 +209,7 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
           <div className="flex justify-between items-start gap-4 mb-6 sm:mb-8">
             <div>
               <h1 className="text-xl sm:text-3xl font-bold font-['Space_Grotesk'] uppercase tracking-tight mb-2 text-[var(--nm-text-primary)]">
-                Apply for {job.position}
+                {t('applyJob.applyFor')} {job.position}
               </h1>
               <p className="font-['Manrope'] text-sm text-[var(--nm-text-secondary)]">
                 {job.employerId?.company?.name} • {job.workSite}
@@ -228,14 +229,14 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
                 className={`jd-btn px-4 py-2 font-bold uppercase tracking-wider ${tab === "update" ? "jd-btn-primary" : "jd-btn-secondary"}`}
                 onClick={() => setTab("update")}
               >
-                Update Details
+                {t('applyJob.updateDetails')}
               </button>
               <button
                 className={`jd-btn px-4 py-2 font-bold uppercase tracking-wider ${tab === "view" ? "jd-btn-primary" : "jd-btn-secondary"}`}
                 onClick={() => setTab("view")}
                 disabled={!loadedApplication}
               >
-                View Submission Details
+                {t('applyJob.viewSubmissionDetails')}
               </button>
             </div>
           )}
@@ -245,7 +246,7 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
               <ApplicationViewer application={loadedApplication} />
             ) : (
               <p className="font-mono text-sm text-[var(--fg-muted)]">
-                Loading submission...
+                {t('applyJob.loadingSubmission')}
               </p>
             )
           ) : (
@@ -261,7 +262,7 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
               {Object.keys(validationErrors).length > 0 && (
                 <div className="p-5 bg-[var(--nm-error-surface)] border-4 border-[var(--nm-error)]">
                   <p className="font-['Space_Grotesk'] font-bold text-sm uppercase text-[var(--nm-error)] mb-2">
-                    Validation Errors:
+                    {t('applyJob.validationErrors')}
                   </p>
                   {Object.entries(validationErrors).map(([key, message]) => (
                     <p

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Step } from "../Stepper";
 import AuthInput from "../AuthInput";
 import GenderSelect from "../GenderSelect";
+import { useTranslation } from "../../../../../context/LanguageContext";
 
 const heading = {
   fontFamily: 'var(--font-display)',
@@ -14,6 +15,7 @@ const heading = {
 };
 
 export default function ProfileStep({ form, setForm, field, errors = {}, onPhoneValidityChange }) {
+  const { t } = useTranslation();
   const [phoneError, setPhoneError] = useState("");
 
   const handleAgeChange = (e) => {
@@ -43,7 +45,7 @@ export default function ProfileStep({ form, setForm, field, errors = {}, onPhone
   const handleTelBlur = () => {
     const val = form.telephone || "";
     if (val.length > 0 && val.length !== 10) {
-      setPhoneError("Phone number must be exactly 10 digits");
+      setPhoneError(t("auth.phoneLengthError", {}, "Phone number must be exactly 10 digits"));
       onPhoneValidityChange?.(false);
     } else if (val.length === 10) {
       setPhoneError("");
@@ -57,7 +59,7 @@ export default function ProfileStep({ form, setForm, field, errors = {}, onPhone
 
   return (
     <Step>
-      <h2 style={heading}>Additional Info</h2>
+      <h2 style={heading}>{t("auth.additionalInfo")}</h2>
       <div
         style={{
           display: "grid",
@@ -70,7 +72,7 @@ export default function ProfileStep({ form, setForm, field, errors = {}, onPhone
           onChange={(g) => setForm((prev) => ({ ...prev, gender: g }))}
         />
         <AuthInput
-          label="Age"
+          label={t("auth.age")}
           type="number"
           placeholder="22"
           min={1}
@@ -84,7 +86,7 @@ export default function ProfileStep({ form, setForm, field, errors = {}, onPhone
         />
       </div>
       <AuthInput
-        label="Phone Number"
+        label={t("auth.phoneNumber")}
         type="tel"
         placeholder="0598420206"
         maxLength={10}

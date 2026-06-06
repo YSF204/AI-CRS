@@ -3,6 +3,7 @@ import { User, Mail, Briefcase, MapPin, Camera } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { toApiAssetUrl } from '../../utils/apiConfig';
+import { useTranslation } from '../../context/LanguageContext';
 
 /**
  * ProfileHeader — displays the user's avatar (initials or photo), name, role,
@@ -10,6 +11,7 @@ import { toApiAssetUrl } from '../../utils/apiConfig';
  */
 export default function ProfileHeader({ user }) {
   const { updateUserState } = useAuth();
+  const { t } = useTranslation();
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const safeSplit = (value, separator = ' ') => String(value || '').split(separator);
@@ -78,7 +80,7 @@ export default function ProfileHeader({ user }) {
           </div>
           <button
             className="absolute -bottom-2 -right-2 w-8 h-8 flex items-center justify-center border-4 border-[var(--nm-ink)] bg-[var(--nm-primary)] text-white hover:translate-x-[2px] hover:translate-y-[2px] transition-transform"
-            title="Change avatar"
+            title={t('admin.changePhoto', {}, 'Change photo')}
             onClick={handleCameraClick}
             disabled={uploading}
             style={{ cursor: uploading ? 'wait' : 'pointer' }}
@@ -98,7 +100,7 @@ export default function ProfileHeader({ user }) {
         {/* Info */}
         <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-bold font-display uppercase tracking-tight truncate text-[var(--fg)]">
-            {fullName || 'Your Name'}
+            {fullName || t('common.yourName', {}, 'Your Name')}
           </h2>
 
           <div className="flex flex-wrap gap-x-6 gap-y-2 mt-3">
@@ -112,7 +114,7 @@ export default function ProfileHeader({ user }) {
             </span>
             <span className="flex items-center gap-2 font-mono text-sm text-[var(--fg-muted)]">
               <MapPin size={14} className="text-[var(--nm-primary)]" />
-              {user?.telephone?.[0] || 'No phone set'}
+              {user?.telephone?.[0] || t('employee.noPhoneSet', {}, 'No phone set')}
             </span>
           </div>
         </div>
@@ -121,7 +123,7 @@ export default function ProfileHeader({ user }) {
         <span
           className="nm-status-pill active shrink-0 self-start sm:self-center"
         >
-          ACTIVE
+          {t('admin.activeLabel', {}, 'ACTIVE').toUpperCase()}
         </span>
       </div>
     </div>

@@ -5,9 +5,11 @@ import DashboardNav from '../../../components/shared/DashboardNav';
 import api from '../../../services/api';
 import useFetch from '../../../hooks/useFetch';
 import CompanyForm from './CompanyForm';
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function CompanyProfile() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -90,7 +92,7 @@ export default function CompanyProfile() {
       }
       navigate('/employer');
     } catch (err) {
-      setError(err.response?.data?.message || 'CRITICAL FAILURE: DATA NOT PERSISTED.');
+      setError(err.response?.data?.message || t('toast.failed_to_save', {}, 'CRITICAL FAILURE: DATA NOT PERSISTED.'));
     } finally {
       setSaving(false);
     }
@@ -99,7 +101,7 @@ export default function CompanyProfile() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', backgroundColor: 'var(--nm-bg)', color: 'var(--nm-text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Loading Profile...</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('employer.loadingProfile', {}, 'Loading Profile...')}</div>
       </div>
     );
   }
@@ -137,7 +139,7 @@ export default function CompanyProfile() {
               lineHeight: 1,
               margin: 0
             }}>
-              {isEditing ? 'Company Profile' : 'Create Profile'}
+              {isEditing ? t('employer.companyProfile') : t('employer.createProfile', {}, 'Create Profile')}
             </h1>
           </div>
           <p style={{ 
@@ -149,8 +151,8 @@ export default function CompanyProfile() {
             lineHeight: 1.6
           }}>
             {isEditing 
-              ? 'Update your organization details and branch information.' 
-              : 'Create your company profile to start posting job listings.'}
+              ? t('employer.updateProfileDesc', {}, 'Update your organization details and branch information.') 
+              : t('employer.createProfileDesc', {}, 'Create your company profile to start posting job listings.')}
           </p>
 
           {error && (
@@ -167,7 +169,7 @@ export default function CompanyProfile() {
               marginBottom: 32,
               boxShadow: '4px 4px 0 var(--nm-ink)'
             }}>
-              SYSTEM ALERT: {error}
+              {t('employer.systemAlert', {}, 'SYSTEM ALERT')}: {error}
             </div>
           )}
 

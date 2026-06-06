@@ -1,11 +1,13 @@
 import CountUp from '../../../components/ui/CountUp';
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function HiringPipelineCard({ totalJobs, openJobs, loading }) {
+  const { t } = useTranslation();
   const closedJobs = totalJobs - openJobs;
 
   const bars = [
-    { label: 'Open',   count: openJobs,   color: 'var(--nm-primary)' },
-    { label: 'Closed', count: closedJobs, color: 'var(--nm-text-tertiary)' },
+    { label: t('employer.open', {}, 'Open'),   count: openJobs,   color: 'var(--nm-primary)' },
+    { label: t('employer.closed', {}, 'Closed'), count: closedJobs, color: 'var(--nm-text-tertiary)' },
   ];
 
   return (
@@ -28,7 +30,7 @@ export default function HiringPipelineCard({ totalJobs, openJobs, loading }) {
         letterSpacing: '0.15em', 
         marginBottom: '2rem' 
       }}>
-        Job Status
+        {t('employer.jobStatus', {}, 'Job Status')}
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4rem', alignItems: 'center' }}>
@@ -53,7 +55,7 @@ export default function HiringPipelineCard({ totalJobs, openJobs, loading }) {
             textTransform: 'uppercase',
             letterSpacing: '0.05em'
           }}>
-            Open Jobs
+            {t('employer.openJobs')}
           </div>
         </div>
 
@@ -62,12 +64,12 @@ export default function HiringPipelineCard({ totalJobs, openJobs, loading }) {
             <div key={label}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
                 <span style={{ 
-                  fontFamily: 'var(--font-display)', 
-                  fontSize: 12, 
-                  color: 'var(--nm-text-secondary)', 
-                  fontWeight: 800, 
-                  textTransform: 'uppercase', 
-                  letterSpacing: '0.05em' 
+                   fontFamily: 'var(--font-display)', 
+                   fontSize: 12, 
+                   color: 'var(--nm-text-secondary)', 
+                   fontWeight: 800, 
+                   textTransform: 'uppercase', 
+                   letterSpacing: '0.05em' 
                 }}>
                   {label}
                 </span>

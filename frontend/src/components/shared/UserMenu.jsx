@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { User, LogOut, ChevronDown } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from '../../context/LanguageContext';
 
 /**
  * UserMenu — User dropdown with Paper design system.
@@ -13,6 +14,7 @@ import { useAuth } from '../../context/AuthContext';
 export default function UserMenu({ profileHref = '/employee/profile' }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
 
   const handleLogout = () => {
@@ -29,7 +31,7 @@ export default function UserMenu({ profileHref = '/employee/profile' }) {
             aria-label="User menu"
           >
             <span className="max-w-[120px] sm:max-w-[180px] truncate">
-              {fullName || 'My Account'}
+              {fullName || t('dashboard.myAccount')}
             </span>
             <ChevronDown
               size={16}
@@ -50,7 +52,7 @@ export default function UserMenu({ profileHref = '/employee/profile' }) {
               style={{ background: 'var(--nm-surface-high)' }}
             >
               <p className="font-['Space_Grotesk'] font-bold text-sm m-0 truncate" style={{ color: 'var(--nm-text-primary)' }}>
-                {fullName || 'My Account'}
+                {fullName || t('dashboard.myAccount')}
               </p>
               <p className="font-['DM_Mono'] text-xs mt-1 break-all m-0" style={{ color: 'var(--nm-text-secondary)' }}>
                 {user?.email || ''}
@@ -65,7 +67,7 @@ export default function UserMenu({ profileHref = '/employee/profile' }) {
                   style={{ color: 'var(--nm-text-primary)' }}
                 >
                   <User size={16} />
-                  My Profile
+                  {t('common.myProfile')}
                 </Link>
               </MenuItem>
 
@@ -77,7 +79,7 @@ export default function UserMenu({ profileHref = '/employee/profile' }) {
                   style={{ color: 'var(--nm-error)' }}
                 >
                   <LogOut size={16} />
-                  Log Out
+                  {t('dashboard.logout')}
                 </button>
               </MenuItem>
             </div>

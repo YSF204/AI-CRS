@@ -5,10 +5,12 @@ import { useAuth } from "../../../context/AuthContext";
 import AuthInput from "./components/AuthInput";
 import ErrorBanner from "./components/ErrorBanner";
 import api from "../../../services/api";
+import { useTranslation } from "../../../context/LanguageContext";
 
 export default function LoginForm({ setMode, setGoogleData }) {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -21,7 +23,7 @@ export default function LoginForm({ setMode, setGoogleData }) {
 
     // Only basic presence check — no format/strength validation on login
     if (!email.trim() || !password.trim()) {
-      setErrorMsg("Invalid email or password");
+      setErrorMsg(t("auth.emailRequired"));
       return;
     }
 
@@ -37,7 +39,7 @@ export default function LoginForm({ setMode, setGoogleData }) {
           return;
         }
       }
-      setErrorMsg(err.response?.data?.message || "Invalid email or password");
+      setErrorMsg(err.response?.data?.message || t("auth.emailRequired"));
       setShowForgotLink(true);
     }
   };
@@ -60,7 +62,7 @@ export default function LoginForm({ setMode, setGoogleData }) {
       login(res.data.token, res.data.data.user);
       navigate("/");
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || "Google login failed.");
+      setErrorMsg(err.response?.data?.message || t("auth.googleLoginFailed"));
     }
   };
 
@@ -69,7 +71,7 @@ export default function LoginForm({ setMode, setGoogleData }) {
       <ErrorBanner message={errorMsg} />
 
       <AuthInput
-        label="Email"
+        label={t("auth.email")}
         type="email"
         placeholder="you@example.com"
         value={email}
@@ -77,7 +79,7 @@ export default function LoginForm({ setMode, setGoogleData }) {
         required
       />
       <AuthInput
-        label="Password"
+        label={t("auth.password")}
         showToggle
         showPw={showPw}
         onToggle={() => setShowPw(!showPw)}
@@ -102,7 +104,7 @@ export default function LoginForm({ setMode, setGoogleData }) {
             }}
             className="hover:text-[var(--nm-primary)]"
           >
-            Forgot Password?
+            {t("auth.forgotPassword")}
           </a>
         )}
       </div>
@@ -120,7 +122,7 @@ export default function LoginForm({ setMode, setGoogleData }) {
           marginBottom: 16,
         }}
       >
-        Login →
+        {t("auth.loginTab")} →
       </button>
 
       <div style={{ display: "flex", alignItems: "center", margin: "2rem 0" }}>
@@ -137,7 +139,7 @@ export default function LoginForm({ setMode, setGoogleData }) {
             letterSpacing: "0.1em",
           }}
         >
-          OR
+          {t("auth.or")}
         </span>
         <div
           style={{ flex: 1, height: "4px", background: "var(--nm-ink)", opacity: 0.1 }}

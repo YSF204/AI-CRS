@@ -1,6 +1,7 @@
 import React from 'react';
 import { Edit3, Trash2, Power, PowerOff, RefreshCcw, Search } from 'lucide-react';
 import { SkTable } from '../../../../components/ui/Skeleton';
+import { useTranslation } from '../../../../context/LanguageContext';
 
 const statusClass = (status) => {
   switch (status) {
@@ -16,6 +17,8 @@ const statusClass = (status) => {
 };
 
 export default function UsersTable({ users, updatingStatus, handleStatusUpdate, openDeleteDialog, navigate, pagination, page, setPage, refetchUsers, loading }) {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <div className="table-scroll-container">
@@ -33,10 +36,10 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
       }}>
         <Search size={48} style={{ marginBottom: 'var(--spacing-4)', opacity: 0.5 }} />
         <p style={{ margin: 0, fontSize: 'var(--text-lg)', fontWeight: 600 }}>
-          No users found
+          {t('admin.noUsersFound', {}, 'No users found')}
         </p>
         <p style={{ margin: 0, fontSize: 'var(--text-sm)' }}>
-          Try adjusting your search or filter criteria
+          {t('admin.noUsersFoundDesc', {}, 'Try adjusting your search or filter criteria')}
         </p>
       </div>
     );
@@ -49,11 +52,11 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
         <table className="admin-table">
         <thead>
           <tr>
-            <th>User</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Joined</th>
-            <th>Actions</th>
+            <th>{t('admin.name', {}, 'User')}</th>
+            <th>{t('admin.role', {}, 'Role')}</th>
+            <th>{t('admin.status', {}, 'Status')}</th>
+            <th>{t('admin.joined', {}, 'Joined')}</th>
+            <th>{t('admin.actions', {}, 'Actions')}</th>
           </tr>
         </thead>
         <tbody>
@@ -115,7 +118,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
                     <button
                       onClick={() => navigate(`/admin/users/${userId}/edit`)}
                       className="admin-action-btn"
-                      title="Edit"
+                      title={t('admin.edit', {}, 'Edit')}
                     >
                       <Edit3 size={14} strokeWidth={2.5} />
                     </button>
@@ -126,7 +129,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
                         onClick={() => handleStatusUpdate(userId, 'ACTIVE')}
                         className="admin-action-btn status-active"
                         disabled={isUpdating}
-                        title="Activate"
+                        title={t('admin.activate', {}, 'Activate')}
                       >
                         <Power size={14} strokeWidth={2.5} />
                       </button>
@@ -136,7 +139,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
                         onClick={() => handleStatusUpdate(userId, 'INACTIVE')}
                         className="admin-action-btn status-inactive"
                         disabled={isUpdating}
-                        title="Deactivate"
+                        title={t('admin.deactivate', {}, 'Deactivate')}
                       >
                         <PowerOff size={14} strokeWidth={2.5} />
                       </button>
@@ -146,7 +149,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
                     <button
                       onClick={() => openDeleteDialog(user)}
                       className="admin-action-btn status-delete"
-                      title="Delete"
+                      title={t('admin.delete', {}, 'Delete')}
                     >
                       <Trash2 size={14} strokeWidth={2.5} />
                     </button>
@@ -181,15 +184,15 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
               {/* Card body */}
               <div className="user-mobile-card-body">
                 <div className="user-mobile-card-row">
-                  <span className="user-mobile-card-label">Email</span>
+                  <span className="user-mobile-card-label">{t('auth.email', {}, 'Email')}</span>
                   <span className="user-mobile-card-value">{user.email}</span>
                 </div>
                 <div className="user-mobile-card-row">
-                  <span className="user-mobile-card-label">Role</span>
+                  <span className="user-mobile-card-label">{t('admin.role', {}, 'Role')}</span>
                   <span className="admin-status-chip" style={{ fontSize: '10px', padding: '2px 8px' }}>{user.role}</span>
                 </div>
                 <div className="user-mobile-card-row">
-                  <span className="user-mobile-card-label">Joined</span>
+                  <span className="user-mobile-card-label">{t('admin.joined', {}, 'Joined')}</span>
                   <span className="user-mobile-card-value">
                     {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A'}
                   </span>
@@ -206,7 +209,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
                   onClick={() => navigate(`/admin/users/${userId}/edit`)}
                   className="admin-action-btn user-mobile-action-btn"
                 >
-                  Edit
+                  {t('admin.edit', {}, 'Edit')}
                 </button>
 
                 {canUpdateStatus && user.accountStatus !== 'ACTIVE' && (
@@ -215,7 +218,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
                     className="admin-action-btn status-active user-mobile-action-btn"
                     disabled={isUpdating}
                   >
-                    Activate
+                    {t('admin.activate', {}, 'Activate')}
                   </button>
                 )}
                 {canUpdateStatus && user.accountStatus !== 'INACTIVE' && (
@@ -224,7 +227,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
                     className="admin-action-btn status-inactive user-mobile-action-btn"
                     disabled={isUpdating}
                   >
-                    Deactivate
+                    {t('admin.deactivate', {}, 'Deactivate')}
                   </button>
                 )}
 
@@ -232,7 +235,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
                   onClick={() => openDeleteDialog(user)}
                   className="admin-action-btn status-delete user-mobile-action-btn"
                 >
-                  Delete
+                  {t('admin.delete', {}, 'Delete')}
                 </button>
               </div>
             </div>
@@ -243,7 +246,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
       {/* Pagination */}
       <div className="admin-pagination">
         <div className="admin-pagination-info">
-          Total users: {pagination.total ?? users.length} | Page {page} of {pagination.pages || 1}
+          {t('admin.totalUsers', {}, 'Total Users')}: {pagination.total ?? users.length} | {t('common.page')} {page} {t('common.of')} {pagination.pages || 1}
         </div>
         <div className="admin-pagination-controls">
           <button
@@ -252,7 +255,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
             className="nm-btn"
             style={{ padding: 'var(--spacing-2) var(--spacing-4)', minWidth: '100px' }}
           >
-            Previous
+            {t('common.previous')}
           </button>
           <button
             onClick={() => setPage((prev) => prev + 1)}
@@ -260,7 +263,7 @@ export default function UsersTable({ users, updatingStatus, handleStatusUpdate, 
             className="nm-btn"
             style={{ padding: 'var(--spacing-2) var(--spacing-4)', minWidth: '100px' }}
           >
-            Next
+            {t('common.next')}
           </button>
           <button
             onClick={() => refetchUsers().catch(() => {})}

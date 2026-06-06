@@ -5,28 +5,30 @@ import useFetch from "../../../hooks/useFetch";
 import api from "../../../services/api";
 import ApplyJobModal from "../apply-job/index.jsx";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "../../../context/LanguageContext";
 import ApplicationsList from "./components/ApplicationsList";
 import ApplicationDetails from "./components/ApplicationDetails";
 
 const ITEMS_PER_PAGE = 8;
 
 const STATUS_OPTIONS = [
-  { value: "all", label: "All" },
-  { value: "pending", label: "Pending" },
-  { value: "accepted", label: "Accepted" },
-  { value: "rejected", label: "Rejected" },
+  { value: "all", label: "applications.all" },
+  { value: "pending", label: "applications.pending" },
+  { value: "accepted", label: "applications.accepted" },
+  { value: "rejected", label: "applications.rejected" },
 ];
 
 const SORT_OPTIONS = [
-  { value: "newest", label: "Newest First" },
-  { value: "oldest", label: "Oldest First" },
-  { value: "score-high", label: "Highest Score" },
-  { value: "score-low", label: "Lowest Score" },
+  { value: "newest", label: "employeeJobs.newestFirst" },
+  { value: "oldest", label: "employeeJobs.oldestFirst" },
+  { value: "score-high", label: "applications.scoreHigh" },
+  { value: "score-low", label: "applications.scoreLow" },
 ];
 
 export default function Applications() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedApp, setSelectedApp] = useState(null);
+  const { t } = useTranslation();
 
   const {
     data: applications = [],
@@ -85,7 +87,7 @@ export default function Applications() {
       setApplications((prev = []) => prev.filter((item) => item._id !== app._id));
       if (selectedApp?._id === app._id) setSelectedApp(null);
     } catch (err) {
-      alert(err.response?.data?.message || "Failed to delete application.");
+      alert(err.response?.data?.message || t("toast.failed_to_delete", {}, "Failed to delete application."));
     } finally {
       setDeletingId(null);
     }
@@ -171,18 +173,18 @@ export default function Applications() {
       return {
         color: "var(--nm-success)",
         icon: <CheckCircle2 size={14} />,
-        label: "Accepted",
+        label: t("applications.accepted"),
       };
     if (s === "rejected")
       return {
         color: "var(--nm-error)",
         icon: <XCircle size={14} />,
-        label: "Rejected",
+        label: t("applications.rejected"),
       };
     return {
       color: "var(--nm-warning)",
       icon: <Clock size={14} />,
-      label: "Under Review",
+      label: t("applications.underReview"),
     };
   };
 
@@ -206,7 +208,7 @@ export default function Applications() {
                   : "bg-[var(--nm-surface)] text-[var(--nm-text-primary)] border-[var(--nm-ink)]/10 hover:border-[var(--nm-ink)]"
                   }`}
               >
-                {opt.label} ({statusCounts[opt.value] || 0})
+                {t(opt.label)} ({statusCounts[opt.value] || 0})
               </button>
             ))}
           </div>
@@ -219,7 +221,7 @@ export default function Applications() {
               />
               <input
                 type="text"
-                placeholder="Search applications..."
+                placeholder={t("applications.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => updateParam("search", e.target.value)}
                 className="jd-input w-full bg-[var(--nm-surface)] text-[var(--nm-text-primary)] border-[var(--nm-ink)]"
@@ -234,7 +236,7 @@ export default function Applications() {
             >
               {SORT_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
-                  {opt.label}
+                  {t(opt.label)}
                 </option>
               ))}
             </select>
@@ -287,28 +289,24 @@ export default function Applications() {
             <div className="flex items-center gap-3 text-[var(--nm-error)] mb-6">
               <Trash2 size={24} />
               <h2 className="text-xl font-black uppercase tracking-tighter">
-                Confirm Deletion
+                {t("common.confirmDeletion")}
               </h2>
             </div>
             <p className="font-bold text-[var(--nm-text-secondary)] leading-relaxed mb-8">
-              Are you sure you want to remove your application for{" "}
-              <span className="text-[var(--nm-text-primary)]">
-                {confirmDelete.jobId?.position}
-              </span>
-              ? This action is permanent and cannot be reversed.
+              {t("applications.deleteWarn", { position: confirmDelete.jobId?.position || t("applications.untitledPosition") })}
             </p>
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={handleConfirmDelete}
                 className="py-4 bg-[var(--nm-error)] text-white font-black uppercase tracking-widest border-2 border-[var(--nm-ink)] shadow-[4px_4px_0_var(--nm-ink)] hover:shadow-none transition-all"
               >
-                Delete
+                {t("common.delete")}
               </button>
               <button
                 onClick={() => setConfirmDelete(null)}
                 className="py-4 bg-[var(--nm-surface)] text-[var(--nm-text-primary)] font-black uppercase tracking-widest border-2 border-[var(--nm-ink)] hover:bg-[var(--nm-ink)] hover:text-white transition-all"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
             </div>
           </div>

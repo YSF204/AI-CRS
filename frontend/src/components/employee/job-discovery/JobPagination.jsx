@@ -1,7 +1,9 @@
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "../../../context/LanguageContext";
 
 const JobPagination = ({ currentPage, totalPages, onPageChange, disabled = false }) => {
+  const { t } = useTranslation();
   const hasPrevious = currentPage > 1;
   const hasNext = currentPage < totalPages;
 
@@ -22,10 +24,10 @@ const JobPagination = ({ currentPage, totalPages, onPageChange, disabled = false
   return (
     <nav
       className="jd-card flex items-center justify-between gap-4"
-      aria-label="Job list pagination"
+      aria-label={t("employeeJobs.paginationLabel", {}, "Job list pagination")}
     >
       <div className="text-sm text-[var(--nm-text-secondary)] font-[var(--font-body)]">
-        Page {currentPage} of {totalPages}
+        {t("common.page", {}, "Page")} {currentPage} {t("common.of", {}, "of")} {totalPages}
       </div>
 
       <div className="flex items-center gap-2">
@@ -34,10 +36,10 @@ const JobPagination = ({ currentPage, totalPages, onPageChange, disabled = false
           onClick={handlePrevious}
           disabled={!hasPrevious || disabled}
           className="jd-btn jd-btn-secondary"
-          aria-label="Go to previous page"
+          aria-label={t("employeeJobs.prevPageLabel", {}, "Go to previous page")}
         >
           <ChevronLeft size={16} />
-          Previous
+          {t("common.previous", {}, "Previous")}
         </button>
 
         <button
@@ -45,9 +47,9 @@ const JobPagination = ({ currentPage, totalPages, onPageChange, disabled = false
           onClick={handleNext}
           disabled={!hasNext || disabled}
           className="jd-btn jd-btn-secondary"
-          aria-label="Go to next page"
+          aria-label={t("employeeJobs.nextPageLabel", {}, "Go to next page")}
         >
-          Next
+          {t("common.next", {}, "Next")}
           <ChevronRight size={16} />
         </button>
       </div>

@@ -4,16 +4,18 @@ import { Trash2, DollarSign, Wifi, Clock, Briefcase, Power, Edit, Users, Sparkle
 import api from '../../../services/api';
 import ApplicantDetail from '../../../components/applications/ApplicantDetail';
 import ApplicationViewer from '../../../components/applications/ApplicationViewer';
+import { useTranslation } from '../../../context/LanguageContext';
 
 const fmt = (n) => (n == null ? '—' : n.toLocaleString());
-const ago = (d) => {
+const ago = (d, t) => {
   const days = Math.floor((Date.now() - new Date(d)) / 86400000);
-  if (days === 0) return 'Today';
-  if (days === 1) return 'Yesterday';
-  return `${days}d ago`;
+  if (days === 0) return t('common.today', {}, 'Today');
+  if (days === 1) return t('common.yesterday', {}, 'Yesterday');
+  return t('common.daysAgo', { count: days }, `${days}d ago`);
 };
 
 export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
+  const { t } = useTranslation();
   const [deleting, setDeleting] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [currentStatus, setCurrentStatus] = useState(job.status);
@@ -82,7 +84,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
       if (originalDetail?._id === appId) {
         setApplicationDetail(originalDetail);
       }
-      alert("Failed to update status. Please try again.");
+      alert(t('toast.failed_to_update_status', {}, "Failed to update status. Please try again."));
     }
   };
 
@@ -103,7 +105,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
       if (originalDetail?._id === appId) {
         setApplicationDetail(originalDetail);
       }
-      alert("Failed to update potential list. Please try again.");
+      alert(t('toast.failed_to_update_potential', {}, "Failed to update potential list. Please try again."));
     }
   };
 
@@ -127,7 +129,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
       if (onUpdate) onUpdate(job._id, newStatus);
     } catch (err) {
       console.error(err);
-      alert('Failed to update system status.');
+      alert(t('toast.failed_to_update_status', {}, "Failed to update system status."));
     } finally {
       setToggling(false);
     }
@@ -192,7 +194,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
               textTransform: 'uppercase',
               letterSpacing: '0.05em'
             }}>
-              LOGGED: {ago(job.createdAt)}
+              {t('employer.logged', {}, 'LOGGED')}: {ago(job.createdAt, t)}
             </div>
           </div>
           <div style={{
@@ -236,7 +238,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
           )}
           {job.yearsOfExperience != null && (
             <span style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, fontFamily: 'var(--font-display)', color: 'var(--nm-text-primary)', fontWeight: 800 }}>
-              <Briefcase size={16} strokeWidth={3} /> {job.yearsOfExperience}Y EXP
+              <Briefcase size={16} strokeWidth={3} /> {t('employer.experienceYears', { years: job.yearsOfExperience }, `${job.yearsOfExperience}Y EXP`)}
             </span>
           )}
         </div>
@@ -266,7 +268,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
                 color: 'var(--nm-text-tertiary)',
                 padding: '5px 0'
               }}>
-                +{job.technicalSkills.length - 3} MORE
+                +{job.technicalSkills.length - 3} {t('employer.more', {}, 'MORE')}
               </span>
             )}
           </div>
@@ -293,7 +295,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
               color: '#0a0a0a',
             }}
           >
-            <Power size={16} strokeWidth={3} /> {toggling ? 'WAIT' : currentStatus === 'OPEN' ? 'DEACTIVATE' : 'ACTIVATE'}
+            <Power size={16} strokeWidth={3} /> {toggling ? t('employer.wait', {}, 'WAIT') : currentStatus === 'OPEN' ? t('employer.deactivate', {}, 'DEACTIVATE') : t('employer.activate', {}, 'ACTIVATE')}
           </button>
 
           <Link
@@ -307,7 +309,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
               background: 'var(--nm-surface)', color: 'var(--nm-text-primary)',
             }}
           >
-            <Edit size={16} strokeWidth={3} /> EDIT
+            <Edit size={16} strokeWidth={3} /> {t('employer.edit', {}, 'EDIT')}
           </Link>
         </div>
 
@@ -323,7 +325,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
               background: 'var(--nm-primary)', color: '#fff',
             }}
           >
-            <Users size={18} strokeWidth={3} /> View Applicants
+            <Users size={18} strokeWidth={3} /> {t('employer.viewApplicants', {}, 'View Applicants')}
           </button>
 
           <button
@@ -338,7 +340,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
               background: 'var(--nm-success)', color: '#0a0a0a',
             }}
           >
-            <Sparkles size={18} strokeWidth={3} /> {shortlisting ? 'Analyzing...' : 'AI Shortlist'}
+            <Sparkles size={18} strokeWidth={3} /> {shortlisting ? t('employer.analyzing', {}, 'Analyzing...') : t('employer.aiShortlist', {}, 'AI Shortlist')}
           </button>
         </div>
 
@@ -354,29 +356,29 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
             background: 'var(--nm-error)', color: '#fff',
           }}
         >
-          <Trash2 size={18} strokeWidth={3} /> {deleting ? 'Deleting...' : 'Delete LISTING'}
+          <Trash2 size={18} strokeWidth={3} /> {deleting ? t('employer.deleting', {}, 'Deleting...') : t('employer.deleteListing', {}, 'Delete LISTING')}
         </button>
       </div>
 
       {showConfirmDelete && (
         <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyItems: "center", justifyContent: "center" }}>
           <div className="nm-card" style={{ background: "var(--nm-surface)", padding: "32px", maxWidth: "400px", width: "90%", border: "4px solid var(--nm-ink)", boxShadow: "8px 8px 0 var(--nm-ink)", borderRadius: "0px" }}>
-            <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "20px", textTransform: "uppercase", marginBottom: "12px", color: "var(--nm-text-primary)" }}>Confirm Termination</h3>
-            <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", marginBottom: "24px", color: "var(--nm-text-secondary)" }}>Are you sure you want to permanently terminate the listing "{job.position}"? This action cannot be undone.</p>
+            <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "20px", textTransform: "uppercase", marginBottom: "12px", color: "var(--nm-text-primary)" }}>{t('employer.confirmTermination', {}, 'Confirm Termination')}</h3>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", marginBottom: "24px", color: "var(--nm-text-secondary)" }}>{t('employer.confirmDeleteJobWarn', { position: job.position }, `Are you sure you want to permanently terminate the listing "${job.position}"? This action cannot be undone.`)}</p>
             <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
               <button
                 onClick={() => setShowConfirmDelete(false)}
                 className="nm-btn"
                 style={{ padding: "10px 16px", background: "var(--nm-surface-high)", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "12px", textTransform: "uppercase" }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleDelete}
                 className="nm-btn"
                 style={{ padding: "10px 16px", background: "var(--nm-error)", color: "#fff", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "12px", textTransform: "uppercase" }}
               >
-                Delete
+                {t('common.delete')}
               </button>
             </div>
           </div>
@@ -414,7 +416,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
               flexShrink: 0,
             }}>
               <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "20px", textTransform: "uppercase", margin: 0, color: "var(--nm-text-primary)" }}>
-                AI Shortlist Results
+                {t('employer.aiShortlistResults', {}, 'AI Shortlist Results')}
               </h2>
               <button
                 onClick={closeShortlistModal}
@@ -442,12 +444,12 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
                   flexShrink: 0,
                 }}>
                   <div style={{ fontFamily: "var(--font-display)", fontSize: 11, fontWeight: 800, color: "var(--nm-text-tertiary)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "12px" }}>
-                    {shortlistResults.total} candidate{shortlistResults.total !== 1 ? 's' : ''} ranked
+                    {t('employer.candidatesRankedCount', { count: shortlistResults.total }, `${shortlistResults.total} candidates ranked`)}
                   </div>
 
                   {shortlistResults.candidates?.length === 0 ? (
                     <div style={{ textAlign: "center", padding: "2rem", fontFamily: "var(--font-display)", fontWeight: 900, color: "var(--nm-text-tertiary)", textTransform: "uppercase" }}>
-                      No candidates found
+                      {t('employer.noCandidatesFound', {}, 'No candidates found')}
                     </div>
                   ) : (
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -494,7 +496,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
                               }}>
-                                #{c.rank} {c.profile?.name || "Unknown"}
+                                #{c.rank} {c.profile?.name || t('employer.unknown', {}, "Unknown")}
                               </div>
                               <div style={{
                                 fontFamily: "var(--font-body)",
@@ -554,7 +556,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
                           border: "2px solid var(--nm-ink)",
                         }}
                       >
-                        <ArrowLeft size={14} strokeWidth={3} style={{ marginRight: 4, verticalAlign: 'middle' }} /> Back
+                        <ArrowLeft size={14} strokeWidth={3} style={{ marginRight: 4, verticalAlign: 'middle' }} /> {t('common.back')}
                       </button>
                       <span style={{
                         fontFamily: "var(--font-display)",
@@ -564,7 +566,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
                         textTransform: "uppercase",
                         letterSpacing: "-0.01em",
                       }}>
-                        {selectedCandidate?.profile?.name || "Candidate"}
+                        {selectedCandidate?.profile?.name || t('employer.candidate', {}, "Candidate")}
                       </span>
                       {selectedCandidate && (
                         <span style={{
@@ -592,7 +594,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
                           color: "var(--nm-text-tertiary)",
                           textTransform: "uppercase",
                         }}>
-                          Loading...
+                          {t('employer.loading')}
                         </div>
                       )}
 
@@ -641,7 +643,7 @@ export default function JobCard({ job, onDelete, onUpdate, onViewCandidates }) {
                                 letterSpacing: "0.1em",
                               }}>
                                 <FileText size={12} strokeWidth={3} style={{ marginRight: 4, verticalAlign: "middle" }} />
-                                CV Preview
+                                {t('employer.cvPreview', {}, 'CV Preview')}
                               </div>
                             </div>
                             <ApplicationViewer application={applicationDetail} showAnalysis={false} />

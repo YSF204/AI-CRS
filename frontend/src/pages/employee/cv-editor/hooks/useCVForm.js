@@ -258,7 +258,7 @@ export default function useCVForm(showToast, autoSaveFunction = null, user = nul
   const handleImageUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 512000) { showToast("error", "Image must be under 500KB."); return; }
+    if (file.size > 512000) { showToast("error", "toast.image_too_large"); return; }
     const reader = new FileReader();
     reader.onload = (ev) => { setForm((f) => ({ ...f, profileImage: ev.target.result })); triggerAutoSave(); };
     reader.readAsDataURL(file);

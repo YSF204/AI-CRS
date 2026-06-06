@@ -11,8 +11,10 @@ import api from "../../../services/api";
 import useFetch from "../../../hooks/useFetch";
 import CVCard from "./components/CVCard";
 import { SkCardGrid, SkCard, SkBox, SkText } from "../../../components/ui/Skeleton";
+import { useTranslation } from "../../../context/LanguageContext";
 
 export default function CVs() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [error, setError] = useState("");
   const [uploadingPdf, setUploadingPdf] = useState(false);
@@ -67,7 +69,7 @@ export default function CVs() {
       setDeleteTarget(null);
       await refetch();
     } catch (err) {
-      setError(err?.response?.data?.message || "Unable to delete CV.");
+      setError(err?.response?.data?.message || t("toast.failed_to_delete", {}, "Unable to delete CV."));
       setDeleteTarget(null);
     }
   };
@@ -79,7 +81,7 @@ export default function CVs() {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!file.name.toLowerCase().endsWith(".pdf")) {
-      setError("Please upload a PDF file");
+      setError(t("applyJob.uploadPdfError"));
       return;
     }
     setUploadingPdf(true);
@@ -93,7 +95,7 @@ export default function CVs() {
       await refetch();
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to upload PDF.");
+      setError(err?.response?.data?.message || t("toast.failed_upload_pdf", {}, "Failed to upload PDF."));
     } finally {
       setUploadingPdf(false);
     }
@@ -111,10 +113,10 @@ export default function CVs() {
           <div className="space-y-1">
             <h1 className="text-2xl font-bold font-display uppercase tracking-tight flex items-center gap-3">
               <FileText size={24} className="text-[var(--nm-primary)]" />
-              Resume Vault
+              {t('employee.resumeVault')}
             </h1>
             <p className="font-mono text-xs text-[var(--nm-text-tertiary)]">
-              {cvs.length} professional resumes on file
+              {cvs.length} {t('employee.resumesOnFile')}
             </p>
           </div>
 
@@ -132,26 +134,26 @@ export default function CVs() {
               disabled={uploadingPdf}
             >
               <UploadCloud size={16} />
-              {uploadingPdf ? "ANALYZING..." : "UPLOAD PDF"}
+              {uploadingPdf ? t('employee.analyzing') : t('employee.uploadPdf')}
             </button>
             <button
               className="nm-btn bg-[var(--nm-warning)] text-[var(--nm-ink)] px-4 py-2 text-xs"
               onClick={goToTemplates}
             >
               <Plus size={16} />
-              NEW CV
+              {t('employee.newCv')}
             </button>
           </div>
         </div>
 
         {/* Toolbar */}
         <div className="jd-surface-stack flex items-center justify-between gap-4 p-4 mb-8">
-          <h2 className="jd-section-title mb-0">Saved CVs ({cvs.length})</h2>
+          <h2 className="jd-section-title mb-0">{t('employee.savedCvs')} ({cvs.length})</h2>
           <div className="flex gap-3 items-center">
             <div className="relative h-[44px]">
               <input
                 type="text"
-                placeholder="Search resumes by job title or name..."
+                placeholder={t('employee.searchPlaceholder')}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="jd-input w-[520px] h-[44px]"
@@ -176,8 +178,8 @@ export default function CVs() {
               className="jd-select h-[44px]"
               style={{ width: "100px" }}
             >
-              <option value="newest">Newest</option>
-              <option value="oldest">Oldest</option>
+              <option value="newest">{t('employee.newest')}</option>
+              <option value="oldest">{t('employee.oldest')}</option>
             </select>
           </div>
         </div>
@@ -187,7 +189,7 @@ export default function CVs() {
             <p className="font-mono text-sm text-[var(--nm-error)] m-0 font-bold uppercase py-1">
               {error ||
                 fetchError?.response?.data?.message ||
-                "Operation failed."}
+                t("common.operationFailed", {}, "Operation failed.")}
             </p>
           </div>
         )}
@@ -222,7 +224,7 @@ export default function CVs() {
               <div className="w-16 h-16 border-4 border-dashed border-[var(--nm-text-tertiary)] flex items-center justify-center">
                 <Plus size={32} className="text-[var(--nm-text-tertiary)]" />
               </div>
-              <p className="jd-section-title mb-0">Add New Resume</p>
+              <p className="jd-section-title mb-0">{t('employee.addNewResume')}</p>
             </div>
           </div>
         )}
@@ -264,7 +266,7 @@ export default function CVs() {
                 color: "var(--nm-text-primary)",
               }}
             >
-              Confirm Deletion
+              {t('employee.confirmDeletion')}
             </h3>
             <p
               style={{
@@ -274,8 +276,7 @@ export default function CVs() {
                 color: "var(--nm-text-secondary)",
               }}
             >
-              Are you sure you want to permanently delete this CV? This action
-              cannot be undone.
+              {t('employee.deleteWarn')}
             </p>
             <div
               style={{
@@ -296,7 +297,7 @@ export default function CVs() {
                   textTransform: "uppercase",
                 }}
               >
-                Cancel
+                {t('auth.back')}
               </button>
               <button
                 onClick={handleDelete}
@@ -311,7 +312,7 @@ export default function CVs() {
                   textTransform: "uppercase",
                 }}
               >
-                Delete Cv
+                {t('employee.deleteCv')}
               </button>
             </div>
           </div>

@@ -1,13 +1,15 @@
 import React from 'react';
-
-const stats = [
-  { value: '10', label: 'ATS Templates', icon: '◆' },
-  { value: '4', label: 'AI Engines', icon: '◆' },
-  { value: '24/7', label: 'AI Support', icon: '◆' },
-  { value: 'Neo-Minimal', label: 'Design System', icon: '◆' },
-];
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function StatsSection() {
+  const { t } = useTranslation();
+
+  const stats = [
+    { value: '10', label: t('stats.templates'), icon: '◆' },
+    { value: '4', label: t('stats.engines'), icon: '◆' },
+    { value: '24/7', label: t('stats.support'), icon: '◆' },
+    { value: t('stats.designValue'), label: t('stats.designSystem'), icon: '◆' },
+  ];
   return (
     <section className="w-full">
       {/* Scrolling marquee strip — industrial ticker */}

@@ -3,8 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { CheckCircle2, XCircle, Loader, ArrowLeft } from "lucide-react";
 import api from "../../../services/api";
 import { useAuth } from "../../../context/AuthContext";
+import { useTranslation } from "../../../context/LanguageContext";
 
 export default function VerifyEmailPage() {
+  const { t } = useTranslation();
   const { token } = useParams();
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -16,7 +18,7 @@ export default function VerifyEmailPage() {
       try {
         if (!token) {
           setStatus("error");
-          setMessage("Invalid verification link. Token is missing.");
+          setMessage(t("auth.invalidVerificationLink", {}, "Invalid verification link. Token is missing."));
           return;
         }
 
@@ -30,13 +32,13 @@ export default function VerifyEmailPage() {
         setStatus("error");
         setMessage(
           error.response?.data?.message ||
-            "Email verification failed. Please try again or request a new verification link.",
+            t("auth.failedVerification", {}, "Email verification failed. Please try again or request a new verification link."),
         );
       }
     };
 
     verifyEmail();
-  }, [token, login, navigate]);
+  }, [token, login, navigate, t]);
 
   return (
     <div
@@ -76,7 +78,7 @@ export default function VerifyEmailPage() {
                 marginBottom: 16,
               }}
             >
-              Verifying Email
+              {t("auth.verifyingEmail")}
             </h1>
             <p
               style={{
@@ -86,7 +88,7 @@ export default function VerifyEmailPage() {
                 textAlign: "center",
               }}
             >
-              We're verifying your email address...
+              {t("auth.verifyingDesc")}
             </p>
           </div>
         )}
@@ -113,7 +115,7 @@ export default function VerifyEmailPage() {
                 marginBottom: 16,
               }}
             >
-              Email Verified!
+              {t("auth.emailVerified")}
             </h1>
             <p
               style={{
@@ -151,7 +153,7 @@ export default function VerifyEmailPage() {
                   boxShadow: "3px 3px 0 #0a0a0a",
                 }}
               >
-                Go to Login
+                {t("auth.goToLogin")}
               </button>
             </div>
           </div>
@@ -179,7 +181,7 @@ export default function VerifyEmailPage() {
                 marginBottom: 16,
               }}
             >
-              Verification Failed
+              {t("auth.verificationFailed")}
             </h1>
             <p
               style={{
@@ -219,7 +221,7 @@ export default function VerifyEmailPage() {
                   boxShadow: "3px 3px 0 #0a0a0a",
                 }}
               >
-                Try Logging In
+                {t("auth.tryLoggingIn")}
               </button>
 
               <button
@@ -244,7 +246,7 @@ export default function VerifyEmailPage() {
                 }}
               >
                 <ArrowLeft size={16} />
-                Back to Home
+                {t("auth.backToHome")}
               </button>
             </div>
           </div>

@@ -1,18 +1,21 @@
 import React from 'react';
 import { Sparkles, CheckCircle2, XCircle } from 'lucide-react';
+import { useTranslation } from '../../../../context/LanguageContext';
 
 export default function CandidateCard({ candidate, index }) {
+  const { t } = useTranslation();
+
   const displayName =
     candidate.profile?.name && candidate.profile.name !== 'Unknown'
       ? candidate.profile.name
-      : candidate.profile?.email || 'SECURE ENTITY';
+      : candidate.profile?.email || t('employer.secureEntity', {}, 'SECURE ENTITY');
 
   const contact = candidate.profile?.contact || {};
   const contactItems = [
-    candidate.profile?.email && { label: 'Email', value: candidate.profile.email },
-    contact.phone && { label: 'Phone', value: contact.phone },
-    contact.github && { label: 'GitHub', value: contact.github },
-    contact.linkedin && { label: 'LinkedIn', value: contact.linkedin },
+    candidate.profile?.email && { label: t('auth.email', {}, 'Email'), value: candidate.profile.email },
+    contact.phone && { label: t('employer.phone', {}, 'Phone'), value: contact.phone },
+    contact.github && { label: t('employer.github', {}, 'GitHub'), value: contact.github },
+    contact.linkedin && { label: t('employer.linkedin', {}, 'LinkedIn'), value: contact.linkedin },
   ].filter(Boolean);
 
   return (
@@ -48,12 +51,12 @@ export default function CandidateCard({ candidate, index }) {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 24 }}>
-        <div>
+        <div style={{ flex: 1 }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 32, margin: '0 0 8px', color: 'var(--nm-text-primary)', textTransform: 'uppercase', letterSpacing: '-0.02em' }}>
             {displayName}
           </h3>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 16, fontWeight: 600, color: 'var(--nm-text-tertiary)', marginBottom: 12 }}>
-            {candidate.profile?.jobTitle || candidate.CVId?.jobTitle || 'UNSPECIFIED ROLE'} • {candidate.profile?.email || 'DATA ENCRYPTED'}
+            {candidate.profile?.jobTitle || candidate.CVId?.jobTitle || t('employer.unspecifiedRole', {}, 'UNSPECIFIED ROLE')} • {candidate.profile?.email || t('employer.dataEncrypted', {}, 'DATA ENCRYPTED')}
           </div>
           {contactItems.length > 0 && (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 12 }}>
@@ -98,7 +101,7 @@ export default function CandidateCard({ candidate, index }) {
             letterSpacing: '0.15em',
             fontWeight: 800
           }}>
-            Compatibility
+            {t('employer.compatibility', {}, 'Compatibility')}
           </div>
         </div>
       </div>
@@ -122,7 +125,7 @@ export default function CandidateCard({ candidate, index }) {
           gap: 8,
           fontWeight: 900
         }}>
-          <Sparkles size={18} strokeWidth={3} /> Neural Reasoning
+          <Sparkles size={18} strokeWidth={3} /> {t('employer.neuralReasoning', {}, 'Neural Reasoning')}
         </div>
         <p style={{
           fontFamily: 'var(--font-body)',
@@ -152,7 +155,7 @@ export default function CandidateCard({ candidate, index }) {
             marginBottom: 10,
             fontWeight: 900
           }}>
-            Profile Snapshot
+            {t('employer.profileSnapshot', {}, 'Profile Snapshot')}
           </div>
           <p style={{
             fontFamily: 'var(--font-body)',
@@ -180,7 +183,7 @@ export default function CandidateCard({ candidate, index }) {
             gap: 10,
             fontWeight: 900
           }}>
-            <CheckCircle2 size={20} strokeWidth={3} /> Strategic Strengths
+            <CheckCircle2 size={20} strokeWidth={3} /> {t('employer.strengths', {}, 'Strategic Strengths')}
           </div>
           <ul style={{
             margin: 0,
@@ -219,7 +222,7 @@ export default function CandidateCard({ candidate, index }) {
             gap: 10,
             fontWeight: 900
           }}>
-            <XCircle size={20} strokeWidth={3} /> Critical Gaps
+            <XCircle size={20} strokeWidth={3} /> {t('employer.criticalGaps', {}, 'Critical Gaps')}
           </div>
           {candidate.skillsMissing?.length > 0 ? (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
@@ -245,12 +248,10 @@ export default function CandidateCard({ candidate, index }) {
               color: 'var(--nm-text-tertiary)',
               fontStyle: 'italic',
               fontWeight: 500
-            }}>Zero deficiency detected</span>
+            }}>{t('employer.zeroDeficiencyDetected', {}, 'Zero deficiency detected')}</span>
           )}
         </div>
       </div>
-
-
     </div>
   );
 }

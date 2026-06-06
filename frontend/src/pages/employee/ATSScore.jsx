@@ -1,12 +1,14 @@
 import React, { useState, useRef, useCallback } from "react";
 import { BarChart3 } from "lucide-react";
 import DashboardNav from "../../components/shared/DashboardNav";
+import { useTranslation } from "../../context/LanguageContext";
 import useFetch from "../../hooks/useFetch";
 import api from "../../services/api";
 import CVSelector from "../../components/employee/ats-score/CVSelector";
 import ATSResults from "../../components/employee/ats-score/ATSResults";
 
 export default function ATSScore() {
+  const { t } = useTranslation();
   const [selectedCvId, setSelectedCvId] = useState(null);
   const [atsResult, setAtsResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -61,7 +63,7 @@ export default function ATSScore() {
       finishProgress();
       setError(
         err.response?.data?.message ||
-          "Failed to analyze CV. Please try again.",
+          t("atsAudit.failedToAnalyze", {}, "Failed to analyze CV. Please try again."),
       );
       setSelectedCvId(null);
     } finally {
@@ -97,7 +99,7 @@ export default function ATSScore() {
               <p className="font-mono text-sm text-[var(--nm-error)] m-0 font-bold uppercase">
                 {error ||
                   cvFetchError?.response?.data?.message ||
-                  "System error: Unable to load data."}
+                  t("atsAudit.systemError", {}, "System error: Unable to load data.")}
               </p>
             </div>
           </div>
@@ -138,7 +140,7 @@ export default function ATSScore() {
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
             <span style={{ fontWeight: 800, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--nm-text-primary)" }}>
-              ATS Analysis
+              {t("atsAudit.atsAnalysis", {}, "ATS Analysis")}
             </span>
             <span style={{ fontWeight: 800, fontSize: "0.85rem", color: "var(--nm-primary)" }}>
               {progress}%
@@ -155,7 +157,13 @@ export default function ATSScore() {
             />
           </div>
           <p style={{ margin: "8px 0 0", fontSize: "0.7rem", color: "var(--nm-text-tertiary)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            {progress < 30 ? "Loading CV data..." : progress < 60 ? "Running ATS scoring..." : progress < 90 ? "Generating recommendations..." : "Almost done..."}
+            {progress < 30 
+              ? t("atsAudit.loadingCvData", {}, "Loading CV data...") 
+              : progress < 60 
+              ? t("atsAudit.runningAtsScoring", {}, "Running ATS scoring...") 
+              : progress < 90 
+              ? t("atsAudit.generatingRecs", {}, "Generating recommendations...") 
+              : t("atsAudit.almostDone", {}, "Almost done...")}
           </p>
         </div>
       )}

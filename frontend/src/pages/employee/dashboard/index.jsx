@@ -12,6 +12,7 @@ import {
 import { Link } from "react-router-dom";
 import DashboardNav from "../../../components/shared/DashboardNav";
 import { useAuth } from "../../../context/AuthContext";
+import { useTranslation } from "../../../context/LanguageContext";
 import useFetch from "../../../hooks/useFetch";
 import useEmployeeDash from "../../../hooks/useEmployeeDash";
 import { calcProfileCompletion } from "../../../utils/profileCompletion";
@@ -21,6 +22,7 @@ import { SkStatCard, SkCard } from "../../../components/ui/Skeleton";
 
 export default function EmployeeDash() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const { fetchAll } = useEmployeeDash();
 
   const {
@@ -41,45 +43,45 @@ export default function EmployeeDash() {
 
     return [
       {
-        label: "Total Applications",
+        label: t("employeeDashboard.totalApplications"),
         value: applications.length.toString(),
         change:
           recentApplications > 0
-            ? `+${recentApplications} this week`
-            : "No recent applications",
+            ? t("employeeDashboard.recentAppsThisWeek", { count: recentApplications })
+            : t("employeeDashboard.noRecentApps"),
         trend: recentApplications > 0 ? "up" : "stable",
         icon: Briefcase,
         color: "var(--color-primary)",
       },
       {
-        label: "Profile Completion",
+        label: t("employeeDashboard.profileCompletion"),
         value: `${profileCompletion}%`,
         change:
           profileCompletion < 100
-            ? "Complete your profile"
-            : "Profile complete",
+            ? t("employeeDashboard.completeYourProfile")
+            : t("employeeDashboard.profileComplete"),
         trend: profileCompletion < 100 ? "up" : "stable",
         icon: User,
         color: "var(--color-success)",
       },
       {
-        label: "CVs Created",
+        label: t("employeeDashboard.cvsCreated"),
         value: cvs.length.toString(),
-        change: cvs.length > 0 ? "Ready to use" : "Create your first CV",
+        change: cvs.length > 0 ? t("employeeDashboard.readyToUse") : t("employeeDashboard.createYourFirstCv"),
         trend: cvs.length > 0 ? "stable" : "down",
         icon: FileText,
         color: "var(--color-warning)",
       },
       {
-        label: "Available Jobs",
+        label: t("employeeDashboard.availableJobs"),
         value: jobs.length.toString(),
-        change: "Open positions",
+        change: t("employeeDashboard.openPositions"),
         trend: jobs.length > 0 ? "up" : "stable",
         icon: TrendingUp,
         color: "var(--color-danger)",
       },
     ];
-  }, [applications, cvs, jobs, profileCompletion]);
+  }, [applications, cvs, jobs, profileCompletion, t]);
 
   const priorityWorkflows = useMemo(() => {
     const workflows = [];
@@ -87,8 +89,8 @@ export default function EmployeeDash() {
     if (cvs.length === 0) {
       workflows.push({
         icon: Plus,
-        label: "Create Your First CV",
-        description: "Start by creating a professional CV to get job matches",
+        label: t("employeeDashboard.createYourFirstCv"),
+        description: t("employeeDashboard.createCvPriorityDesc"),
         href: "/employee/cv-templates",
         priority: "high",
         color: "var(--color-warning)",
@@ -98,8 +100,8 @@ export default function EmployeeDash() {
     if (profileCompletion < 80) {
       workflows.push({
         icon: Edit,
-        label: "Complete Your Profile",
-        description: `${Math.round(100 - profileCompletion)}% remaining - add your details`,
+        label: t("employeeDashboard.completeYourProfile"),
+        description: t("employeeDashboard.completeProfilePriorityDesc", { percent: Math.round(100 - profileCompletion) }),
         href: "/employee/profile",
         priority: "high",
         color: "var(--color-danger)",
@@ -109,8 +111,8 @@ export default function EmployeeDash() {
     if (jobs.length > 0 && cvs.length > 0) {
       workflows.push({
         icon: Briefcase,
-        label: "Apply to Jobs",
-        description: `${jobs.length} positions available matching your skills`,
+        label: t("employeeDashboard.findJobs"),
+        description: t("employeeDashboard.applyToJobsPriorityDesc", { count: jobs.length }),
         href: "/employee/jobs",
         priority: "medium",
         color: "var(--color-primary)",
@@ -125,9 +127,8 @@ export default function EmployeeDash() {
       if (!hasSkills) {
         workflows.push({
           icon: FileText,
-          label: "Add Skills to Your CV",
-          description:
-            "Include your technical skills for better job matches",
+          label: t("employeeDashboard.addSkillsToCv"),
+          description: t("employeeDashboard.addSkillsPriorityDesc"),
           href: "/employee/cvs",
           priority: "low",
           color: "var(--color-success)",
@@ -138,9 +139,8 @@ export default function EmployeeDash() {
     if (workflows.length === 0) {
       workflows.push({
         icon: Search,
-        label: "Explore Job Opportunities",
-        description:
-          "Browse and apply to positions that match your profile",
+        label: t("employeeDashboard.exploreOpportunity"),
+        description: t("employeeDashboard.exploreOpportunityDesc"),
         href: "/employee/jobs",
         priority: "medium",
         color: "var(--color-primary)",
@@ -148,7 +148,7 @@ export default function EmployeeDash() {
     }
 
     return workflows.slice(0, 3);
-  }, [cvs, jobs, profileCompletion]);
+  }, [cvs, jobs, profileCompletion, t]);
 
   if (loading) {
     return (
@@ -190,19 +190,19 @@ export default function EmployeeDash() {
           <div className="workflow-card p-6 sm:p-8 bg-[var(--card-bg)] flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="flex-1">
               <p className="text-mono text-xs uppercase tracking-widest text-[var(--color-text-secondary)] mb-2">
-                Welcome Back, {userName}
+                {t("employeeDashboard.welcomeBack", { name: userName })}
               </p>
               <h1 className="text-display-md text-[var(--text-primary)] mb-3">
                 {profileCompletion < 50
-                  ? "Let's complete your profile first"
+                  ? t("employeeDashboard.completeProfileFirst")
                   : cvs.length === 0
-                    ? "Create your CV to start applying"
-                    : "Ready to find your next opportunity?"}
+                    ? t("employeeDashboard.createCvFirst")
+                    : t("employeeDashboard.readyToFind")}
               </h1>
               <p className="text-body text-[var(--text-muted)] max-w-xl leading-relaxed">
                 {profileCompletion < 100
-                  ? `Your profile is ${profileCompletion}% complete. Finish it to get better job matches.`
-                  : "Your profile is complete. Discover amazing job opportunities tailored to your skills and experience."}
+                  ? t("employeeDashboard.profileCompletionDesc", { percent: profileCompletion })
+                  : t("employeeDashboard.profileCompleteDesc")}
               </p>
             </div>
             <Link
@@ -210,7 +210,7 @@ export default function EmployeeDash() {
               className="paper-btn px-8 py-4 self-start md:self-center flex items-center gap-2 text-lg"
             >
               <Search size={20} />
-              Find Jobs
+              {t("employeeDashboard.findJobs")}
               <ChevronRight size={20} />
             </Link>
           </div>

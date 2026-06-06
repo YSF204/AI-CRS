@@ -1,8 +1,11 @@
 import React from "react";
 import { Clock, MapPin, DollarSign, Briefcase } from "lucide-react";
 import { SkCard, SkBox } from "../../ui/Skeleton";
+import { useTranslation } from "../../../context/LanguageContext";
 
 const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loading }) => {
+  const { t } = useTranslation();
+
   if (loading) {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-4)" }}>
@@ -33,7 +36,7 @@ const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loa
               <div className="h-1 flex-1 bg-[var(--nm-ink)] opacity-10" />
               <div className="px-6 py-2 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface-low)] shadow-[4px_4px_0_var(--nm-ink)]">
                 <span className="font-black text-xs uppercase tracking-[0.2em] text-[var(--nm-text-tertiary)]">
-                  External Fits
+                  {t("employeeJobs.externalFits", {}, "External Fits")}
                 </span>
               </div>
               <div className="h-1 flex-1 bg-[var(--nm-ink)] opacity-10" />
@@ -44,7 +47,7 @@ const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loa
         const isSelected = job.id === selectedJobId;
         const salary = job.raw?.salary
           ? `$${job.raw.salary.toLocaleString()}`
-          : "NOT_SPECIFIED";
+          : t("employeeJobs.notSpecified", {}, "Not Specified");
 
         return (
           <button
@@ -84,7 +87,7 @@ const JobResultsList = ({ jobs, selectedJobId, onJobSelect, getJobTypeLabel, loa
                             : "bg-[var(--nm-error)] text-white"
                         }`}
                     >
-                      {job.match}% MATCH
+                      {t("employeeJobs.matchPercent", { percent: job.match }, `${job.match}% MATCH`)}
                     </div>
                   )}
                 </div>

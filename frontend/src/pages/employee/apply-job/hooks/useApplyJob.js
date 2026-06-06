@@ -2,8 +2,10 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import api from "../../../../services/api";
 import useFetch from "../../../../hooks/useFetch";
+import { useTranslation } from "../../../../context/LanguageContext";
 
 export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
+  const { t } = useTranslation();
   const jobId = propsJobId;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -165,7 +167,7 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
       setCvFile(file);
       setMatchAnalysis(null);
     } else {
-      alert("Please upload a PDF file");
+      alert(t("applyJob.uploadPdfError"));
     }
   };
 
@@ -188,9 +190,9 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
   const submitApplication = async ({ skipAnalysis }) => {
     const errors = {};
     if (applicationMethod === "existingCv" && !selectedCvId) {
-      errors.cvSelection = "Please select a CV";
+      errors.cvSelection = t("applyJob.selectCvError");
     } else if (applicationMethod === "uploadPdf" && !cvFile) {
-      errors.cvUpload = "Please upload a PDF file";
+      errors.cvUpload = t("applyJob.uploadPdfError");
     }
 
     if (Object.keys(errors).length > 0) {
@@ -231,10 +233,10 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
       }
 
       const msg = isEdit
-        ? "Application updated!"
+        ? t("toast.app_updated")
         : skipAnalysis
-          ? "Application submitted instantly!"
-          : "Application submitted successfully!";
+          ? t("toast.app_submitted_instantly")
+          : t("toast.applied_successfully");
       showToastNotice(msg);
       setTimeout(() => {
         if (onCloseFn) onCloseFn();
@@ -253,9 +255,9 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
       }
       setValidationErrors({
         cvAnalysis:
-          error.response?.data?.message || "Failed to submit application",
+          error.response?.data?.message || t("toast.failed_to_apply"),
       });
-      alert(error.response?.data?.message || "Application submission failed");
+      alert(error.response?.data?.message || t("toast.failed_to_apply"));
     } finally {
       setSubmitting(false);
     }

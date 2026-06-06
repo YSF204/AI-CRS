@@ -2,6 +2,7 @@ import { Briefcase } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import JobCard from './JobCard';
 import { SkCard, SkBox, SkText } from '../../../components/ui/Skeleton';
+import { useTranslation } from '../../../context/LanguageContext';
 
 /**
  * JobsGrid
@@ -9,6 +10,8 @@ import { SkCard, SkBox, SkText } from '../../../components/ui/Skeleton';
  * Receives jobs array and callbacks from the parent.
  */
 export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJobUpdated, onViewCandidates, viewAllLink, totalJobsCount }) {
+  const { t } = useTranslation();
+
   return (
     <div style={{ gridColumn: 'span 12' }}>
       {/* Section heading */}
@@ -22,7 +25,7 @@ export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJob
           letterSpacing: '-0.01em',
           margin: 0
         }}>
-          Active Listings
+          {t('employer.activeListings', {}, 'Active Listings')}
         </h2>
         <span style={{ 
           fontFamily: 'var(--font-display)', 
@@ -32,7 +35,7 @@ export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJob
           textTransform: 'uppercase',
           letterSpacing: '0.05em'
         }}>
-          {loading ? 'SYNCING...' : `${jobs.length} UNIT${jobs.length !== 1 ? 'S' : ''}`}
+          {loading ? t('employer.syncing', {}, 'SYNCING...') : t('employer.unitsCount', { count: jobs.length }, `${jobs.length} UNIT${jobs.length !== 1 ? 'S' : ''}`)}
         </span>
       </div>
 
@@ -74,7 +77,7 @@ export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJob
             marginBottom: 10,
             textTransform: 'uppercase'
           }}>
-            Zero Active Nodes
+            {t('employer.zeroActiveNodes', {}, 'Zero Active Nodes')}
           </div>
           <div style={{ 
             fontFamily: 'var(--font-body)', 
@@ -83,7 +86,7 @@ export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJob
             marginBottom: 32,
             fontWeight: 500
           }}>
-            Initiate your first deployment to start intelligence matching.
+            {t('employer.initiateDeployment', {}, 'Initiate your first deployment to start intelligence matching.')}
           </div>
           <button
             onClick={onPostJob}
@@ -99,7 +102,7 @@ export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJob
               letterSpacing: '0.1em'
             }}
           >
-            Create Listing →
+            {t('employer.createListing', {}, 'Create Listing')} →
           </button>
         </div>
       ) : (
@@ -140,7 +143,7 @@ export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJob
                   letterSpacing: '0.1em'
                 }}
               >
-                Access Archive ({totalJobsCount} Units) →
+                {t('employer.accessArchive', { count: totalJobsCount }, `Access Archive (${totalJobsCount} Units)`)} →
               </Link>
             </div>
           )}

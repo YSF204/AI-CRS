@@ -1,5 +1,6 @@
 import { Step } from "../Stepper";
 import AuthInput from "../AuthInput";
+import { useTranslation } from "../../../../../context/LanguageContext";
 
 const heading = {
   fontFamily: "var(--font-display)",
@@ -26,9 +27,11 @@ const sectionLbl = {
 };
 
 export default function CompanyStep({ field }) {
+  const { t } = useTranslation();
+
   return (
     <Step>
-      <h2 style={heading}>Company Profile</h2>
+      <h2 style={heading}>{t("employer.companyProfile")}</h2>
       <div
         style={{
           display: "grid",
@@ -37,13 +40,13 @@ export default function CompanyStep({ field }) {
         }}
       >
         <AuthInput
-          label="Company Name"
+          label={t("employer.companyName")}
           placeholder="Acme Corp"
           required
           {...field("companyName")}
         />
         <AuthInput
-          label="License Number"
+          label={t("auth.licenseNumber")}
           placeholder="BR-12345"
           required
           {...field("companyLicense")}
@@ -57,20 +60,20 @@ export default function CompanyStep({ field }) {
         }}
       >
         <AuthInput
-          label="Contact Email"
+          label={t("auth.contactEmail")}
           type="email"
           placeholder="hr@company.com"
           required
           {...field("contactEmail")}
         />
         <AuthInput
-          label="Website"
+          label={t("auth.website")}
           type="url"
           placeholder="https://company.com"
           {...field("website")}
         />
       </div>
-      <div style={sectionLbl}>Primary Branch</div>
+      <div style={sectionLbl}>{t("auth.primaryBranch")}</div>
       <div
         style={{
           display: "grid",
@@ -79,19 +82,19 @@ export default function CompanyStep({ field }) {
         }}
       >
         <AuthInput
-          label="Name"
+          label={t("auth.branchName")}
           placeholder="HQ"
           required
           {...field("branchName")}
         />
         <AuthInput
-          label="City"
+          label={t("auth.branchCity")}
           placeholder="Hebron"
           required
           {...field("branchCity")}
         />
         <AuthInput
-          label="Street"
+          label={t("auth.branchStreet")}
           placeholder="Main St"
           required
           {...field("branchStreet")}

@@ -111,13 +111,13 @@ export default function useCVAnalysis({
         setShowAnalysis(true);
       } else {
         finishProgress();
-        showToast("error", "Unable to generate analysis. Please try again.");
+        showToast("error", "toast.unable_to_generate_analysis");
       }
     } catch (err) {
       finishProgress();
       showToast(
         "error",
-        err?.response?.data?.message || err?.message || "Analysis failed.",
+        err?.response?.data?.message || "toast.unable_to_generate_analysis",
       );
     } finally {
       setAnalyzing(false);
@@ -185,13 +185,13 @@ export default function useCVAnalysis({
         setShowAnalysis(true);
       } else {
         finishProgress();
-        showToast("error", "Unable to generate analysis. Please try again.");
+        showToast("error", "toast.unable_to_generate_analysis");
       }
     } catch (err) {
       finishProgress();
       showToast(
         "error",
-        err?.response?.data?.message || err?.message || "Analysis failed.",
+        err?.response?.data?.message || "toast.unable_to_generate_analysis",
       );
     } finally {
       setAnalyzing(false);
@@ -200,7 +200,7 @@ export default function useCVAnalysis({
 
   const handleApplyAnalysis = useCallback((updatesToApply) => {
     if (!updatesToApply || Object.keys(updatesToApply).length === 0) {
-      showToast("info", "No changes were selected.");
+      showToast("info", "toast.no_changes_selected");
       setShowAnalysis(false);
       return null;
     }

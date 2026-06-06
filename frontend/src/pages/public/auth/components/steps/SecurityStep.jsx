@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Step } from "../Stepper";
 import AuthInput from "../AuthInput";
+import { useTranslation } from "../../../../../context/LanguageContext";
 
 const heading = {
   fontFamily: "var(--font-display)",
@@ -13,25 +14,27 @@ const heading = {
 };
 
 const REQUIREMENTS = [
-  { label: "At least 8 characters", test: (pw) => pw.length >= 8 },
-  { label: "At least one uppercase letter", test: (pw) => /[A-Z]/.test(pw) },
-  { label: "At least one lowercase letter", test: (pw) => /[a-z]/.test(pw) },
-  { label: "At least one number", test: (pw) => /[0-9]/.test(pw) },
+  { key: "auth.reqLength", fallback: "At least 8 characters", test: (pw) => pw.length >= 8 },
+  { key: "auth.reqUppercase", fallback: "At least one uppercase letter", test: (pw) => /[A-Z]/.test(pw) },
+  { key: "auth.reqLowercase", fallback: "At least one lowercase letter", test: (pw) => /[a-z]/.test(pw) },
+  { key: "auth.reqNumber", fallback: "At least one number", test: (pw) => /[0-9]/.test(pw) },
   {
-    label: "At least one special character (!@#$%^&* etc.)",
+    key: "auth.reqSpecial",
+    fallback: "At least one special character (!@#$%^&* etc.)",
     test: (pw) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(pw),
   },
 ];
 
 const STRENGTH_LEVELS = [
-  { label: "Weak", color: "var(--nm-error, #e53e3e)" },
-  { label: "Weak", color: "var(--nm-error, #e53e3e)" },
-  { label: "Fair", color: "var(--nm-warning, #dd6b20)" },
-  { label: "Good", color: "#d4a017" },
-  { label: "Strong", color: "var(--nm-success, #38a169)" },
+  { key: "auth.strengthWeak", fallback: "Weak", color: "var(--nm-error, #e53e3e)" },
+  { key: "auth.strengthWeak", fallback: "Weak", color: "var(--nm-error, #e53e3e)" },
+  { key: "auth.strengthFair", fallback: "Fair", color: "var(--nm-warning, #dd6b20)" },
+  { key: "auth.strengthGood", fallback: "Good", color: "#d4a017" },
+  { key: "auth.strengthStrong", fallback: "Strong", color: "var(--nm-success, #38a169)" },
 ];
 
 export default function SecurityStep({ field }) {
+  const { t } = useTranslation();
   const passwordProps = field("password", { touchOnChange: true });
   const passwordValue = passwordProps.value || "";
 
@@ -50,9 +53,9 @@ export default function SecurityStep({ field }) {
 
   return (
     <Step>
-      <h2 style={heading}>Security</h2>
+      <h2 style={heading}>{t("auth.security")}</h2>
       <AuthInput
-        label="Create Password"
+        label={t("auth.createPassword")}
         type="password"
         placeholder="••••••••"
         required
@@ -83,7 +86,7 @@ export default function SecurityStep({ field }) {
               marginBottom: 10,
             }}
           >
-            Password Requirements
+            {t("auth.passwordRequirements")}
           </div>
 
           {/* Requirement checklist */}
@@ -107,7 +110,7 @@ export default function SecurityStep({ field }) {
                 <span style={{ fontSize: 13, flexShrink: 0 }}>
                   {req.met ? "✅" : "❌"}
                 </span>
-                {req.label}
+                {t(req.key, {}, req.fallback)}
               </div>
             ))}
           </div>
@@ -132,7 +135,7 @@ export default function SecurityStep({ field }) {
                   color: "var(--nm-text-secondary)",
                 }}
               >
-                Strength
+                {t("auth.strength")}
               </span>
               {strength && (
                 <span
@@ -145,7 +148,7 @@ export default function SecurityStep({ field }) {
                     color: strength.color,
                   }}
                 >
-                  {strength.label}
+                  {t(strength.key, {}, strength.fallback)}
                 </span>
               )}
             </div>
@@ -177,7 +180,7 @@ export default function SecurityStep({ field }) {
       )}
 
       <AuthInput
-        label="Confirm Password"
+        label={t("auth.confirmPassword")}
         type="password"
         placeholder="••••••••"
         required

@@ -1,11 +1,15 @@
 import React from "react";
 import { Search } from "lucide-react";
+import { useTranslation } from "../../../context/LanguageContext";
 
-const JobSearchBar = ({ value, onChange, placeholder = "Search jobs by title or company…", disabled = false }) => {
+const JobSearchBar = ({ value, onChange, placeholder, disabled = false }) => {
+  const { t } = useTranslation();
+  const defaultPlaceholder = placeholder || t("employeeJobs.searchPlaceholder", {}, "Search jobs by title or company…");
+
   return (
     <div>
       <label htmlFor="job-search" className="jd-section-title mb-2 block">
-        Search Jobs
+        {t("employeeJobs.searchJobs", {}, "Search Jobs")}
       </label>
       <div style={{ position: "relative" }}>
         <Search
@@ -28,11 +32,11 @@ const JobSearchBar = ({ value, onChange, placeholder = "Search jobs by title or 
           autoComplete="off"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
+          placeholder={defaultPlaceholder}
           disabled={disabled}
           className="jd-input"
           style={{ paddingLeft: "60px" }}
-          aria-label="Search jobs"
+          aria-label={t("employeeJobs.searchJobs", {}, "Search Jobs")}
         />
       </div>
     </div>

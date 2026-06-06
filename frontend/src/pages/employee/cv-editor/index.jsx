@@ -3,6 +3,7 @@ import DashboardNav from "../../../components/shared/DashboardNav";
 import { TEMPLATES } from "../../../features/cv-management/index.js";
 import { useMediaQuery } from "../../../hooks/useMediaQuery";
 import useCVEditor from "./hooks/useCVEditor";
+import { useTranslation } from "../../../context/LanguageContext";
 
 // Shared components
 import ActionBar from "./components/ActionBar";
@@ -21,6 +22,7 @@ import MobileSectionsTab from "./components/MobileSectionsTab";
 import MobileBottomSheet from "./components/MobileBottomSheet";
 
 export default function CVEditor() {
+  const { t } = useTranslation();
   const {
     id,
     user,
@@ -112,7 +114,7 @@ export default function CVEditor() {
             color: "var(--nm-text-secondary)",
           }}
         >
-          LOADING CV…
+          {t("cvEditor.loadingCv")}
         </span>
       </div>
     );
@@ -224,9 +226,9 @@ export default function CVEditor() {
             fontFamily: "'Space Grotesk', sans-serif",
           }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div style={{ display: "flex", justifyBetween: "space-between", alignItems: "center", marginBottom: 10 }}>
             <span style={{ fontWeight: 800, fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "var(--nm-text-primary)" }}>
-              AI Analysis
+              {t("cvEditor.aiAnalysis")}
             </span>
             <span style={{ fontWeight: 800, fontSize: "0.85rem", color: "var(--nm-primary)" }}>
               {analysisProgress}%
@@ -244,12 +246,12 @@ export default function CVEditor() {
           </div>
           <p style={{ margin: "8px 0 0", fontSize: "0.7rem", color: "var(--nm-text-tertiary)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
             {analysisProgress < 30
-              ? "Reading CV data..."
+              ? t("atsAudit.loadingCvData")
               : analysisProgress < 60
-              ? "Analyzing content quality..."
+              ? t("atsAudit.runningAtsScoring")
               : analysisProgress < 90
-              ? "Generating suggestions..."
-              : "Almost done..."}
+              ? t("atsAudit.generatingRecs")
+              : t("atsAudit.almostDone")}
           </p>
         </div>
       )}
@@ -269,10 +271,10 @@ export default function CVEditor() {
         >
           <div className="nm-card bg-[var(--nm-bg)] p-8 max-w-md w-full mx-4 flex flex-col gap-6">
             <h3 className="font-[var(--font-display)] font-black text-xl uppercase tracking-tight">
-              Unsaved Changes
+              {t("cvEditor.unsavedChanges")}
             </h3>
             <p className="font-mono text-xs text-[var(--nm-text-secondary)] uppercase font-bold leading-relaxed">
-              Your CV data has not been saved. Leaving now will result in loss of progress.
+              {t("cvEditor.unsavedChangesDesc")}
             </p>
             <div className="flex flex-col gap-3 mt-2">
               <button
@@ -281,13 +283,13 @@ export default function CVEditor() {
                 className="nm-btn w-full"
                 style={{ borderColor: "var(--nm-error)", color: "var(--nm-error)" }}
               >
-                DISCARD CHANGES
+                {t("cvEditor.discardChanges")}
               </button>
               <button
                 onClick={() => setShowExitPrompt(false)}
                 className="nm-btn nm-btn-primary w-full"
               >
-                CONTINUE EDITING
+                {t("cvEditor.continueEditing")}
               </button>
             </div>
           </div>

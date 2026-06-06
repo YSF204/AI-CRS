@@ -3,6 +3,7 @@ import {
   ArrowLeft, Save, Eye, Download, Layers, Sparkles,
   Clock, ChevronDown, Brain, Target, MoreHorizontal, Menu
 } from "lucide-react";
+import { useTranslation } from "../../../../context/LanguageContext";
 
 /* ─── Mobile Action Bar ──────────────────────────────────────────────────── */
 function MobileActionBar({
@@ -21,6 +22,7 @@ function MobileActionBar({
   onChangeTemplate,
   onBack,
 }) {
+  const { t } = useTranslation();
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef(null);
 
@@ -43,37 +45,37 @@ function MobileActionBar({
   const formatLastSaved = (date) => {
     if (!date) return null;
     const diff = Math.floor((new Date() - date) / 1000);
-    if (diff < 60) return "Just now";
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    return date.toLocaleDateString();
+    if (diff < 60) return t("cvEditor.justNow");
+    if (diff < 3600) return t("cvEditor.minutesAgo", { count: Math.floor(diff / 60) });
+    return t("cvEditor.hoursAgo", { count: Math.floor(diff / 3600) });
   };
 
   const moreItems = [
     {
       icon: Brain,
-      label: "CV Analysis",
-      sub: "Review & improve",
+      label: t("cvEditor.cvAnalysis"),
+      sub: t("cvEditor.reviewImprove"),
       action: () => { setMoreOpen(false); onAnalyze(); },
       disabled: analyzing,
     },
     {
       icon: Target,
-      label: "Skill Gap",
-      sub: "Find missing skills",
+      label: t("cvEditor.skillGap"),
+      sub: t("cvEditor.findMissingSkills"),
       action: () => { setMoreOpen(false); onSkillGap(); },
       disabled: false,
     },
     {
       icon: Layers,
-      label: "Template",
-      sub: "Change CV template",
+      label: t("cvEditor.template"),
+      sub: t("cvEditor.changeCvTemplate"),
       action: () => { setMoreOpen(false); onChangeTemplate(); },
       disabled: false,
     },
     {
       icon: Download,
-      label: downloadingPdf ? "Exporting…" : "Download PDF",
-      sub: "Save as PDF file",
+      label: downloadingPdf ? t("cvEditor.exporting") : t("cvEditor.downloadPdf"),
+      sub: t("cvEditor.saveAsPdf"),
       action: () => { setMoreOpen(false); onDownloadPdf(); },
       disabled: downloadingPdf,
     },
@@ -106,7 +108,7 @@ function MobileActionBar({
             textOverflow: "ellipsis",
           }}
         >
-          {form.jobTitle || "UNTITLED CV"}
+          {form.jobTitle || t("cvEditor.untitledCv")}
         </div>
         <div
           style={{
@@ -131,7 +133,7 @@ function MobileActionBar({
                 flexShrink: 0,
               }}
             >
-              ATS {atsScore}%
+              {t("cvEditor.atsQuality", { score: atsScore })}
             </span>
           )}
           <span
@@ -149,10 +151,10 @@ function MobileActionBar({
           >
             <Clock size={8} strokeWidth={2.5} className={isAutoSaving ? "animate-pulse" : ""} />
             {isAutoSaving
-              ? "Syncing…"
+              ? t("cvEditor.syncing")
               : lastSavedAt
               ? formatLastSaved(lastSavedAt)
-              : "Unsaved"}
+              : t("cvEditor.unsaved")}
           </span>
         </div>
       </div>
@@ -206,7 +208,7 @@ function MobileActionBar({
                   letterSpacing: "0.08em",
                   color: "var(--nm-text-primary)",
                   opacity: disabled ? 0.4 : 1,
-                  textAlign: "left",
+                  textAlign: t("common.direction", {}, "ltr") === "rtl" ? "right" : "left",
                 }}
                 onClick={disabled ? undefined : action}
                 disabled={disabled}
@@ -241,7 +243,7 @@ function MobileActionBar({
         style={{ padding: "8px 14px", minHeight: 36, fontSize: 11, flexShrink: 0 }}
       >
         <Save size={13} strokeWidth={2.5} />
-        {saving ? "…" : "Save"}
+        {saving ? "…" : t("cvEditor.save")}
       </button>
     </div>
   );
@@ -264,6 +266,7 @@ function DesktopActionBar({
   onChangeTemplate,
   onBack,
 }) {
+  const { t } = useTranslation();
   const [aiMenuOpen, setAiMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
@@ -282,9 +285,9 @@ function DesktopActionBar({
     if (!date) return null;
     const now = new Date();
     const diff = Math.floor((now - date) / 1000);
-    if (diff < 60) return "Just now";
-    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+    if (diff < 60) return t("cvEditor.justNow");
+    if (diff < 3600) return t("cvEditor.minutesAgo", { count: Math.floor(diff / 60) });
+    if (diff < 86400) return t("cvEditor.hoursAgo", { count: Math.floor(diff / 3600) });
     return date.toLocaleDateString();
   };
 
@@ -301,30 +304,30 @@ function DesktopActionBar({
       style={{ zIndex: 9999 }}
     >
       <button onClick={onBack} className="nm-btn" style={btnStyle}>
-        <ArrowLeft size={14} strokeWidth={3} /> Back
+        <ArrowLeft size={14} strokeWidth={3} /> {t("common.back")}
       </button>
       <div className="flex-1">
         <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--nm-text-tertiary)] font-bold">
-          Active Workspace
+          {t("cvEditor.activeWorkspace")}
         </div>
         <div className="font-[var(--font-display)] font-black text-lg tracking-tight text-[var(--nm-text-primary)] uppercase">
-          {form.jobTitle || "UNTITLED_CV.DRF"}
+          {form.jobTitle || t("cvEditor.untitledCv")}
         </div>
       </div>
 
       <div className="flex items-center gap-4 mr-4 flex-wrap">
         {atsScore !== undefined && atsScore !== null && (
           <div className="nm-chip nm-chip-primary" style={{ padding: "6px 12px", fontSize: "11px" }}>
-            ATS QUALITY: {atsScore}%
+            {t("cvEditor.atsQuality", { score: atsScore })}
           </div>
         )}
         <div className="flex items-center gap-2 font-mono text-[10px] text-[var(--nm-text-tertiary)] uppercase font-bold">
           <Clock size={12} className={isAutoSaving ? "animate-pulse" : ""} strokeWidth={2.5} />
           {isAutoSaving
-            ? "Syncing..."
+            ? t("cvEditor.syncing")
             : lastSavedAt
-            ? `Last Sync: ${formatLastSaved(lastSavedAt)}`
-            : "Not Synced"}
+            ? t("cvEditor.lastSync", { time: formatLastSaved(lastSavedAt) })
+            : t("cvEditor.notSynced")}
         </div>
       </div>
 
@@ -337,7 +340,7 @@ function DesktopActionBar({
             style={btnStyle}
           >
             <Sparkles size={14} strokeWidth={2.5} />
-            <span>AI TOOLS</span>
+            <span>{t("cvEditor.aiTools")}</span>
             <ChevronDown
               size={14}
               strokeWidth={2.5}
@@ -380,10 +383,10 @@ function DesktopActionBar({
               onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             >
               <Brain size={16} strokeWidth={2.5} />
-              <div style={{ textAlign: "left" }}>
-                <div>CV Analysis</div>
+              <div style={{ textAlign: t("common.direction", {}, "ltr") === "rtl" ? "right" : "left" }}>
+                <div>{t("cvEditor.cvAnalysis")}</div>
                 <div style={{ fontSize: "0.65rem", fontWeight: 500, color: "var(--nm-text-tertiary)", textTransform: "none" }}>
-                  Review &amp; improve your CV
+                  {t("cvEditor.reviewImproveCv")}
                 </div>
               </div>
             </button>
@@ -402,10 +405,10 @@ function DesktopActionBar({
               onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
             >
               <Target size={16} strokeWidth={2.5} />
-              <div style={{ textAlign: "left" }}>
-                <div>Skill Gap Analysis</div>
+              <div style={{ textAlign: t("common.direction", {}, "ltr") === "rtl" ? "right" : "left" }}>
+                <div>{t("cvEditor.skillGap")}</div>
                 <div style={{ fontSize: "0.65rem", fontWeight: 500, color: "var(--nm-text-tertiary)", textTransform: "none" }}>
-                  Find missing skills for a role
+                  {t("cvEditor.findMissingSkillsRole")}
                 </div>
               </div>
             </button>
@@ -413,10 +416,10 @@ function DesktopActionBar({
         </div>
 
         <button onClick={onChangeTemplate} className="nm-btn" style={btnStyle}>
-          <Layers size={14} strokeWidth={2.5} /> TEMPLATE
+          <Layers size={14} strokeWidth={2.5} /> {t("cvEditor.template")}
         </button>
         <button onClick={onPreview} className="nm-btn" style={btnStyle}>
-          <Eye size={14} strokeWidth={2.5} /> PREVIEW
+          <Eye size={14} strokeWidth={2.5} /> {t("common.preview", {}, "PREVIEW")}
         </button>
         <button
           onClick={onDownloadPdf}
@@ -425,7 +428,7 @@ function DesktopActionBar({
           style={btnStyle}
         >
           <Download size={14} strokeWidth={2.5} />{" "}
-          {downloadingPdf ? "EXPORTING..." : "PDF"}
+          {downloadingPdf ? t("cvEditor.exporting") : t("cvEditor.pdf")}
         </button>
         <button
           onClick={onSave}
@@ -433,7 +436,7 @@ function DesktopActionBar({
           className="nm-btn nm-btn-primary"
           style={{ padding: "8px 24px", minHeight: "40px", fontSize: "12px", boxShadow: "4px 4px 0 var(--nm-ink)" }}
         >
-          <Save size={14} strokeWidth={2.5} /> {saving ? "WRITING..." : "SAVE CV"}
+          <Save size={14} strokeWidth={2.5} /> {saving ? t("cvEditor.writing") : t("cvEditor.saveCv")}
         </button>
       </div>
     </div>

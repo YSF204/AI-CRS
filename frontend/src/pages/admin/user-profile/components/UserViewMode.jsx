@@ -1,5 +1,6 @@
 import React from "react";
 import { Power, PowerOff } from "lucide-react";
+import { useTranslation } from "../../../../context/LanguageContext";
 
 const statusClass = (status) => {
   switch (status) {
@@ -15,6 +16,8 @@ const statusClass = (status) => {
 };
 
 export default function UserViewMode({ formData, accountStatus, userId, handleQuickStatusChange, submitting }) {
+  const { t } = useTranslation();
+
   const renderViewRow = (label, value) => (
     <div className="rounded-xl border-2 border-(--border) bg-(--bg) p-5 min-h-[88px] flex items-center">
       <div className="w-full flex flex-col gap-2">
@@ -29,38 +32,38 @@ export default function UserViewMode({ formData, accountStatus, userId, handleQu
   return (
     <div className="grid gap-6">
       <div className="form-section w-full">
-        <h2 className="text-xl font-bold mb-4">Personal Details</h2>
+        <h2 className="text-xl font-bold mb-4">{t('admin.personalDetails', {}, 'Personal Details')}</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {renderViewRow(
-            "Full Name",
+            t('admin.fullName', {}, 'Full Name'),
             `${formData.firstName} ${formData.lastName}`,
           )}
-          {renderViewRow("Email", formData.email)}
-          {renderViewRow("Telephone", formData.telephone)}
-          {renderViewRow("Gender", formData.gender)}
-          {renderViewRow("Age", formData.age)}
-          {renderViewRow("User ID", userId)}
+          {renderViewRow(t('auth.email', {}, 'Email'), formData.email)}
+          {renderViewRow(t('auth.telephone', {}, 'Telephone'), formData.telephone)}
+          {renderViewRow(t('auth.gender', {}, 'Gender'), formData.gender)}
+          {renderViewRow(t('auth.age', {}, 'Age'), formData.age)}
+          {renderViewRow(t('admin.userId', {}, 'User ID'), userId)}
         </div>
       </div>
 
       {formData.role === "EMPLOYER" && (
         <div className="form-section w-full">
-          <h2 className="text-xl font-bold mb-4">Company Details</h2>
+          <h2 className="text-xl font-bold mb-4">{t('employer.companyDetails', {}, 'Company Details')}</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            {renderViewRow("Company Name", formData.companyName)}
-            {renderViewRow("License", formData.companyLicense)}
-            {renderViewRow("Contact Email", formData.contactEmail)}
-            {renderViewRow("Website", formData.website)}
-            {renderViewRow("Branch Name", formData.branchName)}
-            {renderViewRow("Branch City", formData.branchCity)}
-            {renderViewRow("Branch Street", formData.branchStreet)}
+            {renderViewRow(t('employer.companyName', {}, 'Company Name'), formData.companyName)}
+            {renderViewRow(t('employer.license', {}, 'License'), formData.companyLicense)}
+            {renderViewRow(t('employer.contactEmail', {}, 'Contact Email'), formData.contactEmail)}
+            {renderViewRow(t('employer.website', {}, 'Website'), formData.website)}
+            {renderViewRow(t('employer.branchName', {}, 'Branch Name'), formData.branchName)}
+            {renderViewRow(t('employer.city', {}, 'Branch City'), formData.branchCity)}
+            {renderViewRow(t('employer.companyAddress', {}, 'Branch Street'), formData.branchStreet)}
           </div>
         </div>
       )}
 
       {/* Quick Status Actions */}
       <div className="form-section w-full">
-        <h2 className="text-xl font-bold mb-4">Quick Actions</h2>
+        <h2 className="text-xl font-bold mb-4">{t('admin.quickActions', {}, 'Quick Actions')}</h2>
         <div className="flex flex-wrap gap-3">
           {formData.role !== 'ADMIN' && accountStatus !== 'ACTIVE' && (
             <button
@@ -71,7 +74,7 @@ export default function UserViewMode({ formData, accountStatus, userId, handleQu
               style={{ padding: 'var(--spacing-3) var(--spacing-5)', fontSize: 'var(--text-sm)' }}
             >
               <Power size={18} strokeWidth={2.5} />
-              Activate Account
+              {t('admin.activateAccount', {}, 'Activate Account')}
             </button>
           )}
           {formData.role !== 'ADMIN' && accountStatus !== 'INACTIVE' && (
@@ -83,7 +86,7 @@ export default function UserViewMode({ formData, accountStatus, userId, handleQu
               style={{ padding: 'var(--spacing-3) var(--spacing-5)', fontSize: 'var(--text-sm)' }}
             >
               <PowerOff size={18} strokeWidth={2.5} />
-              Deactivate Account
+              {t('admin.deactivateAccount', {}, 'Deactivate Account')}
             </button>
           )}
         </div>

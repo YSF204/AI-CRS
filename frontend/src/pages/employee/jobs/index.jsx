@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
 import DashboardNav from "../../../components/shared/DashboardNav";
+import { useTranslation } from "../../../context/LanguageContext";
 import api from "../../../services/api";
 import useFetch from "../../../hooks/useFetch";
 import ApplyJobModal from "../apply-job";
@@ -20,6 +21,7 @@ const INITIAL_FILTERS = {
 };
 
 export default function Jobs() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState("browse");
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
@@ -143,10 +145,10 @@ export default function Jobs() {
     }).length;
 
     return [
-      { label: "Open", value: jobs.length, color: "var(--color-primary)" },
-      { label: "New (7d)", value: recent, color: "var(--color-warning)" },
+      { label: t("employeeJobs.open", {}, "Open"), value: jobs.length, color: "var(--color-primary)" },
+      { label: t("employeeJobs.new7d", {}, "New (7d)"), value: recent, color: "var(--color-warning)" },
       {
-        label: mode === "browse" ? "Visible" : "Matched",
+        label: mode === "browse" ? t("employeeJobs.visible", {}, "Visible") : t("employeeJobs.matched", {}, "Matched"),
         value:
           mode === "browse"
             ? browseFilteredJobs.length
@@ -154,7 +156,7 @@ export default function Jobs() {
         color: "var(--color-success)",
       },
     ];
-  }, [browseFilteredJobs.length, cvFilteredJobs.length, jobs, mode]);
+  }, [browseFilteredJobs.length, cvFilteredJobs.length, jobs, mode, t]);
 
   const resetSelectionAndPage = () => {
     setSelectedJobId(null);
@@ -190,7 +192,7 @@ export default function Jobs() {
 
   const handleMatchWithCv = async () => {
     if (!selectedCvId) {
-      setCvError("Please select a CV first.");
+      setCvError(t("findJobByCv.unableToLoadCvs", {}, "Please select a CV first."));
       return;
     }
     setCvLoading(true);
@@ -212,7 +214,7 @@ export default function Jobs() {
     } catch (err) {
       setCvError(
         err?.response?.data?.message ||
-          "Unable to match jobs with selected CV.",
+          t("findJobByCv.unableToLoadCvs", {}, "Unable to match jobs with selected CV."),
       );
     } finally {
       setCvLoading(false);
@@ -229,7 +231,7 @@ export default function Jobs() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       const createdCv = uploadRes.data?.data?.cv;
-      if (!createdCv?._id) throw new Error("Uploaded CV could not be saved.");
+      if (!createdCv?._id) throw new Error(t("findJobByCv.unableToLoadCvs", {}, "Uploaded CV could not be saved."));
       await refetchCvs();
       setSelectedCvId(createdCv._id);
       const matchRes = await api.post(
@@ -251,7 +253,7 @@ export default function Jobs() {
       setCvError(
         err?.response?.data?.message ||
           err?.message ||
-          "Unable to upload CV and match jobs.",
+          t("findJobByCv.unableToLoadCvs", {}, "Unable to upload CV and match jobs."),
       );
     } finally {
       setCvUploading(false);

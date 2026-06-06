@@ -6,6 +6,7 @@ import api from "../../../services/api";
 import useFetch from "../../../hooks/useFetch";
 import UserViewMode from "./components/UserViewMode";
 import UserEditForm from "./components/UserEditForm";
+import { useTranslation } from "../../../context/LanguageContext";
 
 const statusClass = (status) => {
   switch (status) {
@@ -43,6 +44,7 @@ export default function UserProfile() {
   const params = useParams();
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const userId = params.id;
   const mode = useMemo(() => {
     if (location.pathname.endsWith("/new")) return "create";
@@ -114,9 +116,9 @@ export default function UserProfile() {
 
   useEffect(() => {
     if (!fetchError) return;
-    setError(fetchError.response?.data?.message || "Unable to load user details.");
+    setError(fetchError.response?.data?.message || t('admin.unableLoadUserDetails', {}, "Unable to load user details."));
     setLoading(false);
-  }, [fetchError]);
+  }, [fetchError, t]);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -187,12 +189,12 @@ export default function UserProfile() {
       navigate("/admin/users", {
         state: {
           message: isCreate
-            ? "User created successfully."
-            : "User updated successfully.",
+            ? t('toast.user_created', {}, "User created successfully.")
+            : t('toast.user_updated', {}, "User updated successfully."),
         },
       });
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to save user.");
+      setError(err.response?.data?.message || t('admin.unableSaveUser', {}, "Unable to save user."));
     } finally {
       setSubmitting(false);
     }
@@ -209,10 +211,10 @@ export default function UserProfile() {
       });
 
       setAccountStatus(newStatus);
-      setMessage(`Account status updated to ${newStatus}`);
+      setMessage(t('admin.accountStatusUpdated', { status: newStatus }, `Account status updated to ${newStatus}`));
       setTimeout(() => setMessage(""), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update account status.");
+      setError(err.response?.data?.message || t('admin.failedUpdateAccountStatus', {}, "Failed to update account status."));
     } finally {
       setSubmitting(false);
     }
@@ -230,21 +232,21 @@ export default function UserProfile() {
             <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
               <div className="min-w-0">
                 <div className="text-xs uppercase tracking-[0.18em] text-(--fg-muted)">
-                  Admin Workspace
+                  {t('admin.adminWorkspace', {}, 'Admin Workspace')}
                 </div>
                 <h1 className="text-3xl font-bold mt-1">
                   {isCreate
-                    ? "Create New User"
+                    ? t('admin.createUser', {}, "Create New User")
                     : isEdit
-                      ? "Edit User"
-                      : "View User Profile"}
+                      ? t('admin.editUser', {}, "Edit User")
+                      : t('admin.userProfile', {}, "View User Profile")}
                 </h1>
                 <p className="text-(--fg-muted) mt-2">
                   {isCreate
-                    ? "Fill in the details for the new account."
+                    ? t('admin.createUserDesc', {}, "Fill in the details for the new account.")
                     : isEdit
-                      ? "Update the existing profile and save changes."
-                      : "Review the user details and use actions to navigate quickly."}
+                      ? t('admin.editUserDesc', {}, "Update the existing profile and save changes.")
+                      : t('admin.viewUserDesc', {}, "Review the user details and use actions to navigate quickly.")}
                 </p>
                 {isView && (
                   <div className="mt-3 flex flex-wrap gap-2 text-xs">
@@ -263,7 +265,7 @@ export default function UserProfile() {
                   className="nm-btn"
                 >
                   <ArrowLeft size={16} />
-                  Back to list
+                  {t('admin.backToList', {}, 'Back to list')}
                 </button>
                 {isView && (
                   <button
@@ -272,7 +274,7 @@ export default function UserProfile() {
                     className="brutal-btn inline-flex items-center gap-2 px-4 py-2.5 bg-[#1e51f6] text-white"
                   >
                     <Edit3 size={16} />
-                    Edit Profile
+                    {t('admin.editProfile', {}, 'Edit Profile')}
                   </button>
                 )}
               </div>
@@ -292,7 +294,7 @@ export default function UserProfile() {
 
           {loading ? (
             <div className="p-8 text-center text-(--fg-muted)">
-              Loading user...
+              {t('admin.loadingUser', {}, 'Loading user...')}
             </div>
           ) : isView ? (
             <UserViewMode

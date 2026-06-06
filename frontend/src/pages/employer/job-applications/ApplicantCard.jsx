@@ -1,7 +1,10 @@
 import React from 'react';
 import { Star } from 'lucide-react';
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function ApplicantCard({ app, onClick, compact, showMatchScore = true }) {
+  const { t } = useTranslation();
+
   if (compact) {
     return (
       <div
@@ -32,7 +35,7 @@ export default function ApplicantCard({ app, onClick, compact, showMatchScore = 
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
           }}>
-            {app.applicantInfo?.fullName || 'Unidentified'}
+            {app.applicantInfo?.fullName || t('employer.unknown', {}, 'Unidentified')}
             {app.isPotential && <Star size={12} fill="var(--nm-warning)" color="var(--nm-warning)" style={{ marginLeft: 6, display: 'inline' }} />}
           </div>
           <div style={{
@@ -87,7 +90,7 @@ export default function ApplicantCard({ app, onClick, compact, showMatchScore = 
         letterSpacing: '-0.02em',
         marginBottom: 8
       }}>
-        {app.applicantInfo?.fullName || "ENTITY UNIDENTIFIED"}
+        {app.applicantInfo?.fullName || t('employer.unknown', {}, "ENTITY UNIDENTIFIED")}
         {app.isPotential && <Star size={20} fill="var(--nm-warning)" color="var(--nm-warning)" style={{ marginLeft: 8, display: 'inline', verticalAlign: 'middle' }} />}
       </div>
       <div style={{
@@ -98,7 +101,7 @@ export default function ApplicantCard({ app, onClick, compact, showMatchScore = 
         textTransform: 'uppercase',
         letterSpacing: '0.05em'
       }}>
-        {app.applicantInfo?.email || "DATA MASKED"}
+        {app.applicantInfo?.email || t('employer.dataMasked', {}, "DATA MASKED")}
       </div>
 
       {showMatchScore && (
@@ -112,7 +115,7 @@ export default function ApplicantCard({ app, onClick, compact, showMatchScore = 
           alignItems: 'center'
         }}>
           <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 13, color: 'var(--nm-text-primary)' }}>
-            MATCH SCORE
+            {t('employer.matchScore', {}, 'MATCH SCORE')}
           </div>
           <div style={{
             fontFamily: 'var(--font-display)',
@@ -134,7 +137,7 @@ export default function ApplicantCard({ app, onClick, compact, showMatchScore = 
         textTransform: 'uppercase',
         letterSpacing: '0.1em'
       }}>
-        INTAKE: {new Date(app.createdAt).toLocaleDateString()}
+        {t('employer.intake', {}, 'INTAKE')}: {new Date(app.createdAt).toLocaleDateString()}
       </div>
     </div>
   );

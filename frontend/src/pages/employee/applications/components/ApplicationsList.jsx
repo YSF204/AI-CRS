@@ -6,6 +6,7 @@ import {
   Building2,
 } from "lucide-react";
 import { SkCard, SkBox, SkText } from "../../../../components/ui/Skeleton";
+import { useTranslation } from "../../../../context/LanguageContext";
 
 export default function ApplicationsList({
   paginatedApps,
@@ -17,6 +18,7 @@ export default function ApplicationsList({
   totalPages,
   onPageChange,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-4">
       {loading ? (
@@ -36,7 +38,7 @@ export default function ApplicationsList({
       ) : paginatedApps.length === 0 ? (
         <div className="jd-panel p-20 text-center bg-[var(--nm-surface)] text-[var(--nm-text-primary)]">
           <ClipboardList size={48} className="mx-auto mb-4 opacity-20" />
-          <p className="font-bold">No applications found.</p>
+          <p className="font-bold">{t("applications.noApplicationsFound")}</p>
         </div>
       ) : (
         paginatedApps.map((app) => {
@@ -56,11 +58,11 @@ export default function ApplicationsList({
               <div className="flex justify-between items-start mb-3">
                 <div className="space-y-1">
                   <h3 className="font-black text-sm uppercase tracking-tight leading-tight text-[var(--nm-text-primary)]">
-                    {app.jobId?.position || "Untitled Position"}
+                    {app.jobId?.position || t("applications.untitledPosition")}
                   </h3>
                   <p className="text-xs font-bold text-[var(--nm-text-secondary)] flex items-center gap-1">
                     <Building2 size={12} />
-                    {app.employerId?.company?.name || "Company"}
+                    {app.employerId?.company?.name || t("employer.company", {}, "Company")}
                   </p>
                 </div>
                 <div className="text-right">
@@ -68,7 +70,7 @@ export default function ApplicationsList({
                     {app.matchPercentage || 0}%
                   </div>
                   <span className="text-[8px] font-black text-[var(--nm-text-tertiary)] uppercase">
-                    Match
+                    {t("applications.match")}
                   </span>
                 </div>
               </div>
@@ -102,7 +104,7 @@ export default function ApplicationsList({
             <ChevronLeft size={16} />
           </button>
           <span className="text-xs font-black text-[var(--nm-text-primary)]">
-            Page {currentPage} of {totalPages}
+            {t("common.page")} {currentPage} {t("common.of")} {totalPages}
           </span>
           <button
             disabled={currentPage === totalPages}

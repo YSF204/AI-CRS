@@ -8,6 +8,7 @@ import api from '../../../services/api';
 import RoleStep    from './components/steps/RoleStep';
 import ProfileStep from './components/steps/ProfileStep';
 import CompanyStep from './components/steps/CompanyStep';
+import { useTranslation } from '../../../context/LanguageContext';
 
 // Steps: [0] Role  [1] Profile(gender+age+phone)  [2?] Company
 const EMPTY_FORM = {
@@ -17,6 +18,7 @@ const EMPTY_FORM = {
 };
 
 export default function GoogleSignupForm({ googleData, onClear }) {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate  = useNavigate();
   const [errorMsg, setErrorMsg] = useState('');
@@ -39,13 +41,13 @@ export default function GoogleSignupForm({ googleData, onClear }) {
     const errs = {};
     const ageNum = parseInt(form.age);
     if (!form.age || isNaN(ageNum) || ageNum < 1 || ageNum > 100) {
-      errs.age = 'Please enter a valid age between 1 and 100';
+      errs.age = t("auth.ageValidationError", {}, "Please enter a valid age between 1 and 100");
     }
     if (form.telephone && !/^\d{10}$/.test(form.telephone)) {
-      errs.telephone = 'Phone number must be exactly 10 digits';
+      errs.telephone = t("auth.phoneLengthError", {}, "Phone number must be exactly 10 digits");
     }
     if (!form.gender) {
-      errs.gender = 'Please select your gender.';
+      errs.gender = t("auth.genderValidationError", {}, "Please select your gender.");
     }
     return errs;
   };
@@ -132,7 +134,7 @@ export default function GoogleSignupForm({ googleData, onClear }) {
       login(token, data.user);
       navigate('/');
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Registration failed. Please try again.');
+      setErrorMsg(err.response?.data?.message || t("auth.registrationFailed", {}, "Registration failed. Please try again."));
     }
   };
 
@@ -167,9 +169,9 @@ export default function GoogleSignupForm({ googleData, onClear }) {
         gap: 12
       }}>
         <div>
-          ✓ Signed in as <strong style={{ color: 'var(--nm-text-primary)' }}>{googleData?.email || 'Google account'}</strong>
+          ✓ {t("auth.signedInAs")} <strong style={{ color: 'var(--nm-text-primary)' }}>{googleData?.email || 'Google account'}</strong>
           <br/>
-          <span style={{ fontSize: 11, opacity: 0.8 }}>Complete your profile to continue.</span>
+          <span style={{ fontSize: 11, opacity: 0.8 }}>{t("auth.completeProfileToContinue")}</span>
         </div>
         <button
           onClick={onClear}
@@ -187,7 +189,7 @@ export default function GoogleSignupForm({ googleData, onClear }) {
             whiteSpace: 'nowrap'
           }}
         >
-          Switch Account
+          {t("auth.switchAccount")}
         </button>
       </div>
 
@@ -196,8 +198,8 @@ export default function GoogleSignupForm({ googleData, onClear }) {
         initialStep={1}
         onFinalStepCompleted={handleComplete}
         onNextAttempt={handleNextAttempt}
-        backButtonText="← Back"
-        nextButtonText="Continue →"
+        backButtonText={`← ${t("auth.back")}`}
+        nextButtonText={`${t("auth.continue")} →`}
         canProceed={canProceed}
         advanceRef={advanceRef}
       >

@@ -1,8 +1,10 @@
 import React from "react";
 import { AlertCircle, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "../../../../context/LanguageContext";
 
 export default function RecentActivity({ priorityWorkflows }) {
+  const { t } = useTranslation();
   if (priorityWorkflows.length === 0) return null;
 
   return (
@@ -10,7 +12,7 @@ export default function RecentActivity({ priorityWorkflows }) {
       <div className="flex items-center gap-3 mb-4">
         <AlertCircle size={20} className="text-[var(--color-warning)]" />
         <h2 className="text-body-lg font-semibold text-[var(--text-primary)]">
-          Priority Actions
+          {t("employeeDashboard.priorityActions")}
         </h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -46,7 +48,7 @@ export default function RecentActivity({ priorityWorkflows }) {
                         className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white rounded"
                         style={{ background: "var(--color-danger)" }}
                       >
-                        High
+                        {t("employeeDashboard.high")}
                       </span>
                     )}
                   </div>
@@ -56,7 +58,7 @@ export default function RecentActivity({ priorityWorkflows }) {
                 </div>
               </div>
               <div className="flex items-center gap-2 text-mono text-xs text-[var(--color-primary)] font-medium">
-                <span>Take Action</span>
+                <span>{t("employeeDashboard.takeAction")}</span>
                 <ChevronRight
                   size={14}
                   className="group-hover:translate-x-1 transition-transform"

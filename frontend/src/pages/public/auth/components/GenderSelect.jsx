@@ -1,4 +1,9 @@
+import React from 'react';
+import { useTranslation } from '../../../../context/LanguageContext';
+
 export default function GenderSelect({ value, onChange }) {
+  const { t } = useTranslation();
+
   return (
     <div style={{ marginBottom: 20 }}>
       <span 
@@ -13,7 +18,7 @@ export default function GenderSelect({ value, onChange }) {
           marginBottom: 8 
         }}
       >
-        Gender
+        {t("auth.gender")}
       </span>
       <div style={{ display: 'flex', gap: 8 }}>
         {['MALE', 'FEMALE'].map((g) => (
@@ -38,7 +43,7 @@ export default function GenderSelect({ value, onChange }) {
               borderRadius: '0px',
             }}
           >
-            {g}
+            {g === 'MALE' ? t("auth.male") : t("auth.female")}
           </button>
         ))}
       </div>

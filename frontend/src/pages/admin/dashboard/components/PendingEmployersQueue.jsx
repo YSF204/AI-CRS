@@ -1,7 +1,10 @@
 import React from 'react';
 import { Clock, ShieldCheck } from 'lucide-react';
+import { useTranslation } from '../../../../context/LanguageContext';
 
 export default function PendingEmployersQueue({ pendingEmployers, palette, navigate }) {
+  const { t } = useTranslation();
+
   return (
     <div className="nm-card" style={{
       background: 'var(--nm-surface)',
@@ -25,7 +28,7 @@ export default function PendingEmployersQueue({ pendingEmployers, palette, navig
             color: 'var(--nm-text-secondary)',
             marginBottom: 'var(--spacing-2)'
           }}>
-            Approval Queue
+            {t('admin.approvalQueue')}
           </div>
           <h2 style={{
             fontFamily: 'var(--font-display)',
@@ -36,7 +39,7 @@ export default function PendingEmployersQueue({ pendingEmployers, palette, navig
             margin: 0,
             color: 'var(--nm-text-primary)'
           }}>
-            Pending Employers
+            {t('admin.pendingEmployers')}
           </h2>
         </div>
         <div
@@ -73,7 +76,7 @@ export default function PendingEmployersQueue({ pendingEmployers, palette, navig
             fontSize: 'var(--text-sm)',
             margin: 0
           }}>
-            No pending employer approvals
+            {t('admin.noPending')}
           </p>
         </div>
       ) : (
@@ -135,7 +138,7 @@ export default function PendingEmployersQueue({ pendingEmployers, palette, navig
                     overflow: 'hidden',
                     textOverflow: 'ellipsis'
                   }}>
-                    {employer?.company?.name || 'Company name pending'}
+                    {employer?.company?.name || t('admin.companyPending')}
                   </div>
                 </div>
               </div>
@@ -153,7 +156,7 @@ export default function PendingEmployersQueue({ pendingEmployers, palette, navig
                     fontSize: 'var(--text-xs)'
                   }}
                 >
-                  Review
+                  {t('admin.review')}
                 </button>
               </div>
             </div>
@@ -175,7 +178,7 @@ export default function PendingEmployersQueue({ pendingEmployers, palette, navig
             fontSize: 'var(--text-sm)',
             color: 'var(--nm-text-secondary)'
           }}>
-            {pendingEmployers.total} total pending
+            {t('admin.totalPending', { count: pendingEmployers.total })}
           </span>
           <button
             onClick={() => navigate('/admin/users')}
@@ -185,7 +188,7 @@ export default function PendingEmployersQueue({ pendingEmployers, palette, navig
               fontSize: 'var(--text-sm)'
             }}
           >
-            View All
+            {t('admin.viewAll')}
           </button>
         </div>
       )}

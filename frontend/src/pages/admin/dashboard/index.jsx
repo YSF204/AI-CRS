@@ -7,9 +7,11 @@ import StatCard from './components/StatCard';
 import ChartPanel from './components/ChartPanel';
 import PendingEmployersQueue from './components/PendingEmployersQueue';
 import { SkStatCard, SkCard } from '../../../components/ui/Skeleton';
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function AdminDash() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const {
     stats, loading, error, palette, summaryCards,
     volumeChartData, healthChartData, trendChartData,
@@ -70,7 +72,7 @@ export default function AdminDash() {
                 margin: '0 0 var(--spacing-4) 0',
                 color: 'var(--nm-text-primary)'
               }}>
-                Analytics unavailable
+                {t('admin.analyticsUnavailable')}
               </h2>
               <p style={{
                 fontFamily: 'var(--font-body)',
@@ -105,9 +107,9 @@ export default function AdminDash() {
                 <style>{`@media (min-width: 1280px) { .charts-grid { grid-template-columns: 1.5fr 0.9fr; } }`}</style>
                 <div className="charts-grid" style={{ display: 'grid', gap: 'var(--spacing-6)' }}>
                   <ChartPanel
-                    eyebrow="Platform Volumes"
-                    title="Core entity counts"
-                    note="Pulled from current database totals"
+                    eyebrow={t('admin.platformVolumes')}
+                    title={t('admin.coreCounts')}
+                    note={t('admin.dbTotals')}
                   >
                     <div style={{ height: '360px' }}>
                       <Bar data={volumeChartData ?? EMPTY_BAR_DATA} options={volumeChartOptions} />
@@ -115,9 +117,9 @@ export default function AdminDash() {
                   </ChartPanel>
 
                   <ChartPanel
-                    eyebrow="Account Health"
-                    title="User status distribution"
-                    note="Active vs inactive vs pending approval"
+                    eyebrow={t('admin.accountHealth')}
+                    title={t('admin.statusDistribution')}
+                    note={t('admin.statusNote')}
                   >
                     <div style={{ height: '360px' }}>
                       <Doughnut data={healthChartData ?? EMPTY_DOUGHNUT_DATA} options={healthChartOptions} />
@@ -127,9 +129,9 @@ export default function AdminDash() {
 
                 {/* Trend Chart */}
                 <ChartPanel
-                  eyebrow="Growth Trends"
-                  title="7-day vs 30-day activity"
-                  note="Comparing recent platform activity"
+                  eyebrow={t('admin.growthTrends')}
+                  title={t('admin.recentActivity')}
+                  note={t('admin.activityNote')}
                   style={{ gridColumn: '1 / -1' }}
                 >
                   <div style={{ height: '360px' }}>

@@ -1,5 +1,6 @@
 import { Step } from "../Stepper";
 import AuthInput from "../AuthInput";
+import { useTranslation } from "../../../../../context/LanguageContext";
 
 const heading = {
   fontFamily: "var(--font-display)",
@@ -12,11 +13,12 @@ const heading = {
 };
 
 export default function PersonalStep({ field, onEmailDuplicateStatus }) {
+  const { t } = useTranslation();
   const emailFieldProps = field("email");
 
   return (
     <Step>
-      <h2 style={heading}>Personal Info</h2>
+      <h2 style={heading}>{t("auth.personalInfo")}</h2>
       <div
         style={{
           display: "grid",
@@ -25,21 +27,21 @@ export default function PersonalStep({ field, onEmailDuplicateStatus }) {
         }}
       >
         <AuthInput
-          label="First Name"
-          placeholder="Yousef"
+          label={t("auth.firstName")}
+          placeholder={t("auth.firstNamePlaceholder", {}, "First name")}
           required
           {...field("firstName")}
         />
         <AuthInput
-          label="Last Name"
-          placeholder="AL Bakri"
+          label={t("auth.lastName")}
+          placeholder={t("auth.lastNamePlaceholder", {}, "Last name")}
           required
           {...field("lastName")}
         />
       </div>
       <div style={{ position: "relative" }}>
         <AuthInput
-          label="Email Address"
+          label={t("auth.email")}
           type="email"
           placeholder="you@example.com"
           required

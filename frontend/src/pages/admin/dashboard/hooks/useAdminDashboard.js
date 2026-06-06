@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTheme } from '../../../../context/ThemeContext';
+import { useTranslation } from '../../../../context/LanguageContext';
 import api from '../../../../services/api';
 import {
   ArcElement,
@@ -31,6 +32,7 @@ const EMPTY_LINE_DATA = { labels: [], datasets: [] };
 
 export default function useAdminDashboard() {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const [stats, setStats] = useState(() => {
     if (typeof window === "undefined") return null;
     try {
@@ -187,9 +189,9 @@ export default function useAdminDashboard() {
 
     return [
       {
-        label: "Total Users",
+        label: t("admin.totalUsers"),
         value: stats.users.total,
-        detail: `${stats.users.recentRegistrations} joined in the last 7 days`,
+        detail: `${stats.users.recentRegistrations} ${t("admin.joinedRecent")}`,
         icon: Users,
         tone: {
           surface: palette.blue100,
@@ -198,9 +200,9 @@ export default function useAdminDashboard() {
         },
       },
       {
-        label: "Open Jobs",
+        label: t("employer.openJobs"),
         value: stats.jobs.open,
-        detail: `${stats.jobs.recentlyPosted} posted in the last 7 days`,
+        detail: `${stats.jobs.recentlyPosted} ${t("admin.postedRecent")}`,
         icon: BriefcaseBusiness,
         tone: {
           surface: palette.blue50,
@@ -209,9 +211,9 @@ export default function useAdminDashboard() {
         },
       },
       {
-        label: "Stored CVs",
+        label: t("admin.storedCvs"),
         value: stats.cvs.total,
-        detail: "Live resumes currently available in the system",
+        detail: t("admin.cvsAvailable"),
         icon: FileText,
         tone: {
           surface: palette.blue100,
@@ -220,9 +222,9 @@ export default function useAdminDashboard() {
         },
       },
       {
-        label: "Employer Profiles",
+        label: t("admin.employerProfiles"),
         value: stats.employers.total,
-        detail: `${stats.users.pendingApproval} employer approvals are still pending`,
+        detail: `${stats.users.pendingApproval} ${t("admin.approvalsPending")}`,
         icon: ShieldCheck,
         tone: {
           surface: palette.blue50,
@@ -231,24 +233,24 @@ export default function useAdminDashboard() {
         },
       },
     ];
-  }, [palette, stats]);
+  }, [palette, stats, t]);
 
   const volumeChartData = useMemo(() => {
     if (!stats) return null;
 
     return {
       labels: [
-        "Users",
-        "Employees",
-        "Employers",
-        "Admins",
-        "CVs",
-        "Jobs",
-        "Open Jobs",
+        t("admin.usersLabel"),
+        t("admin.employeesLabel"),
+        t("admin.employersLabel"),
+        t("admin.adminsLabel"),
+        t("admin.cvsLabel"),
+        t("admin.jobsLabel"),
+        t("admin.openJobsLabel"),
       ],
       datasets: [
         {
-          label: "System totals",
+          label: t("admin.coreCounts"),
           data: [
             stats.users.total,
             stats.users.employees,
@@ -281,10 +283,14 @@ export default function useAdminDashboard() {
     if (!stats) return null;
 
     return {
-      labels: ["Active", "Inactive", "Pending Approval"],
+      labels: [
+        t("admin.activeLabel"),
+        t("admin.inactiveLabel"),
+        t("admin.pendingLabel"),
+      ],
       datasets: [
         {
-          label: "Accounts",
+          label: t("admin.accountHealth"),
           data: [
             stats.users.active,
             stats.users.inactive,
@@ -303,10 +309,17 @@ export default function useAdminDashboard() {
     if (!trends) return null;
 
     return {
-      labels: ["Users", "Employees", "Employers", "CVs", "Jobs", "Open Jobs"],
+      labels: [
+        t("admin.usersLabel"),
+        t("admin.employeesLabel"),
+        t("admin.employersLabel"),
+        t("admin.cvsLabel"),
+        t("admin.jobsLabel"),
+        t("admin.openJobsLabel"),
+      ],
       datasets: [
         {
-          label: "7 Days",
+          label: t("admin.sevenDays"),
           data: [
             trends.sevenDays.users,
             trends.sevenDays.employees,
@@ -326,7 +339,7 @@ export default function useAdminDashboard() {
           pointHoverRadius: 8,
         },
         {
-          label: "30 Days",
+          label: t("admin.thirtyDays"),
           data: [
             trends.thirtyDays.users,
             trends.thirtyDays.employees,

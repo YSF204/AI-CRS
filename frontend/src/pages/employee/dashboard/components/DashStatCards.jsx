@@ -1,13 +1,15 @@
 import React from "react";
 import { TrendingUp } from "lucide-react";
+import { useTranslation } from "../../../../context/LanguageContext";
 
 export default function DashStatCards({ kpiData }) {
+  const { t } = useTranslation();
   return (
     <section className="mb-8">
       <div className="flex items-center gap-3 mb-4">
         <TrendingUp size={20} className="text-[var(--color-primary)]" />
         <h2 className="text-body-lg font-semibold text-[var(--text-primary)]">
-          Your Progress
+          {t("employeeDashboard.yourProgress")}
         </h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "../../../../context/LanguageContext";
 
 export default function Toast({ toast }) {
   const [isVisible, setIsVisible] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!toast) {
@@ -48,7 +50,7 @@ export default function Toast({ toast }) {
         animation: "toast-slide-in 350ms cubic-bezier(0.175, 0.885, 0.32, 1.275)",
       }}
     >
-      <span style={{ flex: 1 }}>{toast.msg}</span>
+      <span style={{ flex: 1 }}>{t(toast.msg)}</span>
       <style>{`
         @keyframes toast-slide-in {
           from {

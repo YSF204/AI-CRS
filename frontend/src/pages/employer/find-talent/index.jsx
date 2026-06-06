@@ -5,6 +5,7 @@ import api from '../../../services/api';
 import SearchForm from './components/SearchForm';
 import ResultsOverlay from './components/ResultsOverlay';
 import SearchHistory from './components/SearchHistory';
+import { useTranslation } from '../../../context/LanguageContext';
 
 const EMPTY_FORM = {
   position: '',
@@ -17,6 +18,7 @@ const EMPTY_FORM = {
 };
 
 export default function FindTalent() {
+  const { t } = useTranslation();
   const [form, setForm] = useState(EMPTY_FORM);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -63,9 +65,9 @@ export default function FindTalent() {
       setResults(res.data.data.candidates);
     } catch (err) {
       if (err.response?.status === 404) {
-        setError(err.response?.data?.message || 'No candidates were found in the system to match against.');
+        setError(err.response?.data?.message || t('employer.noCandidatesFoundError', {}, 'No candidates were found in the system to match against.'));
       } else {
-        setError(err.response?.data?.message || 'Failed to analyze candidates. The AI engine may be overloaded.');
+        setError(err.response?.data?.message || t('employer.failedAnalyzeCandidates', {}, 'Failed to analyze candidates. The AI engine may be overloaded.'));
       }
     } finally {
       setLoading(false);
@@ -117,7 +119,7 @@ export default function FindTalent() {
                transform: activeTab === 'search' ? 'translate(-2px, -2px)' : 'none'
              }}
            >
-             <Search size={20} strokeWidth={3} /> TALENT SEARCH
+             <Search size={20} strokeWidth={3} /> {t('employer.findTalent', {}, 'TALENT SEARCH')}
            </button>
            <button
              onClick={fetchHistory}
@@ -141,7 +143,7 @@ export default function FindTalent() {
                transform: activeTab === 'history' ? 'translate(-2px, -2px)' : 'none'
              }}
            >
-             <Clock size={20} strokeWidth={3} /> SEARCH HISTORY
+             <Clock size={20} strokeWidth={3} /> {t('employer.pastSearches', {}, 'SEARCH HISTORY')}
            </button>
         </div>
 

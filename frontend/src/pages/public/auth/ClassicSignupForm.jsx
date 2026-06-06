@@ -12,6 +12,7 @@ import PersonalStep from "./components/steps/PersonalStep";
 import ProfileStep from "./components/steps/ProfileStep";
 import SecurityStep from "./components/steps/SecurityStep";
 import CompanyStep from "./components/steps/CompanyStep";
+import { useTranslation } from "../../../context/LanguageContext";
 
 // Steps: [0] Role  [1] Personal  [2] Profile  [3] Security  [4?] Company
 const STEP_FIELDS = [
@@ -49,6 +50,7 @@ const EMPTY_FORM = {
 
 export default function ClassicSignupForm() {
   const { login } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [errorMsg, setErrorMsg] = useState("");
   const [verificationEmail, setVerificationEmail] = useState(null);
@@ -160,7 +162,7 @@ export default function ClassicSignupForm() {
     try {
       const parsed = signupSchema.safeParse(validationData);
       if (!parsed.success) {
-        setErrorMsg(parsed.error.issues[0]?.message || "Validation failed");
+        setErrorMsg(parsed.error.issues[0]?.message || t("auth.validationFailed"));
         return;
       }
 
@@ -219,7 +221,7 @@ export default function ClassicSignupForm() {
         return;
       }
       setErrorMsg(
-        responseData?.message || "Registration failed. Please try again.",
+        responseData?.message || t("auth.registrationFailed"),
       );
     }
   };
@@ -258,8 +260,8 @@ export default function ClassicSignupForm() {
             initialStep={1}
             onFinalStepCompleted={handleComplete}
             onNextAttempt={handleNextAttempt}
-            backButtonText="← Back"
-            nextButtonText="Continue →"
+            backButtonText={`← ${t("auth.back")}`}
+            nextButtonText={`${t("auth.continue")} →`}
             canProceed={canProceed}
             advanceRef={advanceRef}
           >

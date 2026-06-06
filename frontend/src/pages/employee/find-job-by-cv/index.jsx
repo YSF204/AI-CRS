@@ -5,11 +5,13 @@ import DashboardNav from "../../../components/shared/DashboardNav";
 import ActionButton from "../../../components/shared/ActionButton";
 import api from "../../../services/api";
 import useFetch from "../../../hooks/useFetch";
+import { useTranslation } from "../../../context/LanguageContext";
 import CVSelector from "./components/CVSelector";
 import MatchResults from "./components/MatchResults";
 
 export default function FindJobByCV() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [selectedCvId, setSelectedCvId] = useState("");
   const [jobs, setJobs] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -56,9 +58,9 @@ export default function FindJobByCV() {
         return {
           key: id || index,
           id,
-          title: item.position || item.jobTitle || item.title || "Matched Job",
-          location: item.workSite || item.location || "Location not available",
-          company: item.company || item.companyName || "Company",
+          title: item.position || item.jobTitle || item.title || t("employeeJobs.untitledCv"),
+          location: item.workSite || item.location || t("employeeJobs.locationNotAvailable", {}, "Location not available"),
+          company: item.company || item.companyName || t("employer.company", {}, "Company"),
           match: Number.isFinite(Number(score)) ? Number(score) : null,
           reasoning: item.reasoning || item.recommendation_note,
           skillsMatched: item.skillsMatched || item.match_reasons || [],
@@ -66,35 +68,35 @@ export default function FindJobByCV() {
         };
       })
       .sort((a, b) => (b.match ?? -1) - (a.match ?? -1));
-  }, [jobs]);
+  }, [jobs, t]);
 
   const stats = useMemo(() => {
     const safeCvs = Array.isArray(cvs) ? cvs : [];
     return [
       {
-        label: "Saved CVs",
+        label: t("employee.savedCvs"),
         value: safeCvs.length,
         color: "var(--color-primary)",
       },
       {
-        label: "Found Jobs",
+        label: t("findJobByCv.foundJobs", {}, "Found Jobs"),
         value: normalizedJobs.length,
         color: "var(--color-success)",
       },
       {
-        label: "Results",
-        value: jobs ? `${normalizedJobs.length} jobs` : "-",
+        label: t("findJobByCv.results"),
+        value: jobs ? t("employeeJobs.jobsFound", { count: normalizedJobs.length }) : "-",
         color: "var(--color-warning)",
       },
     ];
-  }, [cvs, normalizedJobs.length, jobs]);
+  }, [cvs, normalizedJobs.length, jobs, t]);
 
   const setPageError = (err, fallback) =>
     setError(err?.response?.data?.message || err?.message || fallback);
 
   const handleFindWithExisting = async () => {
     if (!selectedCvId) {
-      setError("Please select a CV first.");
+      setError(t("findJobByCv.selectACv"));
       return;
     }
 
@@ -107,7 +109,7 @@ export default function FindJobByCV() {
       setJobs(match || []);
       setLastAction("saved");
     } catch (err) {
-      setPageError(err, "Unable to find jobs with the selected CV.");
+      setPageError(err, t("findJobByCv.unableToFindJobs", {}, "Unable to find jobs with the selected CV."));
     } finally {
       setLoading(false);
     }
@@ -118,7 +120,7 @@ export default function FindJobByCV() {
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith(".pdf")) {
-      setError("Upload a PDF file only.");
+      setError(t("findJobByCv.uploadPdfOnly", {}, "Upload a PDF file only."));
       return;
     }
 
@@ -135,7 +137,7 @@ export default function FindJobByCV() {
 
       const createdCv = uploadRes.data?.data?.cv;
       if (!createdCv?._id) {
-        throw new Error("Uploaded CV could not be saved.");
+        throw new Error(t("findJobByCv.uploadedCvNotSaved", {}, "Uploaded CV could not be saved."));
       }
 
       await refreshCvs();
@@ -146,7 +148,7 @@ export default function FindJobByCV() {
       setJobs(match || []);
       setLastAction("upload");
     } catch (err) {
-      setPageError(err, "Unable to upload the PDF and search jobs.");
+      setPageError(err, t("findJobByCv.unableToUploadAndSearch", {}, "Unable to upload the PDF and search jobs."));
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -178,11 +180,10 @@ export default function FindJobByCV() {
             <div>
               <h1 className="text-3xl font-bold font-['Space_Grotesk'] uppercase tracking-tight flex items-center gap-3">
                 <FileText size={28} className="text-(--yellow)" />
-                Find Jobs By CV
+                {t("findJobByCv.findJobsByCv")}
               </h1>
               <p className="font-mono text-sm text-(--fg-muted) mt-1 max-w-2xl">
-                A simpler flow: pick a saved CV or upload a PDF, then get
-                matched jobs instantly.
+                {t("findJobByCv.simplerFlow")}
               </p>
             </div>
             <ActionButton
@@ -191,7 +192,7 @@ export default function FindJobByCV() {
               className="px-6 py-3 font-bold flex items-center gap-2"
               onClick={() => navigate("/employee/jobs")}
             >
-              Back to all jobs
+              {t("findJobByCv.backToAllJobs")}
             </ActionButton>
           </div>
         </div>
@@ -201,7 +202,7 @@ export default function FindJobByCV() {
             {error ||
               cvsError?.response?.data?.message ||
               cvsError?.message ||
-              "Unable to load your CVs."}
+              t("findJobByCv.unableToLoadCvs")}
           </div>
         )}
 

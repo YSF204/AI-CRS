@@ -10,16 +10,24 @@ import {
 import DashboardNav from "../../components/shared/DashboardNav";
 import api from "../../services/api";
 import useFetch from "../../hooks/useFetch";
+import { useTranslation } from "../../context/LanguageContext";
 import { getRelativeTime } from "../../utils/dateFormatter";
 import ApplyJobModal from "./apply-job";
 import { SkCard, SkBox, SkText } from "../../components/ui/Skeleton";
 
-const toRoleType = (value) => {
-  if (value === "FULL_TIME") return "Full-time";
-  if (value === "PART_TIME") return "Part-time";
-  if (value === "CONTRACT") return "Contract";
-  if (value === "INTERNSHIP") return "Internship";
-  return value || "Open";
+const toRoleType = (value, t) => {
+  if (value === "FULL_TIME") return t("common.fullTime");
+  if (value === "PART_TIME") return t("common.partTime");
+  if (value === "CONTRACT") return t("common.contract");
+  if (value === "INTERNSHIP") return t("common.internship");
+  return value || t("common.open", {}, "Open");
+};
+
+const toWorkSite = (value, t) => {
+  if (value === "REMOTE") return t("common.remote");
+  if (value === "HYBRID") return t("common.hybrid");
+  if (value === "ON_SITE") return t("common.onsite");
+  return value?.replace("_", " ") || t("employeeJobs.locationNotAvailable", {}, "Location not available");
 };
 
 const openExternalSource = (url) => {
@@ -30,6 +38,7 @@ const openExternalSource = (url) => {
 export default function JobDetails() {
   const { jobId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [applyJobId, setApplyJobId] = useState(null);
 
   const {
@@ -83,13 +92,13 @@ export default function JobDetails() {
         <div className="dashboard-shell py-6">
           <div className="brutal-card p-8 bg-(--card-bg) text-center">
             <p className="font-mono text-sm text-(--coral)">
-              {error?.response?.data?.message || "Job not found"}
+              {error?.response?.data?.message || t("applyJob.jobNotFound")}
             </p>
             <button
               onClick={() => navigate(-1)}
               className="brutal-btn px-4 py-2 mt-4"
             >
-              Go Back
+              {t("common.back")}
             </button>
           </div>
         </div>
@@ -110,7 +119,7 @@ export default function JobDetails() {
             className="brutal-btn px-4 py-2 mb-4 flex items-center gap-2"
           >
             <ChevronLeft size={16} />
-            Back
+            {t("common.back")}
           </button>
         </div>
 
@@ -128,7 +137,7 @@ export default function JobDetails() {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <span className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold font-mono border-2 border-black bg-(--yellow) text-black uppercase">
-                  {toRoleType(job.workDuration)}
+                  {toRoleType(job.workDuration, t)}
                 </span>
               </div>
             </div>
@@ -137,7 +146,7 @@ export default function JobDetails() {
               <div className="flex items-center gap-2">
                 <MapPin size={16} className="text-(--fg-muted)" />
                 <span>
-                  {job.workSite?.replace("_", " ") || "Location not available"}
+                  {toWorkSite(job.workSite, t)}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -146,7 +155,7 @@ export default function JobDetails() {
               </div>
               <div className="flex items-center gap-2">
                 <DollarSign size={16} className="text-(--fg-muted)" />
-                <span>${job.salary?.toLocaleString() || "Not specified"}</span>
+                <span>${job.salary?.toLocaleString() || t("common.notSpecified", {}, "Not specified")}</span>
               </div>
             </div>
           </div>
@@ -154,7 +163,7 @@ export default function JobDetails() {
           {/* Description */}
           <div className="mb-8">
             <h2 className="font-['Space_Grotesk'] font-bold text-xl uppercase tracking-wider mb-4 text-(--fg)">
-              Job Description
+              {t("employer.jobDescription")}
             </h2>
             <p className="font-mono text-sm leading-relaxed text-(--fg-muted)">
               {job.description}
@@ -164,22 +173,22 @@ export default function JobDetails() {
           {/* Requirements */}
           <div className="mb-8">
             <h2 className="font-['Space_Grotesk'] font-bold text-xl uppercase tracking-wider mb-4 text-(--fg)">
-              Requirements
+              {t("employeeJobs.requirements")}
             </h2>
             <div className="space-y-4">
               <div>
                 <p className="font-mono text-sm font-bold text-(--fg-muted) mb-2">
-                  Years of Experience
+                  {t("employer.yearsOfExperience")}
                 </p>
                 <p className="font-mono text-sm text-(--fg)">
-                  {job.yearsOfExperience || 0}+ years
+                  {t("employeeJobs.yearsPlus", { years: job.yearsOfExperience || 0 })}
                 </p>
               </div>
 
               {job.technicalSkills?.length > 0 && (
                 <div>
                   <p className="font-mono text-sm font-bold text-(--fg-muted) mb-2">
-                    Technical Skills
+                    {t("employeeJobs.technicalSkills")}
                   </p>
                   <div className="flex flex-wrap gap-x-3 gap-y-1">
                     {job.technicalSkills.map((skill, i) => (
@@ -197,7 +206,7 @@ export default function JobDetails() {
               {job.softSkills?.length > 0 && (
                 <div>
                   <p className="font-mono text-sm font-bold text-(--fg-muted) mb-2">
-                    Soft Skills
+                    {t("employeeJobs.softSkills")}
                   </p>
                   <div className="flex flex-wrap gap-x-3 gap-y-1">
                     {job.softSkills.map((skill, i) => (
@@ -215,7 +224,7 @@ export default function JobDetails() {
               {job.language?.length > 0 && (
                 <div>
                   <p className="font-mono text-sm font-bold text-(--fg-muted) mb-2">
-                    Languages
+                    {t("common.languages", {}, "Languages")}
                   </p>
                   <div className="flex flex-wrap gap-x-3 gap-y-1">
                     {job.language.map((lang, i) => (
@@ -246,7 +255,7 @@ export default function JobDetails() {
               style={{ background: "var(--yellow)", color: "#0a0a0a" }}
             >
               <Briefcase size={20} />
-              {job.externalUrl ? "Open Source" : "Apply Now"}
+              {job.externalUrl ? t("employeeJobs.openSite") : t("employeeJobs.applyNow")}
             </button>
           </div>
         </div>

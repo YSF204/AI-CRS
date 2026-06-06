@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Sun, Moon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
+import { useTranslation } from '../../../context/LanguageContext';
 import LoginForm from './LoginForm';
 import SignupForm from './SignupForm';
 
@@ -9,6 +10,7 @@ export default function AuthPage() {
   const [mode, setMode] = useState('login');
   const [googleData, setGoogleData] = useState(null);
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -142,12 +144,11 @@ export default function AuthPage() {
                 transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
               }}
             >
-              {m}
+              {m === 'login' ? t('auth.loginTab') : t('auth.signupTab')}
             </button>
           ))}
         </div>
 
-        {/* Title */}
         <h1
           style={{
             fontFamily: 'var(--font-display)',
@@ -160,7 +161,7 @@ export default function AuthPage() {
             marginBottom: '0.75rem',
           }}
         >
-          {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+          {mode === 'login' ? t('auth.welcomeBack') : t('auth.createAccount')}
         </h1>
         <p
           style={{
@@ -172,8 +173,8 @@ export default function AuthPage() {
           }}
         >
           {mode === 'login'
-            ? 'Access your intelligent career dashboard.'
-            : "Join the platform building the future of recruitment."}
+            ? t('auth.loginDesc')
+            : t('auth.signupDesc')}
         </p>
 
         {/* Form content */}

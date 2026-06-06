@@ -6,10 +6,12 @@ import { useTheme } from '../../../context/ThemeContext';
 import api from '../../../services/api';
 import { toApiAssetUrl } from '../../../utils/apiConfig';
 import AdminProfileForm from './ProfileForm';
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function AdminProfile() {
     const { user, updateUserState, refreshUser } = useAuth();
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const fileInputRef = useRef(null);
     const [uploading, setUploading] = useState(false);
     const [form, setForm] = useState({
@@ -100,7 +102,7 @@ export default function AdminProfile() {
                 updateUserState(res.data.data.user);
             }
         } catch (err) {
-            setError('Failed to upload profile picture.');
+            setError(t('admin.failedUploadProfilePic', {}, 'Failed to upload profile picture.'));
         } finally {
             setUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';
@@ -133,9 +135,9 @@ export default function AdminProfile() {
 
             const res = await api.patch(`/admin/users/${targetId}`, payload);
             updateUserState(res.data.data.user);
-            setMessage('Account details updated successfully.');
+            setMessage(t('toast.user_updated', {}, 'Account details updated successfully.'));
         } catch (err) {
-            setError(err.response?.data?.message || 'Unable to update your admin profile.');
+            setError(err.response?.data?.message || t('admin.unableUpdateProfile', {}, 'Unable to update your admin profile.'));
             // Revert
             updateUserState(originalUser);
         } finally {
@@ -191,7 +193,7 @@ export default function AdminProfile() {
                                     borderRadius: '0px',
                                     cursor: uploading ? 'wait' : 'pointer',
                                 }}
-                                title="Change photo"
+                                title={t('admin.changePhoto', {}, 'Change photo')}
                             >
                                 <Camera size={14} />
                             </button>
@@ -205,12 +207,11 @@ export default function AdminProfile() {
                         </div>
                         <div>
                             <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-(--fg-muted)">
-                                Admin Profile
+                                {t('admin.adminProfile', {}, 'Admin Profile')}
                             </div>
                             <h1 className="mt-2 text-4xl font-black uppercase leading-none text-(--fg)">
-                                Account Details
+                                {t('admin.accountDetails', {}, 'Account Details')}
                             </h1>
-
                         </div>
                     </div>
                 </div>

@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Mail, ArrowLeft, Loader } from "lucide-react";
 import api from "../../../services/api";
+import { useTranslation } from "../../../context/LanguageContext";
 
 export default function CheckYourEmailPage({ email, onBackClick }) {
+  const { t } = useTranslation();
   const [resendLoading, setResendLoading] = useState(false);
   const [resendMessage, setResendMessage] = useState("");
   const [resendError, setResendError] = useState("");
@@ -15,12 +17,12 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
     try {
       await api.post("/auth/resend-verification-email", { email });
       setResendMessage(
-        "If your account still needs verification, a fresh email is on the way.",
+        t("publicAuth.freshEmailSent", {}, "If your account still needs verification, a fresh email is on the way.")
       );
     } catch (err) {
       setResendError(
         err.response?.data?.message ||
-          "Failed to resend email. Please try again.",
+          t("publicAuth.failedResend", {}, "Failed to resend email. Please try again.")
       );
     } finally {
       setResendLoading(false);
@@ -74,7 +76,7 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
               letterSpacing: "-0.03em",
             }}
           >
-            Check Your Email
+            {t("publicAuth.checkYourEmail")}
           </h1>
 
           <p
@@ -87,7 +89,7 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
               lineHeight: 1.6,
             }}
           >
-            We&apos;ve sent a verification link to:
+            {t("publicAuth.verificationLinkSent")}
           </p>
 
           <p
@@ -179,7 +181,7 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
               {resendLoading && (
                 <Loader size={18} className="animate-spin" strokeWidth={2.5} />
               )}
-              {resendLoading ? "Sending..." : "Resend Verification Email"}
+              {resendLoading ? t("publicAuth.sending") : t("publicAuth.resendVerification")}
             </button>
 
             <button
@@ -202,7 +204,7 @@ export default function CheckYourEmailPage({ email, onBackClick }) {
               }}
             >
               <ArrowLeft size={18} strokeWidth={2.5} />
-              Back to Login
+              {t("publicAuth.backToLogin")}
             </button>
           </div>
         </div>

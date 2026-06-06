@@ -7,6 +7,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import ActionButton from "../../../../components/shared/ActionButton";
+import { useTranslation } from "../../../../context/LanguageContext";
 
 function renderResults({
   jobs,
@@ -14,6 +15,7 @@ function renderResults({
   onGoToJob,
   onUploadClick,
   onBrowseJobs,
+  t,
 }) {
   if (!jobs) {
     return (
@@ -24,11 +26,10 @@ function renderResults({
           </div>
           <div>
             <p className="font-['Space_Grotesk'] font-bold uppercase text-lg mb-1">
-              Choose One, Then Search
+              {t("findJobByCv.chooseOneThenSearch")}
             </p>
             <p className="font-mono text-sm text-(--fg-muted)">
-              Pick a saved CV or upload a PDF. You do not need to switch
-              modes.
+              {t("findJobByCv.pickSavedOrUpload")}
             </p>
           </div>
         </div>
@@ -43,11 +44,10 @@ function renderResults({
           <AlertTriangle className="text-(--coral) shrink-0" />
           <div>
             <p className="font-['Space_Grotesk'] font-bold uppercase text-lg mb-1">
-              No Strong Matches Right Now
+              {t("findJobByCv.noStrongMatches")}
             </p>
             <p className="font-mono text-sm text-(--fg-muted)">
-              Try another CV or upload a more complete one. You can also
-              browse all open jobs.
+              {t("findJobByCv.tryAnotherOrUpload")}
             </p>
             <div className="flex flex-wrap gap-3 mt-4">
               <ActionButton
@@ -56,7 +56,7 @@ function renderResults({
                 className="px-4 py-2 font-bold"
                 onClick={onUploadClick}
               >
-                Upload another PDF
+                {t("findJobByCv.uploadAnotherPdf")}
               </ActionButton>
               <ActionButton
                 type="button"
@@ -64,7 +64,7 @@ function renderResults({
                 className="px-4 py-2 font-bold"
                 onClick={onBrowseJobs}
               >
-                Browse all jobs
+                {t("findJobByCv.browseAllJobs")}
               </ActionButton>
             </div>
           </div>
@@ -102,7 +102,7 @@ function renderResults({
                   color: "var(--color-text-primary)",
                 }}
               >
-                {item.match}% Match
+                {t("employeeJobs.matchPercent", { percent: item.match })}
               </div>
             )}
           </div>
@@ -116,7 +116,7 @@ function renderResults({
           {item.skillsMatched?.length > 0 && (
             <div className="mb-3">
               <p className="font-bold uppercase text-xs tracking-[0.2em] text-(--fg-muted)">
-                Matched Skills
+                {t("findJobByCv.matchedSkills")}
               </p>
               <p className="font-mono text-sm">
                 {item.skillsMatched.join(", ")}
@@ -127,7 +127,7 @@ function renderResults({
           {item.skillsMissing?.length > 0 && (
             <div className="mb-4">
               <p className="font-bold uppercase text-xs tracking-[0.2em] text-(--fg-muted)">
-                Missing Skills
+                {t("findJobByCv.missingSkills")}
               </p>
               <p className="font-mono text-sm text-(--coral)">
                 {item.skillsMissing.join(", ")}
@@ -141,7 +141,7 @@ function renderResults({
             className="px-4 py-2 font-bold inline-flex items-center gap-2"
             onClick={() => onGoToJob(item.id)}
           >
-            View & Apply
+            {t("findJobByCv.viewApply")}
             <ChevronRight size={16} />
           </ActionButton>
         </div>
@@ -160,13 +160,14 @@ export default function MatchResults({
   onUploadClick,
   onBrowseJobs,
 }) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
       <div className="brutal-card p-6 border-4 border-black bg-(--card-bg)">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
           <h2 className="font-['Space_Grotesk'] font-bold uppercase text-lg inline-flex items-center gap-2">
             <Briefcase size={18} />
-            Results
+            {t("findJobByCv.results")}
           </h2>
           {jobs && (
             <ActionButton
@@ -175,7 +176,7 @@ export default function MatchResults({
               onClick={onClear}
               className="px-3 py-1 font-bold text-xs"
             >
-              Clear
+              {t("findJobByCv.clear")}
             </ActionButton>
           )}
         </div>
@@ -183,7 +184,7 @@ export default function MatchResults({
         {loading || uploading ? (
           <div className="brutal-card p-6 bg-(--bg) border-2 border-(--border-color) font-mono text-sm text-(--fg-muted) inline-flex items-center gap-2">
             <RefreshCw size={16} className="animate-spin" />
-            Searching for job matches...
+            {t("findJobByCv.searchingMatches")}
           </div>
         ) : (
           renderResults({
@@ -192,6 +193,7 @@ export default function MatchResults({
             onGoToJob,
             onUploadClick,
             onBrowseJobs,
+            t,
           })
         )}
       </div>

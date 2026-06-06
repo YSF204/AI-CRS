@@ -1,5 +1,6 @@
 import React from 'react';
 import { PlusCircle, Trash2 } from 'lucide-react';
+import { useTranslation } from '../../../context/LanguageContext';
 
 const INPUT = {
   width: '100%', 
@@ -29,18 +30,20 @@ const LABEL = {
 };
 
 export default function CompanyForm({ form, setField, updateBranch, addBranch, removeBranch, handleSubmit, saving, cooldownDaysLeft, isEditing, error }) {
+  const { t } = useTranslation();
+
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
       
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
         <div style={{ gridColumn: '1 / -1' }}>
-          <label htmlFor="cf-name" style={LABEL}>Company Name *</label>
+          <label htmlFor="cf-name" style={LABEL}>{t('employer.companyName', {}, 'Company Name')} *</label>
           <input
             id="cf-name"
             style={INPUT}
             value={form.name}
             onChange={setField('name')}
-            placeholder="e.g. ACME GLOBAL OPERATIONS"
+            placeholder={t('employer.companyNamePlaceholder', {}, 'e.g. ACME GLOBAL OPERATIONS')}
             required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
@@ -48,8 +51,8 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
         </div>
         <div style={{ position: 'relative' }}>
           <label htmlFor="cf-license" style={LABEL}>
-            License Number *
-            {isEditing && <span style={{ textTransform: 'none', fontWeight: 800, color: 'var(--nm-error)', marginLeft: 8 }}>(LOCKED)</span>}
+            {t('employer.licenseNumber', {}, 'License Number')} *
+            {isEditing && <span style={{ textTransform: 'none', fontWeight: 800, color: 'var(--nm-error)', marginLeft: 8 }}>({t('employer.lockedLabel', {}, 'LOCKED')})</span>}
           </label>
           <input
             id="cf-license"
@@ -63,34 +66,39 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
             }}
             value={form.license}
             onChange={setField('license')}
-            placeholder="REGISTRATION_ID"
+            placeholder={t('employer.licensePlaceholder', {}, 'REGISTRATION_ID')}
             required
             disabled={isEditing}
           />
         </div>
         <div>
-          <label htmlFor="cf-contactEmail" style={LABEL}>Contact Email *</label>
+          <label htmlFor="cf-contactEmail" style={LABEL}>{t('employer.contactEmail', {}, 'Contact Email')} *</label>
           <input
             id="cf-contactEmail"
             style={INPUT}
             type="email"
             value={form.contactEmail}
             onChange={setField('contactEmail')}
-            placeholder="hr@acme.corp"
+            placeholder={t('employer.contactEmailPlaceholder', {}, 'hr@acme.corp')}
             required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
         <div style={{ gridColumn: '1 / -1' }}>
-          <label htmlFor="cf-website" style={LABEL}>Website URL <span style={{ textTransform: 'none', fontWeight: 500, color: 'var(--nm-text-tertiary)' }}>(OPTIONAL)</span></label>
+          <label htmlFor="cf-website" style={LABEL}>
+            {t('employer.companyWebsite', {}, 'Website URL')}{' '}
+            <span style={{ textTransform: 'none', fontWeight: 500, color: 'var(--nm-text-tertiary)' }}>
+              ({t('employer.optional', {}, 'OPTIONAL')})
+            </span>
+          </label>
           <input
             id="cf-website"
             style={INPUT}
             type="url"
             value={form.website}
             onChange={setField('website')}
-            placeholder="https://acme.io"
+            placeholder={t('employer.websitePlaceholder', {}, 'https://acme.io')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
@@ -102,8 +110,12 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 24, gap: 16, flexWrap: 'wrap' }}>
           <div>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 24, color: 'var(--nm-text-primary)', textTransform: 'uppercase', margin: 0 }}>Branches *</h3>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 11, color: 'var(--nm-text-tertiary)', marginTop: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>MINIMUM 1 ACTIVE BRANCH REQUIRED</div>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 24, color: 'var(--nm-text-primary)', textTransform: 'uppercase', margin: 0 }}>
+              {t('employer.branches', {}, 'Branches')} *
+            </h3>
+            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 11, color: 'var(--nm-text-tertiary)', marginTop: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              {t('employer.minBranchRequired', {}, 'MINIMUM 1 ACTIVE BRANCH REQUIRED')}
+            </div>
           </div>
           <button
             type="button" onClick={addBranch}
@@ -121,7 +133,7 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
               textTransform: 'uppercase' 
             }}
           >
-            <PlusCircle size={16} strokeWidth={3} /> Add Branch
+            <PlusCircle size={16} strokeWidth={3} /> {t('employer.addBranch', {}, 'Add Branch')}
           </button>
         </div>
 
@@ -138,16 +150,16 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
             }}>
               <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 20 }}>
                 <div>
-                  <label htmlFor={`cf-branch-${i}-name`} style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>BRANCH NAME</label>
-                  <input id={`cf-branch-${i}-name`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.name} onChange={(e) => updateBranch(i, 'name', e.target.value)} placeholder="e.g. SECTOR_HQ" required />
+                  <label htmlFor={`cf-branch-${i}-name`} style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>{t('employer.branchName', {}, 'BRANCH NAME')}</label>
+                  <input id={`cf-branch-${i}-name`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.name} onChange={(e) => updateBranch(i, 'name', e.target.value)} placeholder={t('employer.branchNamePlaceholder', {}, 'e.g. SECTOR_HQ')} required />
                 </div>
                 <div>
-                  <label htmlFor={`cf-branch-${i}-city`} style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>CITY</label>
-                  <input id={`cf-branch-${i}-city`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.city} onChange={(e) => updateBranch(i, 'city', e.target.value)} placeholder="e.g. LONDON" required />
+                  <label htmlFor={`cf-branch-${i}-city`} style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>{t('employer.city', {}, 'CITY')}</label>
+                  <input id={`cf-branch-${i}-city`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.city} onChange={(e) => updateBranch(i, 'city', e.target.value)} placeholder={t('employer.cityPlaceholder', {}, 'e.g. LONDON')} required />
                 </div>
                 <div>
-                  <label htmlFor={`cf-branch-${i}-street`} style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>ADDRESS</label>
-                  <input id={`cf-branch-${i}-street`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.street} onChange={(e) => updateBranch(i, 'street', e.target.value)} placeholder="123 VECTOR ST" required />
+                  <label htmlFor={`cf-branch-${i}-street`} style={{ ...LABEL, fontSize: 10, marginBottom: 6 }}>{t('employer.companyAddress', {}, 'ADDRESS')}</label>
+                  <input id={`cf-branch-${i}-street`} style={{ ...INPUT, padding: '12px 16px', boxShadow: 'none' }} value={branch.street} onChange={(e) => updateBranch(i, 'street', e.target.value)} placeholder={t('employer.addressPlaceholder', {}, '123 VECTOR ST')} required />
                 </div>
               </div>
               {form.branches.length > 1 && (
@@ -155,7 +167,7 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
                   type="button" onClick={() => removeBranch(i)}
                   className="nm-btn"
                   style={{ marginTop: 24, padding: '12px', background: 'var(--nm-error)', color: '#fff' }}
-                  title="REMOVE BRANCH"
+                  title={t('employer.removeBranch', {}, 'REMOVE BRANCH')}
                 >
                   <Trash2 size={18} strokeWidth={3} />
                 </button>
@@ -183,7 +195,13 @@ export default function CompanyForm({ form, setField, updateBranch, addBranch, r
           opacity: (saving || cooldownDaysLeft > 0) ? 0.7 : 1,
         }}
       >
-        {saving ? 'SAVING...' : cooldownDaysLeft > 0 ? `LOCKED [${cooldownDaysLeft} DAYS]` : isEditing ? 'SAVE PROFILE' : 'CREATE PROFILE'}
+        {saving 
+          ? t('employer.saving', {}, 'SAVING...') 
+          : cooldownDaysLeft > 0 
+            ? t('employer.lockedWithDays', { count: cooldownDaysLeft }, `LOCKED [${cooldownDaysLeft} DAYS]`) 
+            : isEditing 
+              ? t('employer.saveProfile', {}, 'SAVE PROFILE') 
+              : t('employer.createProfile', {}, 'CREATE PROFILE')}
       </button>
     </form>
   );

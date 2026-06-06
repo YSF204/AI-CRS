@@ -1,35 +1,37 @@
 import { FileText, Brain, Zap, Shield } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
-
-const features = [
-  {
-    Icon: FileText,
-    title: 'CV Builder',
-    description: 'Create professional, ATS-optimized resumes with our intelligent builder. Pick from multiple templates and customize every detail.',
-    color: 'var(--nm-primary)',
-  },
-  {
-    Icon: Brain,
-    title: 'ATS Score',
-    description: 'Instant compatibility score and feedback for applicant tracking systems. Know exactly where your CV stands.',
-    color: 'var(--nm-warning)',
-  },
-  {
-    Icon: Zap,
-    title: 'Skill Gap Detection',
-    description: 'AI identifies exactly which skills you need to develop for target roles. Bridge the gap between where you are and where you want to be.',
-    color: 'var(--nm-success)',
-  },
-  {
-    Icon: Shield,
-    title: 'Secure & Private',
-    description: 'Your data stays encrypted end-to-end. We never share your information with third parties. Your career data belongs to you.',
-    color: 'var(--nm-ink)',
-  },
-];
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function FeaturesSection() {
   const { theme } = useTheme();
+  const { t } = useTranslation();
+
+  const features = [
+    {
+      Icon: FileText,
+      title: t('features.cvBuilder.title'),
+      description: t('features.cvBuilder.description'),
+      color: 'var(--nm-primary)',
+    },
+    {
+      Icon: Brain,
+      title: t('features.atsScore.title'),
+      description: t('features.atsScore.description'),
+      color: 'var(--nm-warning)',
+    },
+    {
+      Icon: Zap,
+      title: t('features.skillGap.title'),
+      description: t('features.skillGap.description'),
+      color: 'var(--nm-success)',
+    },
+    {
+      Icon: Shield,
+      title: t('features.secure.title'),
+      description: t('features.secure.description'),
+      color: 'var(--nm-ink)',
+    },
+  ];
 
   return (
     <section
@@ -53,9 +55,9 @@ export default function FeaturesSection() {
             marginTop: '0.5rem'
           }}
         >
-          Everything Your
+          {t('features.titleMain')}
           <br />
-          <span style={{ color: 'var(--nm-primary)' }}>CV Needs</span>
+          <span style={{ color: 'var(--nm-primary)' }}>{t('features.titleHighlight')}</span>
         </h2>
         <p
           style={{
@@ -67,7 +69,7 @@ export default function FeaturesSection() {
             lineHeight: 1.7,
           }}
         >
-          Our AI-powered platform handles every aspect of your resume, from creation to optimization.
+          {t('features.description')}
         </p>
       </div>
 

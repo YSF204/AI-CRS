@@ -1,8 +1,11 @@
 import React from 'react';
 import { XCircle } from 'lucide-react';
 import CandidateCard from './CandidateCard';
+import { useTranslation } from '../../../../context/LanguageContext';
 
 export default function ResultsOverlay({ results, onClose }) {
+  const { t } = useTranslation();
+
   return (
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -35,10 +38,10 @@ export default function ResultsOverlay({ results, onClose }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem', flexWrap: 'wrap', gap: 24 }}>
           <div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--nm-primary)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: 8 }}>
-              AI MATCHING ENGINE
+              {t('employer.aiMatchingEngine', {}, 'AI MATCHING ENGINE')}
             </div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(2.5rem, 6vw, 4rem)', color: 'var(--nm-text-primary)', textTransform: 'uppercase', letterSpacing: '-0.04em', lineHeight: 1, margin: 0 }}>
-              MATCHING CANDIDATES
+              {t('employer.matchingCandidates', {}, 'MATCHING CANDIDATES')}
             </h2>
           </div>
           <div style={{
@@ -52,7 +55,7 @@ export default function ResultsOverlay({ results, onClose }) {
             textTransform: 'uppercase',
             boxShadow: '6px 6px 0 var(--nm-ink)'
           }}>
-            PRECISION RANKED
+            {t('employer.precisionRanked', {}, 'PRECISION RANKED')}
           </div>
         </div>
 

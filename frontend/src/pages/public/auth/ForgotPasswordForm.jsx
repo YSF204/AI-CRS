@@ -5,8 +5,10 @@ import {
   Loader,
 } from "lucide-react";
 import api from "../../../services/api";
+import { useTranslation } from "../../../context/LanguageContext";
 
 export default function ForgotPasswordForm({ onSuccess, onError }) {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -20,13 +22,13 @@ export default function ForgotPasswordForm({ onSuccess, onError }) {
       if (response.data.status === "success") {
         onSuccess(
           response.data.message ||
-            "If an account exists for that email, a reset link will arrive shortly.",
+            t("publicAuth.resetLinkSent", {}, "If an account exists for that email, a reset link will arrive shortly.")
         );
       }
     } catch (error) {
       onError(
         error.response?.data?.message ||
-          "Failed to send reset email. Please try again.",
+          t("publicAuth.failedSendReset", {}, "Failed to send reset email. Please try again.")
       );
     } finally {
       setLoading(false);
@@ -44,7 +46,7 @@ export default function ForgotPasswordForm({ onSuccess, onError }) {
           marginBottom: 8,
         }}
       >
-        Forgot Password?
+        {t("auth.forgotPassword")}
       </h1>
       <p
         style={{
@@ -54,8 +56,7 @@ export default function ForgotPasswordForm({ onSuccess, onError }) {
           marginBottom: "clamp(1rem, 2.5%, 1.5rem)",
         }}
       >
-        Enter your email address and we'll send you a link to reset your
-        password.
+        {t("publicAuth.forgotPasswordDesc")}
       </p>
 
       <form onSubmit={handleSubmit} style={{ marginTop: 24 }}>
@@ -73,7 +74,7 @@ export default function ForgotPasswordForm({ onSuccess, onError }) {
               color: "var(--fg)",
             }}
           >
-            Email Address
+            {t("auth.email")}
           </label>
           <input
             id="forgot-password-email"
@@ -127,12 +128,12 @@ export default function ForgotPasswordForm({ onSuccess, onError }) {
           {loading ? (
             <>
               <Loader size={16} className="animate-spin" />
-              Sending...
+              {t("publicAuth.sending")}
             </>
           ) : (
             <>
               <Mail size={16} />
-              Send Reset Link
+              {t("publicAuth.sendResetLink")}
             </>
           )}
         </button>
@@ -153,7 +154,7 @@ export default function ForgotPasswordForm({ onSuccess, onError }) {
           onMouseEnter={(e) => (e.target.style.color = "var(--yellow)")}
           onMouseLeave={(e) => (e.target.style.color = "var(--teal)")}
         >
-          ← Back to Login
+          ← {t("publicAuth.backToLogin")}
         </Link>
       </form>
     </>

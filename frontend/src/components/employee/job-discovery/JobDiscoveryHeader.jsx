@@ -1,12 +1,14 @@
 import React from "react";
 import { Briefcase, FileText } from "lucide-react";
+import { useTranslation } from "../../../context/LanguageContext";
 
 const JobDiscoveryHeader = ({ mode, onModeChange, resultCount }) => {
+  const { t } = useTranslation();
   return (
     <div className="jd-surface-stack mb-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="jd-section-title">Discovery Mode</p>
+          <p className="jd-section-title">{t("employeeJobs.discoveryMode", {}, "Discovery Mode")}</p>
           <div className="jd-segment-group">
             <button
               type="button"
@@ -16,7 +18,7 @@ const JobDiscoveryHeader = ({ mode, onModeChange, resultCount }) => {
               aria-pressed={mode === "browse"}
             >
               <Briefcase size={16} />
-              Browse Jobs
+              {t("employeeJobs.browseJobs", {}, "Browse Jobs")}
             </button>
             <button
               type="button"
@@ -26,7 +28,7 @@ const JobDiscoveryHeader = ({ mode, onModeChange, resultCount }) => {
               aria-pressed={mode === "cv"}
             >
               <FileText size={16} />
-              Match by CV
+              {t("employeeJobs.matchByCv", {}, "Match by CV")}
             </button>
           </div>
         </div>

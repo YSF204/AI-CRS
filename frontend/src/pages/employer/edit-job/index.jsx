@@ -5,10 +5,12 @@ import DashboardNav from '../../../components/shared/DashboardNav';
 import api from '../../../services/api';
 import useFetch from '../../../hooks/useFetch';
 import JobForm from './JobForm';
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function EditJob() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -34,7 +36,7 @@ export default function EditJob() {
   useEffect(() => {
     if (jobLoading) return;
     if (jobError) {
-      setError('FAILED TO LOAD UNIT DATA.');
+      setError(t('employer.failedToLoadUnitData', {}, 'FAILED TO LOAD UNIT DATA.'));
       setLoading(false);
       return;
     }
@@ -54,7 +56,7 @@ export default function EditJob() {
       status: jobData.status || 'OPEN',
     });
     setLoading(false);
-  }, [jobData, jobError, jobLoading]);
+  }, [jobData, jobError, jobLoading, t]);
 
   const setField = (k) => (e) => setForm((p) => ({ ...p, [k]: e.target.value }));
 
@@ -77,7 +79,7 @@ export default function EditJob() {
       await api.patch(`/jobs/${id}`, payload);
       navigate('/employer');
     } catch (err) {
-      setError(err.response?.data?.message || 'SYSTEM UPDATE FAILURE.');
+      setError(err.response?.data?.message || t('employer.systemUpdateFailure', {}, 'SYSTEM UPDATE FAILURE.'));
     } finally {
       setSaving(false);
     }
@@ -86,7 +88,7 @@ export default function EditJob() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--nm-bg)', color: 'var(--nm-text-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Accessing Data Stream...</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{t('employer.accessingDataStream', {}, 'Accessing Data Stream...')}</div>
       </div>
     );
   }
@@ -125,7 +127,7 @@ export default function EditJob() {
             border: '4px solid var(--nm-ink)'
           }}
         >
-          <ArrowLeft size={18} strokeWidth={3} /> Return
+          <ArrowLeft size={18} strokeWidth={3} /> {t('common.back', {}, 'Return')}
         </button>
 
         <div 
@@ -152,7 +154,7 @@ export default function EditJob() {
               lineHeight: 1,
               margin: 0
             }}>
-              Adjust Listing
+              {t('employer.editJob', {}, 'Adjust Listing')}
             </h1>
           </div>
           
@@ -171,7 +173,7 @@ export default function EditJob() {
               marginTop: 32,
               boxShadow: '4px 4px 0 var(--nm-ink)'
             }}>
-              SYSTEM ALERT: {error}
+              {t('employer.systemAlert', {}, 'SYSTEM ALERT')}: {error}
             </div>
           )}
 

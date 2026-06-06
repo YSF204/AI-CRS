@@ -7,10 +7,12 @@ import api from '../../../services/api';
 import useFetch from '../../../hooks/useFetch';
 import FilterBar from './components/FilterBar';
 import UsersTable from './components/UsersTable';
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function UserManagement() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState({});
   const [search, setSearch] = useState("");
@@ -54,9 +56,9 @@ export default function UserManagement() {
 
   useEffect(() => {
     if (fetchError) {
-      setError(fetchError.response?.data?.message || "Unable to load users.");
+      setError(fetchError.response?.data?.message || t('admin.unableLoadUsers', {}, "Unable to load users."));
     }
-  }, [fetchError]);
+  }, [fetchError, t]);
 
   useEffect(() => {
     if (location.state?.message) {
@@ -85,10 +87,10 @@ export default function UserManagement() {
       setUsers((prev) =>
         prev.filter((item) => (item._id || item.id) !== userId),
       );
-      setMessage("User deleted successfully.");
+      setMessage(t('toast.user_deleted', {}, "User deleted successfully."));
       setPendingDeleteUser(null);
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to delete user.");
+      setError(err.response?.data?.message || t('admin.unableDeleteUser', {}, "Unable to delete user."));
     } finally {
       setDeleting(false);
     }
@@ -116,10 +118,10 @@ export default function UserManagement() {
         })
       );
 
-      setMessage(`User status updated to ${newStatus}`);
+      setMessage(t('admin.userStatusUpdated', { status: newStatus }, `User status updated to ${newStatus}`));
       setTimeout(() => setMessage(""), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update user status.");
+      setError(err.response?.data?.message || t('admin.failedUpdateUserStatus', {}, "Failed to update user status."));
       // Rollback UI on error
       setUsers((prev) =>
         prev.map((user) => {
@@ -155,7 +157,7 @@ export default function UserManagement() {
                 color: 'var(--nm-text-secondary)',
                 marginBottom: 'var(--spacing-2)'
               }}>
-                User Management
+                {t('admin.userManagement', {}, 'User Management')}
               </div>
               <h1 style={{
                 fontFamily: 'var(--font-display)',
@@ -167,7 +169,7 @@ export default function UserManagement() {
                 margin: 0,
                 color: 'var(--nm-text-primary)'
               }}>
-                Manage Platform Users
+                {t('admin.managePlatformUsers', {}, 'Manage Platform Users')}
               </h1>
               <p style={{
                 fontFamily: 'var(--font-body)',
@@ -176,7 +178,7 @@ export default function UserManagement() {
                 margin: 'var(--spacing-2) 0 0 0',
                 maxWidth: '60ch'
               }}>
-                List users, update account status, create new users, and remove inactive accounts.
+                {t('admin.managePlatformUsersDesc', {}, 'List users, update account status, create new users, and remove inactive accounts.')}
               </p>
             </div>
             <button
@@ -192,7 +194,7 @@ export default function UserManagement() {
               }}
             >
               <PlusCircle size={18} strokeWidth={2.5} />
-              Add User
+              {t('admin.addUser', {}, 'Add User')}
             </button>
           </div>
         </div>
@@ -239,13 +241,9 @@ export default function UserManagement() {
       {pendingDeleteUser && (
         <div className="admin-modal">
           <div className="admin-modal-content">
-            <h2 className="admin-modal-title">Confirm Delete</h2>
+            <h2 className="admin-modal-title">{t('admin.confirmDelete', {}, 'Confirm Delete')}</h2>
             <p className="admin-modal-description">
-              Delete user{" "}
-              <span style={{ fontWeight: 700, color: 'var(--nm-text-primary)' }}>
-                {pendingDeleteUser.firstName} {pendingDeleteUser.lastName}
-              </span>
-              ? This action will deactivate the account.
+              {t('admin.deleteUserWarn', { name: `${pendingDeleteUser.firstName} ${pendingDeleteUser.lastName}` }, `Delete user ${pendingDeleteUser.firstName} ${pendingDeleteUser.lastName}? This action will deactivate the account.`)}
             </p>
 
             <div className="admin-modal-actions">
@@ -259,7 +257,7 @@ export default function UserManagement() {
                   color: 'white'
                 }}
               >
-                Cancel
+                {t('common.cancel')}
               </button>
               <button
                 onClick={confirmDelete}
@@ -271,7 +269,7 @@ export default function UserManagement() {
                 }}
                 disabled={deleting}
               >
-                {deleting ? "Deleting..." : "Delete"}
+                {deleting ? t('admin.deleting', {}, "Deleting...") : t('common.delete')}
               </button>
             </div>
           </div>

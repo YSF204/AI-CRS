@@ -7,8 +7,10 @@ import {
   EyeOff,
 } from "lucide-react";
 import api from "../../../services/api";
+import { useTranslation } from "../../../context/LanguageContext";
 
 export default function ResetPasswordForm({ token, onSuccess, onError }) {
+  const { t } = useTranslation();
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -20,26 +22,26 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
     const newErrors = {};
 
     if (!password) {
-      newErrors.password = "Password is required";
+      newErrors.password = t("auth.pwRequired", {}, "Password is required");
     } else if (password.length < 8) {
-      newErrors.password = "Password must be at least 8 characters";
+      newErrors.password = t("auth.pwMinLength", {}, "Password must be at least 8 characters");
     } else if (!/(?=.*[a-z])/.test(password)) {
       newErrors.password =
-        "Password must contain at least one lowercase letter";
+        t("auth.pwLowercase", {}, "Password must contain at least one lowercase letter");
     } else if (!/(?=.*[A-Z])/.test(password)) {
       newErrors.password =
-        "Password must contain at least one uppercase letter";
+        t("auth.pwUppercase", {}, "Password must contain at least one uppercase letter");
     } else if (!/(?=.*\d)/.test(password)) {
-      newErrors.password = "Password must contain at least one number";
+      newErrors.password = t("auth.pwNumber", {}, "Password must contain at least one number");
     } else if (!/(?=.*[!@#$%^&*])/.test(password)) {
       newErrors.password =
-        "Password must contain at least one special character (!@#$%^&*)";
+        t("auth.pwSpecial", {}, "Password must contain at least one special character (!@#$%^&*)");
     }
 
     if (!passwordConfirm) {
-      newErrors.passwordConfirm = "Please confirm your password";
+      newErrors.passwordConfirm = t("auth.pwConfirmRequired", {}, "Please confirm your password");
     } else if (password !== passwordConfirm) {
-      newErrors.passwordConfirm = "Passwords do not match";
+      newErrors.passwordConfirm = t("auth.pwMismatch", {}, "Passwords do not match");
     }
 
     setErrors(newErrors);
@@ -56,21 +58,21 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
     }
 
     try {
-      const response = await api.patch(`/auth/resetPassword/${token}`, {
+      const response = await api.post(`/auth/resetPassword/${token}`, {
         password,
         passwordConfirm,
       });
 
       if (response.data.status === "success") {
         onSuccess(
-          "Your password has been reset successfully!",
+          t("publicAuth.passwordResetSuccess", {}, "Your password has been reset successfully!"),
           response.data.token || null,
         );
       }
     } catch (error) {
       onError(
         error.response?.data?.message ||
-          "Failed to reset password. Please try again or request a new link.",
+          t("publicAuth.failedResetPassword", {}, "Failed to reset password. Please try again or request a new link."),
       );
     } finally {
       setLoading(false);
@@ -88,7 +90,7 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
           marginBottom: 8,
         }}
       >
-        Reset Password
+        {t("publicAuth.resetPassword")}
       </h1>
       <p
         style={{
@@ -98,7 +100,7 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
           marginBottom: "clamp(1rem, 2.5%, 1.5rem)",
         }}
       >
-        Enter your new password below. Make sure it's strong and secure.
+        {t("publicAuth.enterNewPassword")}
       </p>
 
       <form onSubmit={handleSubmit} style={{ marginTop: 24 }}>
@@ -117,7 +119,7 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
               color: "var(--fg)",
             }}
           >
-            New Password
+            {t("publicAuth.newPassword")}
           </label>
           <div style={{ position: "relative" }}>
             <input
@@ -196,7 +198,7 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
               color: "var(--fg)",
             }}
           >
-            Confirm Password
+            {t("auth.confirmPassword")}
           </label>
           <div style={{ position: "relative" }}>
             <input
@@ -271,11 +273,12 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
             color: "var(--fg-muted)",
             marginBottom: 16,
             lineHeight: 1.5,
+            whiteSpace: "pre-line",
           }}
         >
-          Strong password requirements:
-          <br />✓ At least 8 characters
-          <br />✓ Mix of uppercase, lowercase, numbers, and symbols
+          {t("auth.strongPwReq")}
+          <br />
+          {t("auth.reqsSummary")}
         </p>
 
         <button
@@ -304,12 +307,12 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
           {loading ? (
             <>
               <Loader size={16} className="animate-spin" />
-              Resetting...
+              {t("publicAuth.resetting")}
             </>
           ) : (
             <>
               <Lock size={16} />
-              Reset Password
+              {t("publicAuth.resetPassword")}
             </>
           )}
         </button>
@@ -330,7 +333,7 @@ export default function ResetPasswordForm({ token, onSuccess, onError }) {
           onMouseEnter={(e) => (e.target.style.color = "var(--yellow)")}
           onMouseLeave={(e) => (e.target.style.color = "var(--teal)")}
         >
-          ← Back to Login
+          ← {t("publicAuth.backToLogin")}
         </Link>
       </form>
     </>

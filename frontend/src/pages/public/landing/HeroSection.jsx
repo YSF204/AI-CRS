@@ -2,8 +2,11 @@ import CVShowcase from './CVShowcase';
 import Shuffle from './components/Shuffle';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function HeroSection() {
+  const { t, lang } = useTranslation();
+
   return (
     <section
       className="relative w-full flex flex-col lg:flex-row items-center justify-between overflow-hidden"
@@ -27,38 +30,46 @@ export default function HeroSection() {
             textTransform: 'uppercase',
           }}
         >
-          <Shuffle
-            text="CV Builder"
-            shuffleDirection="right"
-            duration={0.8}
-            animationMode="evenodd"
-            shuffleTimes={2}
-            ease="power3.out"
-            stagger={0.08}
-            threshold={0.1}
-            triggerOnce={true}
-            triggerOnHover={false}
-            respectReducedMotion={true}
-            loop={false}
-            loopDelay={0}
-          />
+          {lang === 'ar' ? (
+            t('hero.title1')
+          ) : (
+            <Shuffle
+              text={t('hero.title1')}
+              shuffleDirection="right"
+              duration={0.8}
+              animationMode="evenodd"
+              shuffleTimes={2}
+              ease="power3.out"
+              stagger={0.08}
+              threshold={0.1}
+              triggerOnce={true}
+              triggerOnHover={false}
+              respectReducedMotion={true}
+              loop={false}
+              loopDelay={0}
+            />
+          )}
           <br />
           <span style={{ color: 'var(--nm-primary)' }}>&amp;</span>{' '}
-          <Shuffle
-            text="Analyzer"
-            shuffleDirection="right"
-            duration={0.8}
-            animationMode="evenodd"
-            shuffleTimes={2}
-            ease="power3.out"
-            stagger={0.08}
-            threshold={0.1}
-            triggerOnce={true}
-            triggerOnHover={false}
-            respectReducedMotion={true}
-            loop={false}
-            loopDelay={0}
-          />
+          {lang === 'ar' ? (
+            t('hero.title2')
+          ) : (
+            <Shuffle
+              text={t('hero.title2')}
+              shuffleDirection="right"
+              duration={0.8}
+              animationMode="evenodd"
+              shuffleTimes={2}
+              ease="power3.out"
+              stagger={0.08}
+              threshold={0.1}
+              triggerOnce={true}
+              triggerOnHover={false}
+              respectReducedMotion={true}
+              loop={false}
+              loopDelay={0}
+            />
+          )}
         </h1>
 
         <p
@@ -72,8 +83,7 @@ export default function HeroSection() {
             fontWeight: 400,
           }}
         >
-          Build stunning resumes. Let AI do the rest. Get your ATS score, detect
-          skill gaps, and plan your career path — all in one place.
+          {t('hero.description')}
         </p>
 
         <div className="flex flex-wrap" style={{ gap: 'clamp(1rem, 2%, 1.25rem)' }}>
@@ -84,10 +94,13 @@ export default function HeroSection() {
               padding: '1rem 2.5rem',
               fontSize: 'clamp(0.85rem, 1.1vw, 0.95rem)',
               borderWidth: '4px',
-              boxShadow: '4px 4px 0 var(--nm-ink)'
+              boxShadow: '4px 4px 0 var(--nm-ink)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
             }}
           >
-            Build My CV
+            {t('hero.cta')}
             <ArrowRight size={18} strokeWidth={3} />
           </Link>
 

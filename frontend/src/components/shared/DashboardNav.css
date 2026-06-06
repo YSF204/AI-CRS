@@ -25,10 +25,18 @@
 @media (max-width: 767px) {
   .jd-sidebar {
     transform: translateX(-100%);
+    width: 16rem !important;
   }
 
   body.mobile-sidebar-open .jd-sidebar {
     transform: translateX(0);
+  }
+
+  body.mobile-sidebar-open .jd-sidebar-link-text,
+  body.mobile-sidebar-open .jd-sidebar-action-text,
+  body.mobile-sidebar-open .jd-sidebar-brand-text {
+    opacity: 1 !important;
+    transform: translateX(0) !important;
   }
 
   /* Mobile sidebar backdrop overlay */

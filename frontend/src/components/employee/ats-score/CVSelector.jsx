@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from "react";
 import { Plus, Search, Filter } from "lucide-react";
 import CVPreviewCard from "./CVPreviewCard";
+import { useTranslation } from "../../../context/LanguageContext";
 
 export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
 
@@ -44,15 +46,14 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
     return (
       <div className="jd-surface-stack p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
         <p className="font-mono text-[var(--nm-text-tertiary)] mb-6">
-          No CVs found. Create your first CV to unlock ATS optimization
-          insights.
+          {t("employeeJobs.noCvsFound", {}, "No CVs found. Create your first CV to unlock ATS optimization insights.")}
         </p>
         <a
           href="/employee/cv-templates"
           className="jd-btn jd-btn-primary inline-flex items-center gap-2"
         >
           <Plus size={18} />
-          Create New CV
+          {t("employeeJobs.createNewCv", {}, "Create New CV")}
         </a>
       </div>
     );
@@ -63,9 +64,11 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
       {/* ATS Gallery Toolbar */}
       <div className="jd-surface-stack ats-toolbar flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 p-6">
         <div>
-          <h2 className="jd-section-title mb-1 tracking-tight">Select a CV to Analyze</h2>
+          <h2 className="jd-section-title mb-1 tracking-tight">{t("atsAudit.selectCvToAnalyzeTitle", {}, "Select a CV to Analyze")}</h2>
           <p className="text-sm text-[var(--nm-text-secondary)] font-medium font-mono uppercase tracking-wider">
-            {filteredCvs.length} CV{filteredCvs.length !== 1 ? 's' : ''} available
+            {filteredCvs.length === 1 
+              ? t("employeeJobs.cvsAvailable_one", {}, "1 CV available")
+              : t("employeeJobs.cvsAvailable_other", { count: filteredCvs.length }, `${filteredCvs.length} CVs available`)}
           </p>
         </div>
 
@@ -77,7 +80,7 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
             />
             <input
               type="text"
-              placeholder="Search CVs by name or job title..."
+              placeholder={t("employeeJobs.searchCvsPlaceholder", {}, "Search CVs by name or job title...")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="jd-input w-full md:w-[520px]"
@@ -91,8 +94,8 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
               className="jd-select"
               style={{ paddingRight: '44px' }}
             >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
+              <option value="newest">{t("employeeJobs.newestFirst", {}, "Newest First")}</option>
+              <option value="oldest">{t("employeeJobs.oldestFirst", {}, "Oldest First")}</option>
             </select>
             <Filter size={14} className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--nm-text-tertiary)]" />
           </div>
@@ -118,7 +121,7 @@ export default function CVSelector({ cvs, loading, onAnalyze, analyzingId }) {
             <Search size={20} className="text-[var(--nm-text-tertiary)]" />
           </div>
           <p className="font-mono text-sm uppercase tracking-widest text-[var(--nm-text-tertiary)]">
-            No CVs match your search
+            {t("employeeJobs.noCvsMatchSearch", {}, "No CVs match your search")}
           </p>
         </div>
       )}

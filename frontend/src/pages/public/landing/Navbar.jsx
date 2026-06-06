@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Sun, Moon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../../context/ThemeContext';
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function Navbar() {
   const [visible, setVisible] = useState(true);
   const lastScrollY = useRef(0);
   const { theme, toggleTheme } = useTheme();
+  const { t, lang, toggleLanguage } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -47,6 +49,24 @@ export default function Navbar() {
   const rightActionsNode = (
     <>
       <button
+        onClick={toggleLanguage}
+        aria-label="Switch Language"
+        className="nm-btn"
+        style={{
+          padding: '0.5rem 0.75rem',
+          minHeight: '40px',
+          fontFamily: 'var(--font-display)',
+          fontWeight: 800,
+          fontSize: '0.8rem',
+          textTransform: 'uppercase',
+          background: 'var(--nm-surface)',
+          borderWidth: '4px'
+        }}
+      >
+        {lang === 'en' ? 'العربية' : 'EN'}
+      </button>
+
+      <button
         onClick={toggleTheme}
         aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
         className="nm-btn"
@@ -70,15 +90,15 @@ export default function Navbar() {
           borderWidth: '4px'
         }}
       >
-        Sign In
+        {t('nav.signin')}
       </Link>
     </>
   );
 
   const navItems = [
-    { label: 'Features', href: '#features' },
-    { label: 'About', href: '#about' },
-    { label: 'Contact', href: '#contact' },
+    { label: t('nav.features'), href: '#features' },
+    { label: t('nav.about'), href: '#about' },
+    { label: t('nav.contact'), href: '#contact' },
   ];
 
   return (

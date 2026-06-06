@@ -1,6 +1,15 @@
 import React from 'react';
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function Footer() {
+  const { t } = useTranslation();
+
+  const links = [
+    { label: t('nav.features'), href: '#features' },
+    { label: t('nav.about'), href: '#about' },
+    { label: t('nav.contact'), href: '#contact' },
+  ];
+
   return (
     <footer
       id="contact"
@@ -43,10 +52,10 @@ export default function Footer() {
 
         {/* Links */}
         <div className="flex items-center" style={{ gap: 'clamp(1.5rem, 3%, 2.5rem)' }}>
-          {['Features', 'About', 'Contact'].map((link) => (
+          {links.map((link) => (
             <a
-              key={link}
-              href={`#${link.toLowerCase()}`}
+              key={link.label}
+              href={link.href}
               style={{
                 fontFamily: 'var(--font-display)',
                 fontSize: 'clamp(0.75rem, 1vw, 0.85rem)',
@@ -59,7 +68,7 @@ export default function Footer() {
               }}
               className="hover:text-[var(--nm-primary)]"
             >
-              {link}
+              {link.label}
             </a>
           ))}
         </div>
@@ -76,7 +85,7 @@ export default function Footer() {
             fontWeight: 600,
           }}
         >
-          Palestine Polytechnic University · Hebron · 2025–2026
+          {t('footer.university')}
         </p>
       </div>
     </footer>

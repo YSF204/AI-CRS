@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, Sparkles, AlertCircle } from 'lucide-react';
+import { useTranslation } from '../../../../context/LanguageContext';
 
 const INPUT = {
   width: '100%',
@@ -29,6 +30,8 @@ const LABEL = {
 };
 
 export default function SearchForm({ form, set, loading, error, onSubmit }) {
+  const { t } = useTranslation();
+
   return (
     <div
       className="nm-card"
@@ -60,7 +63,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
           lineHeight: 1,
           margin: 0
         }}>
-          AI Matchmaker
+          {t('employer.aiMatchmaker', {}, 'AI Matchmaker')}
         </h1>
       </div>
       <p style={{
@@ -71,7 +74,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
         maxWidth: '800px',
         lineHeight: 1.6
       }}>
-        Harness advanced neural filtering to identify top-tier talent. Our engine analyzes competencies, soft skills, and experience history to deliver precision matching.
+        {t('employer.aiMatchmakerDesc', {}, 'Harness advanced neural filtering to identify top-tier talent. Our engine analyzes competencies, soft skills, and experience history to deliver precision matching.')}
       </p>
 
       {error && (
@@ -98,20 +101,20 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
       <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
           <div>
-            <label htmlFor="search-title" style={LABEL}>Job Title *</label>
+            <label htmlFor="search-title" style={LABEL}>{t('employer.jobTitle', {}, 'Job Title')} *</label>
             <input
               id="search-title"
               style={INPUT}
               value={form.position}
               onChange={set('position')}
-              placeholder="e.g. SYSTEMS ARCHITECT"
+              placeholder={t('employer.jobTitlePlaceholder', {}, 'e.g. SYSTEMS ARCHITECT')}
               required
               onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
               onBlur={e => e.target.style.transform = 'none'}
             />
           </div>
           <div>
-            <label htmlFor="search-exp" style={LABEL}>Minimum Experience (Years)</label>
+            <label htmlFor="search-exp" style={LABEL}>{t('employer.yearsOfExperience', {}, 'Minimum Experience (Years)')}</label>
             <input
               id="search-exp"
               style={INPUT}
@@ -119,7 +122,7 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
               min="0"
               value={form.yearsOfExperience}
               onChange={set('yearsOfExperience')}
-              placeholder="e.g. 5"
+              placeholder={t('employer.experiencePlaceholder', {}, 'e.g. 5')}
               onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
               onBlur={e => e.target.style.transform = 'none'}
             />
@@ -127,13 +130,13 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
         </div>
 
         <div>
-          <label htmlFor="search-desc" style={LABEL}>Job Description</label>
+          <label htmlFor="search-desc" style={LABEL}>{t('employer.jobDescription', {}, 'Job Description')}</label>
           <textarea
             id="search-desc"
             style={{ ...INPUT, minHeight: 140, resize: 'vertical' }}
             value={form.description}
             onChange={set('description')}
-            placeholder="Describe the role, responsibilities, and key requirements..."
+            placeholder={t('employer.jobDescriptionPlaceholder', {}, 'Describe the role, responsibilities, and key requirements...')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
@@ -141,7 +144,10 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
           <div>
-            <label htmlFor="search-tech" style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(comma separated)</span></label>
+            <label htmlFor="search-tech" style={LABEL}>
+              {t('employer.technicalSkills', {}, 'Technical Skills')}{' '}
+              <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>({t('employer.csvLabel', {}, 'comma separated')})</span>
+            </label>
             <input
               id="search-tech"
               style={INPUT}
@@ -153,7 +159,10 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
             />
           </div>
           <div>
-            <label htmlFor="search-soft" style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(comma separated)</span></label>
+            <label htmlFor="search-soft" style={LABEL}>
+              {t('employer.softSkills', {}, 'Soft Skills')}{' '}
+              <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>({t('employer.csvLabel', {}, 'comma separated')})</span>
+            </label>
             <input
               id="search-soft"
               style={INPUT}
@@ -168,7 +177,10 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
           <div>
-            <label htmlFor="search-lang" style={LABEL}>Languages <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(comma separated)</span></label>
+            <label htmlFor="search-lang" style={LABEL}>
+              {t('employer.languages', {}, 'Languages')}{' '}
+              <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>({t('employer.csvLabel', {}, 'comma separated')})</span>
+            </label>
             <input
               id="search-lang"
               style={INPUT}
@@ -180,13 +192,13 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
             />
           </div>
           <div>
-            <label htmlFor="search-notes" style={LABEL}>Additional Requirements</label>
+            <label htmlFor="search-notes" style={LABEL}>{t('employer.additionalInfo', {}, 'Additional Requirements')}</label>
             <input
               id="search-notes"
               style={INPUT}
               value={form.additionalNotes}
               onChange={set('additionalNotes')}
-              placeholder="Specific timezone, clearance, or relocation..."
+              placeholder={t('employer.additionalInfoPlaceholder', {}, 'Specific timezone, clearance, or relocation...')}
               onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
               onBlur={e => e.target.style.transform = 'none'}
             />
@@ -217,12 +229,12 @@ export default function SearchForm({ form, set, loading, error, onSubmit }) {
           {loading ? (
             <>
               <Search className="animate-spin" size={28} strokeWidth={3} />
-              SEARCHING...
+              {t('employer.searching', {}, 'SEARCHING...')}
             </>
           ) : (
             <>
               <Sparkles size={28} strokeWidth={2.5} />
-              SEARCH CANDIDATES →
+              {t('employer.searchCandidates', {}, 'SEARCH CANDIDATES →')}
             </>
           )}
         </button>

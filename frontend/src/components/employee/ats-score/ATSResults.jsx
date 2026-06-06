@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { ChevronDown, ChevronUp, ArrowLeft, CheckCircle2, AlertCircle, Lightbulb } from "lucide-react";
+import { useTranslation } from "../../../context/LanguageContext";
 
 export default function ATSResults({ result, onBack, onReanalyze }) {
+  const { t } = useTranslation();
   const [expandedSections, setExpandedSections] = useState({});
 
   const toggleSection = (section) => {
@@ -18,9 +20,9 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
   };
 
   const getScoreLabel = (score) => {
-    if (score >= 75) return "OPTIMIZED";
-    if (score >= 50) return "AVERAGE";
-    return "IMPROVABLE";
+    if (score >= 75) return t("atsAudit.optimized");
+    if (score >= 50) return t("atsAudit.average");
+    return t("atsAudit.improvable");
   };
 
   const overallScore = result.overallScore || 0;
@@ -39,7 +41,7 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
           className="jd-btn jd-btn-secondary inline-flex items-center gap-2"
         >
           <ArrowLeft size={16} />
-          Back to Selection
+          {t("atsAudit.backToSelection")}
         </button>
       </div>
 
@@ -50,7 +52,7 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
             <div className="flex items-center gap-2">
               <span className="w-6 h-[3px] bg-[var(--nm-primary)]" />
               <h2 className="text-[10px] font-mono font-bold text-[var(--nm-primary)] tracking-[0.2em] uppercase">
-                Analysis Summary
+                {t("atsAudit.analysisSummary")}
               </h2>
             </div>
             <p className="text-base font-['Manrope'] font-bold text-[var(--nm-text-primary)] leading-relaxed">
@@ -82,7 +84,7 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
           <div className="flex items-center gap-2 mb-6">
             <CheckCircle2 size={18} className="text-[var(--nm-success)]" />
             <h3 className="font-bold font-['Space_Grotesk'] text-sm tracking-widest text-[var(--nm-text-primary)] uppercase">
-              Strengths
+              {t("atsAudit.strengths")}
             </h3>
           </div>
           <ul className="space-y-4">
@@ -100,7 +102,7 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
           <div className="flex items-center gap-2 mb-6">
             <AlertCircle size={18} className="text-[var(--nm-error)]" />
             <h3 className="font-bold font-['Space_Grotesk'] text-sm tracking-widest text-[var(--nm-text-primary)] uppercase">
-              Areas to Improve
+              {t("atsAudit.areasToImprove")}
             </h3>
           </div>
           <ul className="space-y-4">
@@ -118,10 +120,10 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
       <div className="space-y-4">
         <div className="flex items-center justify-between px-2">
           <h3 className="font-bold font-['Space_Grotesk'] text-lg tracking-tight uppercase text-[var(--nm-text-primary)]">
-            Technical Breakdown
+            {t("atsAudit.technicalBreakdown")}
           </h3>
           <span className="text-[10px] font-mono text-[var(--nm-text-secondary)] font-bold uppercase tracking-widest">
-            {Object.keys(sections).length} Sections Analyzed
+            {t("atsAudit.sectionsAnalyzed", { count: Object.keys(sections).length })}
           </span>
         </div>
 
@@ -145,7 +147,7 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       <h4 className="font-bold font-['Space_Grotesk'] text-sm tracking-wider text-[var(--nm-text-primary)] uppercase">
-                        {sectionKey.replace(/([A-Z])/g, " $1").trim()}
+                        {t(`atsAudit.sections.${sectionKey}`, {}, sectionKey.replace(/([A-Z])/g, " $1").trim())}
                       </h4>
                       <div className="h-[2px] flex-1 bg-[var(--nm-surface-high)]" />
                     </div>
@@ -163,7 +165,7 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
                         {score}%
                       </div>
                       <div className="text-[10px] font-mono font-bold text-[var(--nm-text-secondary)] uppercase tracking-tighter">
-                        Accuracy
+                        {t("atsAudit.accuracy")}
                       </div>
                     </div>
                     {isExpanded ? <ChevronUp size={20} className="text-[var(--nm-text-primary)]" /> : <ChevronDown size={20} className="text-[var(--nm-text-primary)]" />}
@@ -177,7 +179,7 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
                       {strengths.length > 0 && (
                         <div>
                           <p className="text-[10px] font-mono font-bold text-[var(--nm-success)] mb-3 uppercase tracking-widest flex items-center gap-2">
-                            <span className="w-2 h-2 bg-[var(--nm-success)]" /> Optimized
+                            <span className="w-2 h-2 bg-[var(--nm-success)]" /> {t("atsAudit.optimized")}
                           </p>
                           <ul className="space-y-2">
                             {strengths.map((s, i) => (
@@ -189,7 +191,7 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
                       {weaknesses.length > 0 && (
                         <div>
                           <p className="text-[10px] font-mono font-bold text-[var(--nm-error)] mb-3 uppercase tracking-widest flex items-center gap-2">
-                            <span className="w-2 h-2 bg-[var(--nm-error)]" /> Recommendations
+                            <span className="w-2 h-2 bg-[var(--nm-error)]" /> {t("atsAudit.recommendations")}
                           </p>
                           <ul className="space-y-2">
                             {weaknesses.map((w, i) => (
@@ -213,7 +215,7 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
           <div className="flex items-center gap-3 mb-8">
             <Lightbulb size={24} className="text-[var(--nm-primary)]" />
             <h3 className="font-bold font-['Space_Grotesk'] text-xl tracking-tight text-[var(--nm-text-primary)] uppercase">
-              Action Plan
+              {t("atsAudit.actionPlan")}
             </h3>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -230,10 +232,10 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
       {/* CTA */}
       <div className="flex flex-col items-center gap-4 py-6">
         <button onClick={onReanalyze} className="jd-btn jd-btn-secondary px-16 py-4 text-sm tracking-widest uppercase shadow-[6px_6px_0_var(--nm-ink)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
-          Re-analyze (Fresh)
+          {t("atsAudit.reAnalyzeFresh")}
         </button>
         <button onClick={onBack} className="jd-btn jd-btn-primary px-16 py-4 text-sm tracking-widest uppercase shadow-[6px_6px_0_var(--nm-ink)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
-          Analyze Another
+          {t("atsAudit.analyzeAnother")}
         </button>
       </div>
     </div>

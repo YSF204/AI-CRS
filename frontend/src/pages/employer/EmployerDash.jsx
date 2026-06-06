@@ -10,10 +10,12 @@ import StatWidget from './components/StatWidget';
 import CompanyProfileCard from './components/CompanyProfileCard';
 import HiringPipelineCard from './components/HiringPipelineCard';
 import ChartWidget from './components/ChartWidget';
+import { useTranslation } from '../../context/LanguageContext';
 
 export default function EmployerDash() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { fetchAll } = useEmployerDash();
 
   const {
@@ -57,7 +59,7 @@ export default function EmployerDash() {
                 marginBottom: '6px',
               }}
             >
-              {loading ? 'Loading…' : (company?.name ?? 'Company')}
+              {loading ? t('employer.loading') : (company?.name ?? 'Company')}
             </div>
             <h1
               style={{
@@ -71,7 +73,7 @@ export default function EmployerDash() {
                 margin: 0,
               }}
             >
-              Dashboard
+              {t('dashboard.dashboard')}
             </h1>
           </div>
 
@@ -93,26 +95,26 @@ export default function EmployerDash() {
             }}
           >
             <PlusCircle size={18} strokeWidth={3} />
-            Post a Job
+            {t('dashboard.postJob')}
           </button>
         </div>
 
         {/* ── Stat Widgets ── */}
         <div className="employer-stats-grid">
           <StatWidget
-            label="Open Jobs"
+            label={t('employer.openJobs')}
             value={loading ? '…' : openJobs}
             accent="var(--nm-warning)"
             icon={Briefcase}
           />
           <StatWidget
-            label="Total Jobs"
+            label={t('employer.totalJobs')}
             value={loading ? '…' : jobs.length}
             accent="var(--nm-primary)"
             icon={CheckCircle2}
           />
           <StatWidget
-            label="Locations"
+            label={t('employer.locations')}
             value={loading ? '…' : (company?.branches?.length ?? '0')}
             accent="var(--nm-error)"
             icon={MapPin}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '../../../context/LanguageContext';
 
 const INPUT = {
   width: '100%', 
@@ -28,12 +29,14 @@ const LABEL = {
 };
 
 export default function JobForm({ form, setField, handleSubmit, saving }) {
+  const { t } = useTranslation();
+
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 32, marginTop: 40 }}>
       
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
         <div style={{ gridColumn: '1 / -1' }}>
-          <label htmlFor="jf-position" style={LABEL}>Job Title *</label>
+          <label htmlFor="jf-position" style={LABEL}>{t('employer.jobTitle', {}, 'Job Title')} *</label>
           <input
             id="jf-position"
             style={INPUT}
@@ -46,7 +49,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div style={{ gridColumn: '1 / -1' }}>
-          <label htmlFor="jf-description" style={LABEL}>Description *</label>
+          <label htmlFor="jf-description" style={LABEL}>{t('employer.jobDescription', {}, 'Description')} *</label>
           <textarea
             id="jf-description"
             style={{ ...INPUT, minHeight: 180, resize: 'vertical', lineHeight: 1.7 }}
@@ -59,7 +62,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div>
-          <label htmlFor="jf-workSite" style={LABEL}>Work Mode *</label>
+          <label htmlFor="jf-workSite" style={LABEL}>{t('employer.workMode', {}, 'Work Mode')} *</label>
           <select
             id="jf-workSite"
             style={{ ...INPUT, cursor: 'pointer' }}
@@ -69,14 +72,14 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           >
-            <option value="ON_SITE">ON-SITE</option>
-            <option value="REMOTE">REMOTE</option>
-            <option value="HYBRID">HYBRID</option>
+            <option value="ON_SITE">{t('common.onsite', {}, 'ON-SITE')}</option>
+            <option value="REMOTE">{t('common.remote', {}, 'REMOTE')}</option>
+            <option value="HYBRID">{t('common.hybrid', {}, 'HYBRID')}</option>
           </select>
         </div>
 
         <div>
-          <label htmlFor="jf-workDuration" style={LABEL}>Job Type *</label>
+          <label htmlFor="jf-workDuration" style={LABEL}>{t('employer.jobType', {}, 'Job Type')} *</label>
           <select
             id="jf-workDuration"
             style={{ ...INPUT, cursor: 'pointer' }}
@@ -86,15 +89,15 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           >
-            <option value="FULL_TIME">FULL-TIME</option>
-            <option value="PART_TIME">PART-TIME</option>
-            <option value="INTERNSHIP">INTERNSHIP</option>
-            <option value="CONTRACT">CONTRACT</option>
+            <option value="FULL_TIME">{t('common.fullTime', {}, 'FULL-TIME')}</option>
+            <option value="PART_TIME">{t('common.partTime', {}, 'PART-TIME')}</option>
+            <option value="INTERNSHIP">{t('common.internship', {}, 'INTERNSHIP')}</option>
+            <option value="CONTRACT">{t('common.contract', {}, 'CONTRACT')}</option>
           </select>
         </div>
 
         <div>
-          <label htmlFor="jf-yearsOfExperience" style={LABEL}>Experience Required (Y) *</label>
+          <label htmlFor="jf-yearsOfExperience" style={LABEL}>{t('employer.yearsOfExperience', {}, 'Experience Required (Y)')} *</label>
           <input
             id="jf-yearsOfExperience"
             style={INPUT}
@@ -109,7 +112,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div>
-          <label htmlFor="jf-salary" style={LABEL}>Salary ($/YR)</label>
+          <label htmlFor="jf-salary" style={LABEL}>{t('employer.salary', {}, 'Salary')} ($/YR)</label>
           <input
             id="jf-salary"
             style={INPUT}
@@ -117,14 +120,17 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
             min="0"
             value={form.salary}
             onChange={setField('salary')}
-            placeholder="e.g. 75000"
+            placeholder={t('employer.salaryPlaceholder', {}, 'e.g. 75000')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
 
         <div style={{ gridColumn: '1 / -1' }}>
-          <label htmlFor="jf-technicalSkills" style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+          <label htmlFor="jf-technicalSkills" style={LABEL}>
+            {t('employer.technicalSkills', {}, 'Technical Skills')}{' '}
+            <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span>
+          </label>
           <input
             id="jf-technicalSkills"
             style={INPUT}
@@ -137,7 +143,10 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div style={{ gridColumn: '1 / -1' }}>
-          <label htmlFor="jf-softSkills" style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+          <label htmlFor="jf-softSkills" style={LABEL}>
+            {t('employer.softSkills', {}, 'Soft Skills')}{' '}
+            <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span>
+          </label>
           <input
             id="jf-softSkills"
             style={INPUT}
@@ -167,7 +176,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
           cursor: saving ? 'not-allowed' : 'pointer',
         }}
       >
-        {saving ? 'SAVING...' : 'SAVE CHANGES'}
+        {saving ? t('employer.saving', {}, 'SAVING...') : t('employer.saveJob', {}, 'SAVE CHANGES')}
       </button>
     </form>
   );

@@ -7,10 +7,12 @@ import ApplicationViewer from "../../../components/applications/ApplicationViewe
 import ApplicantDetail from "../../../components/applications/ApplicantDetail";
 import ApplicantCard from "./ApplicantCard";
 import { SkCard, SkBox } from "../../../components/ui/Skeleton";
+import { useTranslation } from "../../../context/LanguageContext";
 
 export default function JobApplications() {
   const { jobId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState(null);
@@ -39,7 +41,7 @@ export default function JobApplications() {
       if (originalSelected?._id === appId) {
         setSelected(originalSelected);
       }
-      alert("Failed to update status. Please try again.");
+      alert(t('toast.failed_to_update_status', {}, "Failed to update status. Please try again."));
     }
   };
 
@@ -55,7 +57,7 @@ export default function JobApplications() {
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to update potential list. Please try again.");
+      alert(t('toast.failed_to_update_potential', {}, "Failed to update potential list. Please try again."));
     } finally {
       setTogglingAppId(null);
     }
@@ -76,13 +78,13 @@ export default function JobApplications() {
         setApplications(appsRes.data?.data?.applications || []);
       } catch (err) {
         console.error(err);
-        alert("Unable to load applications for this job.");
+        alert(t('employer.unableLoadApplications', {}, "Unable to load applications for this job."));
       } finally {
         setLoading(false);
       }
     };
     load();
-  }, [jobId]);
+  }, [jobId, t]);
 
   return (
     <div style={{
@@ -119,7 +121,7 @@ export default function JobApplications() {
               letterSpacing: "0.15em",
               marginBottom: 4
             }}>
-              Talent Pipelines
+              {t('employer.talentPipelines', {}, 'Talent Pipelines')}
             </div>
             <h1 style={{
               fontFamily: "var(--font-display)",
@@ -130,7 +132,7 @@ export default function JobApplications() {
               textTransform: "uppercase",
               margin: 0
             }}>
-              {job ? job.position : "Unit Intake"}
+              {job ? job.position : t('employer.unitIntake', {}, 'Unit Intake')}
             </h1>
           </div>
           <button
@@ -148,7 +150,7 @@ export default function JobApplications() {
               border: '3px solid var(--nm-ink)'
             }}
           >
-            <ArrowLeft size={14} strokeWidth={3} style={{ marginRight: 6, display: 'inline' }} /> Back
+            <ArrowLeft size={14} strokeWidth={3} style={{ marginRight: 6, display: 'inline' }} /> {t('common.back')}
           </button>
         </div>
 
@@ -170,7 +172,7 @@ export default function JobApplications() {
               borderBottom: activeTab === 'all' ? '6px solid var(--nm-ink)' : 'none'
             }}
           >
-            All Applicants
+            {t('employer.allApplicants', {}, 'All Applicants')}
           </button>
           <button
             onClick={() => setActiveTab('potential')}
@@ -189,7 +191,7 @@ export default function JobApplications() {
               borderBottom: activeTab === 'potential' ? '6px solid var(--nm-ink)' : 'none'
             }}
           >
-            Potential List
+            {t('employer.potentialList', {}, 'Potential List')}
           </button>
         </div>
 
@@ -231,7 +233,7 @@ export default function JobApplications() {
               textTransform: 'uppercase',
               letterSpacing: '0.05em'
             }}>
-              No Inbound Requests
+              {t('employer.noInboundRequests', {}, 'No Inbound Requests')}
             </div>
           </div>
         ) : (
@@ -248,7 +250,7 @@ export default function JobApplications() {
                 paddingBottom: '0.5rem',
                 borderBottom: '3px solid var(--nm-ink)',
               }}>
-                {filteredApps.length} {activeTab === 'all' ? 'Applicant' : 'Potential Candidate'}{filteredApps.length !== 1 ? 's' : ''}
+                {t('employer.applicationsCount', { count: filteredApps.length, type: activeTab === 'all' ? t('employer.applicant', {}, 'Applicant') : t('employer.potentialCandidate', {}, 'Potential Candidate') }, `${filteredApps.length} ${activeTab === 'all' ? 'Applicant' : 'Potential Candidate'}${filteredApps.length !== 1 ? 's' : ''}`)}
               </div>
 
               {selected ? (
@@ -297,8 +299,6 @@ export default function JobApplications() {
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                     }}>
-                      {/* <FileText size={12} strokeWidth={3} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-                      CV Document */}
                     </div>
                   </div>
                   <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: '10px' }}>
@@ -325,7 +325,7 @@ export default function JobApplications() {
                     color: 'var(--nm-text-tertiary)',
                     textTransform: 'uppercase',
                   }}>
-                    Select a candidate to view their CV
+                    {t('employer.selectCandidateViewCv', {}, 'Select a candidate to view their CV')}
                   </div>
                 </div>
               )}

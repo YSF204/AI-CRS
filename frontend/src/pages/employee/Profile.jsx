@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { User, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTranslation } from '../../context/LanguageContext';
 import DashboardNav from '../../components/shared/DashboardNav';
 import StatsBar from '../../components/shared/StatsBar';
 import ProfileHeader from '../../components/employee/ProfileHeader';
@@ -18,6 +19,7 @@ export default function Profile() {
   const { user, logout, updateUserState, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  const { t } = useTranslation();
   const { data: statsState = { cvs: 0, jobs: 0 } } = useFetch(async () => {
     const [cvsRes, jobsRes] = await Promise.all([api.get('/cvs'), api.get('/jobs')]);
     return {
@@ -28,11 +30,11 @@ export default function Profile() {
 
   const stats = useMemo(
     () => ([
-      { label: 'CVs on File', value: statsState.cvs, color: 'var(--nm-primary)' },
-      { label: 'Job Matches', value: statsState.jobs, color: 'var(--nm-warning)' },
-      { label: 'User Role', value: user?.role || 'EMPLOYEE', color: 'var(--nm-success)' },
+      { label: t('employee.cvsOnFile', {}, 'CVs on File'), value: statsState.cvs, color: 'var(--nm-primary)' },
+      { label: t('employee.jobMatches', {}, 'Job Matches'), value: statsState.jobs, color: 'var(--nm-warning)' },
+      { label: t('admin.role', {}, 'User Role'), value: user?.role || 'EMPLOYEE', color: 'var(--nm-success)' },
     ]),
-    [statsState, user?.role],
+    [statsState, user?.role, t],
   );
 
   useEffect(() => {
@@ -50,7 +52,7 @@ export default function Profile() {
       const res = await api.patch('/users/updateMe', updatedData);
       updateUserState(res.data?.data?.user);
     } catch (err) {
-      setError(err.response?.data?.message || 'Unable to update profile.');
+      setError(err.response?.data?.message || t('toast.failed_to_update_profile', {}, 'Unable to update profile.'));
       // Revert
       updateUserState(originalUser);
     }

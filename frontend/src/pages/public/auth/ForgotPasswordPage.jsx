@@ -6,8 +6,10 @@ import {
   AlertCircle,
 } from "lucide-react";
 import ForgotPasswordForm from "./ForgotPasswordForm";
+import { useTranslation } from "../../../context/LanguageContext";
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation();
   const [status, setStatus] = useState("form");
   const [message, setMessage] = useState("");
 
@@ -112,7 +114,7 @@ export default function ForgotPasswordPage() {
                 marginBottom: 16,
               }}
             >
-              Check Your Email
+              {t("publicAuth.checkYourEmail")}
             </h1>
             <p
               style={{
@@ -124,7 +126,7 @@ export default function ForgotPasswordPage() {
                 lineHeight: 1.6,
               }}
             >
-              {message} The link will expire in 10 minutes.
+              {message} {t("publicAuth.linkExpiration")}
             </p>
 
             <Link
@@ -144,7 +146,7 @@ export default function ForgotPasswordPage() {
                 boxShadow: "3px 3px 0 #0a0a0a",
               }}
             >
-              Back to Login
+              {t("publicAuth.backToLogin")}
             </Link>
           </div>
         )}
@@ -171,7 +173,7 @@ export default function ForgotPasswordPage() {
                 marginBottom: 16,
               }}
             >
-              Error
+              {t("common.error")}
             </h1>
             <p
               style={{
@@ -207,7 +209,7 @@ export default function ForgotPasswordPage() {
                 cursor: "pointer",
               }}
             >
-              Try Again
+              {t("common.tryAgain")}
             </button>
           </div>
         )}

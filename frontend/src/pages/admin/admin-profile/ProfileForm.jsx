@@ -1,5 +1,6 @@
 import React from 'react';
 import { User } from 'lucide-react';
+import { useTranslation } from '../../../context/LanguageContext';
 
 export function Field({ id, label, value, onChange, type = 'text' }) {
     return (
@@ -28,6 +29,8 @@ export function Field({ id, label, value, onChange, type = 'text' }) {
 }
 
 export default function AdminProfileForm({ form, setField, handleSubmit, saving, message, error, panelStyles, user }) {
+    const { t } = useTranslation();
+
     return (
         <div
             className="border-[4px] p-6"
@@ -50,9 +53,9 @@ export default function AdminProfileForm({ form, setField, handleSubmit, saving,
                     <User size={18} />
                 </div>
                 <div>
-                    <h2 className="text-2xl font-black text-(--fg)">Account Details</h2>
+                    <h2 className="text-2xl font-black text-(--fg)">{t('admin.accountDetails', {}, 'Account Details')}</h2>
                     <p className="font-mono text-sm text-(--fg-muted)">
-                        Update your admin account information
+                        {t('admin.updateAdminInfoDesc', {}, 'Update your admin account information')}
                     </p>
                 </div>
             </div>
@@ -86,13 +89,13 @@ export default function AdminProfileForm({ form, setField, handleSubmit, saving,
             )}
 
             <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
-                <Field id="firstName" label="First Name" value={form.firstName} onChange={setField('firstName')} />
-                <Field id="lastName" label="Last Name" value={form.lastName} onChange={setField('lastName')} />
-                <Field id="email" label="Email" type="email" value={form.email} onChange={setField('email')} />
+                <Field id="firstName" label={t('auth.firstName', {}, 'First Name')} value={form.firstName} onChange={setField('firstName')} />
+                <Field id="lastName" label={t('auth.lastName', {}, 'Last Name')} value={form.lastName} onChange={setField('lastName')} />
+                <Field id="email" label={t('auth.email', {}, 'Email')} type="email" value={form.email} onChange={setField('email')} />
 
                 <div className="flex flex-col gap-2">
                     <label className="font-mono text-[11px] uppercase tracking-[0.18em] text-(--fg-muted)" htmlFor="gender">
-                        Gender
+                        {t('auth.gender', {}, 'Gender')}
                     </label>
                     <select
                         id="gender"
@@ -106,20 +109,20 @@ export default function AdminProfileForm({ form, setField, handleSubmit, saving,
                             borderRadius: '0px',
                         }}
                     >
-                        <option value="MALE">Male</option>
-                        <option value="FEMALE">Female</option>
+                        <option value="MALE">{t('auth.male', {}, 'Male')}</option>
+                        <option value="FEMALE">{t('auth.female', {}, 'Female')}</option>
                     </select>
                 </div>
 
-                <Field id="age" label="Age" type="number" value={form.age} onChange={setField('age')} />
-                <Field id="telephone" label="Telephone" value={form.telephone} onChange={setField('telephone')} />
+                <Field id="age" label={t('auth.age', {}, 'Age')} type="number" value={form.age} onChange={setField('age')} />
+                <Field id="telephone" label={t('auth.telephone', {}, 'Telephone')} value={form.telephone} onChange={setField('telephone')} />
 
                 <div
                     className="md:col-span-2 flex items-center justify-between gap-4 border-t-[4px] border-dashed pt-4"
                     style={{ borderColor: 'var(--nm-ink, #000)' }}
                 >
                     <div className="font-mono text-xs text-(--fg-muted)">
-                        Signed in as `{user?.role || 'ADMIN'}`.
+                        {t('admin.signedInAs', {}, 'Signed in as')} `{user?.role || 'ADMIN'}`.
                     </div>
                     <button
                         type="submit"
@@ -133,7 +136,7 @@ export default function AdminProfileForm({ form, setField, handleSubmit, saving,
                             opacity: saving ? 0.6 : 1,
                         }}
                     >
-                        {saving ? 'Saving...' : 'Save Details'}
+                        {saving ? t('employer.saving', {}, 'Saving...') : t('admin.saveProfile', {}, 'Save Details')}
                     </button>
                 </div>
             </form>

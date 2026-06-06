@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom';
 import { Building2 } from 'lucide-react';
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function CompanyProfileCard({ company, loading, error }) {
+  const { t } = useTranslation();
+
   return (
     <div 
       className="nm-card"
@@ -38,7 +41,7 @@ export default function CompanyProfileCard({ company, loading, error }) {
             textTransform: 'uppercase', 
             letterSpacing: '0.12em' 
           }}>
-            Company Profile
+            {t('employer.companyProfile')}
           </div>
           <div style={{ 
             fontFamily: 'var(--font-display)', 
@@ -49,7 +52,7 @@ export default function CompanyProfileCard({ company, loading, error }) {
             marginTop: 4,
             textTransform: 'uppercase'
           }}>
-            {loading ? 'Loading...' : (company?.name ?? 'No Profile')}
+            {loading ? t('employer.loading') : (company?.name ?? t('employer.noProfile', {}, 'No Profile'))}
           </div>
         </div>
       </div>
@@ -65,16 +68,18 @@ export default function CompanyProfileCard({ company, loading, error }) {
           border: '3px solid var(--nm-ink)',
           background: 'var(--nm-bg)'
         }}>
-          Profile not set up.{' '}
-          <Link to="/employer/profile" style={{ color: 'var(--nm-primary)', textDecoration: 'underline' }}>Create Profile →</Link>
+          {t('employer.profileNotSetUp', {}, 'Profile not set up.')}{' '}
+          <Link to="/employer/profile" style={{ color: 'var(--nm-primary)', textDecoration: 'underline' }}>
+            {t('employer.createProfile', {}, 'Create Profile')} →
+          </Link>
         </div>
       ) : company ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {[
-            { label: 'License',  val: company.license },
-            { label: 'Contact',  val: company.contactEmail },
-            { label: 'Website',  val: company.website },
-            { label: 'Branches', val: company.branches?.map((b) => b.city).join(', ') },
+            { label: t('employer.license', {}, 'License'),  val: company.license },
+            { label: t('employer.contact', {}, 'Contact'),  val: company.contactEmail },
+            { label: t('employer.website', {}, 'Website'),  val: company.website },
+            { label: t('employer.branches', {}, 'Branches'), val: company.branches?.map((b) => b.city).join(', ') },
           ].map(({ label, val }) =>
             val ? (
               <div key={label}>
@@ -110,7 +115,7 @@ export default function CompanyProfileCard({ company, loading, error }) {
           color: 'var(--nm-text-tertiary)',
           fontStyle: 'italic'
         }}>
-          No company profile detected.
+          {t('employer.noCompanyProfileDetected', {}, 'No company profile detected.')}
         </div>
       ) : null}
     </div>

@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Sparkles, Layers } from "lucide-react";
 import DashboardNav from "../../../components/shared/DashboardNav";
 import { TEMPLATES } from "../../../features/cv-management/index.js";
+import { useTranslation } from "../../../context/LanguageContext";
 import TemplateCard from "./components/TemplateCard";
 import CreateModal from "./components/CreateModal";
 
 export default function CVTemplates() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [selected, setSelected] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,7 @@ export default function CVTemplates() {
         state: { jobTitle, templateId: selected.id },
       });
     } catch (err) {
-      setApiError("Unable to route to CV editor. Please try again.");
+      setApiError(t("cvTemplates.unableToRoute", {}, "Unable to route to CV editor. Please try again."));
       setLoading(false);
     }
   };
@@ -54,7 +56,7 @@ export default function CVTemplates() {
                 }}
               >
                 <Sparkles size={28} style={{ color: "var(--nm-warning)" }} />
-                CV Templates
+                {t("cvTemplates.cvTemplates")}
               </h1>
               <p
                 style={{
@@ -67,7 +69,7 @@ export default function CVTemplates() {
                   letterSpacing: "0.05em",
                 }}
               >
-                Choose a template to get started.
+                {t("cvTemplates.chooseTemplateDesc")}
               </p>
             </div>
 
@@ -87,7 +89,7 @@ export default function CVTemplates() {
               }}
             >
               <Layers size={14} strokeWidth={2.5} />
-              <span>{TEMPLATES.length} Templates</span>
+              <span>{t("cvTemplates.templatesCount", { count: TEMPLATES.length })}</span>
             </div>
           </div>
 
@@ -149,7 +151,7 @@ export default function CVTemplates() {
             textTransform: "uppercase",
           }}
         >
-          Select a template to start building your CV.
+          {t("cvTemplates.selectTemplateStart")}
         </div>
 
       </div>

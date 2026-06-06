@@ -345,7 +345,7 @@ export default function useCVEditor() {
 
         dispatch({ type: "SET_ACTIVE_SECTIONS", payload: resolvedOrder.length ? [...new Set(["summary", ...resolvedOrder])] : ["summary"] });
       } catch {
-        showToast("error", "Failed to load CV.");
+        showToast("error", "toast.failed_to_load");
       } finally {
         dispatch({ type: "SET_LOADING", payload: false });
       }
@@ -396,14 +396,14 @@ export default function useCVEditor() {
       const payload = buildPayload(filteredFormData());
       if (id === "new") {
         const res = await api.post(`/cvs`, payload);
-        showToast("success", "CV created!");
+        showToast("success", "toast.cv_created");
         navigate(`/employee/cv-editor/${res.data.data.cv._id}`, { replace: true });
       } else {
         await api.patch(`/cvs/${id}`, payload);
-        showToast("success", "CV saved!");
+        showToast("success", "toast.cv_saved");
       }
     } catch (err) {
-      showToast("error", err?.response?.data?.message || "Failed to save.");
+      showToast("error", err?.response?.data?.message || "toast.failed_to_save");
     } finally {
       dispatch({ type: "SET_SAVING", payload: false });
     }
@@ -442,9 +442,9 @@ export default function useCVEditor() {
 
       const payload = buildPayload(f);
       await api.patch(`/cvs/${id}`, payload);
-      showToast("success", "Changes applied & saved.");
+      showToast("success", "toast.changes_applied");
     } catch (err) {
-      showToast("error", "Applied but auto-save failed. Please save manually.");
+      showToast("error", "toast.applied_but_save_failed");
     }
   };
 
@@ -472,11 +472,11 @@ export default function useCVEditor() {
   }, []);
 
   const handleDownloadPdf = async () => {
-    if (id === "new") { showToast("error", "Please save the CV first to download it as PDF."); return; }
+    if (id === "new") { showToast("error", "toast.save_cv_first"); return; }
     dispatch({ type: "SET_DOWNLOADING_PDF", payload: true });
     try {
       const el = previewRef.current?.querySelector("[data-cv-content]");
-      if (!el) { showToast("error", "Preview not ready."); return; }
+      if (!el) { showToast("error", "toast.preview_not_ready"); return; }
       const clone = el.cloneNode(true);
       clone.querySelectorAll("[style]").forEach((node) => {
         const s = node.style;
@@ -511,9 +511,9 @@ export default function useCVEditor() {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-      showToast("success", "PDF downloaded!");
+      showToast("success", "toast.pdf_downloaded");
     } catch (err) {
-      showToast("error", "Failed to generate PDF.");
+      showToast("error", "toast.failed_pdf_generation");
     } finally {
       dispatch({ type: "SET_DOWNLOADING_PDF", payload: false });
     }
@@ -525,16 +525,16 @@ export default function useCVEditor() {
       if (id === "new") {
         dispatch({ type: "SET_CV", payload: ui.cv ? { ...ui.cv, templateId } : { templateId } });
         dispatch({ type: "SET_TEMPLATE_SELECTOR", payload: false });
-        showToast("success", "Template changed!");
+        showToast("success", "toast.template_changed");
         return;
       }
       const payload = buildPayload(filteredFormData());
       await api.patch(`/cvs/${id}`, { ...payload, templateId });
       dispatch({ type: "SET_CV", payload: { ...ui.cv, templateId } });
       dispatch({ type: "SET_TEMPLATE_SELECTOR", payload: false });
-      showToast("success", "Template changed!");
+      showToast("success", "toast.template_changed");
     } catch (err) {
-      showToast("error", err?.response?.data?.message || "Failed to change template.");
+      showToast("error", err?.response?.data?.message || "toast.failed_template_change");
     } finally {
       dispatch({ type: "SET_SAVING", payload: false });
     }

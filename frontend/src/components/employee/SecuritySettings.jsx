@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Shield, Eye, EyeOff, Key } from "lucide-react";
 import api from "../../services/api";
+import { useTranslation } from "../../context/LanguageContext";
 
 // FIX #6: Move PasswordField to module level to prevent remounting on every keystroke
 const PasswordField = ({
@@ -42,6 +43,7 @@ const PasswordField = ({
  * Solely responsible for the security / account panel.
  */
 export default function SecuritySettings() {
+  const { t } = useTranslation();
   const [form, setForm] = useState({ current: "", next: "", confirm: "" });
   const [show, setShow] = useState({
     current: false,
@@ -62,16 +64,16 @@ export default function SecuritySettings() {
     setSuccess(false);
 
     if (form.next.length < 8) {
-      setError("New password must be at least 8 characters.");
+      setError(t("auth.pwMinLength"));
       return;
     }
     if (form.next !== form.confirm) {
-      setError("New passwords do not match.");
+      setError(t("auth.pwMismatch"));
       return;
     }
     // FIX #6: Validate new password is different from current password
     if (form.current === form.next) {
-      setError("New password must be different from your current password.");
+      setError(t("auth.pwDifferent", {}, "New password must be different from your current password."));
       return;
     }
 
@@ -85,7 +87,7 @@ export default function SecuritySettings() {
       setForm({ current: "", next: "", confirm: "" });
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
-      setError(err.response?.data?.message || "Unable to update password.");
+      setError(err.response?.data?.message || t("auth.failedUpdatePassword", {}, "Unable to update password."));
     }
   };
 
@@ -93,13 +95,13 @@ export default function SecuritySettings() {
     <div className="nm-card security-settings-card">
       <h3 className="jd-section-title flex items-center gap-2">
         <Shield size={18} className="text-[var(--nm-warning)]" />
-        Account Security
+        {t('auth.security')}
       </h3>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <PasswordField
           id="current"
-          label="Current Password"
+          label={t('auth.currentPassword', {}, 'Current Password')}
           field="current"
           show={show}
           onToggle={toggle("current")}
@@ -109,7 +111,7 @@ export default function SecuritySettings() {
         <div className="grid grid-cols-1 gap-6">
           <PasswordField
             id="next"
-            label="New Password"
+            label={t('publicAuth.newPassword')}
             field="next"
             show={show}
             onToggle={toggle("next")}
@@ -118,7 +120,7 @@ export default function SecuritySettings() {
           />
           <PasswordField
             id="confirm"
-            label="Confirm Password"
+            label={t('auth.confirmPassword')}
             field="confirm"
             show={show}
             onToggle={toggle("confirm")}
@@ -134,14 +136,14 @@ export default function SecuritySettings() {
         )}
         {success && (
           <div className="nm-chip bg-[var(--nm-success-surface)] border-[var(--nm-success)] text-[var(--nm-success)] py-3 px-4 w-full justify-start lowercase">
-            Password updated successfully.
+            {t('auth.passwordUpdated', {}, 'Password updated successfully.')}
           </div>
         )}
 
         <div className="flex justify-end pt-2">
           <button type="submit" className="nm-btn nm-btn-primary w-full">
             <Shield size={16} />
-            UPDATE PASSWORD
+            {t('auth.updatePassword', {}, 'UPDATE PASSWORD').toUpperCase()}
           </button>
         </div>
       </form>

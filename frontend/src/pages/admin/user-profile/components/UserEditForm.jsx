@@ -1,40 +1,56 @@
 import React from "react";
 import { UserPlus } from "lucide-react";
-
-const roles = ["EMPLOYEE", "EMPLOYER", "ADMIN"];
-const genders = ["MALE", "FEMALE"];
-const statuses = ["ACTIVE", "INACTIVE", "PENDING"];
+import { useTranslation } from "../../../../context/LanguageContext";
 
 export default function UserEditForm({ formData, handleInputChange, handleSubmit, submitting, isCreate, isEdit, accountStatus, setAccountStatus, userId, navigate }) {
+  const { t } = useTranslation();
+
+  const roles = [
+    { value: "EMPLOYEE", label: t('admin.employeesLabel', {}, "Employee") },
+    { value: "EMPLOYER", label: t('admin.employersLabel', {}, "Employer") },
+    { value: "ADMIN", label: t('admin.adminsLabel', {}, "Admin") }
+  ];
+
+  const genders = [
+    { value: "MALE", label: t('auth.male', {}, "Male") },
+    { value: "FEMALE", label: t('auth.female', {}, "Female") }
+  ];
+
+  const statuses = [
+    { value: "ACTIVE", label: t('admin.activeLabel', {}, "Active") },
+    { value: "INACTIVE", label: t('admin.inactiveLabel', {}, "Inactive") },
+    { value: "PENDING", label: t('admin.pendingLabel', {}, "Pending") }
+  ];
+
   return (
     <form onSubmit={handleSubmit} className="grid gap-6">
       <div className="form-section grid gap-5 lg:grid-cols-2">
         <div>
-          <label htmlFor="uf-firstName" className="form-label">First Name</label>
+          <label htmlFor="uf-firstName" className="form-label">{t('auth.firstName', {}, 'First Name')}</label>
           <input
             id="uf-firstName"
             name="firstName"
             value={formData.firstName}
             onChange={handleInputChange}
             className="form-field"
-            placeholder="First name"
+            placeholder={t('auth.firstNamePlaceholder', {}, 'First name')}
             required
           />
         </div>
         <div>
-          <label htmlFor="uf-lastName" className="form-label">Last Name</label>
+          <label htmlFor="uf-lastName" className="form-label">{t('auth.lastName', {}, 'Last Name')}</label>
           <input
             id="uf-lastName"
             name="lastName"
             value={formData.lastName}
             onChange={handleInputChange}
             className="form-field"
-            placeholder="Last name"
+            placeholder={t('auth.lastNamePlaceholder', {}, 'Last name')}
             required
           />
         </div>
         <div>
-          <label htmlFor="uf-email" className="form-label">Email</label>
+          <label htmlFor="uf-email" className="form-label">{t('auth.email', {}, 'Email')}</label>
           <input
             id="uf-email"
             name="email"
@@ -47,7 +63,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           />
         </div>
         <div>
-          <label htmlFor="uf-telephone" className="form-label">Telephone</label>
+          <label htmlFor="uf-telephone" className="form-label">{t('auth.telephone', {}, 'Telephone')}</label>
           <input
             id="uf-telephone"
             name="telephone"
@@ -58,7 +74,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           />
         </div>
         <div>
-          <label htmlFor="uf-password" className="form-label">Password</label>
+          <label htmlFor="uf-password" className="form-label">{t('auth.password', {}, 'Password')}</label>
           <input
             id="uf-password"
             name="password"
@@ -68,14 +84,14 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
             className="form-field"
             placeholder={
               isEdit
-                ? "Leave blank to keep current password"
-                : "Password"
+                ? t('admin.leaveBlankPassword', {}, "Leave blank to keep current password")
+                : t('auth.password', {}, "Password")
             }
             required={!isEdit}
           />
         </div>
         <div>
-          <label htmlFor="uf-passwordConfirm" className="form-label">Confirm Password</label>
+          <label htmlFor="uf-passwordConfirm" className="form-label">{t('auth.confirmPassword', {}, 'Confirm Password')}</label>
           <input
             id="uf-passwordConfirm"
             name="passwordConfirm"
@@ -85,14 +101,14 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
             className="form-field"
             placeholder={
               isEdit
-                ? "Leave blank to keep current password"
-                : "Confirm password"
+                ? t('admin.leaveBlankPassword', {}, "Leave blank to keep current password")
+                : t('auth.confirmPassword', {}, "Confirm password")
             }
             required={!isEdit}
           />
         </div>
         <div>
-          <label htmlFor="uf-role" className="form-label">Role</label>
+          <label htmlFor="uf-role" className="form-label">{t('admin.role', {}, 'Role')}</label>
           <select
             id="uf-role"
             name="role"
@@ -101,16 +117,16 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
             className="form-field"
             required
           >
-            {roles.map((role) => (
-              <option key={role} value={role}>
-                {role}
+            {roles.map((r) => (
+              <option key={r.value} value={r.value}>
+                {r.label}
               </option>
             ))}
           </select>
         </div>
         {isEdit && (
           <div>
-            <label htmlFor="uf-accountStatus" className="form-label">Account Status</label>
+            <label htmlFor="uf-accountStatus" className="form-label">{t('admin.status', {}, 'Account Status')}</label>
             <select
               id="uf-accountStatus"
               name="accountStatus"
@@ -119,16 +135,16 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
               className="form-field"
               required
             >
-              {statuses.map((status) => (
-                <option key={status} value={status}>
-                  {status}
+              {statuses.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
                 </option>
               ))}
             </select>
           </div>
         )}
         <div>
-          <label htmlFor="uf-gender" className="form-label">Gender</label>
+          <label htmlFor="uf-gender" className="form-label">{t('auth.gender', {}, 'Gender')}</label>
           <select
             id="uf-gender"
             name="gender"
@@ -137,15 +153,15 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
             className="form-field"
             required
           >
-            {genders.map((gender) => (
-              <option key={gender} value={gender}>
-                {gender}
+            {genders.map((g) => (
+              <option key={g.value} value={g.value}>
+                {g.label}
               </option>
             ))}
           </select>
         </div>
         <div>
-          <label htmlFor="uf-age" className="form-label">Age</label>
+          <label htmlFor="uf-age" className="form-label">{t('auth.age', {}, 'Age')}</label>
           <input
             id="uf-age"
             name="age"
@@ -153,7 +169,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
             value={formData.age}
             onChange={handleInputChange}
             className="form-field"
-            placeholder="Age"
+            placeholder={t('auth.age', {}, 'Age')}
             min="18"
             max="150"
             required
@@ -163,10 +179,10 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
 
       {formData.role === "EMPLOYER" && (
         <div className="form-section grid gap-5">
-          <h2 className="text-xl font-bold">Company Details</h2>
+          <h2 className="text-xl font-bold">{t('employer.companyDetails', {}, 'Company Details')}</h2>
           <div className="grid gap-4 lg:grid-cols-2">
             <div>
-              <label htmlFor="uf-companyName" className="form-label">Company Name</label>
+              <label htmlFor="uf-companyName" className="form-label">{t('employer.companyName', {}, 'Company Name')}</label>
               <input
                 id="uf-companyName"
                 name="companyName"
@@ -178,7 +194,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
               />
             </div>
             <div>
-              <label htmlFor="uf-companyLicense" className="form-label">License Number</label>
+              <label htmlFor="uf-companyLicense" className="form-label">{t('employer.licenseNumber', {}, 'License Number')}</label>
               <input
                 id="uf-companyLicense"
                 name="companyLicense"
@@ -190,7 +206,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
               />
             </div>
             <div>
-              <label htmlFor="uf-contactEmail" className="form-label">Contact Email</label>
+              <label htmlFor="uf-contactEmail" className="form-label">{t('employer.contactEmail', {}, 'Contact Email')}</label>
               <input
                 id="uf-contactEmail"
                 name="contactEmail"
@@ -203,7 +219,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
               />
             </div>
             <div>
-              <label htmlFor="uf-website" className="form-label">Website</label>
+              <label htmlFor="uf-website" className="form-label">{t('employer.companyWebsite', {}, 'Website')}</label>
               <input
                 id="uf-website"
                 name="website"
@@ -217,7 +233,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           </div>
           <div className="grid gap-4 lg:grid-cols-3">
             <div>
-              <label htmlFor="uf-branchName" className="form-label">Branch Name</label>
+              <label htmlFor="uf-branchName" className="form-label">{t('employer.branchName', {}, 'Branch Name')}</label>
               <input
                 id="uf-branchName"
                 name="branchName"
@@ -229,7 +245,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
               />
             </div>
             <div>
-              <label htmlFor="uf-branchCity" className="form-label">Branch City</label>
+              <label htmlFor="uf-branchCity" className="form-label">{t('employer.city', {}, 'Branch City')}</label>
               <input
                 id="uf-branchCity"
                 name="branchCity"
@@ -241,7 +257,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
               />
             </div>
             <div>
-              <label htmlFor="uf-branchStreet" className="form-label">Branch Street</label>
+              <label htmlFor="uf-branchStreet" className="form-label">{t('employer.companyAddress', {}, 'Branch Street')}</label>
               <input
                 id="uf-branchStreet"
                 name="branchStreet"
@@ -265,11 +281,11 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
           {isCreate ? <UserPlus size={18} /> : null}
           {submitting
             ? isCreate
-              ? "Creating..."
-              : "Saving..."
+              ? t('admin.creating', {}, "Creating...")
+              : t('employer.saving', {}, "Saving...")
             : isCreate
-              ? "Create User"
-              : "Save Changes"}
+              ? t('admin.createUser', {}, "Create User")
+              : t('admin.saveProfile', {}, "Save Changes")}
         </button>
         {!isCreate && (
           <button
@@ -277,7 +293,7 @@ export default function UserEditForm({ formData, handleInputChange, handleSubmit
             onClick={() => navigate(`/admin/users/${userId}`)}
             className="nm-btn"
           >
-            View Profile
+            {t('employer.viewProfile', {}, 'View Profile')}
           </button>
         )}
       </div>

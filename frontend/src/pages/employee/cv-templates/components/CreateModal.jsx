@@ -4,10 +4,12 @@ import {
   MOCK_CV_DATA,
   MOCK_USER_NAME,
 } from "../../../../features/cv-management/mockCvData.js";
+import { useTranslation } from "../../../../context/LanguageContext";
 
 export default function CreateModal({ template, onClose, onCreate, loading }) {
   const [title, setTitle] = useState("");
   const [error, setError] = useState("");
+  const { t } = useTranslation();
   const ModalPreviewComponent = template.component;
 
   const ZOOM = 0.72;
@@ -15,7 +17,7 @@ export default function CreateModal({ template, onClose, onCreate, loading }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim()) {
-      setError("Please enter a title for your CV.");
+      setError(t("cvTemplates.pleaseEnterTitle"));
       return;
     }
     onCreate(title.trim());
@@ -101,7 +103,7 @@ export default function CreateModal({ template, onClose, onCreate, loading }) {
                 marginLeft: 6,
               }}
             >
-              Live Preview — {template.name}
+              {t("cvTemplates.livePreview", { name: template.name })}
             </span>
             <span
               style={{
@@ -177,7 +179,7 @@ export default function CreateModal({ template, onClose, onCreate, loading }) {
                   marginBottom: "0.3rem",
                 }}
               >
-                Using template
+                {t("cvTemplates.usingTemplate")}
               </div>
               <h2
                 style={{
@@ -250,13 +252,13 @@ export default function CreateModal({ template, onClose, onCreate, loading }) {
                 className="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--nm-text-tertiary)] mb-2 block"
                 htmlFor="cv-title-input"
               >
-                CV / Job Title
+                {t("cvTemplates.cvJobTitle")}
               </label>
               <input
                 id="cv-title-input"
                 type="text"
                 className="nm-input w-full"
-                placeholder="e.g. Frontend Developer…"
+                placeholder={t("cvTemplates.titlePlaceholder")}
                 value={title}
                 onChange={(e) => {
                   setTitle(e.target.value);
@@ -294,10 +296,10 @@ export default function CreateModal({ template, onClose, onCreate, loading }) {
                 disabled={loading}
               >
                 {loading ? (
-                  "CREATING…"
+                  t("cvTemplates.creating")
                 ) : (
                   <>
-                    CREATE CV <ArrowRight size={16} strokeWidth={2.5} />
+                    {t("cvTemplates.createCv")} <ArrowRight size={16} strokeWidth={2.5} />
                   </>
                 )}
               </button>
@@ -308,7 +310,7 @@ export default function CreateModal({ template, onClose, onCreate, loading }) {
                 style={{ background: "var(--nm-surface)" }}
                 disabled={loading}
               >
-                CANCEL
+                {t("common.cancel")}
               </button>
             </div>
           </form>

@@ -5,10 +5,12 @@ import DashboardNav from '../../components/shared/DashboardNav';
 import JobsGrid from './components/JobsGrid';
 import api from '../../services/api';
 import useFetch from '../../hooks/useFetch';
+import { useTranslation } from '../../context/LanguageContext';
 
 export default function ManageJobs() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const { data: fetchedJobs = [], loading } = useFetch(async () => {
     const res = await api.get('/jobs/employer/me');
@@ -64,7 +66,7 @@ export default function ManageJobs() {
               letterSpacing: '0.15em', 
               marginBottom: 8 
             }}>
-              Asset Administration
+              {t("employer.assetAdministration", {}, "Asset Administration")}
             </div>
             <h1 style={{ 
               fontFamily: 'var(--font-display)', 
@@ -76,7 +78,7 @@ export default function ManageJobs() {
               textTransform: 'uppercase',
               margin: 0
             }}>
-              Job Inventory
+              {t("employer.jobInventory", {}, "Job Inventory")}
             </h1>
           </div>
         </div>

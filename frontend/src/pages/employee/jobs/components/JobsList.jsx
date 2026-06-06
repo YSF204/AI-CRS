@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "../../../../context/LanguageContext";
 import {
   CvMatchPanel,
   JobDetailsPanel,
@@ -47,6 +48,8 @@ export default function JobsList({
   onApply,
   onCloseJob,
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="mt-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(360px,420px)] gap-5 items-start">
       <section className="jd-panel">
@@ -102,9 +105,9 @@ export default function JobsList({
             <JobDiscoveryState
               type="error"
               description={
-                jobsError?.response?.data?.message || "Unable to load jobs."
+                jobsError?.response?.data?.message || t("employeeJobs.unableToLoadJobs", {}, "Unable to load jobs.")
               }
-              action="Try Again"
+              action={t("employeeJobs.tryAgain", {}, "Try Again")}
               onAction={refetchJobs}
             />
           ) : mode === "browse" && jobsLoading ? (
@@ -120,17 +123,17 @@ export default function JobsList({
               type={mode === "browse" ? "empty" : "no-results"}
               title={
                 mode === "browse"
-                   ? "No jobs match current filters"
-                   : "No matches"
+                   ? t("employeeJobs.noJobsFilters", {}, "No jobs match current filters")
+                   : t("employeeJobs.noMatches", {}, "No matches")
               }
               description={
                 mode === "browse"
-                  ? "Try a broader search term or clear filters."
-                  : "Select a CV or upload a PDF to get personalized job matches."
+                  ? t("employeeJobs.browseEmptyDesc", {}, "Try a broader search term or clear filters.")
+                  : t("employeeJobs.cvEmptyDesc", {}, "Select a CV or upload a PDF to get personalized job matches.")
               }
               action={
                 mode === "browse" && hasActiveFilters
-                  ? "Clear Filters"
+                  ? t("employeeJobs.clearFilters", {}, "Clear Filters")
                   : undefined
               }
               onAction={

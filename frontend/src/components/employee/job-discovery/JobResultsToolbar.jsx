@@ -1,13 +1,16 @@
 import React from "react";
 import { X } from "lucide-react";
+import { useTranslation } from "../../../context/LanguageContext";
 
 const JobResultsToolbar = ({ resultCount, sortBy, onSortChange, onClearFilters, hasActiveFilters }) => {
+  const { t } = useTranslation();
+
   const sortOptions = [
-    { value: "newest", label: "Newest" },
-    { value: "oldest", label: "Oldest" },
-    { value: "salary_desc", label: "Highest Salary" },
-    { value: "salary_asc", label: "Lowest Salary" },
-    { value: "relevance", label: "Relevance" }
+    { value: "newest", label: t("employeeJobs.newest", {}, "Newest") },
+    { value: "oldest", label: t("employeeJobs.oldest", {}, "Oldest") },
+    { value: "salary_desc", label: t("employeeJobs.highestSalary", {}, "Highest Salary") },
+    { value: "salary_asc", label: t("employeeJobs.lowestSalary", {}, "Lowest Salary") },
+    { value: "relevance", label: t("employeeJobs.relevance", {}, "Relevance") }
   ];
 
   return (
@@ -15,14 +18,16 @@ const JobResultsToolbar = ({ resultCount, sortBy, onSortChange, onClearFilters, 
       <div className="flex items-center gap-3">
         <div className="w-2 h-2 bg-[var(--nm-primary)]" />
         <span className="font-mono text-[11px] font-black uppercase tracking-widest text-[var(--nm-text-primary)]">
-          {resultCount === 1 ? "1 job found" : `${resultCount} jobs found`}
+          {resultCount === 1
+            ? t("employeeJobs.jobsFound_one", {}, "1 job found")
+            : t("employeeJobs.jobsFound_other", { count: resultCount }, `${resultCount} jobs found`)}
         </span>
       </div>
 
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <div className="flex-1 sm:flex-none relative">
           <label htmlFor="sort-jobs" className="sr-only">
-            Sort by
+            {t("employeeJobs.sortBy", {}, "Sort by")}
           </label>
           <select
             id="sort-jobs"
@@ -43,10 +48,10 @@ const JobResultsToolbar = ({ resultCount, sortBy, onSortChange, onClearFilters, 
             type="button"
             onClick={onClearFilters}
             className="jd-btn jd-btn-ghost py-2 min-h-0 font-mono text-[10px] font-black uppercase bg-[var(--nm-error-surface)] text-[var(--nm-error)] border-2 hover:bg-[var(--nm-error)] hover:text-white transition-colors"
-            aria-label="Clear all filters"
+            aria-label={t("employeeJobs.clearFilters", {}, "Clear Filters")}
           >
             <X size={12} strokeWidth={3} />
-            Clear Filters
+            {t("employeeJobs.clearFilters", {}, "Clear Filters")}
           </button>
         )}
       </div>

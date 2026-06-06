@@ -7,8 +7,10 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
 import ResetPasswordForm from "./ResetPasswordForm";
+import { useTranslation } from "../../../context/LanguageContext";
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -19,9 +21,9 @@ export default function ResetPasswordPage() {
   useEffect(() => {
     if (!token) {
       setStatus("error");
-      setMessage("Invalid reset link. Token is missing.");
+      setMessage(t("auth.invalidResetLink", {}, "Invalid reset link. Token is missing."));
     }
-  }, [token]);
+  }, [token, t]);
 
   const handleSuccess = (msg, autoLoginToken) => {
     setStatus("success");
@@ -130,7 +132,7 @@ export default function ResetPasswordPage() {
                 marginBottom: 16,
               }}
             >
-              Password Reset Successful!
+              {t("auth.pwResetSuccess")}
             </h1>
             <p
               style={{
@@ -142,7 +144,7 @@ export default function ResetPasswordPage() {
                 lineHeight: 1.6,
               }}
             >
-              {message} You'll be logged in automatically.
+              {message} {t("auth.autoLoginMsg")}
             </p>
           </div>
         )}
@@ -169,7 +171,7 @@ export default function ResetPasswordPage() {
                 marginBottom: 16,
               }}
             >
-              Error
+              {t("common.error")}
             </h1>
             <p
               style={{
@@ -201,7 +203,7 @@ export default function ResetPasswordPage() {
                 boxShadow: "3px 3px 0 #0a0a0a",
               }}
             >
-              Request New Link
+              {t("auth.requestNewLink")}
             </Link>
           </div>
         )}

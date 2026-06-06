@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from '../../../context/LanguageContext';
 
 const INPUT = {
   width: '100%', 
@@ -28,31 +29,33 @@ const LABEL = {
 };
 
 export default function PostJobForm({ form, set, handleSubmit, loading }) {
+  const { t } = useTranslation();
+
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
         <div>
-          <label htmlFor="pjf-position" style={LABEL}>Job Title *</label>
+          <label htmlFor="pjf-position" style={LABEL}>{t('employer.jobTitle', {}, 'Job Title')} *</label>
           <input
             id="pjf-position"
             style={INPUT}
             value={form.position}
             onChange={set('position')}
-            placeholder="e.g. OPERATIONS ANALYST"
+            placeholder={t('employer.jobTitlePlaceholder', {}, 'e.g. OPERATIONS ANALYST')}
             required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
         <div>
-          <label htmlFor="pjf-salary" style={LABEL}>Salary ($/YR) *</label>
+          <label htmlFor="pjf-salary" style={LABEL}>{t('employer.salary', {}, 'Salary')} ($/YR) *</label>
           <input
             id="pjf-salary"
             style={INPUT}
             type="number"
             value={form.salary}
             onChange={set('salary')}
-            placeholder="e.g. 85000"
+            placeholder={t('employer.salaryPlaceholder', {}, 'e.g. 85000')}
             required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
@@ -61,13 +64,13 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
       </div>
 
       <div>
-        <label htmlFor="pjf-description" style={LABEL}>Description *</label>
+        <label htmlFor="pjf-description" style={LABEL}>{t('employer.jobDescription', {}, 'Description')} *</label>
         <textarea
           id="pjf-description"
           style={{ ...INPUT, minHeight: 180, resize: 'vertical', lineHeight: 1.7 }}
           value={form.description}
           onChange={set('description')}
-          placeholder="Detail the operational scope and mission objectives..."
+          placeholder={t('employer.jobDescriptionPlaceholder', {}, 'Detail the operational scope and mission objectives...')}
           required
           onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
           onBlur={e => e.target.style.transform = 'none'}
@@ -76,7 +79,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32 }}>
         <div>
-          <label htmlFor="pjf-workSite" style={LABEL}>Work Mode *</label>
+          <label htmlFor="pjf-workSite" style={LABEL}>{t('employer.workMode', {}, 'Work Mode')} *</label>
           <select
             id="pjf-workSite"
             style={{ ...INPUT, cursor: 'pointer' }}
@@ -85,13 +88,13 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           >
-            <option value="REMOTE">REMOTE</option>
-            <option value="ON_SITE">ON-SITE</option>
-            <option value="HYBRID">HYBRID</option>
+            <option value="REMOTE">{t('common.remote', {}, 'REMOTE')}</option>
+            <option value="ON_SITE">{t('common.onsite', {}, 'ON-SITE')}</option>
+            <option value="HYBRID">{t('common.hybrid', {}, 'HYBRID')}</option>
           </select>
         </div>
         <div>
-          <label htmlFor="pjf-workDuration" style={LABEL}>Job Type *</label>
+          <label htmlFor="pjf-workDuration" style={LABEL}>{t('employer.jobType', {}, 'Job Type')} *</label>
           <select
             id="pjf-workDuration"
             style={{ ...INPUT, cursor: 'pointer' }}
@@ -100,14 +103,14 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           >
-            <option value="FULL_TIME">FULL-TIME</option>
-            <option value="PART_TIME">PART-TIME</option>
-            <option value="CONTRACT">CONTRACT</option>
-            <option value="INTERNSHIP">INTERNSHIP</option>
+            <option value="FULL_TIME">{t('common.fullTime', {}, 'FULL-TIME')}</option>
+            <option value="PART_TIME">{t('common.partTime', {}, 'PART-TIME')}</option>
+            <option value="CONTRACT">{t('common.contract', {}, 'CONTRACT')}</option>
+            <option value="INTERNSHIP">{t('common.internship', {}, 'INTERNSHIP')}</option>
           </select>
         </div>
         <div>
-          <label htmlFor="pjf-yearsOfExperience" style={LABEL}>Experience Required (Y) *</label>
+          <label htmlFor="pjf-yearsOfExperience" style={LABEL}>{t('employer.yearsOfExperience', {}, 'Experience Required (Y)')} *</label>
           <input
             id="pjf-yearsOfExperience"
             style={INPUT}
@@ -115,7 +118,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
             min="0"
             value={form.yearsOfExperience}
             onChange={set('yearsOfExperience')}
-            placeholder="e.g. 3"
+            placeholder={t('employer.experiencePlaceholder', {}, 'e.g. 3')}
             required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
@@ -125,25 +128,31 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
         <div>
-          <label htmlFor="pjf-technicalSkills" style={LABEL}>Technical Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+          <label htmlFor="pjf-technicalSkills" style={LABEL}>
+            {t('employer.technicalSkills', {}, 'Technical Skills')}{' '}
+            <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span>
+          </label>
           <input
             id="pjf-technicalSkills"
             style={INPUT}
             value={form.technicalSkills}
             onChange={set('technicalSkills')}
-            placeholder="e.g. PYTHON, AWS, SQL"
+            placeholder={t('employer.technicalSkillsPlaceholder', {}, 'e.g. PYTHON, AWS, SQL')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
         <div>
-          <label htmlFor="pjf-softSkills" style={LABEL}>Soft Skills <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span></label>
+          <label htmlFor="pjf-softSkills" style={LABEL}>
+            {t('employer.softSkills', {}, 'Soft Skills')}{' '}
+            <span style={{ textTransform: 'none', fontWeight: 500, opacity: 0.6 }}>(CSV)</span>
+          </label>
           <input
             id="pjf-softSkills"
             style={INPUT}
             value={form.softSkills}
             onChange={set('softSkills')}
-            placeholder="e.g. STRATEGIC, AGILE"
+            placeholder={t('employer.softSkillsPlaceholder', {}, 'e.g. STRATEGIC, AGILE')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
@@ -167,7 +176,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
           cursor: loading ? 'not-allowed' : 'pointer',
         }}
       >
-        {loading ? 'POSTING...' : 'POST JOB'}
+        {loading ? t('employer.posting', {}, 'POSTING...') : t('employer.postJobSubmit', {}, 'POST JOB')}
       </button>
     </form>
   );

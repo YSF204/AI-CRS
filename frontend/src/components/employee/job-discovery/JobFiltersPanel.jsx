@@ -1,20 +1,23 @@
 import React from "react";
 import { X, SlidersHorizontal } from "lucide-react";
+import { useTranslation } from "../../../context/LanguageContext";
 
 const JobFiltersPanel = ({ filters, onFilterChange, onClearFilters, isOpen, onToggle }) => {
+  const { t } = useTranslation();
+
   const workSiteOptions = [
-    { value: "", label: "All Work Sites" },
-    { value: "REMOTE", label: "Remote" },
-    { value: "ONSITE", label: "On-site" },
-    { value: "HYBRID", label: "Hybrid" }
+    { value: "", label: t("employeeJobs.allWorkSites", {}, "All Work Sites") },
+    { value: "REMOTE", label: t("common.remote", {}, "Remote") },
+    { value: "ONSITE", label: t("common.onsite", {}, "On-site") },
+    { value: "HYBRID", label: t("common.hybrid", {}, "Hybrid") }
   ];
 
   const workDurationOptions = [
-    { value: "", label: "All Types" },
-    { value: "FULL_TIME", label: "Full-time" },
-    { value: "PART_TIME", label: "Part-time" },
-    { value: "CONTRACT", label: "Contract" },
-    { value: "INTERNSHIP", label: "Internship" }
+    { value: "", label: t("employeeJobs.allTypes", {}, "All Types") },
+    { value: "FULL_TIME", label: t("common.fullTime", {}, "Full-time") },
+    { value: "PART_TIME", label: t("common.partTime", {}, "Part-time") },
+    { value: "CONTRACT", label: t("common.contract", {}, "Contract") },
+    { value: "INTERNSHIP", label: t("common.internship", {}, "Internship") }
   ];
 
   const hasActiveFilters = Object.values(filters).some(
@@ -32,7 +35,7 @@ const JobFiltersPanel = ({ filters, onFilterChange, onClearFilters, isOpen, onTo
       >
         <div className="flex items-center gap-2">
           <SlidersHorizontal size={18} className="text-[var(--nm-primary)]" />
-          <span className="jd-section-title mb-0">Filters</span>
+          <span className="jd-section-title mb-0">{t("employeeJobs.filters", {}, "Filters")}</span>
           {hasActiveFilters && (
             <span className="jd-badge jd-badge-primary">
               {Object.values(filters).filter(v => v !== "" && v !== null && v !== undefined).length}
@@ -59,7 +62,7 @@ const JobFiltersPanel = ({ filters, onFilterChange, onClearFilters, isOpen, onTo
         <div id="filters-content" className="mt-4 space-y-4">
           <div>
             <label htmlFor="filter-worksite" className="jd-section-title mb-2 block">
-              Work Site
+              {t("employer.location", {}, "Location")}
             </label>
             <select
               id="filter-worksite"
@@ -77,7 +80,7 @@ const JobFiltersPanel = ({ filters, onFilterChange, onClearFilters, isOpen, onTo
 
           <div>
             <label htmlFor="filter-duration" className="jd-section-title mb-2 block">
-              Work Duration
+              {t("employer.type", {}, "Type")}
             </label>
             <select
               id="filter-duration"
@@ -95,7 +98,7 @@ const JobFiltersPanel = ({ filters, onFilterChange, onClearFilters, isOpen, onTo
 
           <div>
             <label htmlFor="filter-min-salary" className="jd-section-title mb-2 block">
-              Minimum Salary ($)
+              {t("employeeJobs.minimumSalary", {}, "Minimum Salary ($)")}
             </label>
             <input
               id="filter-min-salary"
@@ -108,13 +111,13 @@ const JobFiltersPanel = ({ filters, onFilterChange, onClearFilters, isOpen, onTo
               value={filters.minSalary || ""}
               onChange={(e) => onFilterChange({ ...filters, minSalary: e.target.value ? Number(e.target.value) : null })}
               className="jd-input"
-              placeholder="No minimum…"
+              placeholder={t("employeeJobs.noMinimum", {}, "No minimum…")}
             />
           </div>
 
           <div>
             <label htmlFor="filter-max-salary" className="jd-section-title mb-2 block">
-              Maximum Salary ($)
+              {t("employeeJobs.maximumSalary", {}, "Maximum Salary ($)")}
             </label>
             <input
               id="filter-max-salary"
@@ -127,13 +130,13 @@ const JobFiltersPanel = ({ filters, onFilterChange, onClearFilters, isOpen, onTo
               value={filters.maxSalary || ""}
               onChange={(e) => onFilterChange({ ...filters, maxSalary: e.target.value ? Number(e.target.value) : null })}
               className="jd-input"
-              placeholder="No maximum…"
+              placeholder={t("employeeJobs.noMaximum", {}, "No maximum…")}
             />
           </div>
 
           <div>
             <label htmlFor="filter-min-experience" className="jd-section-title mb-2 block">
-              Minimum Experience (years)
+              {t("employeeJobs.minimumExperience", {}, "Minimum Experience (years)")}
             </label>
             <input
               id="filter-min-experience"
@@ -146,7 +149,7 @@ const JobFiltersPanel = ({ filters, onFilterChange, onClearFilters, isOpen, onTo
               value={filters.minExperience || ""}
               onChange={(e) => onFilterChange({ ...filters, minExperience: e.target.value ? Number(e.target.value) : null })}
               className="jd-input"
-              placeholder="No minimum…"
+              placeholder={t("employeeJobs.noMinimum", {}, "No minimum…")}
             />
           </div>
 
@@ -157,7 +160,7 @@ const JobFiltersPanel = ({ filters, onFilterChange, onClearFilters, isOpen, onTo
               className="jd-btn jd-btn-ghost w-full"
             >
               <X size={16} />
-              Clear All Filters
+              {t("employeeJobs.clearAllFilters", {}, "Clear All Filters")}
             </button>
           )}
         </div>

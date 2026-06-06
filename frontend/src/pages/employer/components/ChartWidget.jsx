@@ -1,15 +1,17 @@
 import React, { useMemo } from 'react';
 import {
-  Chart as ChartJS, CategoryScale, LinearScale, BarElement,
-  Title, Tooltip, Legend
-} from 'chart.js';
+   Chart as ChartJS, CategoryScale, LinearScale, BarElement,
+   Title, Tooltip, Legend
+ } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { useTheme } from '../../../context/ThemeContext';
+import { useTranslation } from '../../../context/LanguageContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function ChartWidget({ jobs = [] }) {
   const { theme } = useTheme();
+  const { t, lang } = useTranslation();
   const isDark = theme === 'dark';
 
   const { labels, data: chartData } = useMemo(() => {
@@ -26,7 +28,7 @@ export default function ChartWidget({ jobs = [] }) {
       const nextWeekStart = new Date(currentWeekStart);
       nextWeekStart.setDate(nextWeekStart.getDate() + 7);
       
-      const mStr = currentWeekStart.toLocaleString('default', { month: 'short' });
+      const mStr = currentWeekStart.toLocaleString(lang, { month: 'short' });
       const dStr = currentWeekStart.getDate();
       wLabels.push(`${mStr} ${dStr}`);
       wCounts.push(0);
@@ -50,7 +52,7 @@ export default function ChartWidget({ jobs = [] }) {
     });
 
     return { labels: wLabels, data: wCounts };
-  }, [jobs]);
+  }, [jobs, lang]);
 
   const options = {
     responsive: true,
@@ -94,7 +96,7 @@ export default function ChartWidget({ jobs = [] }) {
     labels,
     datasets: [
       {
-        label: 'Jobs Posted',
+        label: t('employer.jobsPosted', {}, 'Jobs Posted'),
         data: chartData,
         backgroundColor: 'var(--nm-primary)',
         borderColor: 'var(--nm-ink)',
@@ -131,7 +133,7 @@ export default function ChartWidget({ jobs = [] }) {
             textTransform: 'uppercase', 
             letterSpacing: '0.15em' 
           }}>
-            Activity
+            {t('employer.activity', {}, 'Activity')}
           </div>
           <div style={{ 
             fontFamily: 'var(--font-display)', 
@@ -142,7 +144,7 @@ export default function ChartWidget({ jobs = [] }) {
             marginTop: 4,
             textTransform: 'uppercase'
           }}>
-            Jobs Posted Over Time
+            {t('employer.jobsPostedOverTime', {}, 'Jobs Posted Over Time')}
           </div>
         </div>
         <div style={{ 
@@ -157,7 +159,7 @@ export default function ChartWidget({ jobs = [] }) {
           letterSpacing: '0.05em',
           boxShadow: '3px 3px 0 var(--nm-ink)'
         }}>
-          This Year
+          {t('employer.thisYear', {}, 'This Year')}
         </div>
       </div>
       

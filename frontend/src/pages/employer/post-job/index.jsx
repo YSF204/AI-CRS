@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardNav from '../../../components/shared/DashboardNav';
 import api from '../../../services/api';
 import PostJobForm from './PostJobForm';
+import { useTranslation } from '../../../context/LanguageContext';
 
 const EMPTY = {
   position: '', description: '', salary: '',
@@ -11,6 +12,7 @@ const EMPTY = {
 };
 
 export default function PostJob() {
+  const { t } = useTranslation();
   const [form, setForm] = useState(EMPTY);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -37,9 +39,9 @@ export default function PostJob() {
       navigate('/employer');
     } catch (err) {
       if (err.response?.status === 404) {
-        setError('COMPANY PROFILE INCOMPLETE. POSTING RESTRICTED.');
+        setError(t('employer.companyProfileIncomplete', {}, 'COMPANY PROFILE INCOMPLETE. POSTING RESTRICTED.'));
       } else {
-        setError(err.response?.data?.message || 'CRITICAL FAILURE: LISTING NOT PUBLISHED.');
+        setError(err.response?.data?.message || t('employer.criticalFailureListingNotPublished', {}, 'CRITICAL FAILURE: LISTING NOT PUBLISHED.'));
       }
     } finally {
       setLoading(false);
@@ -83,7 +85,7 @@ export default function PostJob() {
             lineHeight: 1,
             margin: 0
           }}>
-            Publish a Job Listing
+            {t('employer.postNewJob', {}, 'Publish a Job Listing')}
           </h1>
           <p style={{
             fontFamily: 'var(--font-body)',
@@ -93,7 +95,7 @@ export default function PostJob() {
             maxWidth: '600px',
             lineHeight: 1.6
           }}>
-            Configure the parameters for the new talent requisition. All fields marked are required for system indexing.
+            {t('employer.postJobDesc', {}, 'Configure the parameters for the new talent requisition. All fields marked are required for system indexing.')}
           </p>
 
           {error && (
@@ -110,7 +112,7 @@ export default function PostJob() {
               marginBottom: 32,
               boxShadow: '4px 4px 0 var(--nm-ink)'
             }}>
-              SYSTEM ALERT: {error}
+              {t('employer.systemAlert', {}, 'SYSTEM ALERT')}: {error}
             </div>
           )}
 

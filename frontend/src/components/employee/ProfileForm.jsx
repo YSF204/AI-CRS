@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Save, User, Phone, MapPin, Globe, FileText } from 'lucide-react';
+import { useTranslation } from '../../context/LanguageContext';
 
 const FIELD_STYLE = {
   background: 'transparent',
@@ -37,6 +38,7 @@ function FormField({ label, id, icon: Icon, type = 'text', value, onChange, plac
  * Manages its own draft state; calls onSave with the updated values.
  */
 export default function ProfileForm({ user, onSave }) {
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     firstName: user?.firstName ?? '',
     lastName: user?.lastName ?? '',
@@ -67,13 +69,13 @@ export default function ProfileForm({ user, onSave }) {
     <div className="nm-card profile-form-card">
       <h3 className="jd-section-title flex items-center gap-2">
         <User size={18} className="text-[var(--nm-primary)]" />
-        Personal Information
+        {t('auth.personalInfo')}
       </h3>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <FormField
-            label="First Name"
+            label={t('auth.firstName')}
             id="firstName"
             icon={User}
             value={form.firstName}
@@ -81,7 +83,7 @@ export default function ProfileForm({ user, onSave }) {
             placeholder="John"
           />
           <FormField
-            label="Last Name"
+            label={t('auth.lastName')}
             id="lastName"
             icon={User}
             value={form.lastName}
@@ -89,7 +91,7 @@ export default function ProfileForm({ user, onSave }) {
             placeholder="Doe"
           />
           <FormField
-            label="Email Address"
+            label={t('auth.email')}
             id="email"
             icon={Globe}
             type="email"
@@ -98,7 +100,7 @@ export default function ProfileForm({ user, onSave }) {
             placeholder="you@example.com"
           />
           <FormField
-            label="Phone Number"
+            label={t('auth.phoneNumber')}
             id="phone"
             icon={Phone}
             type="tel"
@@ -107,7 +109,7 @@ export default function ProfileForm({ user, onSave }) {
             placeholder="+20 100 000 0000"
           />
           <FormField
-            label="Age"
+            label={t('auth.age')}
             id="age"
             icon={MapPin}
             type="number"
@@ -121,7 +123,7 @@ export default function ProfileForm({ user, onSave }) {
               className="form-label mb-1"
             >
               <FileText size={12} className="inline mr-1.5 mb-0.5" />
-              Gender
+              {t('auth.gender')}
             </label>
             <select 
               id="gender" 
@@ -129,8 +131,8 @@ export default function ProfileForm({ user, onSave }) {
               onChange={set('gender')} 
               className="nm-select text-sm font-mono"
             >
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
+              <option value="MALE">{t('auth.male')}</option>
+              <option value="FEMALE">{t('auth.female')}</option>
             </select>
           </div>
         </div>
@@ -141,7 +143,7 @@ export default function ProfileForm({ user, onSave }) {
             className={`nm-btn px-8 min-w-[180px] ${saved ? 'bg-[var(--nm-success)] text-white' : 'nm-btn-primary'}`}
           >
             <Save size={16} />
-            {saved ? 'PROFILE SAVED' : 'SAVE CHANGES'}
+            {saved ? t('common.saved').toUpperCase() : t('common.saveChanges').toUpperCase()}
           </button>
         </div>
       </form>

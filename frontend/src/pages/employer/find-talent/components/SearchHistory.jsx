@@ -1,7 +1,10 @@
 import React from 'react';
 import { Clock, ChevronRight } from 'lucide-react';
+import { useTranslation } from '../../../../context/LanguageContext';
 
 export default function SearchHistory({ history, historyLoading, onSelectRecord }) {
+  const { t } = useTranslation();
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {historyLoading ? (
@@ -13,7 +16,7 @@ export default function SearchHistory({ history, historyLoading, onSelectRecord 
           textAlign: 'center',
           textTransform: 'uppercase',
           letterSpacing: '0.1em'
-        }}>LOADING SEARCH HISTORY...</div>
+        }}>{t('employer.loadingHistory', {}, 'LOADING SEARCH HISTORY...')}</div>
       ) : history.length === 0 ? (
         <div style={{
           background: 'var(--nm-surface)',
@@ -25,7 +28,7 @@ export default function SearchHistory({ history, historyLoading, onSelectRecord 
         }}>
           <Clock size={48} strokeWidth={2.5} style={{ margin: '0 auto 24px', opacity: 0.5 }} />
           <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 18, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-            No Search History Found
+            {t('employer.noSearches', {}, 'No Search History Found')}
           </div>
         </div>
       ) : (
@@ -68,7 +71,7 @@ export default function SearchHistory({ history, historyLoading, onSelectRecord 
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em'
               }}>
-                {new Date(record.createdAt).toLocaleDateString()} • {record.candidate.length} Matches Found
+                {new Date(record.createdAt).toLocaleDateString()} • {t('employer.matchesFoundCount', { count: record.candidate.length }, `${record.candidate.length} Matches Found`)}
               </div>
             </div>
             <div style={{

@@ -2,49 +2,51 @@ import React from 'react';
 import { Code2, Brain, Server, Layout } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 import YousefImage from '../../../assets/Yousef.png';
-
-const team = [
-  {
-    name: 'Yousef AL Bakri',
-    role: 'Full Stack Developer',
-    initials: 'YA',
-    image: YousefImage,
-    bio: 'Passionate full stack developer with experience in modern web technologies. Designed the platform architecture and AI integration pipeline.',
-    skills: ['React', 'Node.js', 'MongoDB', 'Next.js', "AI Integration", "postgreSQL"],
-    Icon: Code2,
-    accent: 'var(--nm-primary)',
-  },
-  {
-    name: 'Bashar AL-Ajalin',
-    role: 'Full Stack Developer',
-    initials: 'BA',
-    bio: 'Detail-oriented frontend engineer specializing in building responsive, accessible, and performant user interfaces with a strong eye for design.',
-    skills: ['React', 'TailwindCSS', 'Figma', 'UI/UX'],
-    Icon: Layout,
-    accent: 'var(--nm-warning)',
-  },
-  {
-    name: 'Ismail Jboor',
-    role: 'Backend Developer',
-    initials: 'IJ',
-    bio: 'good backend developer with expertise in building scalable APIs and managing databases. Focused on creating efficient server-side logic and seamless integration with AI services.    ',
-    skills: ['Node.js', 'Express', 'PostgreSQL'],
-    Icon: Server,
-    accent: 'var(--nm-success)',
-  },
-  {
-    name: 'Azeez Abu Queider',
-    role: 'Frontend Developer',
-    initials: 'AA',
-    bio: 'Passionate frontend developer with a keen eye for design and a commitment to creating intuitive user experiences.',
-    skills: ['React', 'TailwindCSS', 'Figma', 'UI/UX'],
-    Icon: Brain,
-    accent: 'var(--nm-primary)',
-  },
-];
+import { useTranslation } from '../../../context/LanguageContext';
 
 export default function TeamSection() {
   const { theme } = useTheme();
+  const { t } = useTranslation();
+
+  const team = [
+    {
+      name: 'Yousef AL Bakri',
+      role: t('team.members.yousef.role'),
+      initials: 'YA',
+      image: YousefImage,
+      bio: t('team.members.yousef.bio'),
+      skills: ['React', 'Node.js', 'MongoDB', 'Next.js', "AI Integration", "postgreSQL"],
+      Icon: Code2,
+      accent: 'var(--nm-primary)',
+    },
+    {
+      name: 'Bashar AL-Ajalin',
+      role: t('team.members.bashar.role'),
+      initials: 'BA',
+      bio: t('team.members.bashar.bio'),
+      skills: ['React', 'TailwindCSS', 'Figma', 'UI/UX'],
+      Icon: Layout,
+      accent: 'var(--nm-warning)',
+    },
+    {
+      name: 'Ismail Jboor',
+      role: t('team.members.ismail.role'),
+      initials: 'IJ',
+      bio: t('team.members.ismail.bio'),
+      skills: ['Node.js', 'Express', 'PostgreSQL'],
+      Icon: Server,
+      accent: 'var(--nm-success)',
+    },
+    {
+      name: 'Azeez Abu Queider',
+      role: t('team.members.azeez.role'),
+      initials: 'AA',
+      bio: t('team.members.azeez.bio'),
+      skills: ['React', 'TailwindCSS', 'Figma', 'UI/UX'],
+      Icon: Brain,
+      accent: 'var(--nm-primary)',
+    },
+  ];
 
   return (
     <section
@@ -72,7 +74,7 @@ export default function TeamSection() {
             marginBottom: '1rem',
           }}
         >
-          Meet the <span style={{ color: 'var(--nm-primary)' }}>Team</span>
+          {t('team.title')} <span style={{ color: 'var(--nm-primary)' }}>{t('team.titleHighlight')}</span>
         </h2>
         <p
           style={{
@@ -84,7 +86,7 @@ export default function TeamSection() {
             lineHeight: 1.7,
           }}
         >
-          Four developers from Palestine building the future of CV creation with AI.
+          {t('team.description')}
         </p>
       </div>
 

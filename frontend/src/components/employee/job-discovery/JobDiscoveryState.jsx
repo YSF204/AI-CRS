@@ -1,45 +1,47 @@
 import React from "react";
 import { Loader2, AlertCircle, Inbox, FileText, Search } from "lucide-react";
+import { useTranslation } from "../../../context/LanguageContext";
 
 const JobDiscoveryState = ({ type, title, description, action, onAction }) => {
+  const { t } = useTranslation();
   const getStateConfig = () => {
     switch (type) {
       case "loading":
         return {
           icon: Loader2,
           iconProps: { className: "animate-spin" },
-          defaultTitle: "Loading Jobs",
-          defaultDescription: "Fetching available jobs..."
+          defaultTitle: t("employeeJobs.loadingTitle", {}, "Loading Jobs"),
+          defaultDescription: t("employeeJobs.loadingDesc", {}, "Fetching available jobs...")
         };
       case "error":
         return {
           icon: AlertCircle,
-          defaultTitle: "Error",
-          defaultDescription: "Failed to load jobs. Please try again."
+          defaultTitle: t("common.error", {}, "Error"),
+          defaultDescription: t("employeeJobs.errorDesc", {}, "Failed to load jobs. Please try again.")
         };
       case "empty":
         return {
           icon: Search,
-          defaultTitle: "No Jobs Found",
-          defaultDescription: "Try adjusting your search filters."
+          defaultTitle: t("employeeJobs.emptyTitle", {}, "No Jobs Found"),
+          defaultDescription: t("employeeJobs.emptyDesc", {}, "Try adjusting your search filters.")
         };
       case "no-results":
         return {
           icon: Inbox,
-          defaultTitle: "No Results",
-          defaultDescription: "No jobs match your criteria."
+          defaultTitle: t("employeeJobs.noResultsTitle", {}, "No Results"),
+          defaultDescription: t("employeeJobs.noResultsDesc", {}, "No jobs match your criteria.")
         };
       case "no-cv":
         return {
           icon: FileText,
-          defaultTitle: "CV Missing",
-          defaultDescription: "Upload a CV to see jobs that match your skills."
+          defaultTitle: t("employeeJobs.noCvTitle", {}, "CV Missing"),
+          defaultDescription: t("employeeJobs.noCvDesc", {}, "Upload a CV to see jobs that match your skills.")
         };
       default:
         return {
           icon: Inbox,
-          defaultTitle: "No Data",
-          defaultDescription: "No information available."
+          defaultTitle: t("employeeJobs.noDataTitle", {}, "No Data"),
+          defaultDescription: t("employeeJobs.noDataDesc", {}, "No information available.")
         };
     }
   };

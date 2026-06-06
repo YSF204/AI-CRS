@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Calendar, Zap, LayoutTemplate, Loader2 } from 'lucide-react';
 import { getTemplateById } from '../../../features/cv-management/index.js';
+import { useTranslation } from '../../../context/LanguageContext';
 
 const A4_WIDTH_PX = 794;
 const A4_HEIGHT_PX = 1123;
@@ -40,11 +41,13 @@ const normalizeCvForTemplate = (cv) => ({
           'technicalSkills',
           'softSkills',
           'language',
+          'customSections',
         ],
   },
 });
 
 export default function CVPreviewCard({ cv, loading, analyzingId, onAnalyze }) {
+  const { t } = useTranslation();
   const viewportRef = useRef(null);
   const [scale, setScale] = useState(0.28);
   const createdDate = new Date(cv.updatedAt || cv.createdAt).toLocaleDateString();
@@ -97,7 +100,7 @@ export default function CVPreviewCard({ cv, loading, analyzingId, onAnalyze }) {
           ) : (
             <div className="ats-preview-fallback">
               <LayoutTemplate size={24} />
-              <span>Preview Unavailable</span>
+              <span>{t("employeeJobs.previewUnavailable", {}, "Preview Unavailable")}</span>
             </div>
           )}
         </div>
@@ -105,8 +108,8 @@ export default function CVPreviewCard({ cv, loading, analyzingId, onAnalyze }) {
 
       <div className="ats-card-content">
         <div className="ats-card-header">
-          <h3 className="ats-card-title truncate" title={cv.jobTitle || 'Untitled CV'}>
-            {cv.jobTitle || 'Untitled CV'}
+          <h3 className="ats-card-title truncate" title={cv.jobTitle || t("employeeJobs.untitledCv", {}, "Untitled CV")}>
+            {cv.jobTitle || t("employeeJobs.untitledCv", {}, "Untitled CV")}
           </h3>
           <div className="ats-card-meta">
             <span className="flex items-center gap-1.5">
@@ -127,15 +130,15 @@ export default function CVPreviewCard({ cv, loading, analyzingId, onAnalyze }) {
           >
             {analyzingId === cv._id ? (
               <span className="flex items-center justify-center gap-2">
-                <Loader2 size={16} className="animate-spin" /> Analyzing...
+                <Loader2 size={16} className="animate-spin" /> {t("employeeJobs.analyzing", {}, "Analyzing...")}
               </span>
             ) : loading ? (
               <span className="flex items-center justify-center gap-2 opacity-60">
-                <Zap size={16} /> Analyze This CV
+                <Zap size={16} /> {t("employeeJobs.analyzeThisCv", {}, "Analyze This CV")}
               </span>
             ) : (
               <span className="flex items-center justify-center gap-2">
-                <Zap size={16} /> Analyze This CV
+                <Zap size={16} /> {t("employeeJobs.analyzeThisCv", {}, "Analyze This CV")}
               </span>
             )}
           </button>

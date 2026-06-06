@@ -3,10 +3,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Sun, Moon, Briefcase, FileText, User, Search,
   ChevronRight, ChevronLeft, LayoutDashboard, PlusSquare,
-  Users, Settings, CheckCircle, LayoutTemplate, LogOut, Menu, X
+  Users, Settings, CheckCircle, LayoutTemplate, LogOut, Menu, X, Globe
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useTranslation } from '../../context/LanguageContext';
 import logoExpanded from '../../assets/LOGO 1.svg';
 import logoCollapsed from '../../assets/LOGO2.svg';
 import './DashboardNav.css';
@@ -14,6 +15,7 @@ import './DashboardNav.css';
 export default function DashboardNav({ role = 'employee' }) {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+  const { t, lang, toggleLanguage } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(() => {
@@ -26,7 +28,7 @@ export default function DashboardNav({ role = 'employee' }) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || 'My Account';
+  const fullName = `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || t('dashboard.myAccount');
 
   // Check if we're on mobile
   useEffect(() => {
@@ -108,27 +110,27 @@ export default function DashboardNav({ role = 'employee' }) {
     employer: {
       baseLink: '/employer',
       items: [
-        { label: "Dashboard", href: "/employer", icon: LayoutDashboard },
-        { label: "Post Job", href: "/employer/post-job", icon: PlusSquare },
-        { label: "Manage Jobs", href: "/employer/jobs", icon: Briefcase },
-        { label: "Find Talent", href: "/employer/search", icon: Users },
+        { label: t("dashboard.dashboard"), href: "/employer", icon: LayoutDashboard },
+        { label: t("dashboard.postJob"), href: "/employer/post-job", icon: PlusSquare },
+        { label: t("dashboard.manageJobs"), href: "/employer/jobs", icon: Briefcase },
+        { label: t("dashboard.findTalent"), href: "/employer/search", icon: Users },
       ],
     },
     admin: {
       baseLink: '/admin',
       items: [
-        { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-        { label: "Manage Users", href: "/admin/users", icon: Users },
+        { label: t("dashboard.dashboard"), href: "/admin", icon: LayoutDashboard },
+        { label: t("dashboard.manageUsers"), href: "/admin/users", icon: Users },
       ],
     },
     employee: {
       baseLink: '/employee',
       items: [
-        { label: "My CVs", href: "/employee/cvs", icon: FileText },
-        { label: "ATS Score", href: "/employee/ats-score", icon: CheckCircle },
-        { label: "CV Templates", href: "/employee/cv-templates", icon: LayoutTemplate },
-        { label: "Find Jobs", href: "/employee/jobs", icon: Search },
-        { label: "Applications", href: "/employee/applications", icon: Briefcase },
+        { label: t("dashboard.myCvs"), href: "/employee/cvs", icon: FileText },
+        { label: t("dashboard.atsScore"), href: "/employee/ats-score", icon: CheckCircle },
+        { label: t("dashboard.cvTemplates"), href: "/employee/cv-templates", icon: LayoutTemplate },
+        { label: t("dashboard.findJobs"), href: "/employee/jobs", icon: Search },
+        { label: t("dashboard.applications"), href: "/employee/applications", icon: Briefcase },
       ],
     },
   };
@@ -215,18 +217,25 @@ export default function DashboardNav({ role = 'employee' }) {
             <span className="jd-sidebar-action-text truncate">{fullName}</span>
           </Link>
 
+          <button onClick={toggleLanguage} className="jd-sidebar-action">
+            <div className="jd-sidebar-link-icon">
+              <Globe size={20} strokeWidth={2.5} />
+            </div>
+            <span className="jd-sidebar-action-text">{lang === 'en' ? 'العربية' : 'English'}</span>
+          </button>
+
           <button onClick={toggleTheme} className="jd-sidebar-action">
             <div className="jd-sidebar-link-icon">
               {theme === 'light' ? <Moon size={20} strokeWidth={2.5} /> : <Sun size={20} strokeWidth={2.5} />}
             </div>
-            <span className="jd-sidebar-action-text">{theme === 'light' ? 'Dark Mode' : 'Light Mode'}</span>
+            <span className="jd-sidebar-action-text">{theme === 'light' ? t('dashboard.darkMode') : t('dashboard.lightMode')}</span>
           </button>
 
           <button onClick={handleLogout} className="jd-sidebar-action" style={{ color: 'var(--nm-error)' }}>
             <div className="jd-sidebar-link-icon">
               <LogOut size={20} strokeWidth={2.5} />
             </div>
-            <span className="jd-sidebar-action-text">Log Out</span>
+            <span className="jd-sidebar-action-text">{t('dashboard.logout')}</span>
           </button>
         </div>
       </aside>
