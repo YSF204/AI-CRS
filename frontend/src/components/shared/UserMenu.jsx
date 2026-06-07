@@ -5,12 +5,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from '../../context/LanguageContext';
 
-/**
- * UserMenu — User dropdown with Paper design system.
- * Matches new navbar visual language with semantic tokens.
- *
- * @param {string} profileHref - Link to user profile page
- */
+
 export default function UserMenu({ profileHref = '/employee/profile' }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();

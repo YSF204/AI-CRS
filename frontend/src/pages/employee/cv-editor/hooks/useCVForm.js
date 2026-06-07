@@ -32,10 +32,12 @@ export default function useCVForm(showToast, autoSaveFunction = null, user = nul
   const [suggestions, setSuggestions] = useState({});
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState({});
 
+  /// keeping a ref of form state so the auto-save timer always gets the latest data
   const autoSaveTimerRef = useRef(null);
   const formRef = useRef(form);
   useEffect(() => { formRef.current = form; }, [form]);
 
+  /// automatically saves CV changes to the database after 1 second of inactivity
   const triggerAutoSave = useCallback(() => {
     if (!autoSaveFunction) return;
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
@@ -152,6 +154,7 @@ export default function useCVForm(showToast, autoSaveFunction = null, user = nul
     triggerAutoSave();
   };
 
+  /// fetches AI suggestions for fields like summary or skills based on current form context
   const fetchSuggestions = useCallback(async (field, context = {}) => {
     setIsLoadingSuggestions((prev) => ({ ...prev, [field]: true }));
     try {
@@ -178,6 +181,7 @@ export default function useCVForm(showToast, autoSaveFunction = null, user = nul
   const fetchSuggestionsRef = useRef(fetchSuggestions);
   fetchSuggestionsRef.current = fetchSuggestions;
 
+  /// debounces the suggestion fetch requests to avoid spamming the backend/AI APIs on every keystroke
   const debouncedFetchSuggestions = useMemo(
     () => debounce((field, context) => { fetchSuggestionsRef.current(field, context); }, 2000),
     [],

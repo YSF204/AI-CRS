@@ -1,10 +1,7 @@
 import React from "react";
 import { LayoutGrid, Edit3, Eye } from "lucide-react";
 
-/**
- * Fixed bottom tab bar for mobile CV editor.
- * Tabs: Sections | Editor | Preview
- */
+
 export default function MobileTabBar({ activeTab, onChange, activeSections }) {
   const tabs = [
     { id: "sections", label: "Sections", icon: LayoutGrid },

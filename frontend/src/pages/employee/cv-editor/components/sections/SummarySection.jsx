@@ -1,10 +1,7 @@
 import React from "react";
 import SuggestionBox from "../SuggestionBox";
 
-/**
- * SummarySection - Handles full name and professional summary input
- * Single Responsibility: Render summary form and integrate suggestion UI
- */
+
 export default function SummarySection({ form, handlers, fetchSuggestions, handleSuggestionSelect, suggestions, isLoadingSuggestions }) {
   return (
     <div className="space-y-6">

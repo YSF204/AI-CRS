@@ -1,12 +1,6 @@
 import { useState, useEffect } from 'react';
 
-/**
- * Reactive hook that returns true when the given media query matches.
- * Updates in real-time as the viewport resizes.
- *
- * @param {string} query - A CSS media query string, e.g. '(max-width: 767px)'
- * @returns {boolean}
- */
+
 export function useMediaQuery(query) {
   const [matches, setMatches] = useState(() => {
     if (typeof window === 'undefined') return false;

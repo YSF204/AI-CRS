@@ -10,10 +10,7 @@ const hoverOut = (e) => {
   e.currentTarget.style.boxShadow = '5px 5px 0 #0a0a0a';
 };
 
-/**
- * QuickActionsCard
- * Spans 8 columns, arranged horizontally for the wider dashboard layout.
- */
+
 export default function QuickActionsCard({ onPostJob }) {
   const actions = [
     { label: 'Post a New Job',   icon: PlusCircle, color: '#FFE630', onClick: onPostJob },

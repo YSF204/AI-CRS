@@ -1,11 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 
-/**
- * Individual template preview card.
- * Uses ResizeObserver to dynamically calculate the scale so the A4 CV
- * always fits perfectly inside its card — regardless of card width on
- * any screen size (mobile: 1 col, tablet: 2 col, desktop: 3 col).
- */
+
 function TemplatePreviewCard({
   tmpl,
   isActive,
@@ -66,24 +61,7 @@ function TemplatePreviewCard({
   );
 }
 
-/**
- * Fully responsive Template Selector Modal.
- *
- * Breakpoints:
- *  Desktop  (≥ 900px) : 3-column grid, max-width 1200px
- *  Tablet   (640–899px): 2-column grid, 95vw width
- *  Mobile   (< 640px)  : 1-column grid, full-screen modal
- *
- * Props:
- *  show              {boolean}
- *  onClose           {() => void}
- *  templates         {Array}   — TEMPLATES array from cv-management
- *  currentTemplateId {number}
- *  onSelect          {(id) => void}
- *  saving            {boolean}
- *  userName          {string}
- *  getFilteredFormData {() => object}
- */
+
 export default function TemplateSelector({
   show,
   onClose,

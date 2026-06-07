@@ -38,10 +38,7 @@ const PasswordField = ({
   </div>
 );
 
-/**
- * SecuritySettings — password change form.
- * Solely responsible for the security / account panel.
- */
+
 export default function SecuritySettings() {
   const { t } = useTranslation();
   const [form, setForm] = useState({ current: "", next: "", confirm: "" });

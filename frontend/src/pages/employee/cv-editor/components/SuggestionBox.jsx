@@ -1,9 +1,6 @@
 import React from 'react';
 
-/**
- * SuggestionBox - Displays AI-powered suggestions below form fields
- * Single Responsibility: Render suggestion list and handle selection
- */
+
 const SuggestionBox = ({ suggestions, onSelect, isLoading, single = false }) => {
   // Always render the container to prevent flickering
   const hasContent = (suggestions && suggestions.length > 0) || isLoading;

@@ -12,10 +12,7 @@ import SecuritySettings from '../../components/employee/SecuritySettings';
 import api from '../../services/api';
 import useFetch from '../../hooks/useFetch';
 
-/**
- * Profile — composes ProfileHeader + ProfileForm + SecuritySettings.
- * Responsible only for layout/composition and data passing.
- */
+
 export default function Profile() {
   const { user, logout, updateUserState, refreshUser } = useAuth();
   const navigate = useNavigate();

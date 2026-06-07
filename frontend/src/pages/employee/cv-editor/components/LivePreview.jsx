@@ -13,12 +13,7 @@ const FOOTER_ZONE = 60;
 const HEADER_ZONE = 0;
 const PUSH_BUFFER = 19;
 
-/**
- * Mobile Preview Tab — shows the full CV with all pages and page-break
- * separators, dynamically scaled to fit the mobile screen width.
- * Uses ResizeObserver for scale and the same pagination algorithm as
- * the desktop LivePreview.
- */
+
 function MobilePreviewTab({ formData, userName, TemplateComponent, highlights, template }) {
   const outerRef  = useRef(null);
   const contentRef = useRef(null);
@@ -304,17 +299,7 @@ function MobilePreviewTab({ formData, userName, TemplateComponent, highlights, t
 
 // (A4 constants defined at top of file)
 
-/**
- * LivePreview renders the CV template at a scaled size.
- *
- * Props:
- *  formData    — filtered CV form data
- *  userName    — display name
- *  templateId  — which template to render
- *  highlights  — optional highlight markers
- *  zoom        — override default zoom (desktop only)
- *  isMobileTab — when true, renders as a full-width scaled preview for the mobile Preview tab
- */
+
 export default function LivePreview({ formData, userName, templateId, highlights, zoom: zoomProp, isMobileTab }) {
 
   const template = getTemplateById(templateId);
@@ -332,13 +317,13 @@ export default function LivePreview({ formData, userName, templateId, highlights
     // ── Find blocks to paginate ──
     // Use "leaf" break-inside-avoid elements: the most granular blocks.
     // - For sections with entries (experience, education, custom): individual entries
-    // - For atomic sections (summary, skills, languages): the section itself
+    /// check which elements we need to avoid breaking across pages
     const allBreakAvoid = container.querySelectorAll('.break-inside-avoid');
     const leafBlocks = Array.from(allBreakAvoid).filter(el =>
       !el.querySelector('.break-inside-avoid')
     );
 
-    // Also include <section> tags without break-inside-avoid that we might miss
+    /// get standalone sections that don't have block-avoid wrappers
     const standaloneSections = Array.from(container.querySelectorAll('section')).filter(s =>
       !s.classList.contains('break-inside-avoid') && !s.querySelector('.break-inside-avoid')
     );
@@ -350,6 +335,7 @@ export default function LivePreview({ formData, userName, templateId, highlights
       return;
     }
 
+    /// helper to group things together if they belong to the same parent section
     const getGroupTarget = (block) => {
       const group = block.closest('.cv-page-group');
       if (group && container.contains(group)) return group;
@@ -367,20 +353,20 @@ export default function LivePreview({ formData, userName, templateId, highlights
       elementsToMeasure.add(targetByBlock.get(block));
     });
 
-    // Sort by DOM order (top to bottom)
+    /// sorting elements from top to bottom so we process them in correct order
     blocks.sort((a, b) => {
       const pos = a.compareDocumentPosition(b);
       return pos & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
     });
 
-    // ① Reset all margins
+    /// clear old margins first to get clean measurements
     elementsToMeasure.forEach((el) => {
       el.style.paddingTop = '';
       el.removeAttribute('data-pagination-margin');
     });
-    void container.offsetHeight; // force reflow
+    void container.offsetHeight; // force DOM to update
 
-    // ② Measure all in one pass
+    /// measure where all elements sit relative to the top of the CV container
     const containerRect = container.getBoundingClientRect();
     const measurements = new Map();
     elementsToMeasure.forEach((block) => {
@@ -392,7 +378,7 @@ export default function LivePreview({ formData, userName, templateId, highlights
       });
     });
 
-    // ③ Compute margins with cumulative shift
+    /// figure out if elements overflow A4 pages and push them down using padding-top
     let cumulativeShift = 0;
     const margins = [];
 
@@ -405,13 +391,13 @@ export default function LivePreview({ formData, userName, templateId, highlights
       const adjustedTop = blockMetrics.top + cumulativeShift;
       const adjustedBottom = adjustedTop + blockMetrics.height;
 
-      // Which page is the top on?
+      /// check which A4 page the block starts on
       const page = Math.floor(adjustedTop / A4_HEIGHT);
 
-      // Usable area ends FOOTER_ZONE px before next page
+      /// page ending position, minus the footer safe zone
       const pageUsableEnd = (page + 1) * A4_HEIGHT - FOOTER_ZONE;
 
-      // Does this block's bottom cross into the footer zone?
+      /// if block overlaps with the footer zone, we need to push it to the next page
       if (adjustedBottom > pageUsableEnd) {
         const maxUsable = A4_HEIGHT - FOOTER_ZONE - HEADER_ZONE;
         const target = targetByBlock.get(block) || block;
@@ -442,13 +428,13 @@ export default function LivePreview({ formData, userName, templateId, highlights
       }
     }
 
-    // ④ Apply all margins
+    /// apply the calculated padding to push overflowing sections down
     for (const { element, margin } of margins) {
       element.style.paddingTop = `${margin}px`;
       element.setAttribute('data-pagination-margin', 'true');
     }
 
-    // ⑤ Final page count
+    /// recount total pages after modifying the spacing
     void container.offsetHeight;
     setPages(Math.max(1, Math.ceil(container.scrollHeight / A4_HEIGHT)));
   }, [ZOOM]);

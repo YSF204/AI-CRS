@@ -4,11 +4,7 @@ import JobCard from './JobCard';
 import { SkCard, SkBox, SkText } from '../../../components/ui/Skeleton';
 import { useTranslation } from '../../../context/LanguageContext';
 
-/**
- * JobsGrid
- * Renders the full jobs section: heading, loading/empty states, and the grid of JobCards.
- * Receives jobs array and callbacks from the parent.
- */
+
 export default function JobsGrid({ jobs, loading, onPostJob, onJobDeleted, onJobUpdated, onViewCandidates, viewAllLink, totalJobsCount }) {
   const { t } = useTranslation();
 

@@ -2,10 +2,7 @@ import React from "react";
 import { X, Check, Plus } from "lucide-react";
 import { ALL_SECTIONS, isCustomSectionKey } from "../constants";
 
-/**
- * Slide-up bottom sheet for picking/toggling CV sections on mobile.
- * Opens when the user taps "Add Section" in the Sections tab or Editor tab FAB.
- */
+
 export default function MobileBottomSheet({ open, onClose, activeSections, toggleSection, onAddCustomSection }) {
   return (
     <>

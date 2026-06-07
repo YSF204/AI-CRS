@@ -2,11 +2,7 @@ import React from "react";
 import { X, Plus, ArrowUpDown } from "lucide-react";
 import { ALL_SECTIONS, getSectionMeta } from "../constants";
 
-/**
- * "Sections" tab view for mobile.
- * Shows active sections as chips with remove buttons,
- * plus an "Add Section" button to open the bottom sheet.
- */
+
 export default function MobileSectionsTab({
   activeSections,
   toggleSection,

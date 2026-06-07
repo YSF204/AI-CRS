@@ -1,17 +1,6 @@
-/**
- * Debounce Utility
- * Single responsibility: Debounce function implementation
- * Easy to use and maintain
- */
 
-/**
- * Creates a debounced function that delays execution
- * until after `wait` milliseconds have elapsed since the last call
- *
- * @param {Function} func - The function to debounce
- * @param {number} wait - The delay in milliseconds (default: 1000ms)
- * @returns {Function} Debounced function
- */
+
+
 export const debounce = (func, wait = 1000) => {
   let timeout;
 
@@ -30,14 +19,7 @@ export const debounce = (func, wait = 1000) => {
   };
 };
 
-/**
- * Creates a debounced function with immediate execution option
- * Useful for showing loading state immediately while debouncing actual execution
- *
- * @param {Function} func - The function to debounce
- * @param {number} wait - The delay in milliseconds (default: 1000ms)
- * @returns {Function} Debounced function with immediate flag
- */
+
 export const debounceWithImmediate = (func, wait = 1000) => {
   let timeout;
   let immediateExecuted = false;
@@ -77,14 +59,7 @@ export const debounceWithImmediate = (func, wait = 1000) => {
   };
 };
 
-/**
- * Creates a throttled function that limits execution rate
- * Useful for API calls or expensive operations
- *
- * @param {Function} func - The function to throttle
- * @param {number} limit - The minimum time between executions in milliseconds (default: 1000ms)
- * @returns {Function} Throttled function
- */
+
 export const throttle = (func, limit = 1000) => {
   let inThrottle;
   let lastFunc;
@@ -113,10 +88,7 @@ export const throttle = (func, limit = 1000) => {
   };
 };
 
-/**
- * Cancels all pending debounced/throttled executions
- * Useful for cleanup on component unmount
- */
+
 export const cancelAllPending = () => {
   // This would need to track all created debouncers
   // For now, this is a placeholder for future enhancement

@@ -5,10 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { toApiAssetUrl } from '../../utils/apiConfig';
 import { useTranslation } from '../../context/LanguageContext';
 
-/**
- * ProfileHeader — displays the user's avatar (initials or photo), name, role,
- * and key stats. Handles profile picture upload.
- */
+
 export default function ProfileHeader({ user }) {
   const { updateUserState } = useAuth();
   const { t } = useTranslation();

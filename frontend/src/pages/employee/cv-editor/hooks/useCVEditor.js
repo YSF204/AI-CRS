@@ -451,6 +451,7 @@ export default function useCVEditor() {
   const toggleSection = (key) => dispatch({ type: "TOGGLE_SECTION", payload: key });
   const toggleCollapse = (key) => dispatch({ type: "TOGGLE_COLLAPSE", payload: key });
 
+  /// drag and drop handlers for reordering CV sections on desktop
   const onDragStart = (key) => { dragItemRef.current = key; };
   const onDragOver = (e, key) => { e.preventDefault(); if (dragItemRef.current !== key) dispatch({ type: "SET_DRAG_OVER", payload: key }); };
   const onDragLeave = () => dispatch({ type: "SET_DRAG_OVER", payload: null });
@@ -462,7 +463,7 @@ export default function useCVEditor() {
   };
   const onDragEnd = () => { dragItemRef.current = null; dispatch({ type: "SET_DRAG_OVER", payload: null }); };
 
-  // Mobile touch reorder — swap section up or down in the active list
+  /// mobile buttons to move sections up or down since drag and drop doesn't work well on mobile touch
   const onMoveUp = useCallback((key) => {
     dispatch({ type: "MOVE_SECTION_UP", payload: key });
   }, []);

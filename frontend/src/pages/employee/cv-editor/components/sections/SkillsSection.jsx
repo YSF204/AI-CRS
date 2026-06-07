@@ -2,10 +2,7 @@ import React, { useState } from "react";
 import { X, Plus } from "lucide-react";
 import SuggestionBox from "../SuggestionBox";
 
-/**
- * SkillsSection - Handles technical and soft skills input
- * Single Responsibility: Render skills form and integrate suggestion UI
- */
+
 export default function SkillsSection({ type, form, handlers, fetchSuggestions, handleSuggestionSelect, suggestions, isLoadingSuggestions }) {
   const [input, setInput] = useState("");
   const field = type === "technical" ? "technicalSkills" : "softSkills";

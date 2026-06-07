@@ -19,6 +19,7 @@ export default function useCVAnalysis({
 
   filteredFormDataRef.current = filteredFormData;
 
+  /// simulates a progressive loading bar since the AI model might take some time to respond
   const startProgressSimulation = useCallback(() => {
     setAnalysisProgress(0);
     let progress = 0;
@@ -33,6 +34,7 @@ export default function useCVAnalysis({
     }, 400);
   }, []);
 
+  /// finishes the progress bar by bumping it to 100% when the API call completes
   const finishProgress = useCallback(() => {
     clearInterval(progressTimerRef.current);
     setAnalysisProgress(100);
@@ -198,6 +200,7 @@ export default function useCVAnalysis({
     }
   }, [userName, startProgressSimulation, finishProgress, showToast]);
 
+  /// parses through the AI analysis suggestions and applies selected changes or deletions to our CV form state
   const handleApplyAnalysis = useCallback((updatesToApply) => {
     if (!updatesToApply || Object.keys(updatesToApply).length === 0) {
       showToast("info", "toast.no_changes_selected");

@@ -33,10 +33,7 @@ function FormField({ label, id, icon: Icon, type = 'text', value, onChange, plac
   );
 }
 
-/**
- * ProfileForm — editable personal info section.
- * Manages its own draft state; calls onSave with the updated values.
- */
+
 export default function ProfileForm({ user, onSave }) {
   const { t } = useTranslation();
   const [form, setForm] = useState({
