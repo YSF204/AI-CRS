@@ -1,16 +1,10 @@
 import { z } from "zod";
 
-// Login: only validate that email is valid and a password was supplied.
-// Enforcing complexity rules here locks out users whose valid passwords
-// predate the current rules — this is a UX and security issue.
 export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
 });
 
-// Signup: ADMIN is intentionally excluded from the public role list.
-// Admins are provisioned directly in the DB — allowing self-registration as
-// ADMIN is a privilege-escalation vulnerability.
 export const signupSchema = z
   .object({
     firstName: z
