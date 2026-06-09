@@ -29,7 +29,6 @@ import { regularLimiter, sensitiveLimiter } from "./src/middleware/limiter.js";
 import employerRouter from "./src/routes/employerRoutes.js";
 import adminRouter from "./src/routes/adminRoutes.js";
 import applicationRouter from "./src/routes/applicationRoutes.js";
-import chatRouter from "./src/routes/chatRoutes.js";
 import suggestionRouter from "./src/routes/suggestionRoutes.js";
 
 const app = express();
@@ -99,7 +98,6 @@ app.use("/api/employers", employerRouter);
 app.use("/api/candidates", candidatesRouter);
 app.use("/api/applications", applicationRouter);
 app.use("/api/admin", adminRouter);
-app.use("/api/chat", chatRouter);
 app.use("/api/suggestions", suggestionRouter);
 
 app.use(errorHandler);

@@ -19,7 +19,7 @@ import time
 
 from playwright.sync_api import sync_playwright
 
-BASE_URL = "https://www.jobs.ps/en/jobs/latest?page={page}"
+BASE_URL = "https://www.jobs.ps/jobs/latest?page={page}"
 DELAY_BETWEEN_PAGES = 2
 OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -33,8 +33,8 @@ def scrape_listing_page(page, page_number):
 
     try:
         page.wait_for_selector("a.list-3--row", timeout=15000)
-    except Exception:
-        print(f"No jobs found on page {page_number}")
+    except Exception as error:
+        print(f"No jobs found on page {page_number}: {error}")
         return []
 
     jobs = []
@@ -102,24 +102,39 @@ def main():
     args = parser.parse_args()
 
     all_jobs = []
+    seen_urls = set()
 
     with sync_playwright() as playwright:
         browser = playwright.chromium.launch(headless=True)
-        context = browser.new_context(
-            user_agent=(
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/120.0.0.0 Safari/537.36"
-            ),
-            viewport={"width": 1280, "height": 800},
-        )
-        page = context.new_page()
 
         for page_number in range(args.start_page, args.end_page + 1):
+            context = browser.new_context(
+                user_agent=(
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/120.0.0.0 Safari/537.36"
+                ),
+                viewport={"width": 1280, "height": 800},
+            )
+            page = context.new_page()
+
             jobs = scrape_listing_page(page, page_number)
+            context.close()
+
             if not jobs:
                 break
-            all_jobs.extend(jobs)
+
+            new_jobs = []
+            for job in jobs:
+                if job["url"] not in seen_urls:
+                    seen_urls.add(job["url"])
+                    new_jobs.append(job)
+
+            if not new_jobs:
+                print(f"No new jobs found on page {page_number}. Stopping pagination.")
+                break
+
+            all_jobs.extend(new_jobs)
             time.sleep(DELAY_BETWEEN_PAGES)
 
         browser.close()

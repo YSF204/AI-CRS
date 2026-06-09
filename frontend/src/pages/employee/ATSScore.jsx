@@ -11,7 +11,7 @@ import ATSResults from "../../components/employee/ats-score/ATSResults";
 
 export default function ATSScore() {
   const { t } = useTranslation();
-  const [selectedCvId, setSelectedCvId] = useState(null);
+  const [selectedCvId, setSelectedCvId] =  useState(null);
   const [atsResult, setAtsResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
