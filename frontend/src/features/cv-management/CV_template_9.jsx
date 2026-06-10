@@ -1,8 +1,23 @@
 import React from "react";
-import { getSocialName } from "./SocialIcons";
+import { getSocialIcon, getSocialName } from "./SocialIcons";
+
+const cleanUrlDisplay = (url) => {
+  if (typeof url !== "string") return url;
+  return url
+    .replace(/^(https?:\/\/)?(www\.)?/, "")
+    .replace(/\/$/, "");
+};
+
+const ensureAbsoluteUrl = (url) => {
+  if (typeof url !== "string") return url;
+  if (!/^https?:\/\//i.test(url)) {
+    return `https://${url}`;
+  }
+  return url;
+};
 
 const SectionHeader = ({ title }) => (
-  <h2 className="text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-2 border-b-[1px] border-gray-400 pb-1">
+  <h2 className="text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-2 border-b-[1px] border-gray-400 pb-1 m-0">
     {title}
   </h2>
 );
@@ -27,22 +42,46 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
   };
 
   const contactItems = [];
-  if (cvData.contact?.phone) contactItems.push(cvData.contact.phone);
-  if (cvData.contact?.email) contactItems.push(cvData.contact.email);
+  if (cvData.contact?.phone) {
+    contactItems.push(
+      <a href={`tel:${cvData.contact.phone}`} className="text-inherit hover:underline">
+        {cvData.contact.phone}
+      </a>
+    );
+  }
+  if (cvData.contact?.email) {
+    contactItems.push(
+      <a href={`mailto:${cvData.contact.email}`} className="text-inherit hover:underline">
+        {cvData.contact.email}
+      </a>
+    );
+  }
   if (cvData.address?.street || cvData.address?.city) {
     const location = [cvData.address.street, cvData.address.city]
       .filter(Boolean)
       .join(", ");
     if (location) contactItems.push(location);
   }
-  if (cvData.contact?.linkedin) contactItems.push(cvData.contact.linkedin);
-  if (cvData.contact?.github) contactItems.push(cvData.contact.github);
+  if (cvData.contact?.linkedin) {
+    contactItems.push(
+      <a href={ensureAbsoluteUrl(cvData.contact.linkedin)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title="LinkedIn">
+        {getSocialIcon('linkedin', 14)}
+      </a>
+    );
+  }
+  if (cvData.contact?.github) {
+    contactItems.push(
+      <a href={ensureAbsoluteUrl(cvData.contact.github)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title="GitHub">
+        {getSocialIcon('github', 14)}
+      </a>
+    );
+  }
   if (cvData.contact?.customLinks) {
     cvData.contact.customLinks.forEach(link => {
       if (link.url) {
         contactItems.push(
-          <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-            {getSocialName(link.icon)}
+          <a href={ensureAbsoluteUrl(link.url)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title={link.label || getSocialName(link.icon)}>
+            {getSocialIcon(link.icon, 14)}
           </a>
         );
       }
@@ -64,7 +103,7 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
       }}
     >
       <header className="mb-4 text-center">
-        <h1 className="text-[32px] font-bold text-gray-900 tracking-tight leading-none mb-1.5">
+        <h1 className="text-[32px] font-bold text-gray-900 tracking-tight leading-none mt-0 mb-1.5">
           {userName}
         </h1>
 
@@ -85,7 +124,7 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
           summary: cvData.summary ? (
             <section key="summary" className="cv-page-group break-inside-avoid mb-5" style={getHighlightStyle('summary')}>
               <SectionHeader title="Professional Summary" />
-              <p className="text-[13px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
+              <p className="text-[13px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words m-0">
                 {cvData.summary}
               </p>
             </section>
@@ -100,20 +139,20 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
                     return (
                       <div key={index} style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
                         <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="text-[14px] font-bold text-gray-900">
+                          <h3 className="text-[14px] font-bold text-gray-900 m-0">
                             {exp.position}
                             {exp.institutionName && (
                               <span className="font-normal text-gray-600">, {exp.institutionName}</span>
                             )}
                           </h3>
                           {dur && (
-                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap">
+                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap m-0">
                               {dur}
                             </span>
                           )}
                         </div>
                         {exp.summary && (
-                          <div className="text-[13px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1">
+                          <div className="text-[13px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1 m-0">
                             {exp.summary}
                           </div>
                         )}
@@ -127,20 +166,20 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
                     return (
                       <div key={index + 1} className="break-inside-avoid" style={getHighlightStyle(`experience_${index + 1}_institutionName`, `experience_${index + 1}_position`, `experience_${index + 1}_summary`)}>
                         <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="text-[14px] font-bold text-gray-900">
+                          <h3 className="text-[14px] font-bold text-gray-900 m-0">
                             {exp.position}
                             {exp.institutionName && (
                               <span className="font-normal text-gray-600">, {exp.institutionName}</span>
                             )}
                           </h3>
                           {dur && (
-                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap">
+                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap m-0">
                               {dur}
                             </span>
                           )}
                         </div>
                         {exp.summary && (
-                          <div className="text-[13px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1">
+                          <div className="text-[13px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1 m-0">
                             {exp.summary}
                           </div>
                         )}
@@ -160,20 +199,20 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
                     return (
                       <div key={index} style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}>
                         <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="text-[14px] font-bold text-gray-900">
+                          <h3 className="text-[14px] font-bold text-gray-900 m-0">
                             {edu.institutionName}
                           </h3>
                           {dur && (
-                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap">
+                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap m-0">
                               {dur}
                             </span>
                           )}
                         </div>
-                        <div className="text-[14px] text-gray-800">
+                        <div className="text-[14px] text-gray-800 m-0">
                           {edu.certification}
                         </div>
                         {edu.summary && (
-                          <div className="text-[13px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                          <div className="text-[13px] md:text-sm text-gray-700 mt-1 m-0 leading-relaxed whitespace-pre-wrap break-words">
                             {edu.summary}
                           </div>
                         )}
@@ -187,20 +226,20 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
                     return (
                       <div key={index + 1} className="break-inside-avoid" style={getHighlightStyle(`education_${index + 1}_institutionName`, `education_${index + 1}_certification`, `education_${index + 1}_summary`)}>
                         <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="text-[14px] font-bold text-gray-900">
+                          <h3 className="text-[14px] font-bold text-gray-900 m-0">
                             {edu.institutionName}
                           </h3>
                           {dur && (
-                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap">
+                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap m-0">
                               {dur}
                             </span>
                           )}
                         </div>
-                        <div className="text-[14px] text-gray-800">
+                        <div className="text-[14px] text-gray-800 m-0">
                           {edu.certification}
                         </div>
                         {edu.summary && (
-                          <div className="text-[13px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                          <div className="text-[13px] md:text-sm text-gray-700 mt-1 m-0 leading-relaxed whitespace-pre-wrap break-words">
                             {edu.summary}
                           </div>
                         )}
@@ -211,20 +250,46 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
               </section>
             ) : null,
           technicalSkills:
-            cvData.technicalSkills?.length > 0 ? (
-              <section key="technicalSkills" className="cv-page-group break-inside-avoid mb-5" style={getHighlightStyle('technicalSkills')}>
-                <SectionHeader title="Technical Skills" />
-                <p className="text-[13px] md:text-sm text-gray-800 leading-relaxed">
-                  <span className="font-semibold mr-1">Skills:</span>
-                  {cvData.technicalSkills.join(" • ")}
-                </p>
-              </section>
-            ) : null,
+            cvData.technicalSkills?.length > 0 ? (() => {
+              const groups = [];
+              const loose = [];
+              cvData.technicalSkills.forEach(s => {
+                const m = typeof s === 'string' && s.match(/^([^:]+):\s*(.+)$/);
+                if (m) groups.push({ title: m[1].trim(), skills: m[2].split(',').map(x => x.trim()).filter(Boolean) });
+                else loose.push(s);
+              });
+              const hasGroups = groups.length > 0;
+              return (
+                <section key="technicalSkills" className="cv-page-group break-inside-avoid mb-5" style={getHighlightStyle('technicalSkills')}>
+                  <SectionHeader title="Technical Skills" />
+                  {hasGroups ? (
+                    <div className="flex flex-col gap-1.5">
+                      {groups.map((g, gi) => (
+                        <div key={gi} className="flex flex-wrap items-baseline gap-x-1.5">
+                          <span className="text-[13px] font-bold text-gray-800 shrink-0">{g.title}:</span>
+                          <span className="text-[12.5px] text-gray-600">{g.skills.join(' • ')}</span>
+                        </div>
+                      ))}
+                      {loose.length > 0 && (
+                        <p className="text-[13px] md:text-sm text-gray-800 leading-relaxed m-0">
+                          <span className="font-semibold mr-1">Other:</span>{loose.join(" • ")}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-[13px] md:text-sm text-gray-800 leading-relaxed m-0">
+                      <span className="font-semibold mr-1">Skills:</span>
+                      {cvData.technicalSkills.join(" • ")}
+                    </p>
+                  )}
+                </section>
+              );
+            })() : null,
           softSkills:
             cvData.softSkills?.length > 0 ? (
               <section key="softSkills" className="cv-page-group break-inside-avoid mb-5" style={getHighlightStyle('softSkills')}>
                 <SectionHeader title="Soft Skills" />
-                <p className="text-[13px] md:text-sm text-gray-800 leading-relaxed">
+                <p className="text-[13px] md:text-sm text-gray-800 leading-relaxed m-0">
                   <span className="font-semibold mr-1">Competencies:</span>
                   {cvData.softSkills.join(" • ")}
                 </p>
@@ -234,7 +299,7 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
             cvData.language?.length > 0 ? (
               <section key="language" className="cv-page-group break-inside-avoid mb-5" style={getHighlightStyle('language')}>
                 <SectionHeader title="Languages" />
-                <p className="text-[13px] md:text-sm text-gray-800 leading-relaxed">
+                <p className="text-[13px] md:text-sm text-gray-800 leading-relaxed m-0">
                   <span className="font-semibold mr-1">Languages:</span>
                   {cvData.language
                     .map((item) =>
@@ -258,14 +323,19 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
           "customSections",
         ];
 
+        let customSectionCounter = 0;
         return sectionOrder.map((key) => {
           const isCustom = key.startsWith("customSection__");
           const isLegacyCustom = key === "customSections";
           if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
-            const sectionIdx = isCustom ? parseInt(key.replace("customSection__", ""), 10) : -1;
-            const sectionsToRender = isCustom ? [cvData.customSections[sectionIdx]].filter(Boolean) : cvData.customSections;
+            let sectionsToRender = [];
+            if (isLegacyCustom) {
+              sectionsToRender = cvData.customSections;
+            } else {
+              sectionsToRender = [cvData.customSections[customSectionCounter++]].filter(Boolean);
+            }
             return sectionsToRender.map((section, loopIdx) => {
-              const sectionIndex = isCustom ? sectionIdx : loopIdx;
+              const sectionIndex = isLegacyCustom ? loopIdx : (customSectionCounter - 1);
               return (
               <section
                 key={`custom-${sectionIndex}`}
@@ -281,13 +351,13 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
                         style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
                       >
                         <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="text-[14px] font-bold text-gray-900">
+                          <h3 className="text-[14px] font-bold text-gray-900 m-0">
                             {item.link ? (
                               <a
                                 href={item.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="hover:underline"
+                                className="text-inherit hover:underline"
                               >
                                 {item.name}
                               </a>
@@ -296,13 +366,13 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             )}
                           </h3>
                           {dur && (
-                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap">
+                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap m-0">
                               {dur}
                             </span>
                           )}
                         </div>
                         {item.description && (
-                          <div className="text-[13px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1">
+                          <div className="text-[13px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1 m-0">
                             {item.description}
                           </div>
                         )}
@@ -310,7 +380,7 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
                     );
                   })}
                 </div>
-                <div className="space-y-4 block">
+                <div className="space-y-4 block mt-4">
                   {section.items.slice(1).map((item, itemIndex) => {
                     const dur = fmtDuration(item.durationFrom, item.durationTo);
                     return (
@@ -320,13 +390,13 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
                         style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex + 1}_description`)}
                       >
                         <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="text-[14px] font-bold text-gray-900">
+                          <h3 className="text-[14px] font-bold text-gray-900 m-0">
                             {item.link ? (
                               <a
                                 href={item.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="hover:underline"
+                                className="text-inherit hover:underline"
                               >
                                 {item.name}
                               </a>
@@ -335,13 +405,13 @@ const MinimalATSTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             )}
                           </h3>
                           {dur && (
-                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap">
+                            <span className="text-[13px] text-gray-600 font-medium whitespace-nowrap m-0">
                               {dur}
                             </span>
                           )}
                         </div>
                         {item.description && (
-                          <div className="text-[13px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1">
+                          <div className="text-[13px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1 m-0">
                             {item.description}
                           </div>
                         )}

@@ -1,9 +1,3 @@
-/**
- * Utility Prompts
- * Single responsibility: General utility prompts for CV processing
- * Handles text extraction, validation, and summary generation
- */
-
 export const UTILITY_PROMPTS = {
   /**
    * Extract text from CV for analysis

@@ -121,6 +121,21 @@ export const buildNormalizedProfile = ({
   const certifications = extractCertifications(applicantInfo, education, customSections);
   const yearsOfExperience = calculateExperienceYears(applicantInfo, experience);
 
+  const rawLanguages = applicantInfo?.languages || cvData?.language || [];
+  const languages = (Array.isArray(rawLanguages) ? rawLanguages : [rawLanguages])
+    .map((l) => {
+      if (!l) return "";
+      if (typeof l === "string") return l.trim();
+      if (typeof l === "object") {
+        const name = l.name || l.lang || l.language;
+        if (name && typeof name === "string") {
+          return name.trim();
+        }
+      }
+      return "";
+    })
+    .filter(Boolean);
+
   return {
     fullName: applicantInfo?.fullName || cvData?.fullName || 'Candidate',
     email: applicantInfo?.email || cvData?.contact?.email || '',
@@ -128,7 +143,7 @@ export const buildNormalizedProfile = ({
     summary: applicantInfo?.summary || cvData?.summary || '',
     technicalSkills: applicantInfo?.technicalSkills || cvData?.technicalSkills || [],
     softSkills: applicantInfo?.softSkills || cvData?.softSkills || [],
-    languages: applicantInfo?.languages || cvData?.language || [],
+    languages,
     yearsOfExperience,
     certifications,
     education: Array.isArray(education) ? education : [],
@@ -149,8 +164,8 @@ export const extractApplicantInfoFromParsedCV = (parsedAnalysis, user = null) =>
 
   return {
     fullName: parsedAnalysis?.candidate_name ||
-              cvData?.jobTitle ||
-              (user?.firstName ? `${user.firstName} ${user.lastName}`.trim() : 'Uploaded CV'),
+      cvData?.jobTitle ||
+      (user?.firstName ? `${user.firstName} ${user.lastName}`.trim() : 'Uploaded CV'),
     email: cvData?.contact?.email || '',
     phone: cvData?.contact?.phone || '',
     linkedin: cvData?.contact?.linkedin || '',

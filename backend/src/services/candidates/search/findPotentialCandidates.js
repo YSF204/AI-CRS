@@ -33,11 +33,41 @@ export const findPotentialCandidates = async ({ userId, body }) => {
         query.$or = orConditions;
     }
     
-    let allCvs = await CV.find(query).populate("userId", "firstName lastName email").limit(50);
+    // Deduplicate function to ensure same person (userId) only appears once,
+    // keeping the most recently updated CV.
+    const deduplicate = (cvs, limit) => {
+        const seen = new Set();
+        const result = [];
+        for (const cv of cvs) {
+            const userIdStr = cv.userId ? String(cv.userId._id || cv.userId) : null;
+            if (userIdStr) {
+                if (!seen.has(userIdStr)) {
+                    seen.add(userIdStr);
+                    result.push(cv);
+                }
+            } else {
+                // If for some reason there is no userId, still include it but don't deduplicate
+                result.push(cv);
+            }
+            if (result.length >= limit) break;
+        }
+        return result;
+    };
+
+    let allCvs = await CV.find(query)
+        .populate("userId", "firstName lastName email")
+        .sort({ updatedAt: -1 })
+        .limit(200);
+
+    allCvs = deduplicate(allCvs, 50);
     
     // Fallback: If no specific matches found, fetch a subset of any CVs to avoid returning nothing
     if (!allCvs.length) {
-        allCvs = await CV.find({}).populate("userId", "firstName lastName email").limit(20);
+        const fallbackCvs = await CV.find({})
+            .populate("userId", "firstName lastName email")
+            .sort({ updatedAt: -1 })
+            .limit(100);
+        allCvs = deduplicate(fallbackCvs, 20);
     }
     
     if (!allCvs.length) {

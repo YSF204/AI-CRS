@@ -8,7 +8,7 @@ import { findOpenJobById } from "../helpers/findOpenJobById.js";
 import { uploadApplicationCvToSupabase } from "../helpers/uploadApplicationCv.js";
 
 export const createApplication = async ({ body, user, file }) => {
-    const { jobId, cvId, skipAnalysis } = body;
+    const { jobId, cvId, skipAnalysis, preComputedMatchPercentage, preComputedMatchDetails } = body;
     if (!jobId) {
         throw new AppError("Job ID is required", 400);
     }
@@ -39,6 +39,8 @@ export const createApplication = async ({ body, user, file }) => {
         skipAnalysis,
         isManualApplication: profileInput.isManualApplication,
         userId: user._id,
+        preComputedMatchPercentage,
+        preComputedMatchDetails,
     });
 
     const applicationData = {

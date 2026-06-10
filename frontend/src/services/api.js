@@ -39,6 +39,12 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => {
     const cfg = response.config;
+    
+    // Invalidate the entire cache on any successful state-modifying request
+    if (cfg.method && ["post", "put", "delete", "patch"].includes(cfg.method.toLowerCase())) {
+      clearApiCache();
+    }
+
     if (cfg.method && cfg.method.toLowerCase() === "get" && !cfg.__noCache) {
       const key = makeCacheKey(cfg);
       const ttl = cfg.__cacheTTL || 30_000;

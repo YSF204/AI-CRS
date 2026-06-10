@@ -1,9 +1,3 @@
-/**
- * System Prompts
- * Single responsibility: Core AI system prompts for different contexts
- * Defines AI behavior and personality for various use cases
- */
-
 export const SYSTEM_PROMPTS = {
   /**
    * Default system prompt for all AI interactions

@@ -43,9 +43,9 @@ const buildLocalJobRecommendations = (cv, jobs, normalizedProfile) => {
       );
       const experienceScore = job.yearsOfExperience
         ? Math.min(
-            100,
-            Math.round((cvExperience / job.yearsOfExperience) * 100),
-          )
+          100,
+          Math.round((cvExperience / job.yearsOfExperience) * 100),
+        )
         : 100;
 
       return {
@@ -55,8 +55,8 @@ const buildLocalJobRecommendations = (cv, jobs, normalizedProfile) => {
           100,
           Math.round(
             techMatched.length * 3 +
-              softMatched.length * 1.5 +
-              experienceScore * 0.2,
+            softMatched.length * 1.5 +
+            experienceScore * 0.2,
           ),
         ),
         skillsMatched: [...new Set([...techMatched, ...softMatched])],

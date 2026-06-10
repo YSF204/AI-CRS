@@ -139,7 +139,13 @@ function renderResults({
             type="button"
             variant="prism"
             className="px-4 py-2 font-bold inline-flex items-center gap-2"
-            onClick={() => onGoToJob(item.id)}
+            onClick={() => {
+              if (item.isExternal && item.externalUrl) {
+                window.open(item.externalUrl, "_blank", "noopener,noreferrer");
+              } else {
+                onGoToJob(item.id);
+              }
+            }}
           >
             {t("findJobByCv.viewApply")}
             <ChevronRight size={16} />

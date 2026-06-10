@@ -19,7 +19,7 @@ export const updateApplication = async ({ applicationId, body, user, file }) => 
     }
 
     const job = await findOpenJobById(application.jobId);
-    const { cvId, skipAnalysis } = body;
+    const { cvId, skipAnalysis, preComputedMatchPercentage, preComputedMatchDetails } = body;
 
     const profileInput = await resolveApplicationProfileInput({
         user,
@@ -40,6 +40,8 @@ export const updateApplication = async ({ applicationId, body, user, file }) => 
         skipAnalysis,
         isManualApplication: profileInput.isManualApplication,
         userId: user._id,
+        preComputedMatchPercentage,
+        preComputedMatchDetails,
     });
 
     application.applicantInfo = mapApplicantInfoFromNormalizedProfile(profileInput.normalizedProfile);

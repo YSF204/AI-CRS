@@ -112,7 +112,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
         </div>
 
         <div>
-          <label htmlFor="jf-salary" style={LABEL}>{t('employer.salary', {}, 'Salary')} (₪/شهر)</label>
+          <label htmlFor="jf-salary" style={LABEL}>{t('employer.salary', {}, 'Salary (₪/month)')}</label>
           <input
             id="jf-salary"
             style={INPUT}
@@ -120,7 +120,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
             min="0"
             value={form.salary}
             onChange={setField('salary')}
-            placeholder={t('employer.salaryPlaceholder', {}, 'مثال: 3500')}
+            placeholder={t('employer.salaryPlaceholder', {}, 'e.g. 3500')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
@@ -136,7 +136,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
             style={INPUT}
             value={form.technicalSkills}
             onChange={setField('technicalSkills')}
-            placeholder="مثال: React, Node.js, MongoDB"
+            placeholder={t('employer.technicalSkillsPlaceholder', {}, 'e.g. React, Node.js, MongoDB')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
@@ -152,7 +152,7 @@ export default function JobForm({ form, setField, handleSubmit, saving }) {
             style={INPUT}
             value={form.softSkills}
             onChange={setField('softSkills')}
-            placeholder="مثال: التواصل, القيادة"
+            placeholder={t('employer.softSkillsPlaceholder', {}, 'e.g. Teamwork, Leadership')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />

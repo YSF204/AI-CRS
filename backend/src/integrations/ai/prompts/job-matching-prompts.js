@@ -1,9 +1,3 @@
-/**
- * Job Matching Prompts
- * Single responsibility: Prompts for matching candidates to jobs and vice versa
- * Handles candidate-job fit analysis and job recommendations
- */
-
 export const JOB_MATCHING_PROMPTS = {
   /**
    * Match candidates to job posting

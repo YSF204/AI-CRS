@@ -27,6 +27,7 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
 
   const overallScore = result.overallScore || 0;
   const sections = result.sections || {};
+  const customSections = result.customSections || [];
   const topStrengths = result.topStrengths || [];
   const topWeaknesses = result.topWeaknesses || [];
   const suggestions = result.improvementSuggestions || [];
@@ -208,6 +209,106 @@ export default function ATSResults({ result, onBack, onReanalyze }) {
           })}
         </div>
       </div>
+
+      {/* Custom Sections Breakdown */}
+      {customSections.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <h3 className="font-bold font-['Space_Grotesk'] text-lg tracking-tight uppercase text-[var(--nm-text-primary)]">
+              {t("atsAudit.customSections", {}, "Custom Sections")}
+            </h3>
+            <span className="text-[10px] font-mono text-[var(--nm-text-secondary)] font-bold uppercase tracking-widest">
+              {t("atsAudit.sectionsAnalyzed", { count: customSections.length })}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            {customSections.map((cs, idx) => {
+              const key = `custom_${idx}`;
+              const isExpanded = expandedSections[key];
+              const score = cs.score || 0;
+              const strengths = cs.strengths || [];
+              const weaknesses = cs.weaknesses || [];
+              const typeLabel = cs.type ? cs.type.toUpperCase() : "OTHER";
+
+              return (
+                <div
+                  key={key}
+                  className="jd-card bg-[var(--nm-surface)] group hover:border-[var(--nm-primary)] transition-colors"
+                >
+                  {/* Header */}
+                  <div
+                    onClick={() => toggleSection(key)}
+                    className="p-4 flex items-center justify-between cursor-pointer gap-6"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <h4 className="font-bold font-['Space_Grotesk'] text-sm tracking-wider text-[var(--nm-text-primary)] uppercase">
+                          {cs.title || typeLabel}
+                        </h4>
+                        <span className="text-[9px] font-mono font-bold px-2 py-0.5 bg-[var(--nm-primary)]/10 text-[var(--nm-primary)] border border-[var(--nm-primary)]/30 tracking-widest">
+                          {typeLabel}
+                        </span>
+                        <div className="h-[2px] flex-1 bg-[var(--nm-surface-high)]" />
+                      </div>
+                      {/* Progress Bar */}
+                      <div className="w-full bg-[var(--nm-surface-high)] h-[8px] relative overflow-hidden border border-[var(--nm-ink)]/10">
+                        <div
+                          className="h-full bg-[var(--nm-primary)] transition-all duration-700 ease-out"
+                          style={{ width: `${score}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      <div className="text-right">
+                        <div className="text-2xl font-bold font-['Space_Grotesk'] text-[var(--nm-text-primary)] leading-none">
+                          {score}%
+                        </div>
+                        <div className="text-[10px] font-mono font-bold text-[var(--nm-text-secondary)] uppercase tracking-tighter">
+                          {t("atsAudit.accuracy")}
+                        </div>
+                      </div>
+                      {isExpanded ? <ChevronUp size={20} className="text-[var(--nm-text-primary)]" /> : <ChevronDown size={20} className="text-[var(--nm-text-primary)]" />}
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  {isExpanded && (
+                    <div className="p-6 bg-[var(--nm-surface-low)] border-t-[4px] border-[var(--nm-ink)]">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {strengths.length > 0 && (
+                          <div>
+                            <p className="text-[10px] font-mono font-bold text-[var(--nm-success)] mb-3 uppercase tracking-widest flex items-center gap-2">
+                              <span className="w-2 h-2 bg-[var(--nm-success)]" /> {t("atsAudit.optimized")}
+                            </p>
+                            <ul className="space-y-2">
+                              {strengths.map((s, i) => (
+                                <li key={i} className="text-sm font-['Manrope'] text-[var(--nm-text-primary)] font-medium pl-4 border-l-2 border-[var(--nm-success)]">{s}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {weaknesses.length > 0 && (
+                          <div>
+                            <p className="text-[10px] font-mono font-bold text-[var(--nm-error)] mb-3 uppercase tracking-widest flex items-center gap-2">
+                              <span className="w-2 h-2 bg-[var(--nm-error)]" /> {t("atsAudit.recommendations")}
+                            </p>
+                            <ul className="space-y-2">
+                              {weaknesses.map((w, i) => (
+                                <li key={i} className="text-sm font-['Manrope'] text-[var(--nm-text-primary)] font-medium pl-4 border-l-2 border-[var(--nm-error)]">{w}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Suggestions Section */}
       {suggestions.length > 0 && (

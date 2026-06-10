@@ -6,6 +6,21 @@ import { getSocialIcon, getSocialName } from "./SocialIcons";
 // dark sidebar always fills to the bottom of the last page.
 const PAGE_HEIGHT_PX = (297 * 96) / 25.4;
 
+const cleanUrlDisplay = (url) => {
+  if (typeof url !== "string") return url;
+  return url
+    .replace(/^(https?:\/\/)?(www\.)?/, "")
+    .replace(/\/$/, "");
+};
+
+const ensureAbsoluteUrl = (url) => {
+  if (typeof url !== "string") return url;
+  if (!/^https?:\/\//i.test(url)) {
+    return `https://${url}`;
+  }
+  return url;
+};
+
 const TimelineItem = ({
   leftText1,
   leftText2,
@@ -17,16 +32,16 @@ const TimelineItem = ({
 }) => (
   <div className="flex relative break-inside-avoid" style={highlightStyle}>
     <div className="w-[30%] pr-5 text-left pt-0.5">
-      <div className="text-gray-800 font-medium text-xs md:text-[13px] uppercase tracking-wide">
+      <div className="text-gray-800 font-medium text-xs md:text-[13px] uppercase tracking-wide m-0">
         {leftText1}
       </div>
       {leftText2 && (
-        <div className="text-gray-500 text-xs md:text-[13px]">
+        <div className="text-gray-500 text-xs md:text-[13px] m-0">
           {leftText2}
         </div>
       )}
       {leftText3 && (
-        <div className="text-gray-400 text-[11px] md:text-[12px] mt-1">
+        <div className="text-gray-400 text-[11px] md:text-[12px] mt-1 m-0">
           {leftText3}
         </div>
       )}
@@ -38,11 +53,11 @@ const TimelineItem = ({
       )}
     </div>
     <div className="w-[70%] pl-5 pb-5">
-      <h4 className="font-bold text-gray-800 text-xs md:text-[13px] mb-1">
+      <h4 className="font-bold text-gray-800 text-xs md:text-[13px] mt-0 mb-1">
         {title}
       </h4>
       {description && (
-        <div className="text-[13px] md:text-[13.5px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words">
+        <div className="text-[13px] md:text-[13.5px] text-gray-600 leading-relaxed whitespace-pre-wrap break-words m-0">
           {description}
         </div>
       )}
@@ -165,10 +180,10 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
         {/* ABOUT ME */}
         {cvData.summary && (
           <div className="mb-4 break-inside-avoid" style={getHighlightStyle('summary')}>
-            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
+            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mt-0 mb-2.5 border-b border-gray-500 pb-1.5">
               About Me
             </h3>
-            <p className="text-xs md:text-[13px] leading-relaxed text-gray-300 whitespace-pre-wrap break-words">
+            <p className="text-xs md:text-[13px] leading-relaxed text-gray-300 whitespace-pre-wrap break-words m-0">
               {cvData.summary}
             </p>
           </div>
@@ -177,77 +192,106 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
         {/* LINKS */}
         {(cvData.contact?.linkedin || cvData.contact?.github || (cvData.contact?.customLinks && cvData.contact.customLinks.length > 0)) && (
           <div className="mb-4 break-inside-avoid">
-            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
+            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mt-0 mb-2.5 border-b border-gray-500 pb-1.5">
               Links
             </h3>
-            <div className="flex flex-col gap-2.5 text-xs md:text-[13px]">
+            <div className="flex flex-wrap gap-3 text-white">
               {cvData.contact.linkedin && (
-                <div>
-                  <span className="font-bold text-white block mb-0.5">
-                    LinkedIn:
-                  </span>
-                  <a
-                    href={`https://${cvData.contact.linkedin}`}
-                    className="text-gray-300 hover:text-white underline break-all"
-                  >
-                    {cvData.contact.linkedin}
-                  </a>
-                </div>
+                <a
+                  href={ensureAbsoluteUrl(cvData.contact.linkedin)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white inline-flex items-center"
+                  title="LinkedIn"
+                >
+                  {getSocialIcon('linkedin', 16)}
+                </a>
               )}
               {cvData.contact.github && (
-                <div>
-                  <span className="font-bold text-white block mb-0.5">
-                    GitHub:
-                  </span>
-                  <a
-                    href={`https://${cvData.contact.github}`}
-                    className="text-gray-300 hover:text-white underline break-all"
-                  >
-                    {cvData.contact.github}
-                  </a>
-                </div>
+                <a
+                  href={ensureAbsoluteUrl(cvData.contact.github)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white inline-flex items-center"
+                  title="GitHub"
+                >
+                  {getSocialIcon('github', 16)}
+                </a>
               )}
               {(cvData.contact.customLinks || []).map((link, i) => (
                 link.url && (
-                  <div key={i}>
-                    <a
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-bold text-white hover:text-gray-300 underline break-all"
-                    >
-                      {getSocialName(link.icon)}
-                    </a>
-                  </div>
+                  <a
+                    key={i}
+                    href={ensureAbsoluteUrl(link.url)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-300 hover:text-white inline-flex items-center"
+                    title={link.label || getSocialName(link.icon)}
+                  >
+                    {getSocialIcon(link.icon, 16)}
+                  </a>
                 )
               ))}
             </div>
           </div>
         )}
 
-        {/* TECHNICAL SKILLS — simple tags, no fake bars */}
-        {cvData.technicalSkills && cvData.technicalSkills.length > 0 && (
-          <div className="mb-4 break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
-            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
-              Technical Skills
-            </h3>
-            <div className="flex flex-wrap gap-1.5">
-              {cvData.technicalSkills.map((skill, index) => (
-                <span
-                  key={index}
-                  className="uppercase text-[10px] md:text-[11px] text-gray-300 tracking-wider font-medium bg-gray-600/50 px-2 py-0.5 rounded-sm"
-                >
-                  {skill}
-                </span>
-              ))}
+        {/* TECHNICAL SKILLS — grouped by category */}
+        {cvData.technicalSkills && cvData.technicalSkills.length > 0 && (() => {
+          const groups = [];
+          const loose = [];
+          cvData.technicalSkills.forEach(s => {
+            const m = typeof s === 'string' && s.match(/^([^:]+):\s*(.+)$/);
+            if (m) groups.push({ title: m[1].trim(), skills: m[2].split(',').map(x => x.trim()).filter(Boolean) });
+            else loose.push(s);
+          });
+          const hasGroups = groups.length > 0;
+          return (
+            <div className="mb-4 break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
+              <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mt-0 mb-2.5 border-b border-gray-500 pb-1.5">
+                Technical Skills
+              </h3>
+              {hasGroups ? (
+                <div className="flex flex-col gap-2">
+                  {groups.map((g, gi) => (
+                    <div key={gi} className="flex flex-wrap items-baseline gap-x-1.5">
+                      <span className="text-[12px] font-bold text-gray-200 shrink-0">{g.title}:</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {g.skills.map((skill, si) => (
+                          <span key={si} className="uppercase text-[10px] md:text-[11px] text-gray-300 tracking-wider font-medium bg-gray-600/50 px-2 py-0.5 rounded-sm">
+                            {skill}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  {loose.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {loose.map((skill, i) => (
+                        <span key={i} className="uppercase text-[10px] md:text-[11px] text-gray-300 tracking-wider font-medium bg-gray-600/50 px-2 py-0.5 rounded-sm">
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {cvData.technicalSkills.map((skill, index) => (
+                    <span key={index} className="uppercase text-[10px] md:text-[11px] text-gray-300 tracking-wider font-medium bg-gray-600/50 px-2 py-0.5 rounded-sm">
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* SOFT SKILLS */}
         {cvData.softSkills && cvData.softSkills.length > 0 && (
           <div className="mb-4 break-inside-avoid" style={getHighlightStyle('softSkills')}>
-            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
+            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mt-0 mb-2.5 border-b border-gray-500 pb-1.5">
               Soft Skills
             </h3>
             <div className="flex flex-wrap gap-1.5">
@@ -266,7 +310,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
         {/* LANGUAGES — simple tags, no fake bars */}
         {cvData.language && cvData.language.length > 0 && (
           <div className="mb-4 break-inside-avoid" style={getHighlightStyle('language')}>
-            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
+            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mt-0 mb-2.5 border-b border-gray-500 pb-1.5">
               Languages
             </h3>
             <div className="flex flex-wrap gap-1.5">
@@ -291,7 +335,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
         {/* SIDEBAR CUSTOM SECTIONS (Hobbies, References) */}
         {sidebarCustomSections.map((section, idx) => (
           <div key={idx} className="mb-4 break-inside-avoid">
-            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mb-2.5 border-b border-gray-500 pb-1.5">
+            <h3 className="uppercase text-[13px] md:text-[13.5px] font-bold tracking-widest text-white mt-0 mb-2.5 border-b border-gray-500 pb-1.5">
               {section.title}
             </h3>
             <div className="flex flex-col gap-2 text-xs md:text-[13px] text-gray-300">
@@ -304,16 +348,16 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
                     className="p-1"
                   >
                     {section.title.toLowerCase() === "hobbies" ? (
-                      <span className="uppercase tracking-wider">
+                      <span className="uppercase tracking-wider m-0">
                         • {item.name}
                       </span>
                     ) : (
                       <>
-                        <div className="font-bold text-white uppercase">
+                        <div className="font-bold text-white uppercase mt-0 mb-1">
                           {item.name}
                         </div>
                         {item.description && (
-                          <div className="whitespace-pre-wrap break-words">
+                          <div className="whitespace-pre-wrap break-words m-0">
                             {item.description}
                           </div>
                         )}
@@ -339,7 +383,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
         {/* HEADER AREA */}
         <div className="flex justify-between items-start mb-6">
           <div className="flex-1">
-            <h1 className="text-[28px] md:text-[32px] font-black uppercase text-gray-700 leading-none mb-2 tracking-tight">
+            <h1 className="text-[28px] md:text-[32px] font-black uppercase text-gray-700 leading-none mt-0 mb-2 tracking-tight">
               {userName.split(" ").map((name, i) => (
                 <span key={i} className="block">
                   {name}
@@ -370,7 +414,9 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
             )}
             {cvData.contact?.phone && (
               <div className="flex items-center justify-end gap-2">
-                <span>{cvData.contact.phone}</span>
+                <a href={`tel:${cvData.contact.phone}`} className="text-inherit hover:underline">
+                  {cvData.contact.phone}
+                </a>
                 <svg
                   className="w-4 h-4 text-gray-700"
                   fill="currentColor"
@@ -382,7 +428,9 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
             )}
             {cvData.contact?.email && (
               <div className="flex items-center justify-end gap-2">
-                <span>{cvData.contact.email}</span>
+                <a href={`mailto:${cvData.contact.email}`} className="text-inherit hover:underline">
+                  {cvData.contact.email}
+                </a>
                 <svg
                   className="w-4 h-4 text-gray-700"
                   fill="currentColor"
@@ -402,7 +450,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
               cvData.experience && cvData.experience.length > 0 ? (
                 <div key="experience" className="cv-page-group mb-5">
                   <div className="break-inside-avoid">
-                    <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mb-5 border-b border-gray-400 pb-1">
+                    <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mt-0 mb-5 border-b border-gray-400 pb-1">
                       Work Experience
                     </h3>
                     {cvData.experience.slice(0, 1).map((exp, index) => {
@@ -444,7 +492,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
               cvData.education && cvData.education.length > 0 ? (
                 <div key="education" className="cv-page-group mb-5">
                   <div className="break-inside-avoid">
-                    <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mb-5 border-b border-gray-400 pb-1">
+                    <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mt-0 mb-5 border-b border-gray-400 pb-1">
                       Education
                     </h3>
                     {cvData.education.slice(0, 1).map((edu, index) => {
@@ -493,23 +541,25 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
             "language",
           ];
 
+          let customSectionCounter = 0;
           return sectionOrder.map((key) => {
             const isCustom = key.startsWith("customSection__");
             const isLegacyCustom = key === "customSections";
             if (isCustom || isLegacyCustom) {
-              const sectionIdx = isCustom ? parseInt(key.replace("customSection__", ""), 10) : -1;
-              const sectionsToRender = isCustom
-                ? [cvData.customSections[sectionIdx]].filter(Boolean).filter(
-                    (sec) => !sidebarSectionTitles.includes(sec.title.toLowerCase())
-                  )
-                : mainCustomSections;
+              let sectionsToRender = [];
+              if (isLegacyCustom) {
+                sectionsToRender = mainCustomSections;
+              } else {
+                const sec = cvData.customSections[customSectionCounter++];
+                sectionsToRender = sec && !sidebarSectionTitles.includes(sec.title.toLowerCase()) ? [sec] : [];
+              }
               if (!sectionsToRender || sectionsToRender.length === 0) return null;
               return sectionsToRender.map((section, loopIdx) => {
                 const realSectionIdx = cvData.customSections.indexOf(section);
                 return (
                   <div key={`custom-${loopIdx}`} className="cv-page-group mb-5">
                     <div className="break-inside-avoid">
-                      <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mb-5 border-b border-gray-400 pb-1">
+                      <h3 className="uppercase text-xs md:text-[14px] font-bold tracking-widest text-gray-800 mt-0 mb-5 border-b border-gray-400 pb-1">
                         {section.title}
                       </h3>
                       {section.items.slice(0, 1).map((item, itemIdx) => {
@@ -530,7 +580,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
                                   href={item.link}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
+                                  className="text-inherit hover:underline"
                                 >
                                   {item.name}
                                 </a>
@@ -563,7 +613,7 @@ const TwoColumnResumeTemplate = ({ userName = "", profileImage, cvData, highligh
                                   href={item.link}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline"
+                                  className="text-inherit hover:underline"
                                 >
                                   {item.name}
                                 </a>

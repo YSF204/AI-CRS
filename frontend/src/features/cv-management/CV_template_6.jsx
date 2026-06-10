@@ -1,10 +1,25 @@
 import React from "react";
-import { getSocialIcon } from "./SocialIcons";
+import { getSocialIcon, getSocialName } from "./SocialIcons";
+
+const cleanUrlDisplay = (url) => {
+  if (typeof url !== "string") return url;
+  return url
+    .replace(/^(https?:\/\/)?(www\.)?/, "")
+    .replace(/\/$/, "");
+};
+
+const ensureAbsoluteUrl = (url) => {
+  if (typeof url !== "string") return url;
+  if (!/^https?:\/\//i.test(url)) {
+    return `https://${url}`;
+  }
+  return url;
+};
 
 const SectionHeader = ({ title }) => (
   <div className="my-3">
     <hr className="border-t-[1.5px] border-gray-300 mb-1" />
-    <h2 className="text-center text-[13px] md:text-sm font-bold uppercase tracking-[0.15em] text-gray-800">
+    <h2 className="text-center text-[13px] md:text-sm font-bold uppercase tracking-[0.15em] text-gray-800 m-0">
       {title}
     </h2>
     <hr className="border-t-[1.5px] border-gray-300 mt-1" />
@@ -34,13 +49,19 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (cvData.contact?.phone)
     contactItems.push(
       <span key="phone">
-        <strong>Phone:</strong> {cvData.contact.phone}
+        <strong>Phone: </strong>
+        <a href={`tel:${cvData.contact.phone}`} className="text-inherit hover:underline">
+          {cvData.contact.phone}
+        </a>
       </span>,
     );
   if (cvData.contact?.email)
     contactItems.push(
       <span key="email">
-        <strong>Email:</strong> {cvData.contact.email}
+        <strong>Email: </strong>
+        <a href={`mailto:${cvData.contact.email}`} className="text-inherit hover:underline">
+          {cvData.contact.email}
+        </a>
       </span>,
     );
   if (cvData.address?.street || cvData.address?.city) {
@@ -56,24 +77,23 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
   }
   if (cvData.contact?.linkedin)
     contactItems.push(
-      <span key="linkedin">
-        <strong>LinkedIn:</strong> {cvData.contact.linkedin}
-      </span>,
+      <a key="linkedin" href={ensureAbsoluteUrl(cvData.contact.linkedin)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title="LinkedIn">
+        {getSocialIcon('linkedin', 14)}
+      </a>
     );
   if (cvData.contact?.github)
     contactItems.push(
-      <span key="github">
-        <strong>GitHub:</strong> {cvData.contact.github}
-      </span>,
+      <a key="github" href={ensureAbsoluteUrl(cvData.contact.github)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title="GitHub">
+        {getSocialIcon('github', 14)}
+      </a>
     );
   if (cvData.contact?.customLinks) {
     cvData.contact.customLinks.forEach((link, i) => {
       if (link.url) {
         contactItems.push(
-          <span key={`custom-${i}`} className="inline-flex items-center gap-1">
-            {getSocialIcon(link.icon, 12)}
-            <strong>{link.label || "Link"}:</strong> {link.url}
-          </span>
+          <a key={`custom-${i}`} href={ensureAbsoluteUrl(link.url)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title={link.label || getSocialName(link.icon)}>
+            {getSocialIcon(link.icon, 14)}
+          </a>
         );
       }
     });
@@ -94,7 +114,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
       }}
     >
       <header className="text-center mb-4">
-        <h1 className="text-[28px] md:text-[34px] font-semibold uppercase tracking-[0.2em] text-gray-800 mb-2">
+        <h1 className="text-[28px] md:text-[34px] font-semibold uppercase tracking-[0.2em] text-gray-800 mt-0 mb-2">
           {userName}
         </h1>
 
@@ -135,7 +155,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
           summary: cvData.summary ? (
             <section key="summary" className="break-inside-avoid mb-5" style={getHighlightStyle('summary')}>
               <SectionHeader title="Professional Statement" />
-              <div className="text-xs md:text-[13px] text-gray-800 leading-relaxed text-justify whitespace-pre-wrap break-words">
+              <div className="text-xs md:text-[13px] text-gray-800 leading-relaxed text-justify whitespace-pre-wrap break-words m-0">
                 {cvData.summary}
               </div>
             </section>
@@ -163,7 +183,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                           {dur && <div className="font-medium">{dur}</div>}
                         </div>
                         {exp.summary && (
-                          <div className="text-[13px] md:text-[13.5px] text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1.5 text-left">
+                          <div className="text-[13px] md:text-[13.5px] text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1 m-0 text-left">
                             {exp.summary}
                           </div>
                         )}
@@ -190,7 +210,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                           {dur && <div className="font-medium">{dur}</div>}
                         </div>
                         {exp.summary && (
-                          <div className="text-[13px] md:text-[13.5px] text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1.5 text-left">
+                          <div className="text-[13px] md:text-[13.5px] text-gray-800 leading-relaxed whitespace-pre-wrap break-words mt-1 m-0 text-left">
                             {exp.summary}
                           </div>
                         )}
@@ -200,7 +220,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                 </div>
               </section>
             ) : null,
-          education:
+ education:
             cvData.education && cvData.education.length > 0 ? (
               <section key="education" className="cv-page-group mb-5">
                 <div className="break-inside-avoid">
@@ -213,15 +233,15 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                         className="text-[13px] md:text-sm"
                         style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}
                       >
-                        <div className="font-bold text-gray-900">
+                        <div className="font-bold text-gray-900 m-0">
                           {edu.certification}
                           {dur ? ` | ${dur}` : ""}
                         </div>
-                        <div className="text-gray-700 mt-0.5">
+                        <div className="text-gray-700 mt-0.5 m-0">
                           {edu.institutionName}
                         </div>
                         {edu.summary && (
-                          <div className="text-gray-600 mt-1 whitespace-pre-wrap break-words">
+                          <div className="text-gray-600 mt-1 m-0 whitespace-pre-wrap break-words">
                             {edu.summary}
                           </div>
                         )}
@@ -238,15 +258,15 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                         className="text-[13px] md:text-sm break-inside-avoid"
                         style={getHighlightStyle(`education_${index + 1}_institutionName`, `education_${index + 1}_certification`, `education_${index + 1}_summary`)}
                       >
-                        <div className="font-bold text-gray-900">
+                        <div className="font-bold text-gray-900 m-0">
                           {edu.certification}
                           {dur ? ` | ${dur}` : ""}
                         </div>
-                        <div className="text-gray-700 mt-0.5">
+                        <div className="text-gray-700 mt-0.5 m-0">
                           {edu.institutionName}
                         </div>
                         {edu.summary && (
-                          <div className="text-gray-600 mt-1 whitespace-pre-wrap break-words">
+                          <div className="text-gray-600 mt-1 m-0 whitespace-pre-wrap break-words">
                             {edu.summary}
                           </div>
                         )}
@@ -257,20 +277,48 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
               </section>
             ) : null,
           technicalSkills:
-            cvData.technicalSkills?.length > 0 ? (
-              <section
-                key="technicalSkills"
-                className="break-inside-avoid mb-5"
-                style={getHighlightStyle('technicalSkills')}
-              >
-                <SectionHeader title="Technical Skills" />
-                <ul className="grid grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
-                  {cvData.technicalSkills.map((skill, index) => (
-                    <li key={index}>{skill}</li>
-                  ))}
-                </ul>
-              </section>
-            ) : null,
+            cvData.technicalSkills?.length > 0 ? (() => {
+              const groups = [];
+              const loose = [];
+              cvData.technicalSkills.forEach(s => {
+                const m = typeof s === 'string' && s.match(/^([^:]+):\s*(.+)$/);
+                if (m) groups.push({ title: m[1].trim(), skills: m[2].split(',').map(x => x.trim()).filter(Boolean) });
+                else loose.push(s);
+              });
+              const hasGroups = groups.length > 0;
+              return (
+                <section
+                  key="technicalSkills"
+                  className="break-inside-avoid mb-5"
+                  style={getHighlightStyle('technicalSkills')}
+                >
+                  <SectionHeader title="Technical Skills" />
+                  {hasGroups ? (
+                    <div className="grid grid-cols-2 gap-x-5 gap-y-2">
+                      {groups.map((g, gi) => (
+                        <div key={gi} className="flex flex-wrap items-baseline gap-x-1.5">
+                          <span className="text-[13px] font-bold text-gray-800 shrink-0">{g.title}:</span>
+                          <span className="text-[12.5px] text-gray-600">{g.skills.join(' · ')}</span>
+                        </div>
+                      ))}
+                      {loose.length > 0 && (
+                        <div className="col-span-2">
+                          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[12.5px] text-gray-800 list-disc list-inside m-0">
+                            {loose.map((s, i) => <li key={i}>{s}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <ul className="grid grid-cols-3 gap-y-1.5 gap-x-3.5 text-xs md:text-[13px] text-gray-800 list-disc list-inside">
+                      {cvData.technicalSkills.map((skill, index) => (
+                        <li key={index}>{skill}</li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              );
+            })() : null,
           softSkills:
             cvData.softSkills?.length > 0 ? (
               <section key="softSkills" className="break-inside-avoid mb-5" style={getHighlightStyle('softSkills')}>
@@ -309,17 +357,21 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
           "language",
         ];
 
+        let customSectionCounter = 0;
         return sectionOrder.map((key) => {
           const isCustom = key.startsWith("customSection__");
           const isLegacyCustom = key === "customSections";
           if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
-            const sectionIdx = isCustom ? parseInt(key.replace("customSection__", ""), 10) : -1;
-            const sectionsToRender = isCustom
-              ? [cvData.customSections[sectionIdx]].filter(Boolean).filter((sec) => sec.title.toLowerCase() !== "federal details")
-              : cvData.customSections.filter((sec) => sec.title.toLowerCase() !== "federal details");
+            let sectionsToRender = [];
+            if (isLegacyCustom) {
+              sectionsToRender = cvData.customSections.filter((sec) => sec.title.toLowerCase() !== "federal details");
+            } else {
+              const sec = cvData.customSections[customSectionCounter++];
+              sectionsToRender = sec && sec.title.toLowerCase() !== "federal details" ? [sec] : [];
+            }
             if (!sectionsToRender.length) return null;
             return sectionsToRender.map((section, loopIdx) => {
-              const sectionIndex = isCustom ? sectionIdx : loopIdx;
+              const sectionIndex = isLegacyCustom ? loopIdx : (customSectionCounter - 1);
               const useGrid = [
                 "professional development",
                 "skills",
@@ -343,7 +395,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                           className="text-xs md:text-[13px]"
                           style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
                         >
-                          <div className="font-bold text-gray-900">
+                          <div className="font-bold text-gray-900 m-0">
                             <span>{item.name}</span>
                             {item.link && (
                               <a
@@ -358,7 +410,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             {dur ? ` | ${dur}` : ""}
                           </div>
                           {item.description && (
-                            <div className="text-gray-700 mt-0.5 whitespace-pre-wrap break-words">
+                            <div className="text-gray-700 mt-0.5 m-0 whitespace-pre-wrap break-words">
                               {item.description}
                             </div>
                           )}
@@ -384,7 +436,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                           className="text-xs md:text-[13px] break-inside-avoid"
                           style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex + 1}_description`)}
                         >
-                          <div className="font-bold text-gray-900">
+                          <div className="font-bold text-gray-900 m-0">
                             <span>{item.name}</span>
                             {item.link && (
                               <a
@@ -399,7 +451,7 @@ const FederalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             {dur ? ` | ${dur}` : ""}
                           </div>
                           {item.description && (
-                            <div className="text-gray-700 mt-0.5 whitespace-pre-wrap break-words">
+                            <div className="text-gray-700 mt-0.5 m-0 whitespace-pre-wrap break-words">
                               {item.description}
                             </div>
                           )}

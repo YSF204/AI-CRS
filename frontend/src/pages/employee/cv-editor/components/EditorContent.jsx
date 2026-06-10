@@ -13,12 +13,6 @@ export default function EditorContent({
   handlers,
   toggleSection,
   toggleCollapse,
-  dragOverKey,
-  onDragStart,
-  onDragOver,
-  onDragLeave,
-  onDrop,
-  onDragEnd,
   handleImageUpload,
   removeProfileImage,
   fetchSuggestions,
@@ -124,79 +118,36 @@ export default function EditorContent({
         </div>
       )}
 
-      {/* Draggable (desktop) / Accordion (mobile) section cards */}
+      {/* Section cards */}
       <div className="flex flex-col gap-6" style={isMobile ? { gap: "10px" } : {}}>
         {activeSections.map((key, index) => {
-          if (isMobile) {
-                      // Mobile: no drag-and-drop, use up/down arrows
-            return (
-              <SectionCard
-                key={key}
-                sectionKey={key}
-                form={form}
-                handlers={handlers}
-                onRemove={() => {
-                  if (isCustomSectionKey(key)) {
-                    handlers.removeCustomSection(getCustomSectionIndex(key));
-                  } else {
-                    toggleSection(key);
-                  }
-                }}
-                collapsed={!!collapsedSections[key]}
-                onToggleCollapse={() => toggleCollapse(key)}
-                fetchSuggestions={fetchSuggestions}
-                fetchSingleSummarySuggestion={fetchSingleSummarySuggestion}
-                handleSuggestionSelect={handleSuggestionSelect}
-                suggestions={suggestions}
-                isLoadingSuggestions={isLoadingSuggestions}
-                onAnalyzeSection={onAnalyzeSection}
-                isMobile={true}
-                onMoveUp={() => onMoveUp(key)}
-                onMoveDown={() => onMoveDown(key)}
-                isFirst={index === 0}
-                isLast={index === activeSections.length - 1}
-              />
-            );
-          }
-
-                    // Desktop: drag-and-drop enabled
           return (
-            <div
+            <SectionCard
               key={key}
-              draggable
-              onDragStart={() => onDragStart(key)}
-              onDragOver={(e) => onDragOver(e, key)}
-              onDragLeave={onDragLeave}
-              onDrop={() => onDrop(key)}
-              onDragEnd={onDragEnd}
-              style={{
-                transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease",
-                transform: dragOverKey === key ? "scale(1.02)" : "none",
-                cursor: "grab",
+              sectionKey={key}
+              form={form}
+              handlers={handlers}
+              onRemove={() => {
+                if (isCustomSectionKey(key)) {
+                  handlers.removeCustomSection(getCustomSectionIndex(key));
+                } else {
+                  toggleSection(key);
+                }
               }}
-            >
-              <SectionCard
-                sectionKey={key}
-                form={form}
-                handlers={handlers}
-                onRemove={() => {
-                  if (isCustomSectionKey(key)) {
-                    handlers.removeCustomSection(getCustomSectionIndex(key));
-                  } else {
-                    toggleSection(key);
-                  }
-                }}
-                collapsed={!!collapsedSections[key]}
-                onToggleCollapse={() => toggleCollapse(key)}
-                fetchSuggestions={fetchSuggestions}
-                fetchSingleSummarySuggestion={fetchSingleSummarySuggestion}
-                handleSuggestionSelect={handleSuggestionSelect}
-                suggestions={suggestions}
-                isLoadingSuggestions={isLoadingSuggestions}
-                onAnalyzeSection={onAnalyzeSection}
-                isMobile={false}
-              />
-            </div>
+              collapsed={!!collapsedSections[key]}
+              onToggleCollapse={() => toggleCollapse(key)}
+              fetchSuggestions={fetchSuggestions}
+              fetchSingleSummarySuggestion={fetchSingleSummarySuggestion}
+              handleSuggestionSelect={handleSuggestionSelect}
+              suggestions={suggestions}
+              isLoadingSuggestions={isLoadingSuggestions}
+              onAnalyzeSection={onAnalyzeSection}
+              isMobile={isMobile}
+              onMoveUp={() => onMoveUp(key)}
+              onMoveDown={() => onMoveDown(key)}
+              isFirst={index === 0}
+              isLast={index === activeSections.length - 1}
+            />
           );
         })}
       </div>

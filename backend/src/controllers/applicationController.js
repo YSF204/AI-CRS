@@ -132,6 +132,7 @@ export const analyzeAtsScore = catchAsync(async (req, res, next) => {
       fullAnalysis: {
         overallScore: normalized.overallScore,
         sections: normalized.sections,
+        customSections: normalized.customSections || [],
         topStrengths: normalized.topStrengths,
         topWeaknesses: normalized.topWeaknesses,
         improvementSuggestions: normalized.improvementSuggestions,

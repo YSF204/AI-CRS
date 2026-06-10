@@ -1,5 +1,5 @@
 import React from "react";
-import { Loader } from "lucide-react";
+import { Loader, Sparkles } from "lucide-react";
 
 export default function CvSelector({
   cvs,
@@ -10,7 +10,7 @@ export default function CvSelector({
   handleInstantSubmitApplication,
   submitting,
   isEdit,
-  formHasChanged, // FIX #6: Added form change detection
+  formHasChanged,
 }) {
   return (
     <>
@@ -41,17 +41,42 @@ export default function CvSelector({
         )}
       </div>
 
-      <div className="p-5 bg-[var(--nm-surface-high)] border-4 border-[var(--nm-primary)]">
+      <div className="p-4 bg-[var(--nm-surface-high)] border-4 border-[var(--nm-primary)]">
         <p className="font-['Manrope'] text-sm text-[var(--nm-text-secondary)]">
-          Choose whether to submit instantly with the selected CV or analyze it first.
+          <strong>Analyze First</strong> to see how well your CV fits this job before applying, or <strong>Apply Instantly</strong> to submit without analysis.
         </p>
       </div>
 
       <div className="flex flex-col gap-4 mt-6">
+        {/* Analyze → shows results → user decides to apply */}
+        <button
+          onClick={handleSubmitApplication}
+          disabled={!selectedCvId || submitting || (isEdit && !formHasChanged)}
+          className="jd-btn jd-btn-primary w-full py-4 font-black shadow-[4px_4px_0_var(--nm-ink)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px] flex items-center justify-center gap-2"
+          title={
+            isEdit && !formHasChanged
+              ? "No changes to submit"
+              : "Analyze your CV fit for this job"
+          }
+        >
+          {submitting ? (
+            <>
+              <Loader className="animate-spin" size={18} />
+              Analyzing...
+            </>
+          ) : (
+            <>
+              <Sparkles size={18} />
+              Analyze My Fit
+            </>
+          )}
+        </button>
+
+        {/* Apply instantly without analysis */}
         <button
           onClick={handleInstantSubmitApplication}
           disabled={!selectedCvId || submitting || (isEdit && !formHasChanged)}
-          className="jd-btn jd-btn-primary w-full py-4 font-black shadow-[4px_4px_0_var(--nm-ink)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
+          className="jd-btn jd-btn-secondary w-full py-4 font-black shadow-[4px_4px_0_var(--nm-ink)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
           title={
             isEdit && !formHasChanged
               ? "No changes to submit"
@@ -67,19 +92,8 @@ export default function CvSelector({
             "Apply Instantly"
           )}
         </button>
-        <button
-          onClick={handleSubmitApplication}
-          disabled={!selectedCvId || submitting || (isEdit && !formHasChanged)}
-          className="jd-btn jd-btn-secondary w-full py-4 font-black shadow-[4px_4px_0_var(--nm-ink)] active:shadow-none active:translate-x-[4px] active:translate-y-[4px]"
-          title={
-            isEdit && !formHasChanged
-              ? "No changes to submit"
-              : "Analyze before applying"
-          }
-        >
-          Analyze Before Applying
-        </button>
       </div>
     </>
   );
 }
+

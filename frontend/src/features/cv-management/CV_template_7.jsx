@@ -1,10 +1,25 @@
 import React from "react";
 import { getSocialIcon, getSocialName } from "./SocialIcons";
 
+const cleanUrlDisplay = (url) => {
+  if (typeof url !== "string") return url;
+  return url
+    .replace(/^(https?:\/\/)?(www\.)?/, "")
+    .replace(/\/$/, "");
+};
+
+const ensureAbsoluteUrl = (url) => {
+  if (typeof url !== "string") return url;
+  if (!/^https?:\/\//i.test(url)) {
+    return `https://${url}`;
+  }
+  return url;
+};
+
 const SectionHeader = ({ title }) => (
   <div className="my-3">
     <hr className="border-t-2 border-gray-300 mb-2" />
-    <h2 className="text-center text-xs md:text-sm font-bold uppercase tracking-widest text-gray-800">
+    <h2 className="text-center text-xs md:text-sm font-bold uppercase tracking-widest text-gray-800 m-0">
       {title}
     </h2>
     <hr className="border-t-2 border-gray-300 mt-2" />
@@ -31,22 +46,46 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
   };
 
   const contactItems = [];
-  if (cvData.contact?.phone) contactItems.push(cvData.contact.phone);
-  if (cvData.contact?.email) contactItems.push(cvData.contact.email);
+  if (cvData.contact?.phone) {
+    contactItems.push(
+      <a href={`tel:${cvData.contact.phone}`} className="text-inherit hover:underline">
+        {cvData.contact.phone}
+      </a>
+    );
+  }
+  if (cvData.contact?.email) {
+    contactItems.push(
+      <a href={`mailto:${cvData.contact.email}`} className="text-inherit hover:underline">
+        {cvData.contact.email}
+      </a>
+    );
+  }
   if (cvData.address?.street || cvData.address?.city) {
     const location = [cvData.address.street, cvData.address.city]
       .filter(Boolean)
       .join(", ");
     if (location) contactItems.push(location);
   }
-  if (cvData.contact?.linkedin) contactItems.push(cvData.contact.linkedin);
-  if (cvData.contact?.github) contactItems.push(cvData.contact.github);
+  if (cvData.contact?.linkedin) {
+    contactItems.push(
+      <a href={ensureAbsoluteUrl(cvData.contact.linkedin)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title="LinkedIn">
+        {getSocialIcon('linkedin', 14)}
+      </a>
+    );
+  }
+  if (cvData.contact?.github) {
+    contactItems.push(
+      <a href={ensureAbsoluteUrl(cvData.contact.github)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title="GitHub">
+        {getSocialIcon('github', 14)}
+      </a>
+    );
+  }
   if (cvData.contact?.customLinks) {
     cvData.contact.customLinks.forEach(link => {
       if (link.url) {
         contactItems.push(
-          <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-            {getSocialName(link.icon)}
+          <a href={ensureAbsoluteUrl(link.url)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title={link.label || getSocialName(link.icon)}>
+            {getSocialIcon(link.icon, 14)}
           </a>
         );
       }
@@ -69,7 +108,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
       }}
     >
       <header className="text-center mb-3">
-        <h1 className="text-[26px] md:text-[30px] font-bold uppercase tracking-wide text-gray-900 mb-1.5">
+        <h1 className="text-[26px] md:text-[30px] font-bold uppercase tracking-wide text-gray-900 mt-0 mb-1.5">
           {userName}
         </h1>
 
@@ -92,24 +131,50 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
           summary: cvData.summary ? (
             <section key="summary" className="break-inside-avoid" style={getHighlightStyle('summary')}>
               <SectionHeader title="Career Summary" />
-              <p className="text-[13px] md:text-sm text-gray-800 leading-[1.6] text-left whitespace-pre-wrap break-words">
+              <p className="text-[13px] md:text-sm text-gray-800 leading-[1.6] text-left whitespace-pre-wrap break-words m-0">
                 {cvData.summary}
               </p>
             </section>
           ) : null,
           technicalSkills:
-            cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
-              <section key="technicalSkills" className="break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
-                <SectionHeader title="Technical Strengths" />
-                <ul className="grid grid-cols-3 gap-y-1 gap-x-2 pl-4 text-xs md:text-sm text-gray-800 list-disc">
-                  {cvData.technicalSkills.map((skill, index) => (
-                    <li key={index} className="pl-1">
-                      {skill}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ) : null,
+            cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (() => {
+              const groups = [];
+              const loose = [];
+              cvData.technicalSkills.forEach(s => {
+                const m = typeof s === 'string' && s.match(/^([^:]+):\s*(.+)$/);
+                if (m) groups.push({ title: m[1].trim(), skills: m[2].split(',').map(x => x.trim()).filter(Boolean) });
+                else loose.push(s);
+              });
+              const hasGroups = groups.length > 0;
+              return (
+                <section key="technicalSkills" className="break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
+                  <SectionHeader title="Technical Strengths" />
+                  {hasGroups ? (
+                    <div className="grid grid-cols-2 gap-x-5 gap-y-2">
+                      {groups.map((g, gi) => (
+                        <div key={gi} className="flex flex-wrap items-baseline gap-x-1.5">
+                          <span className="text-[13px] font-bold text-gray-800 shrink-0">{g.title}:</span>
+                          <span className="text-[12.5px] text-gray-600">{g.skills.join(' · ')}</span>
+                        </div>
+                      ))}
+                      {loose.length > 0 && (
+                        <div className="col-span-2">
+                          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[12.5px] text-gray-800 list-disc list-inside m-0">
+                            {loose.map((s, i) => <li key={i} className="pl-1">{s}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <ul className="grid grid-cols-3 gap-y-1 gap-x-2 pl-4 text-xs md:text-sm text-gray-800 list-disc">
+                      {cvData.technicalSkills.map((skill, index) => (
+                        <li key={index} className="pl-1">{skill}</li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              );
+            })() : null,
           softSkills:
             cvData.softSkills && cvData.softSkills.length > 0 ? (
               <section key="softSkills" className="break-inside-avoid" style={getHighlightStyle('softSkills')}>
@@ -152,7 +217,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                       const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                       return (
                         <div key={0} className="break-inside-avoid" style={getHighlightStyle(`experience_0_institutionName`, `experience_0_position`, `experience_0_summary`)}>
-                          <div className="text-[13px] md:text-sm text-gray-800 mb-1">
+                          <div className="text-[13px] md:text-sm text-gray-800 mt-0 mb-1">
                             <span className="font-bold text-gray-900">{exp.position}</span>
                             {exp.institutionName && (
                               <span> | {exp.institutionName}</span>
@@ -160,7 +225,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             {dur && <span> | {dur}</span>}
                           </div>
                           {exp.summary && (
-                            <div className="text-[13px] md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-2 border-l-2 border-gray-200 pl-2">
+                            <div className="text-[13px] md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-2 border-l-2 border-gray-200 pl-2 m-0">
                               {exp.summary}
                             </div>
                           )}
@@ -176,7 +241,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                       const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                       return (
                         <div key={actualIndex} className="break-inside-avoid" style={getHighlightStyle(`experience_${actualIndex}_institutionName`, `experience_${actualIndex}_position`, `experience_${actualIndex}_summary`)}>
-                          <div className="text-[13px] md:text-sm text-gray-800 mb-1">
+                          <div className="text-[13px] md:text-sm text-gray-800 mt-0 mb-1">
                             <span className="font-bold text-gray-900">{exp.position}</span>
                             {exp.institutionName && (
                               <span> | {exp.institutionName}</span>
@@ -184,7 +249,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             {dur && <span> | {dur}</span>}
                           </div>
                           {exp.summary && (
-                            <div className="text-[13px] md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-2 border-l-2 border-gray-200 pl-2">
+                            <div className="text-[13px] md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-2 border-l-2 border-gray-200 pl-2 m-0">
                               {exp.summary}
                             </div>
                           )}
@@ -205,7 +270,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                       const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                       return (
                         <div key={0} className="break-inside-avoid" style={getHighlightStyle(`education_0_institutionName`, `education_0_certification`, `education_0_summary`)}>
-                          <div className="text-xs md:text-sm text-gray-800 mb-1.5">
+                          <div className="text-xs md:text-sm text-gray-800 mt-0 mb-1.5">
                             <span className="font-bold">{edu.certification}</span>
                             {edu.institutionName && (
                               <span> | {edu.institutionName}</span>
@@ -213,7 +278,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             {dur && <span> | {dur}</span>}
                           </div>
                           {edu.summary && (
-                            <div className="text-xs md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-3">
+                            <div className="text-xs md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-3 m-0">
                               {edu.summary}
                             </div>
                           )}
@@ -229,7 +294,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                       const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                       return (
                         <div key={actualIndex} className="break-inside-avoid" style={getHighlightStyle(`education_${actualIndex}_institutionName`, `education_${actualIndex}_certification`, `education_${actualIndex}_summary`)}>
-                          <div className="text-xs md:text-sm text-gray-800 mb-1.5">
+                          <div className="text-xs md:text-sm text-gray-800 mt-0 mb-1.5">
                             <span className="font-bold">{edu.certification}</span>
                             {edu.institutionName && (
                               <span> | {edu.institutionName}</span>
@@ -237,7 +302,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             {dur && <span> | {dur}</span>}
                           </div>
                           {edu.summary && (
-                            <div className="text-xs md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-3">
+                            <div className="text-xs md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-3 m-0">
                               {edu.summary}
                             </div>
                           )}
@@ -260,14 +325,19 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
           "customSections",
         ];
 
+        let customSectionCounter = 0;
         return sectionOrder.map((key) => {
           const isCustom = key.startsWith("customSection__");
           const isLegacyCustom = key === "customSections";
           if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
-            const sectionIdx = isCustom ? parseInt(key.replace("customSection__", ""), 10) : -1;
-            const sectionsToRender = isCustom ? [cvData.customSections[sectionIdx]].filter(Boolean) : cvData.customSections;
+            let sectionsToRender = [];
+            if (isLegacyCustom) {
+              sectionsToRender = cvData.customSections;
+            } else {
+              sectionsToRender = [cvData.customSections[customSectionCounter++]].filter(Boolean);
+            }
             return sectionsToRender.map((section, loopIdx) => {
-              const sectionIndex = isCustom ? sectionIdx : loopIdx;
+              const sectionIndex = isLegacyCustom ? loopIdx : (customSectionCounter - 1);
               return (
               <section
                 key={`custom-${sectionIndex}`}
@@ -284,7 +354,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                           className="break-inside-avoid"
                           style={getHighlightStyle(`customSections_${sectionIndex}_items_0_description`)}
                         >
-                          <div className="text-xs md:text-sm text-gray-800 mb-0.5">
+                          <div className="text-xs md:text-sm text-gray-800 mt-0 mb-0.5">
                             <span className="font-bold">
                               <span>{item.name}</span>
                               {item.link && (
@@ -296,7 +366,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             {dur && <span> | {dur}</span>}
                           </div>
                           {item.description && (
-                            <div className="text-xs md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-3">
+                            <div className="text-xs md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-3 m-0">
                               {item.description}
                             </div>
                           )}
@@ -306,7 +376,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                   </div>
                 </div>
                 {section.items.length > 1 && (
-                  <div className="space-y-2.5 block mt-2">
+                  <div className="space-y-2.5 block mt-2.5">
                     {section.items.slice(1).map((item, itemIndex) => {
                       const actualIndex = itemIndex + 1;
                       const dur = fmtDuration(item.durationFrom, item.durationTo);
@@ -316,7 +386,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                           className="break-inside-avoid"
                           style={getHighlightStyle(`customSections_${sectionIndex}_items_${actualIndex}_description`)}
                         >
-                          <div className="text-xs md:text-sm text-gray-800 mb-0.5">
+                          <div className="text-xs md:text-sm text-gray-800 mt-0 mb-0.5">
                             <span className="font-bold">
                               <span>{item.name}</span>
                               {item.link && (
@@ -328,7 +398,7 @@ const CenteredFormalTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             {dur && <span> | {dur}</span>}
                           </div>
                           {item.description && (
-                            <div className="text-xs md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-3">
+                            <div className="text-xs md:text-sm text-gray-800 leading-[1.6] whitespace-pre-wrap break-words ml-3 m-0">
                               {item.description}
                             </div>
                           )}

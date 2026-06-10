@@ -1,6 +1,21 @@
 import React from "react";
 import { getSocialIcon, getSocialName } from "./SocialIcons";
 
+const cleanUrlDisplay = (url) => {
+  if (typeof url !== "string") return url;
+  return url
+    .replace(/^(https?:\/\/)?(www\.)?/, "")
+    .replace(/\/$/, "");
+};
+
+const ensureAbsoluteUrl = (url) => {
+  if (typeof url !== "string") return url;
+  if (!/^https?:\/\//i.test(url)) {
+    return `https://${url}`;
+  }
+  return url;
+};
+
 const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
   if (!cvData) return null;
 
@@ -22,22 +37,46 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
 
   // Helper to neatly format contact info with the pipe separator " | "
   const contactItems = [];
-  if (cvData.contact?.phone) contactItems.push(cvData.contact.phone);
-  if (cvData.address?.city || cvData.address?.street) {
-    const location = [cvData.address.street, cvData.address.city]
+  if (cvData.contact?.phone) {
+    contactItems.push(
+      <a href={`tel:${cvData.contact.phone}`} className="text-inherit hover:underline">
+        {cvData.contact.phone}
+      </a>
+    );
+  }
+  if (cvData.contact?.email) {
+    contactItems.push(
+      <a href={`mailto:${cvData.contact.email}`} className="text-inherit hover:underline">
+        {cvData.contact.email}
+      </a>
+    );
+  }
+  if (cvData.address?.street || cvData.address?.city || cvData.address?.country) {
+    const location = [cvData.address.street, cvData.address.city, cvData.address.country]
       .filter(Boolean)
       .join(", ");
     if (location) contactItems.push(location);
   }
-  if (cvData.contact?.email) contactItems.push(cvData.contact.email);
-  if (cvData.contact?.linkedin) contactItems.push(cvData.contact.linkedin);
-  if (cvData.contact?.github) contactItems.push(cvData.contact.github);
+  if (cvData.contact?.linkedin) {
+    contactItems.push(
+      <a href={ensureAbsoluteUrl(cvData.contact.linkedin)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title="LinkedIn">
+        {getSocialIcon('linkedin', 14)}
+      </a>
+    );
+  }
+  if (cvData.contact?.github) {
+    contactItems.push(
+      <a href={ensureAbsoluteUrl(cvData.contact.github)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title="GitHub">
+        {getSocialIcon('github', 14)}
+      </a>
+    );
+  }
   if (cvData.contact?.customLinks) {
     cvData.contact.customLinks.forEach(link => {
       if (link.url) {
         contactItems.push(
-          <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-            {getSocialName(link.icon)}
+          <a href={ensureAbsoluteUrl(link.url)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title={link.label || getSocialName(link.icon)}>
+            {getSocialIcon(link.icon, 14)}
           </a>
         );
       }
@@ -60,7 +99,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
     >
       {/* HEADER SECTION */}
       <header className="text-center mb-2">
-        <h1 className="text-[26px] md:text-[30px] font-bold uppercase tracking-tight text-gray-900 mb-0">
+        <h1 className="text-[26px] md:text-[30px] font-bold uppercase tracking-tight text-gray-900 mt-0 mb-0">
           {userName}
         </h1>
       </header>
@@ -83,11 +122,11 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
         const sectionBlocks = {
           summary: cvData.summary ? (
             <section key="summary" className="break-inside-avoid mb-4" style={getHighlightStyle('summary')}>
-              <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
+              <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mt-0 mb-1">
                 Objective
               </h3>
               <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
-              <p className="text-[13.5px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
+              <p className="text-[13.5px] md:text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words m-0">
                 {cvData.summary}
               </p>
             </section>
@@ -96,7 +135,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
             cvData.education && cvData.education.length > 0 ? (
               <section key="education" className="mb-4">
                 <div className="break-inside-avoid cv-page-group">
-                  <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
+                  <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mt-0 mb-1">
                     Education
                   </h3>
                   <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
@@ -105,7 +144,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                       const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                       return (
                         <div key={0} className="break-inside-avoid" style={getHighlightStyle(`education_0_institutionName`, `education_0_certification`, `education_0_summary`)}>
-                          <p className="text-[13.5px] md:text-sm text-gray-900">
+                          <p className="text-[13.5px] md:text-sm text-gray-900 mt-0 mb-0">
                             <span className="font-semibold">
                               {edu.certification}
                             </span>
@@ -115,7 +154,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             )}
                           </p>
                           {edu.summary && (
-                            <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                            <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words m-0">
                               {edu.summary}
                             </p>
                           )}
@@ -131,7 +170,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                       const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                       return (
                         <div key={actualIndex} className="break-inside-avoid" style={getHighlightStyle(`education_${actualIndex}_institutionName`, `education_${actualIndex}_certification`, `education_${actualIndex}_summary`)}>
-                          <p className="text-[13.5px] md:text-sm text-gray-900">
+                          <p className="text-[13.5px] md:text-sm text-gray-900 mt-0 mb-0">
                             <span className="font-semibold">
                               {edu.certification}
                             </span>
@@ -141,7 +180,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             )}
                           </p>
                           {edu.summary && (
-                            <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                            <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words m-0">
                               {edu.summary}
                             </p>
                           )}
@@ -156,7 +195,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
             cvData.experience && cvData.experience.length > 0 ? (
               <section key="experience" className="mb-4">
                 <div className="break-inside-avoid cv-page-group">
-                  <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
+                  <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mt-0 mb-1">
                     Experience
                   </h3>
                   <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
@@ -165,7 +204,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                       const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                       return (
                         <div key={0} className="break-inside-avoid" style={getHighlightStyle(`experience_0_institutionName`, `experience_0_position`, `experience_0_summary`)}>
-                          <p className="text-[13.5px] md:text-sm text-gray-900">
+                          <p className="text-[13.5px] md:text-sm text-gray-900 mt-0 mb-0">
                             <span className="font-semibold">
                               {exp.institutionName}
                             </span>
@@ -175,7 +214,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             )}
                           </p>
                           {exp.summary && (
-                            <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                            <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words m-0">
                               {exp.summary}
                             </p>
                           )}
@@ -191,7 +230,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                       const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                       return (
                         <div key={actualIndex} className="break-inside-avoid" style={getHighlightStyle(`experience_${actualIndex}_institutionName`, `experience_${actualIndex}_position`, `experience_${actualIndex}_summary`)}>
-                          <p className="text-[13.5px] md:text-sm text-gray-900">
+                          <p className="text-[13.5px] md:text-sm text-gray-900 mt-0 mb-0">
                             <span className="font-semibold">
                               {exp.institutionName}
                             </span>
@@ -201,7 +240,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             )}
                           </p>
                           {exp.summary && (
-                            <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                            <p className="text-[13.5px] md:text-sm text-gray-700 mt-1 leading-relaxed whitespace-pre-wrap break-words m-0">
                               {exp.summary}
                             </p>
                           )}
@@ -213,29 +252,53 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
               </section>
             ) : null,
           technicalSkills:
-            cvData.technicalSkills?.length > 0 ? (
-              <section
-                key="technicalSkills"
-                className="break-inside-avoid mb-4"
-                style={getHighlightStyle('technicalSkills')}
-              >
-                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
-                  Technical Skills
-                </h3>
-                <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
-                <p className="text-[13.5px] md:text-sm text-gray-800 leading-relaxed">
-                  {cvData.technicalSkills.join(", ")}
-                </p>
-              </section>
-            ) : null,
+            cvData.technicalSkills?.length > 0 ? (() => {
+              const groups = [];
+              const loose = [];
+              cvData.technicalSkills.forEach(s => {
+                const m = typeof s === 'string' && s.match(/^([^:]+):\s*(.+)$/);
+                if (m) groups.push({ title: m[1].trim(), skills: m[2].split(',').map(x => x.trim()).filter(Boolean) });
+                else loose.push(s);
+              });
+              const hasGroups = groups.length > 0;
+              return (
+                <section
+                  key="technicalSkills"
+                  className="break-inside-avoid mb-4"
+                  style={getHighlightStyle('technicalSkills')}
+                >
+                  <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mt-0 mb-1">
+                    Technical Skills
+                  </h3>
+                  <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
+                  {hasGroups ? (
+                    <div className="flex flex-col gap-1.5">
+                      {groups.map((g, gi) => (
+                        <div key={gi} className="flex flex-wrap items-baseline gap-x-1.5">
+                          <span className="text-[13px] font-bold text-gray-800 shrink-0">{g.title}:</span>
+                          <span className="text-[12.5px] text-gray-600">{g.skills.join(' · ')}</span>
+                        </div>
+                      ))}
+                      {loose.length > 0 && (
+                        <p className="text-[13.5px] md:text-sm text-gray-800 m-0">{loose.join(", ")}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-[13.5px] md:text-sm text-gray-800 leading-relaxed m-0">
+                      {cvData.technicalSkills.join(", ")}
+                    </p>
+                  )}
+                </section>
+              );
+            })() : null,
           softSkills:
             cvData.softSkills?.length > 0 ? (
               <section key="softSkills" className="break-inside-avoid mb-4" style={getHighlightStyle('softSkills')}>
-                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
+                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mt-0 mb-1">
                   Soft Skills
                 </h3>
                 <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
-                <p className="text-[13.5px] md:text-sm text-gray-800 leading-relaxed">
+                <p className="text-[13.5px] md:text-sm text-gray-800 leading-relaxed m-0">
                   {cvData.softSkills.join(", ")}
                 </p>
               </section>
@@ -243,11 +306,11 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
           language:
             cvData.language?.length > 0 ? (
               <section key="language" className="break-inside-avoid mb-4" style={getHighlightStyle('language')}>
-                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
+                <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mt-0 mb-1">
                   Languages
                 </h3>
                 <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
-                <p className="text-[13.5px] md:text-sm text-gray-800 leading-relaxed">
+                <p className="text-[13.5px] md:text-sm text-gray-800 leading-relaxed m-0">
                   {cvData.language
                     .map((item) =>
                       typeof item === "string"
@@ -270,23 +333,27 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
           "language",
         ];
 
+        let customSectionCounter = 0;
         return sectionOrder.map((key) => {
           const isCustom = key.startsWith("customSection__");
-        const isLegacyCustom = key === "customSections";
-        if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
-          let sectionsToRender = isLegacyCustom 
-            ? cvData.customSections
-            : [cvData.customSections[parseInt(key.replace("customSection__", ""), 10)]].filter(Boolean);
+          const isLegacyCustom = key === "customSections";
+          if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
+            let sectionsToRender = [];
+            if (isLegacyCustom) {
+              sectionsToRender = cvData.customSections;
+            } else {
+              sectionsToRender = [cvData.customSections[customSectionCounter++]].filter(Boolean);
+            }
             
-          return sectionsToRender.map((section, loopIdx) => {
-            const sectionIndex = isLegacyCustom ? loopIdx : parseInt(key.replace("customSection__", ""), 10);
+            return sectionsToRender.map((section, loopIdx) => {
+              const sectionIndex = isLegacyCustom ? loopIdx : (customSectionCounter - 1);
             return (
               <section
                 key={`custom-${sectionIndex}`}
                 className="mb-4"
               >
                 <div className="break-inside-avoid cv-page-group">
-                  <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mb-1">
+                  <h3 className="text-[13px] md:text-[14px] font-bold uppercase tracking-wider text-gray-900 mt-0 mb-1">
                     {section.title}
                   </h3>
                   <hr className="border-t-[1.5px] border-gray-300 mt-1 mb-2" />
@@ -300,11 +367,11 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                           style={getHighlightStyle(`customSections_${sectionIndex}_items_0_description`)}
                         >
                           <div className="flex justify-between items-baseline mb-0.5">
-                            <h3 className="text-[13px] font-bold text-gray-900">
+                            <h3 className="text-[13px] font-bold text-gray-900 m-0">
                               <span>{item.name}</span>
                               {item.link && (
                                 <a
-                                  href={item.link}
+                                  href={ensureAbsoluteUrl(item.link)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="ml-1 text-gray-500 hover:text-gray-700"
@@ -320,7 +387,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             )}
                           </div>
                           {item.description && (
-                            <div className="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1">
+                            <div className="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1 m-0">
                               {item.description}
                             </div>
                           )}
@@ -330,7 +397,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                   </div>
                 </div>
                 {section.items.length > 1 && (
-                  <div className="space-y-4 block mt-2">
+                  <div className="space-y-4 block mt-4">
                     {section.items.slice(1).map((item, itemIndex) => {
                       const actualIndex = itemIndex + 1;
                       const dur = fmtDuration(item.durationFrom, item.durationTo);
@@ -341,11 +408,11 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                           style={getHighlightStyle(`customSections_${sectionIndex}_items_${actualIndex}_description`)}
                         >
                           <div className="flex justify-between items-baseline mb-0.5">
-                            <h3 className="text-[13px] font-bold text-gray-900">
+                            <h3 className="text-[13px] font-bold text-gray-900 m-0">
                               <span>{item.name}</span>
                               {item.link && (
                                 <a
-                                  href={item.link}
+                                  href={ensureAbsoluteUrl(item.link)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="ml-1 text-gray-500 hover:text-gray-700"
@@ -361,7 +428,7 @@ const MinimalResumeTemplate = ({ userName = "", cvData, highlights = {} }) => {
                             )}
                           </div>
                           {item.description && (
-                            <div className="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1">
+                            <div className="text-xs md:text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1 m-0">
                               {item.description}
                             </div>
                           )}

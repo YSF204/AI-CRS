@@ -1,9 +1,3 @@
-/**
- * Form Suggestion Prompts
- * Single responsibility: Prompts for generating form field suggestions
- * Handles job titles, summaries, experience entries, skills, education, and custom sections
- */
-
 export const FORM_SUGGESTION_PROMPTS = {
   /**
    * Suggest job title based on experience

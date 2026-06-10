@@ -1,8 +1,23 @@
 import React from "react";
 import { getSocialIcon, getSocialName } from "./SocialIcons";
 
+const cleanUrlDisplay = (url) => {
+  if (typeof url !== "string") return url;
+  return url
+    .replace(/^(https?:\/\/)?(www\.)?/, "")
+    .replace(/\/$/, "");
+};
+
+const ensureAbsoluteUrl = (url) => {
+  if (typeof url !== "string") return url;
+  if (!/^https?:\/\//i.test(url)) {
+    return `https://${url}`;
+  }
+  return url;
+};
+
 const SectionHeader = ({ title }) => (
-  <h2 className="text-[15px] font-bold uppercase text-black mb-2 border-b-[1.5px] border-black pb-1 tracking-widest">
+  <h2 className="text-[13.5px] font-bold uppercase text-black mt-0 mb-1.5 border-b-[1.5px] border-black pb-0.5 tracking-widest">
     {title}
   </h2>
 );
@@ -27,22 +42,46 @@ const ATSProvenTemplate = ({ userName = "", cvData, highlights = {} }) => {
   };
 
   const contactItems = [];
-  if (cvData.contact?.phone) contactItems.push(cvData.contact.phone);
-  if (cvData.contact?.email) contactItems.push(cvData.contact.email);
+  if (cvData.contact?.phone) {
+    contactItems.push(
+      <a href={`tel:${cvData.contact.phone}`} className="text-inherit hover:underline">
+        {cvData.contact.phone}
+      </a>
+    );
+  }
+  if (cvData.contact?.email) {
+    contactItems.push(
+      <a href={`mailto:${cvData.contact.email}`} className="text-inherit hover:underline">
+        {cvData.contact.email}
+      </a>
+    );
+  }
   if (cvData.address?.country || cvData.address?.city) {
     const location = [cvData.address.city, cvData.address.country]
       .filter(Boolean)
       .join(", ");
     if (location) contactItems.push(location);
   }
-  if (cvData.contact?.linkedin) contactItems.push(cvData.contact.linkedin);
-  if (cvData.contact?.github) contactItems.push(cvData.contact.github);
+  if (cvData.contact?.linkedin) {
+    contactItems.push(
+      <a href={ensureAbsoluteUrl(cvData.contact.linkedin)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title="LinkedIn">
+        {getSocialIcon('linkedin', 14)}
+      </a>
+    );
+  }
+  if (cvData.contact?.github) {
+    contactItems.push(
+      <a href={ensureAbsoluteUrl(cvData.contact.github)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title="GitHub">
+        {getSocialIcon('github', 14)}
+      </a>
+    );
+  }
   if (cvData.contact?.customLinks) {
     cvData.contact.customLinks.forEach(link => {
       if (link.url) {
         contactItems.push(
-          <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-            {getSocialName(link.icon)}
+          <a href={ensureAbsoluteUrl(link.url)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title={link.label || getSocialName(link.icon)}>
+            {getSocialIcon(link.icon, 14)}
           </a>
         );
       }
@@ -60,15 +99,15 @@ const ATSProvenTemplate = ({ userName = "", cvData, highlights = {} }) => {
         margin: "0 auto",
         boxSizing: "border-box",
         position: "relative",
-        padding: "20mm", // Standard A4 margins
+        padding: "15mm 20mm", // Compact top/bottom standard left/right margins
       }}
     >
-      <header className="text-center mb-6">
-        <h1 className="text-[36px] font-bold text-black leading-none mb-2">
+      <header className="text-center mb-4">
+        <h1 className="text-[26px] font-bold text-black leading-none mt-0 mb-1.5">
           {userName}
         </h1>
 
-        <div className="flex flex-wrap justify-center items-center gap-1.5 text-[14px] text-black">
+        <div className="flex flex-wrap justify-center items-center gap-x-2 gap-y-0.5 text-[11px] text-black">
           {contactItems.map((item, index) => (
             <React.Fragment key={index}>
               <span>{item}</span>
@@ -83,16 +122,16 @@ const ATSProvenTemplate = ({ userName = "", cvData, highlights = {} }) => {
       {(() => {
         const sectionBlocks = {
           summary: cvData.summary ? (
-            <section key="summary" className="cv-page-group break-inside-avoid mb-5" style={getHighlightStyle('summary')}>
+            <section key="summary" className="cv-page-group break-inside-avoid mb-3.5" style={getHighlightStyle('summary')}>
               <SectionHeader title="Professional Summary" />
-              <p className="text-[14px] text-black leading-relaxed whitespace-pre-wrap break-words">
+              <p className="text-[12px] text-black leading-normal whitespace-pre-wrap break-words m-0">
                 {cvData.summary}
               </p>
             </section>
           ) : null,
           experience:
             cvData.experience && cvData.experience.length > 0 ? (
-              <section key="experience" className="cv-page-group mb-5">
+              <section key="experience" className="cv-page-group mb-3.5">
                 <div className="break-inside-avoid">
                   <SectionHeader title="Experience" />
                   {cvData.experience.slice(0, 1).map((exp, index) => {
@@ -100,28 +139,28 @@ const ATSProvenTemplate = ({ userName = "", cvData, highlights = {} }) => {
                     return (
                       <div key={index} style={getHighlightStyle(`experience_${index}_institutionName`, `experience_${index}_position`, `experience_${index}_summary`)}>
                         <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="text-[15px] font-bold text-black">
+                          <h3 className="text-[13px] font-bold text-black m-0">
                             {exp.position}
                           </h3>
                           {dur && (
-                            <span className="text-[14px] text-black font-semibold">
+                            <span className="text-[12px] text-black font-semibold">
                               {dur}
                             </span>
                           )}
                         </div>
                         {exp.institutionName && (
-                          <div className="text-[14.5px] italic text-black mb-1">
+                          <div className="text-[12.5px] italic text-black mt-0.5 mb-0.5">
                             {exp.institutionName}
                           </div>
                         )}
                         {exp.summary && (
-                          <div className="text-[14px] text-black leading-relaxed whitespace-pre-wrap break-words mt-1">
+                          <div className="text-[12px] text-black leading-normal whitespace-pre-wrap break-words mt-0.5 m-0">
                             {/* Standard ATS bullets format often best kept clean */}
                             {exp.summary.split('\n').map((line, i) => {
                               const trimmedLine = line.trim();
                               if (!trimmedLine) return null;
                               return (
-                                <div key={i} className="flex mb-1">
+                                <div key={i} className="flex mt-0.5 mb-0.5">
                                   <span className="mr-2">•</span>
                                   <span>{trimmedLine.replace(/^[-•]\s*/, '')}</span>
                                 </div>
@@ -133,34 +172,34 @@ const ATSProvenTemplate = ({ userName = "", cvData, highlights = {} }) => {
                     );
                   })}
                 </div>
-                <div className="space-y-4 block">
+                <div className="space-y-2.5 block mt-2.5">
                   {cvData.experience.slice(1).map((exp, index) => {
                     const dur = fmtDuration(exp.durationFrom, exp.durationTo);
                     return (
                       <div key={index + 1} className="break-inside-avoid" style={getHighlightStyle(`experience_${index + 1}_institutionName`, `experience_${index + 1}_position`, `experience_${index + 1}_summary`)}>
                         <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="text-[15px] font-bold text-black">
+                          <h3 className="text-[13px] font-bold text-black m-0">
                             {exp.position}
                           </h3>
                           {dur && (
-                            <span className="text-[14px] text-black font-semibold">
+                            <span className="text-[12px] text-black font-semibold">
                               {dur}
                             </span>
                           )}
                         </div>
                         {exp.institutionName && (
-                          <div className="text-[14.5px] italic text-black mb-1">
+                          <div className="text-[12.5px] italic text-black mt-0.5 mb-0.5">
                             {exp.institutionName}
                           </div>
                         )}
                         {exp.summary && (
-                          <div className="text-[14px] text-black leading-relaxed whitespace-pre-wrap break-words mt-1">
+                          <div className="text-[12px] text-black leading-normal whitespace-pre-wrap break-words mt-0.5 m-0">
                             {/* Standard ATS bullets format often best kept clean */}
                             {exp.summary.split('\n').map((line, i) => {
                               const trimmedLine = line.trim();
                               if (!trimmedLine) return null;
                               return (
-                                <div key={i} className="flex mb-1">
+                                <div key={i} className="flex mt-0.5 mb-0.5">
                                   <span className="mr-2">•</span>
                                   <span>{trimmedLine.replace(/^[-•]\s*/, '')}</span>
                                 </div>
@@ -176,7 +215,7 @@ const ATSProvenTemplate = ({ userName = "", cvData, highlights = {} }) => {
             ) : null,
           education:
             cvData.education && cvData.education.length > 0 ? (
-              <section key="education" className="cv-page-group mb-5">
+              <section key="education" className="cv-page-group mb-3.5">
                 <div className="break-inside-avoid">
                   <SectionHeader title="Education" />
                   {cvData.education.slice(0, 1).map((edu, index) => {
@@ -184,20 +223,20 @@ const ATSProvenTemplate = ({ userName = "", cvData, highlights = {} }) => {
                     return (
                       <div key={index} style={getHighlightStyle(`education_${index}_institutionName`, `education_${index}_certification`, `education_${index}_summary`)}>
                         <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="text-[15px] font-bold text-black">
+                          <h3 className="text-[13px] font-bold text-black m-0">
                             {edu.institutionName}
                           </h3>
                           {dur && (
-                            <span className="text-[14px] text-black font-semibold">
+                            <span className="text-[12px] text-black font-semibold">
                               {dur}
                             </span>
                           )}
                         </div>
-                        <div className="text-[14.5px] italic text-black">
+                        <div className="text-[12.5px] italic text-black mt-0.5 mb-0.5">
                           {edu.certification}
                         </div>
                         {edu.summary && (
-                          <div className="text-[14px] text-black mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                          <div className="text-[12px] text-black mt-0.5 leading-normal whitespace-pre-wrap break-words m-0">
                             {edu.summary}
                           </div>
                         )}
@@ -205,26 +244,26 @@ const ATSProvenTemplate = ({ userName = "", cvData, highlights = {} }) => {
                     );
                   })}
                 </div>
-                <div className="space-y-4 block">
+                <div className="space-y-2.5 block mt-2.5">
                   {cvData.education.slice(1).map((edu, index) => {
                     const dur = fmtDuration(edu.durationFrom, edu.durationTo);
                     return (
                       <div key={index + 1} className="break-inside-avoid" style={getHighlightStyle(`education_${index + 1}_institutionName`, `education_${index + 1}_certification`, `education_${index + 1}_summary`)}>
                         <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="text-[15px] font-bold text-black">
+                          <h3 className="text-[13px] font-bold text-black m-0">
                             {edu.institutionName}
                           </h3>
                           {dur && (
-                            <span className="text-[14px] text-black font-semibold">
+                            <span className="text-[12px] text-black font-semibold">
                               {dur}
                             </span>
                           )}
                         </div>
-                        <div className="text-[14.5px] italic text-black">
+                        <div className="text-[12.5px] italic text-black mt-0.5 mb-0.5">
                           {edu.certification}
                         </div>
                         {edu.summary && (
-                          <div className="text-[14px] text-black mt-1 leading-relaxed whitespace-pre-wrap break-words">
+                          <div className="text-[12px] text-black mt-0.5 leading-normal whitespace-pre-wrap break-words m-0">
                             {edu.summary}
                           </div>
                         )}
@@ -235,28 +274,52 @@ const ATSProvenTemplate = ({ userName = "", cvData, highlights = {} }) => {
               </section>
             ) : null,
           technicalSkills:
-            cvData.technicalSkills?.length > 0 ? (
-              <section key="technicalSkills" className="cv-page-group break-inside-avoid mb-5" style={getHighlightStyle('technicalSkills')}>
-                <SectionHeader title="Technical Skills" />
-                <p className="text-[14px] text-black leading-relaxed">
-                  {cvData.technicalSkills.join(", ")}
-                </p>
-              </section>
-            ) : null,
+            cvData.technicalSkills?.length > 0 ? (() => {
+              const groups = [];
+              const loose = [];
+              cvData.technicalSkills.forEach(s => {
+                const m = typeof s === 'string' && s.match(/^([^:]+):\s*(.+)$/);
+                if (m) groups.push({ title: m[1].trim(), skills: m[2].split(',').map(x => x.trim()).filter(Boolean) });
+                else loose.push(s);
+              });
+              const hasGroups = groups.length > 0;
+              return (
+                <section key="technicalSkills" className="cv-page-group break-inside-avoid mb-3.5" style={getHighlightStyle('technicalSkills')}>
+                  <SectionHeader title="Technical Skills" />
+                  {hasGroups ? (
+                    <div className="flex flex-col gap-1.5">
+                      {groups.map((g, gi) => (
+                        <div key={gi} className="flex flex-wrap items-baseline gap-x-1.5">
+                          <span className="text-[12px] font-bold text-black shrink-0">{g.title}:</span>
+                          <span className="text-[12px] text-gray-700">{g.skills.join(' · ')}</span>
+                        </div>
+                      ))}
+                      {loose.length > 0 && (
+                        <p className="text-[12px] text-black leading-normal m-0">{loose.join(", ")}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-[12px] text-black leading-normal m-0">
+                      {cvData.technicalSkills.join(", ")}
+                    </p>
+                  )}
+                </section>
+              );
+            })() : null,
           softSkills:
             cvData.softSkills?.length > 0 ? (
-              <section key="softSkills" className="cv-page-group break-inside-avoid mb-5" style={getHighlightStyle('softSkills')}>
+              <section key="softSkills" className="cv-page-group break-inside-avoid mb-3.5" style={getHighlightStyle('softSkills')}>
                 <SectionHeader title="Soft Skills" />
-                <p className="text-[14px] text-black leading-relaxed">
+                <p className="text-[12px] text-black leading-normal m-0">
                   {cvData.softSkills.join(", ")}
                 </p>
               </section>
             ) : null,
           language:
             cvData.language?.length > 0 ? (
-              <section key="language" className="cv-page-group break-inside-avoid mb-5" style={getHighlightStyle('language')}>
+              <section key="language" className="cv-page-group break-inside-avoid mb-3.5" style={getHighlightStyle('language')}>
                 <SectionHeader title="Languages" />
-                <p className="text-[14px] text-black leading-relaxed">
+                <p className="text-[12px] text-black leading-normal m-0">
                   {cvData.language
                     .map((item) =>
                       typeof item === "string"
@@ -279,100 +342,130 @@ const ATSProvenTemplate = ({ userName = "", cvData, highlights = {} }) => {
           "customSections",
         ];
 
+        let customSectionCounter = 0;
         return sectionOrder.map((key) => {
           const isCustom = key.startsWith("customSection__");
-        const isLegacyCustom = key === "customSections";
-        if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
-          let sectionsToRender = isLegacyCustom 
-            ? cvData.customSections
-            : [cvData.customSections[parseInt(key.replace("customSection__", ""), 10)]].filter(Boolean);
+          const isLegacyCustom = key === "customSections";
+          if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
+            let sectionsToRender = [];
+            if (isLegacyCustom) {
+              sectionsToRender = cvData.customSections;
+            } else {
+              sectionsToRender = [cvData.customSections[customSectionCounter++]].filter(Boolean);
+            }
             
-          return sectionsToRender.map((section, loopIdx) => {
-            const sectionIndex = isLegacyCustom ? loopIdx : parseInt(key.replace("customSection__", ""), 10);
-            return (
-              <section
-                key={`custom-${sectionIndex}`}
-                className="cv-page-group mb-5"
-              >
-                <div className="break-inside-avoid">
-                  <SectionHeader title={section.title} />
-                  {section.items.slice(0, 1).map((item, itemIndex) => {
-                    const dur = fmtDuration(item.durationFrom, item.durationTo);
-                    return (
-                      <div
-                        key={itemIndex}
-                        style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
-                      >
-                        <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="text-[15px] font-bold text-black">
-                            <span>{item.name}</span>
-                            {item.link && (
-                              <a
-                                href={item.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="ml-1 text-gray-500 hover:text-gray-700"
-                              >
-                                <svg className="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                              </a>
+            return sectionsToRender.map((section, loopIdx) => {
+              const sectionIndex = isLegacyCustom ? loopIdx : (customSectionCounter - 1);
+              return (
+                <section
+                  key={`custom-${sectionIndex}`}
+                  className="cv-page-group mb-3.5"
+                >
+                  <div className="break-inside-avoid">
+                    <SectionHeader title={section.title} />
+                    {section.items.slice(0, 1).map((item, itemIndex) => {
+                      const dur = fmtDuration(item.durationFrom, item.durationTo);
+                      return (
+                        <div
+                          key={itemIndex}
+                          style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex}_description`)}
+                        >
+                          <div className="flex justify-between items-baseline mb-0.5">
+                            <h3 className="text-[13px] font-bold text-black flex items-center m-0">
+                              <span>{item.name}</span>
+                              {item.link && (
+                                <a
+                                  href={ensureAbsoluteUrl(item.link)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="ml-1 text-gray-500 hover:text-gray-700"
+                                >
+                                  <svg className="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                </a>
+                              )}
+                            </h3>
+                            {dur && (
+                              <span className="text-[12px] text-black font-semibold">
+                                {dur}
+                              </span>
                             )}
-                          </h3>
-                          {dur && (
-                            <span className="text-[14px] text-black font-semibold">
-                              {dur}
-                            </span>
+                          </div>
+                          {item.description && (
+                            <div className="text-[12px] text-black leading-normal whitespace-pre-wrap break-words mt-0.5 m-0">
+                              {item.description.includes('\n') ? (
+                                item.description.split('\n').map((line, i) => {
+                                  const trimmedLine = line.trim();
+                                  if (!trimmedLine) return null;
+                                  return (
+                                    <div key={i} className="flex mt-0.5 mb-0.5">
+                                      <span className="mr-2">•</span>
+                                      <span>{trimmedLine.replace(/^[-•]\s*/, '')}</span>
+                                    </div>
+                                  );
+                                })
+                              ) : (
+                                item.description
+                              )}
+                            </div>
                           )}
                         </div>
-                        {item.description && (
-                          <div className="text-[14px] text-black leading-relaxed whitespace-pre-wrap break-words mt-1">
-                            {item.description}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="space-y-4 block">
-                  {section.items.slice(1).map((item, itemIndex) => {
-                    const dur = fmtDuration(item.durationFrom, item.durationTo);
-                    return (
-                      <div
-                        key={itemIndex + 1}
-                        className="break-inside-avoid"
-                        style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex + 1}_description`)}
-                      >
-                        <div className="flex justify-between items-baseline mb-0.5">
-                          <h3 className="text-[15px] font-bold text-black">
-                            <span>{item.name}</span>
-                            {item.link && (
-                              <a
-                                href={item.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="ml-1 text-gray-500 hover:text-gray-700"
-                              >
-                                <svg className="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                              </a>
+                      );
+                    })}
+                  </div>
+                  <div className="space-y-2.5 block mt-2.5">
+                    {section.items.slice(1).map((item, itemIndex) => {
+                      const dur = fmtDuration(item.durationFrom, item.durationTo);
+                      return (
+                        <div
+                          key={itemIndex + 1}
+                          className="break-inside-avoid"
+                          style={getHighlightStyle(`customSections_${sectionIndex}_items_${itemIndex + 1}_description`)}
+                        >
+                          <div className="flex justify-between items-baseline mb-0.5">
+                            <h3 className="text-[13px] font-bold text-black flex items-center m-0">
+                              <span>{item.name}</span>
+                              {item.link && (
+                                <a
+                                  href={ensureAbsoluteUrl(item.link)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="ml-1 text-gray-500 hover:text-gray-700"
+                                >
+                                  <svg className="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                </a>
+                              )}
+                            </h3>
+                            {dur && (
+                              <span className="text-[12px] text-black font-semibold">
+                                {dur}
+                              </span>
                             )}
-                          </h3>
-                          {dur && (
-                            <span className="text-[14px] text-black font-semibold">
-                              {dur}
-                            </span>
+                          </div>
+                          {item.description && (
+                            <div className="text-[12px] text-black leading-normal whitespace-pre-wrap break-words mt-0.5 m-0">
+                              {item.description.includes('\n') ? (
+                                item.description.split('\n').map((line, i) => {
+                                  const trimmedLine = line.trim();
+                                  if (!trimmedLine) return null;
+                                  return (
+                                    <div key={i} className="flex mt-0.5 mb-0.5">
+                                      <span className="mr-2">•</span>
+                                      <span>{trimmedLine.replace(/^[-•]\s*/, '')}</span>
+                                    </div>
+                                  );
+                                })
+                              ) : (
+                                item.description
+                              )}
+                            </div>
                           )}
                         </div>
-                        {item.description && (
-                          <div className="text-[14px] text-black leading-relaxed whitespace-pre-wrap break-words mt-1">
-                            {item.description}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-            );
-          });
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            });
           }
           if (key.includes("Skills") || key === "language")
             return sectionBlocks[key];

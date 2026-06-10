@@ -44,7 +44,11 @@ export const MOCK_CV_DATA = {
       summary: 'Graduated with honors. Focus on Algorithms and Distributed Systems.',
     },
   ],
-  technicalSkills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'Docker', 'AWS'],
+  technicalSkills: [
+    'Frontend: React, NextJS, TypeScript, TailwindCSS',
+    'Backend: Node.js, Express, PostgreSQL, MongoDB',
+    'DevOps: Docker, AWS, CI/CD, GitHub Actions',
+  ],
   softSkills: ['Leadership', 'Communication', 'Problem Solving'],
   language: ['English', 'Arabic', 'Hebrew'],
   customSections: [

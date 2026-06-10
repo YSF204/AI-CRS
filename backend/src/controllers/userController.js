@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import APIFeatures from "../utils/apiFeatures.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import fs from "fs";
 import { updateMyProfile as updateMeService } from "../services/users/account/updateMyProfile.js";
 import { requestAccountDeletion as requestDelete } from "../services/users/account/requestAccountDeletion.js";
 import { confirmAccountDeletion as confirmDeleteService } from "../services/users/account/confirmAccountDeletion.js";
@@ -106,24 +107,40 @@ export const uploadProfilePicture = catchAsync(async (req, res, next) => {
   const extension = path.extname(req.file.originalname || ".jpg") || ".jpg";
   const fileName = `${req.user._id}-${Date.now()}-${crypto.randomBytes(6).toString("hex")}${extension}`;
   const filePath = `profile/${fileName}`;
-  const supabase = getSupabaseClient();
+  let profilePicUrl = "";
 
-  const { error: uploadError } = await supabase.storage
-    .from(SUPABASE_BUCKET)
-    .upload(filePath, req.file.buffer, {
-      contentType: req.file.mimetype,
-      upsert: true,
-    });
+  try {
+    const supabase = getSupabaseClient();
+    const { error: uploadError } = await supabase.storage
+      .from(SUPABASE_BUCKET)
+      .upload(filePath, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: true,
+      });
 
-  if (uploadError) {
-    return next(new AppError(`Failed to upload profile picture: ${uploadError.message}`, 500));
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data: publicData } = supabase.storage
+      .from(SUPABASE_BUCKET)
+      .getPublicUrl(filePath);
+
+    profilePicUrl = publicData?.publicUrl || "";
+  } catch (error) {
+    console.warn("Supabase profile picture upload failed, falling back to local storage:", error.message);
+
+    const localDir = path.join(process.cwd(), "src", "uploads", "profile");
+    if (!fs.existsSync(localDir)) {
+      fs.mkdirSync(localDir, { recursive: true });
+    }
+
+    const localFilePath = path.join(localDir, fileName);
+    fs.writeFileSync(localFilePath, req.file.buffer);
+
+    const backendUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get("host")}`;
+    profilePicUrl = `${backendUrl}/uploads/profile/${fileName}`;
   }
-
-  const { data: publicData } = supabase.storage
-    .from(SUPABASE_BUCKET)
-    .getPublicUrl(filePath);
-
-  const profilePicUrl = publicData?.publicUrl || "";
 
   const user = await User.findByIdAndUpdate(
     req.user._id,

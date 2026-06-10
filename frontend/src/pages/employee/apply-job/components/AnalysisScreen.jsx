@@ -56,10 +56,10 @@ export default function AnalysisScreen({
             }}
             className="flex items-center gap-2 mb-4 text-black hover:bg-black hover:text-white transition-colors font-mono font-bold uppercase tracking-widest text-xs border-4 border-black px-4 py-2"
           >
-            <ChevronLeft size={16} /> Retour
+            <ChevronLeft size={16} /> Back to CV Selection
           </button>
           <h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-['Space_Grotesk'] uppercase tracking-tight text-black">
-            Action Analysis
+            Fit Analysis
           </h1>
           <p className="font-mono text-xs sm:text-base text-black font-bold uppercase tracking-widest mt-2 border-2 border-black inline-block px-2 sm:px-3 py-1 bg-[var(--yellow)]">
             POSITION: {job.position}
@@ -85,52 +85,7 @@ export default function AnalysisScreen({
           </h2>
         </div>
 
-        {/* Breakdown Panel */}
-        <div className="flex-[1.5] border-[6px] border-black p-6 bg-white shadow-[8px_8px_0px_#000] flex flex-col">
-          <h3 className="font-black font-['Space_Grotesk'] text-2xl uppercase border-b-4 border-black pb-4 mb-6 flex items-center gap-3 text-black">
-            <Zap size={24} /> Matrix Map
-          </h3>
-          <div className="flex-1 flex flex-col justify-around gap-4">
-            {[
-              {
-                label: "Technical Capabilities",
-                score: matchDetails?.technicalSkillsMatch || 0,
-                color: "var(--teal)",
-              },
-              {
-                label: "Experience Match",
-                score: matchDetails?.experienceMatch || 0,
-                color: "var(--yellow)",
-              },
-              {
-                label: "Interpersonal Skills",
-                score: matchDetails?.softSkillsMatch || 0,
-                color: "var(--coral)",
-              },
-            ].map((item, i) => (
-              <div key={i} className="flex flex-col gap-1">
-                <div className="flex justify-between items-end">
-                  <span className="font-mono text-sm font-bold uppercase text-black">
-                    {item.label}
-                  </span>
-                  <span className="font-mono text-2xl font-black text-black">
-                    {item.score}%
-                  </span>
-                </div>
-                {/* Clean progress bar */}
-                <div className="w-full h-8 border-[3px] border-black bg-[#eee] relative">
-                  <div
-                    className="h-full absolute top-0 left-0 border-r-[3px] border-black"
-                    style={{
-                      width: `${item.score}%`,
-                      backgroundColor: item.color,
-                    }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+
       </div>
 
       {/* Summary Notes */}

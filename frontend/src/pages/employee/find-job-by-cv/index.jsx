@@ -65,6 +65,8 @@ export default function FindJobByCV() {
           reasoning: item.reasoning || item.recommendation_note,
           skillsMatched: item.skillsMatched || item.match_reasons || [],
           skillsMissing: item.skillsMissing || item.missing_skills || [],
+          isExternal: !!item.isExternal,
+          externalUrl: item.externalUrl || item.raw?.externalUrl || item.raw?.url || "",
         };
       })
       .sort((a, b) => (b.match ?? -1) - (a.match ?? -1));

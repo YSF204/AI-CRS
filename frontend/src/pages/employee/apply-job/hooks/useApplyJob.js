@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import api from "../../../../services/api";
 import useFetch from "../../../../hooks/useFetch";
@@ -187,6 +187,95 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
     return submitApplication({ skipAnalysis: true });
   };
 
+  /**
+   * Analyze CV against job WITHOUT submitting an application.
+   * Shows the AnalysisScreen so the user can decide whether to apply.
+   */
+  const handleAnalyzeBeforeApply = useCallback(async () => {
+    const errors = {};
+    if (!selectedCvId) {
+      errors.cvSelection = t("applyJob.selectCvError");
+      setValidationErrors(errors);
+      return;
+    }
+    setValidationErrors({});
+    setSubmitting(true);
+    try {
+      const res = await api.post("/applications/analyze-cv", {
+        jobId,
+        cvId: selectedCvId,
+      });
+      const data = res.data?.data || {};
+      setMatchAnalysis({
+        matchPercentage: data.matchPercentage,
+        overall_fit_percentage: data.matchPercentage,
+        matchDetails: data.matchDetails || {},
+        strengths: data.strengths || [],
+        weaknesses: data.weaknesses || [],
+        recruiter_summary: data.matchDetails?.matchAnalysis || "",
+      });
+      setStep("result");
+    } catch (err) {
+      setValidationErrors({
+        cvAnalysis: err.response?.data?.message || t("toast.failed_to_apply"),
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }, [jobId, selectedCvId, t]);
+
+  /**
+   * Submit the application AFTER analysis, forwarding the pre-computed
+   * match percentage & details so the backend stores exactly what was shown.
+   * No second AI call — zero score discrepancy.
+   */
+  const handleSubmitWithAnalysis = useCallback(async () => {
+    if (!matchAnalysis) {
+      // Fallback: if no analysis data, do instant submit
+      return submitApplication({ skipAnalysis: true });
+    }
+    const preComputedMatchPercentage =
+      matchAnalysis.matchPercentage ??
+      matchAnalysis.overall_fit_percentage ??
+      null;
+    const preComputedMatchDetails = matchAnalysis.matchDetails || null;
+
+    setValidationErrors({});
+    setSubmitting(true);
+    try {
+      const payload = {
+        jobId,
+        cvId: selectedCvId,
+        skipAnalysis: true, // skip re-scoring on backend
+        ...(preComputedMatchPercentage != null ? { preComputedMatchPercentage } : {}),
+        ...(preComputedMatchDetails ? { preComputedMatchDetails } : {}),
+      };
+      const response = isEdit
+        ? await api.patch(`/applications/${appId}`, payload)
+        : await api.post("/applications", payload);
+
+      if (response?.data?.data?.alreadyApplied === true) return;
+
+      showToastNotice(isEdit ? t("toast.app_updated") : t("toast.applied_successfully"));
+      setTimeout(() => {
+        if (onCloseFn) onCloseFn();
+        else navigate("/employee/applications");
+      }, 2000);
+    } catch (error) {
+      const status = error?.response?.status;
+      const message = String(error?.response?.data?.message || "").toLowerCase();
+      if ((status === 409 && error?.response?.data?.data?.alreadyApplied) || message.includes("already applied")) {
+        return;
+      }
+      setValidationErrors({
+        cvAnalysis: error.response?.data?.message || t("toast.failed_to_apply"),
+      });
+      alert(error.response?.data?.message || t("toast.failed_to_apply"));
+    } finally {
+      setSubmitting(false);
+    }
+  }, [jobId, selectedCvId, appId, matchAnalysis, isEdit, onCloseFn, t]);
+
   const submitApplication = async ({ skipAnalysis }) => {
     const errors = {};
     if (applicationMethod === "existingCv" && !selectedCvId) {
@@ -284,6 +373,8 @@ export function useApplyJob(propsJobId, propsAppId, onCloseFn) {
     handleFileUpload,
     handleSubmitApplication,
     handleInstantSubmitApplication,
+    handleAnalyzeBeforeApply,
+    handleSubmitWithAnalysis,
     loadedApplication,
     setLoadedApplication,
     isEdit,

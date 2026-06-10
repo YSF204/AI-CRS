@@ -9,6 +9,7 @@ import { useTranslation } from "../../../context/LanguageContext";
 import MethodSelector from "./components/MethodSelector";
 import CvSelector from "./components/CvSelector";
 import PdfUploader from "./components/PdfUploader";
+import AnalysisScreen from "./components/AnalysisScreen";
 import ApplicationViewer from "../../../components/applications/ApplicationViewer";
 
 export default function ApplyJobModal({ jobId, appId, onClose }) {
@@ -44,6 +45,8 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
     handleFileUpload,
     handleSubmitApplication,
     handleInstantSubmitApplication,
+    handleAnalyzeBeforeApply,
+    handleSubmitWithAnalysis,
     loadedApplication,
     isEdit,
     hasDuplicateApplication,
@@ -250,6 +253,19 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
                 {t('applyJob.loadingSubmission')}
               </p>
             )
+          ) : step === "result" && matchAnalysis ? (
+            // Show analysis results — user can then choose to apply with the SAME score
+            <AnalysisScreen
+              job={job}
+              matchAnalysis={matchAnalysis}
+              setStep={setStep}
+              setMatchAnalysis={setMatchAnalysis}
+              setCvFile={setCvFile}
+              setSelectedCvId={setSelectedCvId}
+              handleSubmitApplication={handleSubmitWithAnalysis}
+              submitting={submitting}
+              isEdit={isEdit}
+            />
           ) : (
             <div className="space-y-8">
               {/* FIX #4: Allow method switching during update */}
@@ -283,7 +299,7 @@ export default function ApplyJobModal({ jobId, appId, onClose }) {
                   selectedCvId={selectedCvId}
                   setSelectedCvId={setSelectedCvId}
                   setMatchAnalysis={setMatchAnalysis}
-                  handleSubmitApplication={handleSubmitApplication}
+                  handleSubmitApplication={handleAnalyzeBeforeApply}
                   handleInstantSubmitApplication={
                     handleInstantSubmitApplication
                   }

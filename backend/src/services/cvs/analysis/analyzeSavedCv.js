@@ -43,6 +43,19 @@ export const buildCvDataForATS = (cv) => ({
     cv.customSections
       ?.filter((s) => s.sectionType === "certifications")
       .flatMap((s) => s.items.map((item) => item.name || "")) || [],
+  customSections: (cv.customSections || [])
+    .filter((s) => s.sectionType !== "certifications")
+    .map((s) => ({
+      title: s.title || "",
+      type: s.sectionType || "other",
+      items: (s.items || []).map((item) => ({
+        name: item.name || "",
+        description: item.description || "",
+        durationFrom: item.durationFrom || "",
+        durationTo: item.durationTo || "",
+        link: item.link || "",
+      })),
+    })),
 });
 
 export const runUnifiedATSScoring = async (cv) => {

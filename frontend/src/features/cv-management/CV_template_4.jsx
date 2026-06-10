@@ -1,9 +1,24 @@
 import React from "react";
 import { getSocialIcon, getSocialName } from "./SocialIcons";
 
+const cleanUrlDisplay = (url) => {
+  if (typeof url !== "string") return url;
+  return url
+    .replace(/^(https?:\/\/)?(www\.)?/, "")
+    .replace(/\/$/, "");
+};
+
+const ensureAbsoluteUrl = (url) => {
+  if (typeof url !== "string") return url;
+  if (!/^https?:\/\//i.test(url)) {
+    return `https://${url}`;
+  }
+  return url;
+};
+
 const SectionHeader = ({ title }) => (
   <div className="border-y-[1.5px] border-blue-400/60 py-1 mb-2 mt-4">
-    <h2 className="text-[13px] md:text-[14px] font-bold uppercase text-blue-600 tracking-wider">
+    <h2 className="text-[13px] md:text-[14px] font-bold uppercase text-blue-600 tracking-wider m-0">
       {title}
     </h2>
   </div>
@@ -29,22 +44,46 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
   };
 
   const contactItems = [];
+  if (cvData.contact?.phone) {
+    contactItems.push(
+      <a href={`tel:${cvData.contact.phone}`} className="text-inherit hover:underline">
+        {cvData.contact.phone}
+      </a>
+    );
+  }
+  if (cvData.contact?.email) {
+    contactItems.push(
+      <a href={`mailto:${cvData.contact.email}`} className="text-inherit hover:underline">
+        {cvData.contact.email}
+      </a>
+    );
+  }
   if (cvData.address?.street || cvData.address?.city) {
     const location = [cvData.address.street, cvData.address.city]
       .filter(Boolean)
       .join(", ");
     if (location) contactItems.push(location);
   }
-  if (cvData.contact?.phone) contactItems.push(cvData.contact.phone);
-  if (cvData.contact?.email) contactItems.push(cvData.contact.email);
-  if (cvData.contact?.linkedin) contactItems.push(cvData.contact.linkedin);
-  if (cvData.contact?.github) contactItems.push(cvData.contact.github);
+  if (cvData.contact?.linkedin) {
+    contactItems.push(
+      <a href={ensureAbsoluteUrl(cvData.contact.linkedin)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title="LinkedIn">
+        {getSocialIcon('linkedin', 14)}
+      </a>
+    );
+  }
+  if (cvData.contact?.github) {
+    contactItems.push(
+      <a href={ensureAbsoluteUrl(cvData.contact.github)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title="GitHub">
+        {getSocialIcon('github', 14)}
+      </a>
+    );
+  }
   if (cvData.contact?.customLinks) {
     cvData.contact.customLinks.forEach(link => {
       if (link.url) {
         contactItems.push(
-          <a href={link.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
-            {getSocialName(link.icon)}
+          <a href={ensureAbsoluteUrl(link.url)} target="_blank" rel="noopener noreferrer" className="text-inherit hover:text-gray-900 inline-flex items-center align-middle" title={link.label || getSocialName(link.icon)}>
+            {getSocialIcon(link.icon, 14)}
           </a>
         );
       }
@@ -67,7 +106,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
     >
       <header className="flex justify-between items-start mb-3">
         <div className="flex-1 pr-4">
-          <h1 className="text-[26px] md:text-[30px] font-extrabold text-blue-600 uppercase mb-1">
+          <h1 className="text-[26px] md:text-[30px] font-extrabold text-blue-600 uppercase mt-0 mb-1">
             {userName}
           </h1>
           <div className="flex flex-wrap items-center gap-1.5 text-[13px] md:text-[14px] text-gray-700">
@@ -97,7 +136,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
           summary: cvData.summary ? (
             <section key="summary" className="break-inside-avoid" style={getHighlightStyle('summary')}>
               <SectionHeader title="Summary" />
-              <p className="text-[13px] md:text-[14px] text-gray-800 leading-relaxed text-justify whitespace-pre-wrap break-words">
+              <p className="text-[13px] md:text-[14px] text-gray-800 leading-relaxed text-justify whitespace-pre-wrap break-words m-0">
                 {cvData.summary}
               </p>
             </section>
@@ -113,18 +152,18 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
                       return (
                         <div key={0} className="break-inside-avoid" style={getHighlightStyle(`experience_0_institutionName`, `experience_0_position`, `experience_0_summary`)}>
                           <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
-                            <h3 className="text-[13.5px] md:text-[14px] font-bold text-gray-900">
+                            <h3 className="text-[13.5px] md:text-[14px] font-bold text-gray-900 m-0">
                               {exp.position}
                               {exp.institutionName ? `, ${exp.institutionName}` : ""}
                             </h3>
                             {dur && (
-                              <div className="text-[13px] md:text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">
+                              <div className="text-[13px] md:text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0 m-0">
                                 {dur}
                               </div>
                             )}
                           </div>
                           {exp.summary && (
-                            <div className="text-[13px] md:text-[14px] text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1">
+                            <div className="text-[13px] md:text-[14px] text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1 m-0">
                               {exp.summary}
                             </div>
                           )}
@@ -141,18 +180,18 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
                       return (
                         <div key={actualIndex} className="break-inside-avoid" style={getHighlightStyle(`experience_${actualIndex}_institutionName`, `experience_${actualIndex}_position`, `experience_${actualIndex}_summary`)}>
                           <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
-                            <h3 className="text-[13.5px] md:text-[14px] font-bold text-gray-900">
+                            <h3 className="text-[13.5px] md:text-[14px] font-bold text-gray-900 m-0">
                               {exp.position}
                               {exp.institutionName ? `, ${exp.institutionName}` : ""}
                             </h3>
                             {dur && (
-                              <div className="text-[13px] md:text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">
+                              <div className="text-[13px] md:text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0 m-0">
                                 {dur}
                               </div>
                             )}
                           </div>
                           {exp.summary && (
-                            <div className="text-[13px] md:text-[14px] text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1">
+                            <div className="text-[13px] md:text-[14px] text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 mt-1 m-0">
                               {exp.summary}
                             </div>
                           )}
@@ -174,22 +213,22 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
                       return (
                         <div key={0} className="break-inside-avoid" style={getHighlightStyle(`education_0_institutionName`, `education_0_certification`, `education_0_summary`)}>
                           <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
-                            <h3 className="text-[13.5px] md:text-[14px] font-bold text-gray-900">
+                            <h3 className="text-[13.5px] md:text-[14px] font-bold text-gray-900 m-0">
                               {edu.certification}
                             </h3>
                             {dur && (
-                              <div className="text-[13px] md:text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">
+                              <div className="text-[13px] md:text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0 m-0">
                                 {dur}
                               </div>
                             )}
                           </div>
                           {edu.institutionName && (
-                            <p className="text-[13px] md:text-[14px] text-gray-800 mb-1">
+                            <p className="text-[13px] md:text-[14px] text-gray-800 mt-0 mb-1">
                               {edu.institutionName}
                             </p>
                           )}
                           {edu.summary && (
-                            <div className="text-[13px] md:text-[14px] text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3">
+                            <div className="text-[13px] md:text-[14px] text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 m-0">
                               {edu.summary}
                             </div>
                           )}
@@ -206,22 +245,22 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
                       return (
                         <div key={actualIndex} className="break-inside-avoid" style={getHighlightStyle(`education_${actualIndex}_institutionName`, `education_${actualIndex}_certification`, `education_${actualIndex}_summary`)}>
                           <div className="flex flex-col sm:flex-row justify-between items-baseline mb-0.5">
-                            <h3 className="text-[13.5px] md:text-[14px] font-bold text-gray-900">
+                            <h3 className="text-[13.5px] md:text-[14px] font-bold text-gray-900 m-0">
                               {edu.certification}
                             </h3>
                             {dur && (
-                              <div className="text-[13px] md:text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0">
+                              <div className="text-[13px] md:text-[14px] text-gray-900 font-bold sm:text-right mt-1 sm:mt-0 m-0">
                                 {dur}
                               </div>
                             )}
                           </div>
                           {edu.institutionName && (
-                            <p className="text-[13px] md:text-[14px] text-gray-800 mb-1">
+                            <p className="text-[13px] md:text-[14px] text-gray-800 mt-0 mb-1">
                               {edu.institutionName}
                             </p>
                           )}
                           {edu.summary && (
-                            <div className="text-[13px] md:text-[14px] text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3">
+                            <div className="text-[13px] md:text-[14px] text-gray-700 leading-relaxed whitespace-pre-wrap break-words ml-3 m-0">
                               {edu.summary}
                             </div>
                           )}
@@ -233,16 +272,44 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
               </section>
             ) : null,
           technicalSkills:
-            cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (
-              <section key="technicalSkills" className="break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
-                <SectionHeader title="Technical Skills" />
-                <ul className="grid grid-cols-4 gap-y-1 gap-x-3 text-[13px] md:text-[14px] text-gray-700">
-                  {cvData.technicalSkills.map((skill, index) => (
-                    <li key={index}>{skill}</li>
-                  ))}
-                </ul>
-              </section>
-            ) : null,
+            cvData.technicalSkills && cvData.technicalSkills.length > 0 ? (() => {
+              const groups = [];
+              const loose = [];
+              cvData.technicalSkills.forEach(s => {
+                const m = typeof s === 'string' && s.match(/^([^:]+):\s*(.+)$/);
+                if (m) groups.push({ title: m[1].trim(), skills: m[2].split(',').map(x => x.trim()).filter(Boolean) });
+                else loose.push(s);
+              });
+              const hasGroups = groups.length > 0;
+              return (
+                <section key="technicalSkills" className="break-inside-avoid" style={getHighlightStyle('technicalSkills')}>
+                  <SectionHeader title="Technical Skills" />
+                  {hasGroups ? (
+                    <div className="grid grid-cols-2 gap-x-5 gap-y-2">
+                      {groups.map((g, gi) => (
+                        <div key={gi} className="flex flex-wrap items-baseline gap-x-1.5">
+                          <span className="text-[13px] font-bold text-gray-800 shrink-0">{g.title}:</span>
+                          <span className="text-[12.5px] text-gray-600">{g.skills.join(' · ')}</span>
+                        </div>
+                      ))}
+                      {loose.length > 0 && (
+                        <div className="col-span-2">
+                          <ul className="flex flex-wrap gap-x-4 gap-y-1 text-[12.5px] text-gray-700 list-disc list-inside m-0">
+                            {loose.map((s, i) => <li key={i}>{s}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <ul className="grid grid-cols-4 gap-y-1 gap-x-3 text-[13px] md:text-[14px] text-gray-700">
+                      {cvData.technicalSkills.map((skill, index) => (
+                        <li key={index}>{skill}</li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              );
+            })() : null,
           softSkills:
             cvData.softSkills && cvData.softSkills.length > 0 ? (
               <section key="softSkills" className="break-inside-avoid" style={getHighlightStyle('softSkills')}>
@@ -281,14 +348,19 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
           "language",
         ];
 
+        let customSectionCounter = 0;
         return sectionOrder.map((key) => {
           const isCustom = key.startsWith("customSection__");
           const isLegacyCustom = key === "customSections";
           if ((isCustom || isLegacyCustom) && cvData.customSections?.length > 0) {
-            const sectionIdx = isCustom ? parseInt(key.replace("customSection__", ""), 10) : -1;
-            const sectionsToRender = isCustom ? [cvData.customSections[sectionIdx]].filter(Boolean) : cvData.customSections;
+            let sectionsToRender = [];
+            if (isLegacyCustom) {
+              sectionsToRender = cvData.customSections;
+            } else {
+              sectionsToRender = [cvData.customSections[customSectionCounter++]].filter(Boolean);
+            }
             return sectionsToRender.map((section, loopIdx) => {
-              const sectionIndex = isCustom ? sectionIdx : loopIdx;
+              const sectionIndex = isLegacyCustom ? loopIdx : (customSectionCounter - 1);
               return (
               <section
                 key={`custom-${sectionIndex}`}
@@ -302,7 +374,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
                       return (
                         <div
                           key={0}
-                          className="text-[13px] md:text-[14px] text-gray-800 break-inside-avoid"
+                          className="text-[13px] md:text-[14px] text-gray-800 break-inside-avoid m-0"
                           style={getHighlightStyle(`customSections_${sectionIndex}_items_0_description`)}
                         >
                           <span className="font-bold text-gray-900 mr-2">
@@ -329,7 +401,7 @@ const BlueAccentResumeTemplate = ({ userName = "", profileImage, cvData, highlig
                       return (
                         <div
                           key={actualIndex}
-                          className="text-[13px] md:text-[14px] text-gray-800 break-inside-avoid"
+                          className="text-[13px] md:text-[14px] text-gray-800 break-inside-avoid m-0"
                           style={getHighlightStyle(`customSections_${sectionIndex}_items_${actualIndex}_description`)}
                         >
                           <span className="font-bold text-gray-900 mr-2">

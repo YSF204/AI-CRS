@@ -468,12 +468,12 @@
   .cv-reorder-arrows {
     display: flex;
     flex-direction: column;
-    gap: 1px;
+    gap: 2px;
   }
 
   .cv-reorder-btn {
-    width: 24px;
-    height: 20px;
+    width: 30px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;

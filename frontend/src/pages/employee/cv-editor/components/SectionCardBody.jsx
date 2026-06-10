@@ -20,6 +20,7 @@ import RepeatableItem from "./RepeatableItem";
 import AddBtn from "./AddBtn";
 import SummarySection from "./SectionCardSummary.jsx";
 import LanguageSection from "./sections/LanguageSection.jsx";
+import TechnicalSkillsSection from "./sections/TechnicalSkillsSection.jsx";
 
 export default function SectionCardBody({ sectionKey, form, handlers }) {
   const {
@@ -320,18 +321,7 @@ export default function SectionCardBody({ sectionKey, form, handlers }) {
 
     case "technicalSkills":
       return (
-        <div>
-          <Field
-            label="Technical Skills"
-            hint="press Enter or comma to add a tag"
-          >
-            <TagInput
-              value={form.technicalSkills}
-              onChange={set("technicalSkills")}
-              placeholder="React, Node.js, Python..."
-            />
-          </Field>
-        </div>
+        <TechnicalSkillsSection form={form} handlers={handlers} />
       );
 
     case "softSkills":

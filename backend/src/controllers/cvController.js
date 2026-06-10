@@ -229,24 +229,39 @@ export const analyzeCVFile = catchAsync(async (req, res, next) => {
 
   const supabaseFileName = `${req.user._id}-${Date.now()}-${crypto.randomBytes(6).toString("hex")}.pdf`;
   const supabaseFilePath = `cvs/${supabaseFileName}`;
-  const supabase = getSupabaseClient();
+  let pdfUrl = "";
 
-  const { error: uploadError } = await supabase.storage
-    .from(SUPABASE_BUCKET)
-    .upload(supabaseFilePath, req.file.buffer, {
-      contentType: req.file.mimetype || "application/pdf",
-      upsert: true,
-    });
+  try {
+    const supabase = getSupabaseClient();
+    const { error: uploadError } = await supabase.storage
+      .from(SUPABASE_BUCKET)
+      .upload(supabaseFilePath, req.file.buffer, {
+        contentType: req.file.mimetype || "application/pdf",
+        upsert: true,
+      });
 
-  if (uploadError) {
-    fs.rmSync(tempDir, { recursive: true, force: true });
-    return next(new AppError(`Failed to upload CV PDF: ${uploadError.message}`, 500));
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data: publicData } = supabase.storage
+      .from(SUPABASE_BUCKET)
+      .getPublicUrl(supabaseFilePath);
+    pdfUrl = publicData?.publicUrl || "";
+  } catch (error) {
+    console.warn("Supabase CV upload failed, falling back to local storage:", error.message);
+
+    const localDir = path.join(process.cwd(), "src", "uploads", "cvs");
+    if (!fs.existsSync(localDir)) {
+      fs.mkdirSync(localDir, { recursive: true });
+    }
+
+    const localFilePath = path.join(localDir, supabaseFileName);
+    fs.writeFileSync(localFilePath, req.file.buffer);
+
+    const backendUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get("host")}`;
+    pdfUrl = `${backendUrl}/uploads/cvs/${supabaseFileName}`;
   }
-
-  const { data: publicData } = supabase.storage
-    .from(SUPABASE_BUCKET)
-    .getPublicUrl(supabaseFilePath);
-  const pdfUrl = publicData?.publicUrl || "";
 
   let aiResult;
   try {

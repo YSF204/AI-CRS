@@ -45,16 +45,16 @@ const buildLocalJobRecommendations = (cv, jobs, normalizedProfile) => {
       );
       const experienceScore = job.yearsOfExperience
         ? Math.min(
-            100,
-            Math.round((cvExperience / job.yearsOfExperience) * 100),
-          )
+          100,
+          Math.round((cvExperience / job.yearsOfExperience) * 100),
+        )
         : 100;
       const score = Math.min(
         100,
         Math.round(
           techMatched.length * 3 +
-            softMatched.length * 1.5 +
-            experienceScore * 0.2,
+          softMatched.length * 1.5 +
+          experienceScore * 0.2,
         ),
       );
 
@@ -108,51 +108,81 @@ const normalizeAiMatches = (parsedMatches, jobs) => {
  * Matches external jobs based on title keywords and CV profile
  */
 const matchExternalJobs = (cv, externalJobs, normalizedProfile) => {
-  const cvRoles = new Set([
-    ...(cv.experience || []).map((e) => e.position.toLowerCase()),
-    ...(cv.education || []).map((e) => e.certification.toLowerCase()),
-  ]);
-  const cvSkills = new Set([
-    ...(cv.technicalSkills || []).map((s) => s.toLowerCase()),
-    ...(normalizedProfile?.technicalSkills || []).map((s) => s.toLowerCase()),
-  ]);
+  const targetTitle = (cv.jobTitle || "").toLowerCase().trim();
+  const pastRoles = (cv.experience || [])
+    .map((e) => (e.position || "").toLowerCase().trim())
+    .filter(Boolean);
+
+  const keywords = new Set();
+  
+  // Add target title keywords
+  if (targetTitle && targetTitle !== "untitled cv" && targetTitle !== "cv") {
+    targetTitle.split(/\s+/).forEach(w => {
+      const cleaned = w.replace(/[^a-zA-Z0-9+#]/g, "").trim().toLowerCase();
+      if (cleaned.length > 2 && cleaned !== "developer" && cleaned !== "engineer" && cleaned !== "senior" && cleaned !== "junior") {
+        keywords.add(cleaned);
+      }
+    });
+  }
+  
+  // Add past roles keywords
+  pastRoles.forEach(role => {
+    role.split(/\s+/).forEach(w => {
+      const cleaned = w.replace(/[^a-zA-Z0-9+#]/g, "").trim().toLowerCase();
+      if (cleaned.length > 2 && cleaned !== "developer" && cleaned !== "engineer" && cleaned !== "senior" && cleaned !== "junior") {
+        keywords.add(cleaned);
+      }
+    });
+  });
 
   return externalJobs
     .map((job) => {
-      const title = job.title.toLowerCase();
+      const title = (job.title || "").toLowerCase();
       
-      // Simple keyword matching: does the title overlap with CV roles or skills?
-      let score = 0;
-      const matchedKeywords = [];
+      let matchedTerm = "";
+      let isMatch = false;
 
-      cvRoles.forEach(role => {
-        if (title.includes(role)) {
-          score += 40;
-          matchedKeywords.push(role);
+      // 1. Direct target title check
+      if (targetTitle && targetTitle !== "untitled cv" && targetTitle !== "cv") {
+        if (title.includes(targetTitle) || targetTitle.includes(title)) {
+          isMatch = true;
+          matchedTerm = cv.jobTitle;
         }
-      });
+      }
 
-      cvSkills.forEach(skill => {
-        if (title.includes(skill)) {
-          score += 20;
-          matchedKeywords.push(skill);
+      // 2. Direct past roles check
+      if (!isMatch) {
+        for (const role of pastRoles) {
+          if (title.includes(role) || role.includes(title)) {
+            isMatch = true;
+            matchedTerm = role;
+            break;
+          }
         }
-      });
+      }
 
-      // Cap at 95% since we don't have deep info
-      score = Math.min(95, score);
+      // 3. Keyword overlap check
+      if (!isMatch) {
+        for (const word of keywords) {
+          if (title.includes(word)) {
+            isMatch = true;
+            matchedTerm = word;
+            break;
+          }
+        }
+      }
 
-      if (score < 20) return null; // Too weak
+      if (!isMatch) return null;
 
       return {
-        jobId: job.id, // This is the URL for external jobs
+        jobId: job.id,
         position: job.title,
         company: job.company,
         location: job.location,
         workSite: job.location,
-        matchScore: score,
-        skillsMatched: matchedKeywords.slice(0, 5),
-        reasoning: `Matched based on title alignment with your experience: ${matchedKeywords.slice(0, 3).join(", ")}.`,
+        matchScore: 85,
+        skillsMatched: [matchedTerm],
+        reasoning: `Job title aligns with your profile title/experience: "${matchedTerm}"`,
         isExternal: true,
         externalUrl: job.externalUrl,
         sourceName: job.sourceName,
@@ -291,10 +321,14 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
 
   console.log(`[recommendJobs] Returning ${dedupedInternal.length} internal and ${dedupedExternal.length} external results`);
 
+  const combinedMatches = [...dedupedInternal, ...dedupedExternal].sort(
+    (a, b) => (b.matchScore || 0) - (a.matchScore || 0)
+  );
+
   res.status(200).json({
     success: true,
-    data: { 
-      match: dedupedInternal, // Keep 'match' for backward compatibility
+    data: {
+      match: combinedMatches, // Keep 'match' for backward compatibility (combines internal + external)
       internalMatches: dedupedInternal,
       externalMatches: dedupedExternal
     },

@@ -9,7 +9,26 @@ export const computeApplicationScore = async ({
     skipAnalysis,
     isManualApplication,
     userId,
+    preComputedMatchPercentage,
+    preComputedMatchDetails,
 }) => {
+    // ─── Use pre-computed result from prior analyze step ───────────────────────
+    // When the user clicks "Analyze My Fit" and then "Submit Application",
+    // the frontend sends the already-computed score so we store exactly what
+    // the user saw — no second AI call, no different result.
+    if (preComputedMatchPercentage != null && !isNaN(Number(preComputedMatchPercentage))) {
+        const localResult = calculateMatchPercentage(normalizedProfile, job);
+        return {
+            matchPercentage: Number(preComputedMatchPercentage),
+            matchDetails: {
+                ...(preComputedMatchDetails || localResult.breakdown),
+                matchAnalysis: preComputedMatchDetails?.matchAnalysis || "",
+            },
+            backgroundAnalysisRequired: false,
+        };
+    }
+
+    // ─── Normal scoring path ────────────────────────────────────────────────────
     const matchResult = calculateMatchPercentage(normalizedProfile, job);
 
     let matchPercentage = matchResult.percentage;

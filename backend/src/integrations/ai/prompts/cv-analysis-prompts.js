@@ -1,9 +1,3 @@
-/**
- * CV Analysis Prompts
- * Single responsibility: Prompts for analyzing and improving CVs
- * Handles uploaded CV parsing, database CV analysis, and section-level analysis
- */
-
 export const CV_ANALYSIS_PROMPTS = {
   /**
    * Analyze uploaded CV file

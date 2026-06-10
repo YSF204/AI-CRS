@@ -23,7 +23,6 @@ const initialState = {
   showPreview: false,
   downloadingPdf: false,
   showTemplateSelector: false,
-  dragOverKey: null,
 };
 
 function editorReducer(state, action) {
@@ -63,18 +62,6 @@ function editorReducer(state, action) {
       return { ...state, downloadingPdf: action.payload };
     case "SET_TEMPLATE_SELECTOR":
       return { ...state, showTemplateSelector: action.payload };
-    case "SET_DRAG_OVER":
-      return { ...state, dragOverKey: action.payload };
-    case "REORDER_SECTIONS": {
-      const { fromKey, toKey } = action.payload;
-      const arr = [...state.activeSections];
-      const fromIdx = arr.indexOf(fromKey);
-      const toIdx = arr.indexOf(toKey);
-      if (fromIdx < 0 || toIdx < 0) return state;
-      arr.splice(fromIdx, 1);
-      arr.splice(toIdx, 0, fromKey);
-      return { ...state, activeSections: arr, dragOverKey: null };
-    }
     case "MOVE_SECTION_UP": {
       const arr = [...state.activeSections];
       const idx = arr.indexOf(action.payload);
@@ -119,7 +106,6 @@ export default function useCVEditor() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const dragItemRef = useRef(null);
   const previewRef = useRef(null);
   const toastTimerRef = useRef(null);
 
@@ -312,10 +298,16 @@ export default function useCVEditor() {
 
         // Build saved section order, replacing legacy "customSections" with per-section keys
         const savedOrder = d.layout?.sectionOrder || [];
+        let customCount = 0;
         let resolvedOrder = savedOrder.flatMap((k) => {
           if (k === "customSections") {
             // Legacy: expand to individual keys
             return (d.customSections || []).map((_, i) => makeCustomSectionKey(i));
+          }
+          if (k.startsWith("customSection__")) {
+            const newKey = makeCustomSectionKey(customCount);
+            customCount++;
+            return [newKey];
           }
           return [k];
         });
@@ -324,7 +316,9 @@ export default function useCVEditor() {
         if (d.customSections?.length) {
           d.customSections.forEach((_, i) => {
             const key = makeCustomSectionKey(i);
-            if (!resolvedOrder.includes(key)) resolvedOrder.push(key);
+            if (i >= customCount) {
+              resolvedOrder.push(key);
+            }
           });
         }
 
@@ -451,18 +445,6 @@ export default function useCVEditor() {
   const toggleSection = (key) => dispatch({ type: "TOGGLE_SECTION", payload: key });
   const toggleCollapse = (key) => dispatch({ type: "TOGGLE_COLLAPSE", payload: key });
 
-  /// drag and drop handlers for reordering CV sections on desktop
-  const onDragStart = (key) => { dragItemRef.current = key; };
-  const onDragOver = (e, key) => { e.preventDefault(); if (dragItemRef.current !== key) dispatch({ type: "SET_DRAG_OVER", payload: key }); };
-  const onDragLeave = () => dispatch({ type: "SET_DRAG_OVER", payload: null });
-  const onDrop = (targetKey) => {
-    const srcKey = dragItemRef.current;
-    if (!srcKey || srcKey === targetKey) { dispatch({ type: "SET_DRAG_OVER", payload: null }); return; }
-    dispatch({ type: "REORDER_SECTIONS", payload: { fromKey: srcKey, toKey: targetKey } });
-    dragItemRef.current = null;
-  };
-  const onDragEnd = () => { dragItemRef.current = null; dispatch({ type: "SET_DRAG_OVER", payload: null }); };
-
   /// mobile buttons to move sections up or down since drag and drop doesn't work well on mobile touch
   const onMoveUp = useCallback((key) => {
     dispatch({ type: "MOVE_SECTION_UP", payload: key });
@@ -559,7 +541,6 @@ export default function useCVEditor() {
     downloadingPdf: ui.downloadingPdf,
     showTemplateSelector: ui.showTemplateSelector,
     setShowTemplateSelector: (v) => dispatch({ type: "SET_TEMPLATE_SELECTOR", payload: v }),
-    dragOverKey: ui.dragOverKey,
     previewRef,
     form,
     setForm,
@@ -579,11 +560,6 @@ export default function useCVEditor() {
     handleSave,
     toggleSection,
     toggleCollapse,
-    onDragStart,
-    onDragOver,
-    onDragLeave,
-    onDrop,
-    onDragEnd,
     onMoveUp,
     onMoveDown,
     handleDownloadPdf,

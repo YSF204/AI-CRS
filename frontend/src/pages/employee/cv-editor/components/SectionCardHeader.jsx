@@ -1,5 +1,5 @@
 import React from "react";
-import { GripVertical, ChevronDown, X, ArrowUp, ArrowDown } from "lucide-react";
+import { ChevronDown, X, ArrowUp, ArrowDown } from "lucide-react";
 import { getSectionMeta } from "../constants";
 
 export default function SectionCardHeader({
@@ -23,46 +23,32 @@ export default function SectionCardHeader({
       style={{ background: meta.accent }}
       onClick={onToggleCollapse}
     >
-      {/* Desktop: drag grip / Mobile: up-down arrows */}
-      {isMobile ? (
-        <div
-          className="cv-reorder-arrows"
-          onClick={(e) => e.stopPropagation()}
+      {/* Reorder arrows */}
+      <div
+        className="cv-reorder-arrows"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          className="cv-reorder-btn"
+          style={{ color: meta.textColor }}
+          disabled={isFirst}
+          onClick={(e) => { e.stopPropagation(); onMoveUp && onMoveUp(); }}
+          aria-label="Move section up"
         >
-          <button
-            type="button"
-            className="cv-reorder-btn"
-            style={{ color: meta.textColor }}
-            disabled={isFirst}
-            onClick={(e) => { e.stopPropagation(); onMoveUp && onMoveUp(); }}
-            aria-label="Move section up"
-          >
-            <ArrowUp size={10} strokeWidth={3} />
-          </button>
-          <button
-            type="button"
-            className="cv-reorder-btn"
-            style={{ color: meta.textColor }}
-            disabled={isLast}
-            onClick={(e) => { e.stopPropagation(); onMoveDown && onMoveDown(); }}
-            aria-label="Move section down"
-          >
-            <ArrowDown size={10} strokeWidth={3} />
-          </button>
-        </div>
-      ) : (
-        <div
-          style={{
-            cursor: "grab",
-            opacity: 0.6,
-            display: "flex",
-            alignItems: "center",
-          }}
-          onClick={(e) => e.stopPropagation()}
+          <ArrowUp size={13} strokeWidth={3} />
+        </button>
+        <button
+          type="button"
+          className="cv-reorder-btn"
+          style={{ color: meta.textColor }}
+          disabled={isLast}
+          onClick={(e) => { e.stopPropagation(); onMoveDown && onMoveDown(); }}
+          aria-label="Move section down"
         >
-          <GripVertical size={18} color={meta.textColor} strokeWidth={2.5} />
-        </div>
-      )}
+          <ArrowDown size={13} strokeWidth={3} />
+        </button>
+      </div>
 
       <Icon size={18} style={{ color: meta.textColor }} strokeWidth={2.5} />
       <span

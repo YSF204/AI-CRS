@@ -41,21 +41,21 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
             style={INPUT}
             value={form.position}
             onChange={set('position')}
-            placeholder={t('employer.jobTitlePlaceholder', {}, 'مثال: محلل برمجيات')}
+            placeholder={t('employer.jobTitlePlaceholder', {}, 'e.g. Software engineer')}
             required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
         </div>
         <div>
-          <label htmlFor="pjf-salary" style={LABEL}>{t('employer.salary', {}, 'Salary')} (₪/شهر) *</label>
+          <label htmlFor="pjf-salary" style={LABEL}>{t('employer.salary', {}, 'Salary (₪/month)')} *</label>
           <input
             id="pjf-salary"
             style={INPUT}
             type="number"
             value={form.salary}
             onChange={set('salary')}
-            placeholder={t('employer.salaryPlaceholder', {}, 'مثال: 3500')}
+            placeholder={t('employer.salaryPlaceholder', {}, 'e.g. 3500')}
             required
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
@@ -70,7 +70,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
           style={{ ...INPUT, minHeight: 180, resize: 'vertical', lineHeight: 1.7 }}
           value={form.description}
           onChange={set('description')}
-          placeholder={t('employer.jobDescriptionPlaceholder', {}, 'صف مهام الوظيفة ومتطلباتها...')}
+          placeholder={t('employer.jobDescriptionPlaceholder', {}, 'Describe the role, responsibilities, and key requirements...')}
           required
           onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
           onBlur={e => e.target.style.transform = 'none'}
@@ -137,7 +137,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
             style={INPUT}
             value={form.technicalSkills}
             onChange={set('technicalSkills')}
-            placeholder={t('employer.technicalSkillsPlaceholder', {}, 'مثال: Python, React, SQL')}
+            placeholder={t('employer.technicalSkillsPlaceholder', {}, 'e.g. Python, React, SQL')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />
@@ -152,7 +152,7 @@ export default function PostJobForm({ form, set, handleSubmit, loading }) {
             style={INPUT}
             value={form.softSkills}
             onChange={set('softSkills')}
-            placeholder={t('employer.softSkillsPlaceholder', {}, 'مثال: التواصل, العمل بالفريق')}
+            placeholder={t('employer.softSkillsPlaceholder', {}, 'e.g. Teamwork, Communication')}
             onFocus={e => e.target.style.transform = 'translate(-2px, -2px)'}
             onBlur={e => e.target.style.transform = 'none'}
           />

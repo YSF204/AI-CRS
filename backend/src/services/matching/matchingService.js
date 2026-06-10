@@ -243,12 +243,19 @@ export const calculateMatchPercentage = (applicantInfo, jobRequirements) => {
   );
 
   // Experience Match (0-100)
+  // Derive years from experience entries if yearsOfExperience isn't set
   const yearsRequired = jobRequirements.yearsOfExperience || 0;
-  const yearsApplicant = applicantInfo.yearsOfExperience || 0;
-  const experienceMatch = calculateExperienceMatch(
-    yearsApplicant,
-    yearsRequired,
-  );
+  let yearsApplicant = applicantInfo.yearsOfExperience || 0;
+  if (yearsApplicant === 0 && Array.isArray(applicantInfo.experience) && applicantInfo.experience.length > 0) {
+    yearsApplicant = applicantInfo.experience.reduce((sum, exp) => {
+      if (exp.duration) return sum + Number(exp.duration || 0);
+      const from = exp.durationFrom ? parseInt(exp.durationFrom, 10) : null;
+      const to = exp.durationTo ? parseInt(exp.durationTo, 10) : new Date().getFullYear();
+      if (from && !isNaN(from) && !isNaN(to)) return sum + Math.max(0, to - from);
+      return sum;
+    }, 0);
+  }
+  const experienceMatch = calculateExperienceMatch(yearsApplicant, yearsRequired);
 
   // Soft Skills Match (0-100)
   const applicantSoftSkills = applicantInfo.softSkills || [];
@@ -258,7 +265,7 @@ export const calculateMatchPercentage = (applicantInfo, jobRequirements) => {
     jobSoftSkills,
   );
 
-  // Languages Match (0-100)
+  // Languages Match (0-100) — if job specifies no language requirements, give full credit
   const applicantLanguages = applicantInfo.languages || [];
   const jobLanguages = jobRequirements.language || [];
   const languagesMatch = calculateSkillsMatch(applicantLanguages, jobLanguages);
@@ -292,11 +299,19 @@ const calculateSkillsMatch = (applicantSkills, requiredSkills) => {
   if (!requiredSkills || requiredSkills.length === 0) return 100;
   if (!applicantSkills || applicantSkills.length === 0) return 0;
 
+  // Expand compound skill strings like "Frontend: React, NextJS, TypeScript, TailwindCSS"
+  // by splitting on commas/semicolons and stripping any "Category: " prefix
+  const expandSkillStrings = (skills) =>
+    skills
+      .flatMap((s) => s.split(/[,;]/))
+      .map((s) => s.replace(/^[^:]+:\s*/, "").trim())
+      .filter(Boolean);
+
   // Normalize required skills to canonical form
-  const canonicalRequired = requiredSkills.map(normalizeSkill);
+  const canonicalRequired = expandSkillStrings(requiredSkills).map(normalizeSkill);
 
   // Normalize applicant skills to canonical form, then expand with implied skills
-  const canonicalApplicant = applicantSkills.map(normalizeSkill);
+  const canonicalApplicant = expandSkillStrings(applicantSkills).map(normalizeSkill);
   const expandedApplicant = new Set(
     expandWithImpliedSkills(canonicalApplicant),
   );
@@ -321,6 +336,7 @@ const calculateSkillsMatch = (applicantSkills, requiredSkills) => {
 
   return Math.min((matchCount / canonicalRequired.length) * 100, 100);
 };
+
 
 /**
  * Calculate experience match
@@ -448,7 +464,7 @@ const createFallbackAnalysis = (
       yearsOfExperience: applicantInfo.yearsOfExperience || 0,
       technicalSkills: applicantInfo.technicalSkills || [],
       softSkills: applicantInfo.softSkills || [],
-      languages: applicantInfo.language || [],
+      languages: applicantInfo.languages || [],
       summary: applicantInfo.summary || "",
       additionalInformation: "",
     },
@@ -634,9 +650,73 @@ export const generateAIMatchAnalysis = async (
   rawCvText = null,
 ) => {
   try {
-    const candidateProfileContent = rawCvText
-      ? rawCvText
-      : JSON.stringify(applicantInfo, null, 2);
+    /**
+     * Build a rich, human-readable CV text so the AI has full context
+     * including experience descriptions and education — not just skill arrays.
+     */
+    const buildRichCvText = (profile) => {
+      const lines = [];
+
+      lines.push(`Name: ${profile.fullName || "Unknown"}`);
+      if (profile.email) lines.push(`Email: ${profile.email}`);
+      if (profile.summary) lines.push(`Summary: ${profile.summary}`);
+
+      lines.push(`Total Years of Experience: ${profile.yearsOfExperience || 0}`);
+
+      // Technical skills — split compound strings like "Frontend: React, NextJS, TypeScript"
+      const techSkills = (profile.technicalSkills || [])
+        .flatMap((s) => s.split(/[,|;]/))
+        .map((s) => s.replace(/^[^:]+:\s*/, "").trim())
+        .filter(Boolean);
+      if (techSkills.length > 0) {
+        lines.push(`Technical Skills: ${techSkills.join(", ")}`);
+      }
+
+      const softSkills = profile.softSkills || [];
+      if (softSkills.length > 0) {
+        lines.push(`Soft Skills: ${softSkills.join(", ")}`);
+      }
+
+      const languages = profile.languages || [];
+      if (languages.length > 0) {
+        lines.push(`Languages: ${languages.join(", ")}`);
+      }
+
+      // Experience entries with full descriptions
+      const experience = profile.experience || [];
+      if (experience.length > 0) {
+        lines.push("\nWork Experience:");
+        for (const exp of experience) {
+          const from = exp.durationFrom || "";
+          const to = exp.durationTo || "Present";
+          const duration = exp.duration ? `(${exp.duration} years)` : from ? `(${from} – ${to})` : "";
+          lines.push(
+            `  - ${exp.position || "Role"} at ${exp.institutionName || "Company"} ${duration}`,
+          );
+          if (exp.summary) lines.push(`    ${exp.summary}`);
+        }
+      }
+
+      // Education
+      const education = profile.education || [];
+      if (education.length > 0) {
+        lines.push("\nEducation:");
+        for (const edu of education) {
+          lines.push(
+            `  - ${edu.certification || "Degree"} at ${edu.institutionName || "Institution"} (${edu.durationFrom || ""} – ${edu.durationTo || ""})`,
+          );
+          if (edu.summary) lines.push(`    ${edu.summary}`);
+        }
+      }
+
+      // Certifications
+      const certs = profile.certifications || [];
+      if (certs.length > 0) {
+        lines.push(`\nCertifications: ${certs.join(", ")}`);
+      }
+
+      return lines.join("\n");
+    };
 
     const prompt = `You are an expert AI Recruitment Analyst. Your job is to evaluate candidate-to-job fit realistically, like a professional recruiter would.
 
@@ -672,6 +752,10 @@ When a candidate has skill A, they automatically have related skill B:
 If a CV says "Built microservices on AWS EKS," credit: Docker, Kubernetes, AWS, API design, CI/CD
 Don't penalize for not listing each sub-skill — the project proves them.
 
+### IMPORTANT: Compound Skill Strings
+Skills may be listed as compound strings like "Frontend: React, NextJS, TypeScript, TailwindCSS".
+Parse ALL individual technologies out of such strings as separate skills before matching.
+
 ## SCORING CALIBRATION (This is Your Target)
 
 Use these as anchors for overall_fit_percentage:
@@ -691,6 +775,7 @@ Use these as anchors for overall_fit_percentage:
 4. If candidate meets ALL core requirements → allow score 70%+
 5. DO NOT hallucinate skills — only credit what you can infer from the CV
 6. DO NOT apply artificial penalties for not listing synonyms (e.g., "problem-solving" not listed but "led complex projects" shown → still counts as problem-solving)
+7. ALWAYS read the full experience descriptions — past job titles and project descriptions reveal skills not listed explicitly
 
 ## OUTPUT: VALID JSON ONLY
 
@@ -760,7 +845,7 @@ Return ONLY valid JSON. No markdown, no fences, no text outside JSON. If you can
 Input Type: ${inputType}
 
 Candidate Profile:
-${candidateProfileContent}
+${rawCvText ? rawCvText : buildRichCvText(applicantInfo)}
 
 Job Listing:
 ${JSON.stringify(

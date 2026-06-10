@@ -35,9 +35,21 @@ export function normalizeATSScore(raw) {
 
   const overallScore = clampScore(raw.overallScore ?? computedOverall);
 
+  // Normalize custom sections returned by AI
+  const customSections = Array.isArray(raw.customSections)
+    ? raw.customSections.map((cs) => ({
+        title: typeof cs.title === "string" ? cs.title : "",
+        type: typeof cs.type === "string" ? cs.type : "other",
+        score: clampScore(cs.score),
+        strengths: Array.isArray(cs.strengths) ? cs.strengths.slice(0, 5) : [],
+        weaknesses: Array.isArray(cs.weaknesses) ? cs.weaknesses.slice(0, 5) : [],
+      }))
+    : [];
+
   return {
     overallScore,
     sections: validSections,
+    customSections,
     topStrengths: Array.isArray(raw.topStrengths) ? raw.topStrengths.slice(0, 5) : [],
     topWeaknesses: Array.isArray(raw.topWeaknesses) ? raw.topWeaknesses.slice(0, 5) : [],
     improvementSuggestions: Array.isArray(raw.improvementSuggestions) ? raw.improvementSuggestions.slice(0, 10) : [],
