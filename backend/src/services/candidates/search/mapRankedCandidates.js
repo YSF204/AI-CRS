@@ -60,7 +60,7 @@ export const mapRankedCandidates = (allCvs, ranked) => {
         .slice(0, MAX_CANDIDATES);
 };
 
-export const mapRankedApplications = (applications, ranked) => {
+export const mapRankedApplications = (applications, ranked, localScores = new Map()) => {
     const appMap = new Map(applications.map((app) => [String(app._id), app]));
 
     return (ranked || [])
@@ -76,12 +76,20 @@ export const mapRankedApplications = (applications, ranked) => {
                 ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || info.fullName || "Unknown"
                 : info.fullName || "Unknown";
 
+            // Use ONLY the deterministic local formula score — same as calculateMatchPercentage
+            // used on the candidate side (recommendJobs). Dropping the Math.max blend so both
+            // paths produce the same number and the candidate / employer see consistent %.
+            const aiScore = Number(item.matchScore) || 0;
+            const localScore = localScores.get(String(app._id)) || 0;
+            // If a local score was computed, prefer it for consistency; fall back to AI score.
+            const blendedScore = localScore > 0 ? localScore : aiScore;
+
             return {
                 applicationId: app._id,
                 cvId: cv ? cv._id : null,
                 userId: user?._id || app.userId,
                 rank: item.rank,
-                matchScore: item.matchScore,
+                matchScore: blendedScore,
                 reasoning: item.reasoning,
                 strengths: Array.isArray(item.strengths)
                     ? item.strengths

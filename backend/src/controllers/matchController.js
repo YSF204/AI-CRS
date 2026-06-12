@@ -238,7 +238,7 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
 
   // Fetch both internal and external jobs
   const [jobs, externalJobs] = await Promise.all([
-    Job.find({ status: "OPEN" }),
+    Job.find({ status: "OPEN" }).populate("employerId", "company.name"),
     getExternalJobs(),
   ]);
 
@@ -288,15 +288,31 @@ export const recommendJobs = catchAsync(async (req, res, next) => {
     parsed = localRanked;
   }
 
-  // Calculate final internal scores
+  // Calculate final internal scores and enrich with full job details
   let internalMatches = parsed.map((jobMatch) => {
     const job = jobs.find((j) => j._id.toString() === jobMatch.jobId);
     if (!job) return jobMatch;
+
+    // Use the deterministic formula as the single source of truth for score.
+    // This guarantees the same number a candidate sees when an employer
+    // shortlists against that same job (aiShortlistCandidates also calls
+    // calculateMatchPercentage and uses Math.max(aiScore, localScore)).
     const matchResult = calculateMatchPercentage(normalizedProfile, job);
+
     return {
       ...jobMatch,
-      matchScore: Math.max(jobMatch.matchScore || 0, matchResult.percentage),
+      // Overwrite with canonical score — no blending so CV→Job === Job→CV
+      matchScore: matchResult.percentage,
       breakdown: matchResult.breakdown,
+      // Enrich with full job details so the card has everything to display
+      description: job.description || "",
+      workDuration: job.workDuration || "",
+      salary: job.salary ?? null,
+      technicalSkills: job.technicalSkills || [],
+      softSkills: job.softSkills || [],
+      language: job.language || [],
+      yearsOfExperience: job.yearsOfExperience ?? 0,
+      company: job.employerId?.company?.name || jobMatch.company || "",
     };
   });
 

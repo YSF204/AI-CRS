@@ -218,33 +218,31 @@ const expandWithImpliedSkills = (canonicalSkills) => {
   return Array.from(expanded);
 };
 
-/**
- * Calculate job match percentage between applicant and job requirements
- * Weights:
- * - Technical Skills: 40%
- * - Experience: 30%
- * - Soft Skills: 15%
- * - Languages: 15%
- */
-export const calculateMatchPercentage = (applicantInfo, jobRequirements) => {
-  const weights = {
-    technicalSkills: 0.4,
-    experience: 0.3,
-    softSkills: 0.15,
-    languages: 0.15,
-  };
 
-  // Technical Skills Match (0-100)
-  const applicantTechSkills = applicantInfo.technicalSkills || [];
+export const calculateMatchPercentage = (applicantInfo, jobRequirements) => {
+
   const jobTechSkills = jobRequirements.technicalSkills || [];
+  const jobSoftSkills = jobRequirements.softSkills || [];
+  const jobLanguages = jobRequirements.language || [];
+  const yearsRequired = jobRequirements.yearsOfExperience || 0;
+
+  // ── 1. Raw dimension scores ───────────────────────────────────────────────
   const techSkillsMatch = calculateSkillsMatch(
-    applicantTechSkills,
+    applicantInfo.technicalSkills || [],
     jobTechSkills,
   );
 
-  // Experience Match (0-100)
-  // Derive years from experience entries if yearsOfExperience isn't set
-  const yearsRequired = jobRequirements.yearsOfExperience || 0;
+  const softSkillsMatch = calculateSkillsMatch(
+    applicantInfo.softSkills || [],
+    jobSoftSkills,
+  );
+
+  const languagesMatch = calculateSkillsMatch(
+    applicantInfo.languages || [],
+    jobLanguages,
+  );
+
+  // Derive years of experience from entries if not set explicitly
   let yearsApplicant = applicantInfo.yearsOfExperience || 0;
   if (yearsApplicant === 0 && Array.isArray(applicantInfo.experience) && applicantInfo.experience.length > 0) {
     yearsApplicant = applicantInfo.experience.reduce((sum, exp) => {
@@ -257,28 +255,34 @@ export const calculateMatchPercentage = (applicantInfo, jobRequirements) => {
   }
   const experienceMatch = calculateExperienceMatch(yearsApplicant, yearsRequired);
 
-  // Soft Skills Match (0-100)
-  const applicantSoftSkills = applicantInfo.softSkills || [];
-  const jobSoftSkills = jobRequirements.softSkills || [];
-  const softSkillsMatch = calculateSkillsMatch(
-    applicantSoftSkills,
-    jobSoftSkills,
-  );
+  // ── 2. Dynamic weights — only count categories the job actually specifies ─
+  // Fixed base weights
+  let wTech = jobTechSkills.length > 0 ? 0.50 : 0;
+  let wExp  = yearsRequired > 0        ? 0.25 : 0;
+  let wSoft = jobSoftSkills.length > 0 ? 0.15 : 0;
+  let wLang = jobLanguages.length > 0  ? 0.10 : 0;
 
-  // Languages Match (0-100) — if job specifies no language requirements, give full credit
-  const applicantLanguages = applicantInfo.languages || [];
-  const jobLanguages = jobRequirements.language || [];
-  const languagesMatch = calculateSkillsMatch(applicantLanguages, jobLanguages);
+  // Normalise so weights always sum to 1 — distributes unused weight proportionally
+  const wTotal = wTech + wExp + wSoft + wLang || 1;
+  wTech /= wTotal; wExp /= wTotal; wSoft /= wTotal; wLang /= wTotal;
 
-  // Calculate weighted score
-  const totalScore =
-    techSkillsMatch * weights.technicalSkills +
-    experienceMatch * weights.experience +
-    softSkillsMatch * weights.softSkills +
-    languagesMatch * weights.languages;
+  // ── 3. Weighted score ─────────────────────────────────────────────────────
+  const rawScore =
+    techSkillsMatch * wTech +
+    experienceMatch * wExp  +
+    softSkillsMatch * wSoft +
+    languagesMatch  * wLang;
+
+  // ── 4. Generous floor — a candidate with any relevant tech skills should
+  //       never score below 30 (they are at least worth reviewing)
+  const hasAnyTechOverlap = techSkillsMatch > 0;
+  const floored = hasAnyTechOverlap ? Math.max(rawScore, 30) : rawScore;
+
+  // ── 5. Clamp to [0, 100] and round ───────────────────────────────────────
+  const percentage = Math.min(100, Math.round(floored));
 
   return {
-    percentage: Math.round(totalScore),
+    percentage,
     breakdown: {
       technicalSkillsMatch: Math.round(techSkillsMatch),
       experienceMatch: Math.round(experienceMatch),
@@ -289,70 +293,92 @@ export const calculateMatchPercentage = (applicantInfo, jobRequirements) => {
 };
 
 /**
- * Calculate skills match between two arrays.
- * Uses:
- *   1. Alias normalization  — "React.js" = "React", "Node" = "Node.js"
- *   2. Implied skills       — If applicant knows TypeScript → also knows JavaScript
- *   3. Partial string match — Fallback for unknown aliases
+ * Smart skills matcher.
+ * Layers:
+ *   1. Alias normalisation   — "React.js" = "reactjs" canonical
+ *   2. Implied skills        — TypeScript holder implicitly knows JavaScript
+ *   3. Compound expansion    — "Frontend: React, NextJS" → individual tokens
+ *   4. Bidirectional fuzzy   — substring match in both directions with 0.8 credit
+ *   5. Word-overlap scoring  — multi-word skills score on shared word count
  */
 const calculateSkillsMatch = (applicantSkills, requiredSkills) => {
   if (!requiredSkills || requiredSkills.length === 0) return 100;
   if (!applicantSkills || applicantSkills.length === 0) return 0;
 
-  // Expand compound skill strings like "Frontend: React, NextJS, TypeScript, TailwindCSS"
-  // by splitting on commas/semicolons and stripping any "Category: " prefix
   const expandSkillStrings = (skills) =>
     skills
-      .flatMap((s) => s.split(/[,;]/))
+      .flatMap((s) => s.split(/[,;|]/))
       .map((s) => s.replace(/^[^:]+:\s*/, "").trim())
       .filter(Boolean);
 
-  // Normalize required skills to canonical form
   const canonicalRequired = expandSkillStrings(requiredSkills).map(normalizeSkill);
-
-  // Normalize applicant skills to canonical form, then expand with implied skills
   const canonicalApplicant = expandSkillStrings(applicantSkills).map(normalizeSkill);
-  const expandedApplicant = new Set(
-    expandWithImpliedSkills(canonicalApplicant),
-  );
+  const expandedApplicant = new Set(expandWithImpliedSkills(canonicalApplicant));
 
   let matchCount = 0;
+
   for (const reqSkill of canonicalRequired) {
-    // 1. Direct canonical match
+    // 1. Exact canonical match (includes alias + implied)
     if (expandedApplicant.has(reqSkill)) {
-      matchCount++;
+      matchCount += 1;
       continue;
     }
 
-    // 2. Fallback: partial string match for unknown/unlisted skills
     const reqLower = reqSkill.toLowerCase();
-    const partialMatch = [...expandedApplicant].some(
-      (appSkill) => appSkill.includes(reqLower) || reqLower.includes(appSkill),
-    );
-    if (partialMatch) {
-      matchCount += 0.8; // partial credit for fuzzy match
+    const reqWords = reqLower.split(/\s+/).filter(w => w.length > 2);
+
+    let bestCredit = 0;
+    for (const appSkill of expandedApplicant) {
+      const appLower = appSkill.toLowerCase();
+
+      // 2. Bidirectional substring (e.g. "postgres" ↔ "postgresql")
+      if (appLower.includes(reqLower) || reqLower.includes(appLower)) {
+        bestCredit = Math.max(bestCredit, 0.85);
+        continue;
+      }
+
+      // 3. Word-overlap for multi-word skills (e.g. "machine learning" vs "deep learning")
+      const appWords = appLower.split(/\s+/).filter(w => w.length > 2);
+      if (reqWords.length > 1 && appWords.length > 1) {
+        const shared = reqWords.filter(w => appWords.includes(w)).length;
+        if (shared > 0) {
+          const overlapRatio = shared / Math.max(reqWords.length, appWords.length);
+          bestCredit = Math.max(bestCredit, 0.6 * overlapRatio + 0.2);
+        }
+      }
     }
+    matchCount += bestCredit;
   }
 
-  return Math.min((matchCount / canonicalRequired.length) * 100, 100);
+  const rawPct = (matchCount / canonicalRequired.length) * 100;
+
+  // Breadth bonus: candidate who covers ≥80% of requirements gets a small lift
+  const coverageRatio = matchCount / canonicalRequired.length;
+  const breadthBonus = coverageRatio >= 0.8 ? 5 : coverageRatio >= 0.6 ? 3 : 0;
+
+  return Math.min(rawPct + breadthBonus, 100);
 };
 
-
 /**
- * Calculate experience match
+ * Non-linear experience match using a square-root curve.
+ * This is FAR more generous than the old linear formula:
+ *   50% of required years → 71% score  (was 50%)
+ *   60% of required years → 77% score  (was 60%)
+ *   75% of required years → 87% score  (was 75%)
+ *   100%+               → 100%        (unchanged)
+ * A candidate with zero experience gets 15% (not 0) — they still deserve a look.
  */
 const calculateExperienceMatch = (yearsApplicant, yearsRequired) => {
   if (yearsRequired === 0) return 100;
-  if (yearsApplicant === 0) return 0;
+  if (yearsApplicant === 0) return 15; // entry-level candidates still reviewed
 
-  const percentMatch = (yearsApplicant / yearsRequired) * 100;
-  // Cap at 100% - having more experience is not penalized
-  return Math.min(percentMatch, 100);
+  const ratio = yearsApplicant / yearsRequired;
+  if (ratio >= 1) return 100; // meets or exceeds — full marks
+
+  // sqrt curve: score = sqrt(ratio) * 100, floored at 20
+  return Math.max(20, Math.round(Math.sqrt(ratio) * 100));
 };
 
-/**
- * Generate detailed AI-powered match analysis
- */
 const buildLocalFallbackAnalysis = (applicantInfo, jobInfo) => {
   const techSkills = applicantInfo.technicalSkills || [];
   const jobTech = jobInfo.technicalSkills || [];
@@ -362,6 +388,7 @@ const buildLocalFallbackAnalysis = (applicantInfo, jobInfo) => {
   const jobLanguages = jobInfo.language || [];
   const yearsApplicant = applicantInfo.yearsOfExperience || 0;
   const yearsRequired = jobInfo.yearsOfExperience || 0;
+
 
   const matchingTech = techSkills.filter((skill) =>
     jobTech.some((req) => req.toLowerCase().includes(skill.toLowerCase())),

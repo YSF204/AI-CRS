@@ -453,6 +453,7 @@ export const updateApplication = catchAsync(async (req, res, next) => {
     application.cvFile = {
       filename: req.file.originalname,
       path: uploadedCv?.publicUrl || "",
+      storagePath: uploadedCv?.storagePath || "",
     };
   }
 

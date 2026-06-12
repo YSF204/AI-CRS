@@ -7,6 +7,7 @@ import { safeParseJson } from "../../shared/aiResponseParser.js";
 import { buildRequirementsText } from "./buildRequirementsText.js";
 import { formatCandidateCvBlock, normalizeApplicationToCvLike } from "./formatCandidateCvBlock.js";
 import { mapRankedApplications } from "./mapRankedCandidates.js";
+import { calculateMatchPercentage } from "../../matching/matchingService.js";
 
 export const aiShortlistCandidates = async ({ jobId, userId }) => {
     const job = await Job.findById(jobId);
@@ -81,7 +82,31 @@ export const aiShortlistCandidates = async ({ jobId, userId }) => {
         }));
     }
 
-    const candidates = mapRankedApplications(applications, ranked);
+    // Build a local score for every application using the same deterministic formula
+    // used by CV → Job matching (calculateMatchPercentage). This score acts as a floor
+    // so that Math.max(aiScore, localScore) keeps shortlisting consistent with what
+    // the candidate saw on the "Find Jobs" screen.
+    const localScores = new Map();
+    for (const app of applications) {
+        try {
+            const info = app.applicantInfo || {};
+            const localResult = calculateMatchPercentage(
+                {
+                    technicalSkills: info.technicalSkills || [],
+                    softSkills: info.softSkills || [],
+                    languages: info.languages || [],
+                    yearsOfExperience: info.yearsOfExperience || 0,
+                    experience: info.experience || [],
+                },
+                job,
+            );
+            localScores.set(String(app._id), localResult.percentage);
+        } catch (err) {
+            console.warn(`[aiShortlist] Local score failed for app ${app._id}:`, err.message);
+        }
+    }
+
+    const candidates = mapRankedApplications(applications, ranked, localScores);
 
     return {
         job: {
@@ -95,3 +120,5 @@ export const aiShortlistCandidates = async ({ jobId, userId }) => {
 };
 
 export default aiShortlistCandidates;
+
+

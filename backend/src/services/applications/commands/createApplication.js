@@ -61,6 +61,7 @@ export const createApplication = async ({ body, user, file }) => {
         applicationData.cvFile = {
             filename: file.originalname,
             path: uploadedCv?.publicUrl || "",
+            storagePath: uploadedCv?.storagePath || "",
         };
     }
 

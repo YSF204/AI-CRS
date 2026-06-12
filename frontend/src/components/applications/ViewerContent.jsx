@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { getTemplateById } from "../../features/cv-management";
 import { API_ORIGIN } from "../../utils/apiConfig";
 
@@ -357,24 +357,214 @@ export default function ViewerContent({ application, cv, loadingCv, showAnalysis
           )}
 
           {!cv && fileUrl && (
-            <div style={{ marginTop: "20px" }}>
-              <div style={{ ...LABEL_STYLE, fontSize: "11px", marginBottom: "8px" }}>Uploaded PDF Stream</div>
+            <PdfViewer fileUrl={fileUrl} />
+          )}
+          {!cv && !fileUrl && !loadingCv && (
+            <div style={{
+              padding: "32px",
+              textAlign: "center",
+              border: "3px dashed var(--nm-ink)",
+              background: "var(--nm-bg)"
+            }}>
               <div style={{
-                height: "clamp(300px, 50vh, 500px)",
-                border: "4px solid var(--nm-ink)",
-                boxShadow: "6px 6px 0 var(--nm-ink)",
-                background: "var(--nm-bg)"
+                fontFamily: "var(--font-display)",
+                fontSize: "12px",
+                fontWeight: 900,
+                color: "var(--nm-text-tertiary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.1em"
               }}>
-                <iframe
-                  src={fileUrl}
-                  title="CV PDF"
-                  sandbox="allow-same-origin"
-                  style={{ width: "100%", height: "100%", border: "none" }}
-                />
+                No CV file attached to this application.
               </div>
             </div>
           )}
         </Section>
+      )}
+    </div>
+  );
+}
+
+function PdfViewer({ fileUrl }) {
+  const [status, setStatus] = useState("loading"); // loading | ok | error
+  const objectRef = useRef(null);
+
+  // Detect load/error on the <object> element
+  const handleLoad = useCallback(() => setStatus("ok"), []);
+  const handleError = useCallback(() => setStatus("error"), []);
+
+  useEffect(() => {
+    setStatus("loading");
+    // Some browsers don't fire load on <object>, so set a timeout fallback
+    const timer = setTimeout(() => {
+      // If still loading after 4s, assume it rendered (or silently failed)
+      setStatus(prev => prev === "loading" ? "ok" : prev);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [fileUrl]);
+
+  const isLocalBackendUrl = fileUrl && /\/uploads\/cvs\//i.test(fileUrl);
+
+  return (
+    <div style={{ marginTop: "20px" }}>
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: "8px",
+        flexWrap: "wrap",
+        gap: "8px"
+      }}>
+        <div style={{ ...LABEL_STYLE, fontSize: "11px", marginBottom: 0 }}>Uploaded PDF</div>
+        <a
+          href={fileUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "6px",
+            padding: "5px 12px",
+            background: "var(--nm-primary)",
+            color: "#fff",
+            border: "2px solid var(--nm-ink)",
+            boxShadow: "2px 2px 0 var(--nm-ink)",
+            fontFamily: "var(--font-display)",
+            fontSize: "10px",
+            fontWeight: 900,
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            textDecoration: "none",
+            cursor: "pointer",
+          }}
+        >
+          ↗ Open PDF
+        </a>
+      </div>
+
+      {isLocalBackendUrl ? (
+        /* Local-storage fallback URLs are ephemeral on Render — just show the open button */
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "12px",
+          height: "200px",
+          border: "3px dashed var(--nm-ink)",
+          background: "var(--nm-bg)",
+        }}>
+          <div style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "11px",
+            fontWeight: 900,
+            color: "var(--nm-text-tertiary)",
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            textAlign: "center",
+          }}>
+            PDF is stored externally.
+            <br />
+            Use the button above to open it.
+          </div>
+        </div>
+      ) : (
+        <div style={{
+          position: "relative",
+          height: "clamp(320px, 55vh, 580px)",
+          border: "4px solid var(--nm-ink)",
+          boxShadow: "6px 6px 0 var(--nm-ink)",
+          background: "var(--nm-bg)",
+          overflow: "hidden",
+        }}>
+          {/* Loading overlay */}
+          {status === "loading" && (
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+              background: "var(--nm-bg)",
+              zIndex: 2,
+            }}>
+              <div style={{
+                width: 28,
+                height: 28,
+                border: "3px solid var(--nm-ink)",
+                borderTopColor: "var(--nm-primary)",
+                borderRadius: "50%",
+                animation: "spin 0.7s linear infinite",
+              }} />
+              <div style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "11px",
+                fontWeight: 900,
+                color: "var(--nm-text-tertiary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.1em"
+              }}>
+                Loading PDF…
+              </div>
+            </div>
+          )}
+
+          {/* Error state */}
+          {status === "error" && (
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "12px",
+              background: "var(--nm-bg)",
+              zIndex: 2,
+            }}>
+              <div style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "12px",
+                fontWeight: 900,
+                color: "var(--nm-text-tertiary)",
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+                textAlign: "center",
+              }}>
+                Could not preview PDF in browser.
+                <br />
+                <span style={{ fontSize: "10px", color: "var(--nm-text-tertiary)" }}>
+                  Use the "Open PDF" button above.
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Native PDF embed */}
+          <object
+            ref={objectRef}
+            data={`${fileUrl}#toolbar=1&view=FitH`}
+            type="application/pdf"
+            onLoad={handleLoad}
+            onError={handleError}
+            style={{
+              width: "100%",
+              height: "100%",
+              border: "none",
+              display: "block",
+            }}
+          >
+            {/* Fallback for browsers that don't support object */}
+            <embed
+              src={`${fileUrl}#toolbar=1`}
+              type="application/pdf"
+              style={{ width: "100%", height: "100%", border: "none" }}
+            />
+          </object>
+
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
       )}
     </div>
   );

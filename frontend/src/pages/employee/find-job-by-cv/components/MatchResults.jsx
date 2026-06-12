@@ -73,6 +73,23 @@ function renderResults({
     );
   }
 
+  const toWorkSite = (value) => {
+    if (!value) return null;
+    if (value === "REMOTE") return t("common.remote", {}, "Remote");
+    if (value === "HYBRID") return t("common.hybrid", {}, "Hybrid");
+    if (value === "ON_SITE") return t("common.onsite", {}, "On-site");
+    return value.replace("_", " ");
+  };
+
+  const toRoleType = (value) => {
+    if (!value) return null;
+    if (value === "FULL_TIME") return t("common.fullTime", {}, "Full-time");
+    if (value === "PART_TIME") return t("common.partTime", {}, "Part-time");
+    if (value === "CONTRACT") return t("common.contract", {}, "Contract");
+    if (value === "INTERNSHIP") return t("common.internship", {}, "Internship");
+    return value;
+  };
+
   return (
     <div className="grid grid-cols-1 gap-5">
       {normalizedJobs.map((item, index) => (
@@ -80,18 +97,19 @@ function renderResults({
           key={item.key || index}
           className="brutal-card p-6 bg-(--card-bg) border-4 border-(--border-color) hover:border-black transition-all"
         >
-          <div className="flex items-start justify-between gap-3 mb-4">
-            <div>
-              <h2 className="font-['Space_Grotesk'] font-bold text-xl uppercase mb-1">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="min-w-0 flex-1">
+              <h2 className="font-['Space_Grotesk'] font-bold text-xl uppercase mb-1 break-words">
                 {item.title}
               </h2>
               <p className="font-mono text-sm text-(--fg-muted)">
-                {item.company} • {item.location}
+                {item.company} • {toWorkSite(item.location) || item.location}
               </p>
             </div>
             {item.match !== null && (
               <div
-                className="brutal-card px-3 py-1 font-mono text-sm font-bold border-2 border-black whitespace-nowrap"
+                className="brutal-card px-3 py-1 font-mono text-sm font-bold border-2 border-black whitespace-nowrap shrink-0"
                 style={{
                   background:
                     item.match >= 80
@@ -107,27 +125,75 @@ function renderResults({
             )}
           </div>
 
+          {/* Meta badges (type / salary) */}
+          {(item.workDuration || item.salary !== null) && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {item.workDuration && (
+                <span className="px-2 py-0.5 text-xs font-mono border border-(--border-color) text-(--fg-muted)">
+                  {toRoleType(item.workDuration)}
+                </span>
+              )}
+              {item.salary !== null && (
+                <span className="px-2 py-0.5 text-xs font-mono border border-(--border-color) text-(--fg-muted)">
+                  ${item.salary?.toLocaleString()}
+                </span>
+              )}
+              {item.yearsOfExperience !== null && (
+                <span className="px-2 py-0.5 text-xs font-mono border border-(--border-color) text-(--fg-muted)">
+                  {item.yearsOfExperience}+ yrs
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Description */}
+          {item.description && (
+            <p className="font-mono text-sm text-(--fg-muted) mb-4 leading-relaxed line-clamp-3">
+              {item.description}
+            </p>
+          )}
+
+          {/* AI reasoning */}
           {item.reasoning && (
-            <p className="font-mono text-sm text-(--fg) mb-4">
+            <p className="font-mono text-xs italic text-(--fg-muted) mb-3 border-l-2 border-(--yellow) pl-3">
               {item.reasoning}
             </p>
           )}
 
+          {/* Technical skills required */}
+          {item.technicalSkills?.length > 0 && (
+            <div className="mb-3">
+              <p className="font-bold uppercase text-xs tracking-[0.2em] text-(--fg-muted) mb-1">
+                {t("employeeJobs.technicalSkills", {}, "Technical Skills")}
+              </p>
+              <div className="flex flex-wrap gap-1">
+                {item.technicalSkills.slice(0, 8).map((s, i) => (
+                  <span key={i} className="px-2 py-0.5 text-xs font-mono bg-(--bg) border border-(--border-color)">{s}</span>
+                ))}
+                {item.technicalSkills.length > 8 && (
+                  <span className="px-2 py-0.5 text-xs font-mono text-(--fg-muted)">+{item.technicalSkills.length - 8} more</span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Matched skills */}
           {item.skillsMatched?.length > 0 && (
             <div className="mb-3">
-              <p className="font-bold uppercase text-xs tracking-[0.2em] text-(--fg-muted)">
-                {t("findJobByCv.matchedSkills")}
+              <p className="font-bold uppercase text-xs tracking-[0.2em] text-(--fg-muted) mb-1">
+                ✅ {t("findJobByCv.matchedSkills")}
               </p>
-              <p className="font-mono text-sm">
+              <p className="font-mono text-sm text-(--color-success, green)">
                 {item.skillsMatched.join(", ")}
               </p>
             </div>
           )}
 
+          {/* Missing skills */}
           {item.skillsMissing?.length > 0 && (
             <div className="mb-4">
-              <p className="font-bold uppercase text-xs tracking-[0.2em] text-(--fg-muted)">
-                {t("findJobByCv.missingSkills")}
+              <p className="font-bold uppercase text-xs tracking-[0.2em] text-(--fg-muted) mb-1">
+                ❌ {t("findJobByCv.missingSkills")}
               </p>
               <p className="font-mono text-sm text-(--coral)">
                 {item.skillsMissing.join(", ")}

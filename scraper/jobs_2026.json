@@ -1,5 +1,130 @@
 [
   {
+    "title": "Logistics Manager",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/logistics-manage-67296"
+  },
+  {
+    "title": "RF & Optimization Engineer",
+    "location": "رام الله والبيرة",
+    "url": "https://www.jobs.ps/jobs/rf-optimization-engineer-67294"
+  },
+  {
+    "title": "مساعد/ة إداري/ة",
+    "location": "القدس",
+    "url": "https://www.jobs.ps/jobs/مساعد-ة-إداري-ة-67293"
+  },
+  {
+    "title": "Area Manager",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/area-manager-67291"
+  },
+  {
+    "title": "Senior/Mid-level Automation Engineer",
+    "location": "نابلس",
+    "url": "https://www.jobs.ps/jobs/automation-engineer-67290"
+  },
+  {
+    "title": "موظف محتوى العلاقات العامة والإنتاج الإعلامي",
+    "location": "رام الله والبيرة",
+    "url": "https://www.jobs.ps/jobs/موظف-محتوى-العلاقات-العامة-والإنتاج-الإعلامي-67289"
+  },
+  {
+    "title": "Sales Development Executive - Qalqilya and Salfit",
+    "location": "سلفيت وبديا, قلقيلية",
+    "url": "https://www.jobs.ps/jobs/sales-development-executive-qalqilya-and-salfit-67288"
+  },
+  {
+    "title": "RAN Senior Engineer",
+    "location": "رام الله والبيرة",
+    "url": "https://www.jobs.ps/jobs/ran-senior-engineer-67287"
+  },
+  {
+    "title": "موظفة مبيعات",
+    "location": "نابلس",
+    "url": "https://www.jobs.ps/jobs/مبيعات-67286"
+  },
+  {
+    "title": "MHPSS Supervisor",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/mhpss-supervisor-67285"
+  },
+  {
+    "title": "Consultant to Strengthen the Capacity of Family Protection",
+    "location": "رام الله والبيرة, العمل عن بعد",
+    "url": "https://www.jobs.ps/jobs/protection-consultant-67284"
+  },
+  {
+    "title": "Gender Based Violence Expert",
+    "location": "رام الله والبيرة, العمل عن بعد",
+    "url": "https://www.jobs.ps/jobs/gender-based-violence-expert-67283"
+  },
+  {
+    "title": "موظفة محاسبة",
+    "location": "العيزرية",
+    "url": "https://www.jobs.ps/jobs/محاسبة-67282"
+  },
+  {
+    "title": "Procurement Officer",
+    "location": "نابلس",
+    "url": "https://www.jobs.ps/jobs/procurement-officer-67281"
+  },
+  {
+    "title": "FabLab Technician",
+    "location": "بيت لحم",
+    "url": "https://www.jobs.ps/jobs/fablab-technician-67264"
+  },
+  {
+    "title": "Project Coordinators",
+    "location": "رام الله والبيرة, جنين",
+    "url": "https://www.jobs.ps/jobs/project-coordinators-67261"
+  },
+  {
+    "title": "Project Manager",
+    "location": "رام الله والبيرة",
+    "url": "https://www.jobs.ps/jobs/project-manager-67260"
+  },
+  {
+    "title": "مسؤول صناعة المحتوى وادارة سوشال ميديا - Content Creator",
+    "location": "رام الله والبيرة",
+    "url": "https://www.jobs.ps/jobs/content-creator-67249"
+  },
+  {
+    "title": "مدير مبيعات",
+    "location": "جنوب الضفة الغربية",
+    "url": "https://www.jobs.ps/jobs/مدير-مبيعات-67229"
+  },
+  {
+    "title": "طبيب-ة امراض جلدية",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/طبيب-امراض-جلدية-67280"
+  },
+  {
+    "title": "ممرض-ة",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/ممرض-ة-67279"
+  },
+  {
+    "title": "Projects Coordinator",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/projects-coordinator-67278"
+  },
+  {
+    "title": "قابلة",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/قابلة-67277"
+  },
+  {
+    "title": "مثقفة صحية",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/مثقفة-صحية-67276"
+  },
+  {
+    "title": "صيدلاني-ة",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/صيدلاني-67275"
+  },
+  {
     "title": "سكرتارية ومحاسبة",
     "location": "القدس",
     "url": "https://www.jobs.ps/jobs/سكرتارية-67025"
@@ -20,23 +145,18 @@
     "url": "https://www.jobs.ps/jobs/meal-officer-67266"
   },
   {
-    "title": "Projects Coordinator",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/projects-coordinator-67278"
-  },
-  {
     "title": "محاسب",
     "location": "رام الله والبيرة",
     "url": "https://www.jobs.ps/jobs/محاسب-67244"
   },
   {
     "title": "Market Systems Development (MSD) Officer",
-    "location": "رام الله والبيرة",
+    "location": "الضفة الغربية",
     "url": "https://www.jobs.ps/jobs/market-systems-development-msd-officer-67273"
   },
   {
     "title": "Business Development & Inclusion Lead",
-    "location": "رام الله والبيرة",
+    "location": "الضفة الغربية",
     "url": "https://www.jobs.ps/jobs/business-development-inclusion-lead-67272"
   },
   {
@@ -53,100 +173,5 @@
     "title": "Accountant",
     "location": "رام الله والبيرة",
     "url": "https://www.jobs.ps/jobs/accountant-67254"
-  },
-  {
-    "title": "مساعدة تجنيد اموال وكتابة تقارير",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/مساعدة-تجنيد-اموال-وكتابة-تقارير-67265"
-  },
-  {
-    "title": "Project Coordinator",
-    "location": "جنين, طوباس",
-    "url": "https://www.jobs.ps/jobs/project-coordinator-67262"
-  },
-  {
-    "title": "طبيب-ة امراض جلدية",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/طبيب-امراض-جلدية-67280"
-  },
-  {
-    "title": "ممرض-ة",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/ممرض-ة-67279"
-  },
-  {
-    "title": "قابلة",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/قابلة-67277"
-  },
-  {
-    "title": "مثقفة صحية",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/مثقفة-صحية-67276"
-  },
-  {
-    "title": "صيدلاني-ة",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/صيدلاني-67275"
-  },
-  {
-    "title": "اخصائي-ة تغذية",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/اخصائي-ة-تغذية-67274"
-  },
-  {
-    "title": "طبيبة نساء وولاده",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/طبيبة-نساء-وولاده-67271"
-  },
-  {
-    "title": "مسؤول/ة العلاقات الدولية وتطوير البرامج",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/مسؤول-ة-العلاقات-الدولية-وتطوير-البرامج-67257"
-  },
-  {
-    "title": "سكرتير/ة",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/سكرتير-67247"
-  },
-  {
-    "title": "صانع محتوى - Content Creator",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/content-creator-67239"
-  },
-  {
-    "title": "Account Manager - مدير حسابات تسويقية",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/account-manager-67236"
-  },
-  {
-    "title": "Localization Partnership Specialist",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/localization-partnership-specialist-67226"
-  },
-  {
-    "title": "MEAL officer",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/meal-officer-67231"
-  },
-  {
-    "title": "Senior Finance Manager",
-    "location": "القدس",
-    "url": "https://www.jobs.ps/jobs/senior-finance-manager-67245"
-  },
-  {
-    "title": "Teachers (All Subjects)",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/teachers-67119"
-  },
-  {
-    "title": "مندوبي مبيعات ميداني",
-    "location": "الخليل, بيت لحم, أريحا, سلفيت وبديا, نابلس, جنين, طولكرم, قلقيلية, طوباس, روابي, بيرزيت, الرام, العيزرية, ابو ديس, كفر عقب, عناتا, حزما, بدُو, جفتلك",
-    "url": "https://www.jobs.ps/jobs/sales-67222"
-  },
-  {
-    "title": "مدرس/ة - Teachers",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/teachers-67237"
   }
 ]

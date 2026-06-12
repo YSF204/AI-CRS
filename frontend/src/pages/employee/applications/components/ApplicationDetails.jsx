@@ -7,7 +7,6 @@ import {
   Building2,
   Calendar,
   MapPin,
-  Target,
 } from "lucide-react";
 import { useTranslation } from "../../../../context/LanguageContext";
 
@@ -65,40 +64,6 @@ export default function ApplicationDetails({
                   year: "numeric",
                 })}
               </span>
-            </div>
-          </div>
-
-          <div className="mb-4 sm:mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div>
-                <h3 className="font-black uppercase text-xs tracking-tight leading-none mb-1 text-[var(--nm-text-primary)]">
-                  {t("applications.intelligenceAnalysis")}
-                </h3>
-                <p className="text-[9px] font-black text-[var(--nm-primary)] uppercase tracking-widest">
-                  {t("applications.aiCoreOutput")}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="p-5 border-4 border-[var(--nm-ink)] bg-[var(--nm-surface-low)] relative overflow-hidden flex flex-col items-center justify-center text-center">
-                <div className="absolute top-0 right-0 p-2 opacity-5 pointer-events-none text-[var(--nm-ink)]">
-                  <Target size={90} />
-                </div>
-                <div className="relative z-10 w-full flex flex-col items-center justify-center">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-[var(--nm-text-tertiary)] mb-2">
-                    {t("applications.positionFitScore")}
-                  </p>
-                  <div className="flex items-center justify-center whitespace-nowrap">
-                    <span className="text-4xl sm:text-5xl font-black font-['Space_Grotesk'] tracking-tighter text-[var(--nm-text-primary)] leading-none">
-                      {selectedApp.matchPercentage || 0}%
-                    </span>
-                  </div>
-                  <p className="mt-2 text-[9px] font-black uppercase tracking-widest text-[var(--nm-text-tertiary)]">
-                    {t("applications.accuracyOptimized")}
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
 

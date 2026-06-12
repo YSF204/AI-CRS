@@ -116,6 +116,9 @@ const applicationSchema = new mongoose.Schema(
       path: {
         type: String,
       },
+      storagePath: {
+        type: String, // Supabase bucket path e.g. "cvs/filename.pdf"
+      },
       uploadedAt: {
         type: Date,
         default: Date.now,

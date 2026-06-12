@@ -67,6 +67,15 @@ export default function FindJobByCV() {
           skillsMissing: item.skillsMissing || item.missing_skills || [],
           isExternal: !!item.isExternal,
           externalUrl: item.externalUrl || item.raw?.externalUrl || item.raw?.url || "",
+          // Full job details (only present for internal jobs)
+          description: item.description || "",
+          workDuration: item.workDuration || "",
+          salary: item.salary ?? null,
+          technicalSkills: item.technicalSkills || [],
+          softSkills: item.softSkills || [],
+          language: item.language || [],
+          yearsOfExperience: item.yearsOfExperience ?? null,
+          breakdown: item.breakdown || null,
         };
       })
       .sort((a, b) => (b.match ?? -1) - (a.match ?? -1));

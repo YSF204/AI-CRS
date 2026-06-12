@@ -62,6 +62,7 @@ export const updateApplication = async ({ applicationId, body, user, file }) => 
         application.cvFile = {
             filename: file.originalname,
             path: uploadedCv?.publicUrl || "",
+            storagePath: uploadedCv?.storagePath || "",
         };
         application.applicationMethod = "uploadPdf";
     }

@@ -12,6 +12,7 @@ import {
   togglePotential,
   deleteApplication,
 } from "../controllers/applicationController.js";
+import { streamApplicationCv } from "../controllers/cvProxyController.js";
 import { authenticate } from "../middleware/Auth.js";
 import { isEmployee } from "../middleware/roleCheck.js";
 import { isEmployer } from "../middleware/roleCheck.js";
@@ -36,6 +37,7 @@ applicationRouter.patch("/:id/potential", isEmployer, togglePotential);
 
 // Shared routes (after specific prefixes)
 applicationRouter.get("/:id", getApplicationById);
+applicationRouter.get("/:id/cv", streamApplicationCv);
 applicationRouter.patch("/:id", isEmployee, uploadCV, updateApplication);
 applicationRouter.delete("/:id", deleteApplication);
 
