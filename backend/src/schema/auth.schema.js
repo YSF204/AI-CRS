@@ -1,16 +1,12 @@
 import { z } from 'zod';
 
-// Login: only validate that email is valid and password was provided.
-// Do NOT enforce password complexity here — complexity is a registration concern.
-// Enforcing rules at login means users with older/valid passwords get locked out.
+// login vald
 export const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
 });
 
-// Signup: ADMIN role is intentionally excluded.
-// Admins are created directly in the DB — public self-registration as ADMIN
-// is a privilege-escalation vector.
+///  sign up validation
 export const signupSchema = z.object({
   firstName: z.string().min(1, 'First name is required').regex(/^[^0-9]*$/, 'First name should not contain numbers'),
   lastName: z.string().min(1, 'Last name is required').regex(/^[^0-9]*$/, 'Last name should not contain numbers'),

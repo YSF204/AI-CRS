@@ -87,7 +87,6 @@ export default function AnalysisScreen({
 
 
       </div>
-
       {/* Summary Notes */}
       {aiSummary && (
         <div className="border-[6px] border-black p-6 bg-white shadow-[8px_8px_0px_#000]">

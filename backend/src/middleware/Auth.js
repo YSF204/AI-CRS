@@ -36,7 +36,6 @@ export const authenticate = catchAsync(async (req, res, next) => {
     );
   }
 
-  // FIX: Reject tokens for accounts that are not fully active.
   // A deactivated or pending user's existing JWT must not grant access.
   if (user.accountStatus !== "ACTIVE") {
     return next(

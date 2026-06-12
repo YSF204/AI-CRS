@@ -23,7 +23,7 @@ router.post("/forgotPassword", forgotPassword);
 router.patch("/resetPassword/:token", resetPassword);
 router.patch("/updatePassword", authenticate, updatePassword);
 
-// FIX #1: Email verification routes
+// Email verification routes
 router.get("/verify-email/:token", verifyEmail);
 router.post("/resend-verification-email", resendVerificationEmail);
 

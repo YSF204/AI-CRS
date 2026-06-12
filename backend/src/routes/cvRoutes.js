@@ -35,7 +35,7 @@ cvRouter.delete("/:id", deleteCV);
 cvRouter.post("/:id/analyze", analyzeCV);
 cvRouter.get("/:id/analyses", getCVAnalyses);
 
-// PDF Download (generates on-the-fly)
+// PDF Download 
 cvRouter.post("/:id/download-pdf", downloadPDF);
 
 // job Reccomendation
