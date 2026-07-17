@@ -8,7 +8,7 @@ export default function PdfUploader({
   handleInstantSubmitApplication,
   submitting,
   isEdit,
-  formHasChanged, // FIX #6: Added form change detection
+  formHasChanged,
 }) {
   return (
     <>

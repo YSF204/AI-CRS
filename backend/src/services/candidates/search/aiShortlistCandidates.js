@@ -82,10 +82,6 @@ export const aiShortlistCandidates = async ({ jobId, userId }) => {
         }));
     }
 
-    // Build a local score for every application using the same deterministic formula
-    // used by CV → Job matching (calculateMatchPercentage). This score acts as a floor
-    // so that Math.max(aiScore, localScore) keeps shortlisting consistent with what
-    // the candidate saw on the "Find Jobs" screen.
     const localScores = new Map();
     for (const app of applications) {
         try {

@@ -6,14 +6,11 @@ import { router } from './routes.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 import { AuthProvider } from './context/AuthContext.jsx'
 import { LanguageProvider } from './context/LanguageContext.jsx'
-
-import { GoogleOAuthProvider } from '@react-oauth/google';
-
-const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
+import OptionalClerkProvider from './components/auth/OptionalClerkProvider.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <GoogleOAuthProvider clientId={clientId}>
+    <OptionalClerkProvider>
       <LanguageProvider>
         <ThemeProvider>
           <AuthProvider>
@@ -21,7 +18,6 @@ createRoot(document.getElementById('root')).render(
           </AuthProvider>
         </ThemeProvider>
       </LanguageProvider>
-    </GoogleOAuthProvider>
+    </OptionalClerkProvider>
   </StrictMode>,
 )
-

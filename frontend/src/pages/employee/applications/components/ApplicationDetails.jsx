@@ -51,9 +51,9 @@ export default function ApplicationDetails({
                 <MapPin size={14} />
                 {selectedApp.jobId?.workSite ? (
                   selectedApp.jobId.workSite === "REMOTE" ? t("common.remote") :
-                  selectedApp.jobId.workSite === "HYBRID" ? t("common.hybrid") :
-                  selectedApp.jobId.workSite === "ON_SITE" ? t("common.onsite") :
-                  selectedApp.jobId.workSite.replace("_", " ")
+                    selectedApp.jobId.workSite === "HYBRID" ? t("common.hybrid") :
+                      selectedApp.jobId.workSite === "ON_SITE" ? t("common.onsite") :
+                        selectedApp.jobId.workSite.replace("_", " ")
                 ) : t("common.remote")}
               </span>
               <span className="flex items-center gap-1.5">

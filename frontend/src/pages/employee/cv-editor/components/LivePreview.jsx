@@ -7,7 +7,7 @@ const MemoizedTemplate = React.memo(({ Component, userName, formData, highlights
 });
 
 // ── A4 page constants (needed by MobilePreviewTab too) ──
-const A4_WIDTH  = 794;
+const A4_WIDTH = 794;
 const A4_HEIGHT = 1123;
 const FOOTER_ZONE = 60;
 const HEADER_ZONE = 0;
@@ -15,7 +15,7 @@ const PUSH_BUFFER = 19;
 
 
 function MobilePreviewTab({ formData, userName, TemplateComponent, highlights, template }) {
-  const outerRef  = useRef(null);
+  const outerRef = useRef(null);
   const contentRef = useRef(null);
   const [scale, setScale] = useState(0.43);
   const [pages, setPages] = useState(1);
@@ -85,7 +85,7 @@ function MobilePreviewTab({ formData, userName, TemplateComponent, highlights, t
     elementsToMeasure.forEach(block => {
       const rect = block.getBoundingClientRect();
       measurements.set(block, {
-        top:    (rect.top - containerRect.top) / currentScale,
+        top: (rect.top - containerRect.top) / currentScale,
         height: block.offsetHeight,
       });
     });
@@ -98,30 +98,30 @@ function MobilePreviewTab({ formData, userName, TemplateComponent, highlights, t
     for (const block of blocks) {
       const bm = measurements.get(block);
       if (!bm) continue;
-      const adjTop    = bm.top + cumulativeShift;
+      const adjTop = bm.top + cumulativeShift;
       const adjBottom = adjTop + bm.height;
-      const page      = Math.floor(adjTop / A4_HEIGHT);
-      const pageEnd   = (page + 1) * A4_HEIGHT - FOOTER_ZONE;
+      const page = Math.floor(adjTop / A4_HEIGHT);
+      const pageEnd = (page + 1) * A4_HEIGHT - FOOTER_ZONE;
 
       if (adjBottom > pageEnd) {
         const maxUsable = A4_HEIGHT - FOOTER_ZONE - HEADER_ZONE;
-        const target    = targetByBlock.get(block) || block;
-        const tm        = measurements.get(target) || bm;
-        let pushTarget  = target;
-        let pushTop     = tm.top;
-        let pushHeight  = tm.height;
+        const target = targetByBlock.get(block) || block;
+        const tm = measurements.get(target) || bm;
+        let pushTarget = target;
+        let pushTop = tm.top;
+        let pushHeight = tm.height;
 
         if (pushHeight > maxUsable) {
           pushTarget = block;
-          pushTop    = bm.top;
+          pushTop = bm.top;
           pushHeight = bm.height;
         }
 
         if (pushHeight <= maxUsable && !movedTargets.has(pushTarget)) {
           const adjTargetTop = pushTop + cumulativeShift;
-          const targetPage   = Math.floor(adjTargetTop / A4_HEIGHT);
+          const targetPage = Math.floor(adjTargetTop / A4_HEIGHT);
           const nextPageStart = (targetPage + 1) * A4_HEIGHT + HEADER_ZONE + PUSH_BUFFER;
-          const pushAmount   = nextPageStart - adjTargetTop;
+          const pushAmount = nextPageStart - adjTargetTop;
           if (pushAmount > 0) {
             margins.push({ element: pushTarget, margin: pushAmount });
             movedTargets.add(pushTarget);
@@ -152,8 +152,8 @@ function MobilePreviewTab({ formData, userName, TemplateComponent, highlights, t
     return () => { ro.disconnect(); mo.disconnect(); };
   }, [paginate, scale, formData, userName]);
 
-  const totalHeight      = pages * A4_HEIGHT;          // unscaled
-  const scaledHeight     = Math.round(totalHeight * scale); // what the wrapper shows
+  const totalHeight = pages * A4_HEIGHT;          // unscaled
+  const scaledHeight = Math.round(totalHeight * scale); // what the wrapper shows
 
   return (
     <div className="cv-mobile-preview-tab" ref={outerRef}>
@@ -228,7 +228,7 @@ function MobilePreviewTab({ formData, userName, TemplateComponent, highlights, t
 
           {/* Page-break separators */}
           {pages > 1 && Array.from({ length: pages - 1 }).map((_, i) => {
-            const breakY      = (i + 1) * A4_HEIGHT - FOOTER_ZONE;
+            const breakY = (i + 1) * A4_HEIGHT - FOOTER_ZONE;
             const breakHeight = FOOTER_ZONE + HEADER_ZONE;
             return (
               <div
@@ -314,10 +314,6 @@ export default function LivePreview({ formData, userName, templateId, highlights
     const container = contentRef.current;
     if (!container) return;
 
-    // ── Find blocks to paginate ──
-    // Use "leaf" break-inside-avoid elements: the most granular blocks.
-    // - For sections with entries (experience, education, custom): individual entries
-    /// check which elements we need to avoid breaking across pages
     const allBreakAvoid = container.querySelectorAll('.break-inside-avoid');
     const leafBlocks = Array.from(allBreakAvoid).filter(el =>
       !el.querySelector('.break-inside-avoid')

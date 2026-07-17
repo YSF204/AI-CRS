@@ -9,6 +9,7 @@ import RoleStep    from './components/steps/RoleStep';
 import ProfileStep from './components/steps/ProfileStep';
 import CompanyStep from './components/steps/CompanyStep';
 import { useTranslation } from '../../../context/LanguageContext';
+import { useClerk } from '@clerk/react';
 
 // Steps: [0] Role  [1] Profile(gender+age+phone)  [2?] Company
 const EMPTY_FORM = {
@@ -19,6 +20,7 @@ const EMPTY_FORM = {
 
 export default function GoogleSignupForm({ googleData, onClear }) {
   const { t } = useTranslation();
+  const { signOut } = useClerk();
   const { login } = useAuth();
   const navigate  = useNavigate();
   const [errorMsg, setErrorMsg] = useState('');
@@ -92,6 +94,11 @@ export default function GoogleSignupForm({ googleData, onClear }) {
     setTimeout(() => advanceRef.current?.(), 0);
   };
 
+  const handleClear = async () => {
+    await signOut();
+    onClear?.();
+  };
+
   const handleComplete = async () => {
     setErrorMsg('');
 
@@ -120,7 +127,9 @@ export default function GoogleSignupForm({ googleData, onClear }) {
         };
       }
 
-      const res = await api.post('/auth/google/complete-profile', body);
+      const res = await api.post('/auth/clerk/complete-profile', body, {
+        headers: { Authorization: `Bearer ${googleData.token}` },
+      });
 
       if (res.data.requiresEmailVerification) {
         setVerificationEmail(res.data.data.user.email);
@@ -128,6 +137,7 @@ export default function GoogleSignupForm({ googleData, onClear }) {
       }
 
       onClear?.();
+      await signOut();
 
       const { token, data } = res.data;
       if (data.user.role === 'EMPLOYER' && data.user.accountStatus === 'PENDING') { navigate('/pending'); return; }
@@ -169,12 +179,12 @@ export default function GoogleSignupForm({ googleData, onClear }) {
         gap: 12
       }}>
         <div>
-          ✓ {t("auth.signedInAs")} <strong style={{ color: 'var(--nm-text-primary)' }}>{googleData?.email || 'Google account'}</strong>
+          ✓ {t("auth.signedInAs")} <strong style={{ color: 'var(--nm-text-primary)' }}>{googleData?.email || 'Social account'}</strong>
           <br/>
           <span style={{ fontSize: 11, opacity: 0.8 }}>{t("auth.completeProfileToContinue")}</span>
         </div>
         <button
-          onClick={onClear}
+          onClick={handleClear}
           style={{
             background: 'none',
             border: 'none',

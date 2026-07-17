@@ -73,7 +73,7 @@ const userSchema = new mongoose.Schema(
     },
     authProvider: {
       type: String,
-      enum: ["LOCAL", "GOOGLE"],
+      enum: ["LOCAL", "GOOGLE", "CLERK"],
       default: "LOCAL",
     },
     profilePic: {

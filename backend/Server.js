@@ -10,6 +10,7 @@ import connectDB from "./src/config/dbConnect.js";
 import { initRedis } from "./src/config/redis.js";
 import { getAllowedOrigins } from "./src/config/security.js";
 import morgan from "morgan";
+import { clerkMiddleware } from "@clerk/express";
 
 const envPath = path.resolve(process.cwd(), ".env");
 dotenv.config({ path: envPath });
@@ -87,8 +88,28 @@ app.use("/api/auth/register", sensitiveLimiter);
 app.use("/api/auth/forgotPassword", sensitiveLimiter);
 app.use("/api/auth/resend-verification-email", sensitiveLimiter);
 app.use("/api/auth/verify-email", sensitiveLimiter);
-app.use("/api/auth/google", sensitiveLimiter);
+app.use("/api/auth/clerk", sensitiveLimiter);
 // ──────────────────────────────────────────────────────────────────────────
+
+// Clerk is scoped to social-auth endpoints only. The existing application JWT
+// middleware continues to protect every other API route unchanged.
+if (process.env.CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY) {
+  app.use(
+    "/api/auth/clerk",
+    clerkMiddleware({
+      publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
+      secretKey: process.env.CLERK_SECRET_KEY,
+      authorizedParties: allowedOrigins,
+    }),
+  );
+} else {
+  app.use("/api/auth/clerk", (_req, res) => {
+    res.status(503).json({
+      success: false,
+      message: "Social login is not configured",
+    });
+  });
+}
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRouter);

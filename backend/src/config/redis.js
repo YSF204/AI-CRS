@@ -11,6 +11,8 @@ const initRedis = async () => {
         socket: {
             host: process.env.REDIS_HOST,
             port: Number(process.env.REDIS_PORT),
+            connectTimeout: 3000,
+            reconnectStrategy: false,
         },
     });
 
@@ -22,6 +24,10 @@ const initRedis = async () => {
         return client;
     } catch (err) {
         console.warn(`Redis connection failed: ${err.message}`);
+        if (client?.isOpen) {
+            await client.close().catch(() => {});
+        }
+        client = null;
         return null;
     }
 };

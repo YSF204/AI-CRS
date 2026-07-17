@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { GoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../context/AuthContext";
 import AuthInput from "./components/AuthInput";
 import ErrorBanner from "./components/ErrorBanner";
 import api from "../../../services/api";
 import { useTranslation } from "../../../context/LanguageContext";
+import ClerkSocialLogin from "./ClerkSocialLogin";
 
 export default function LoginForm({ setMode, setGoogleData }) {
   const { login } = useAuth();
@@ -41,28 +41,6 @@ export default function LoginForm({ setMode, setGoogleData }) {
       }
       setErrorMsg(err.response?.data?.message || t("auth.emailRequired"));
       setShowForgotLink(true);
-    }
-  };
-
-  const handleGoogleSuccess = async (credentialResponse) => {
-    try {
-      const res = await api.post("/auth/google", {
-        token: credentialResponse.credential,
-      });
-
-      if (res.status === 206 || res.data.requireProfileCompletion) {
-        setGoogleData({
-          token: credentialResponse.credential,
-          ...res.data.googleData,
-        });
-        setMode?.("signup");
-        return;
-      }
-
-      login(res.data.token, res.data.data.user);
-      navigate("/");
-    } catch (err) {
-      setErrorMsg(err.response?.data?.message || t("auth.googleLoginFailed"));
     }
   };
 
@@ -146,25 +124,12 @@ export default function LoginForm({ setMode, setGoogleData }) {
         />
       </div>
 
-      <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
-        <div
-          style={{
-            display: "inline-flex",
-            border: "4px solid var(--nm-ink)",
-            boxShadow: "6px 6px 0 var(--nm-ink)",
-            background: "#fff",
-            borderRadius: "0px",
-            overflow: "hidden",
-          }}
-        >
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => setErrorMsg("Google login failed.")}
-            theme="outline"
-            size="large"
-            text="continue_with"
-          />
-        </div>
+      <div style={{ marginTop: 16 }}>
+        {import.meta.env.VITE_CLERK_PUBLISHABLE_KEY ? (
+          <ClerkSocialLogin setMode={setMode} setSocialData={setGoogleData} setErrorMsg={setErrorMsg} />
+        ) : (
+          <p style={{ textAlign: 'center', fontSize: 13 }}>Social login is not configured.</p>
+        )}
       </div>
     </form>
   );

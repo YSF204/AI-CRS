@@ -35,7 +35,6 @@ export default function AnalysisScreen({
   const strengthsList = matchAnalysis.strengths || [];
   const weaknessesList = matchAnalysis.weaknesses || [];
 
-  // FIX #4: Handler to reset CV selection and go back to upload step
   const handleTryDifferentCV = () => {
     setMatchAnalysis(null);
     setCvFile(null);
