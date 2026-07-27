@@ -1,202 +1,147 @@
 [
   {
-    "title": "Technical Coordinator",
+    "title": "ممثل مبيعات المتاجر",
+    "location": "ايكون مول, رام الله",
+    "url": "https://www.jobs.ps/jobs/ممثل-مبيعات-المتاجر-68074"
+  },
+  {
+    "title": "Field Worker, Case Management",
+    "location": "رام الله والبيرة, جنين, قلقيلي...",
+    "url": "https://www.jobs.ps/jobs/field-worker-68070"
+  },
+  {
+    "title": "Project Medical Coordinator",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/project-medical-coordinator-68063"
+  },
+  {
+    "title": "Logistic Manager",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/logistic-manager-68062"
+  },
+  {
+    "title": "Gaza Awards Officer",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/gaza-awards-officer-68061"
+  },
+  {
+    "title": "مسؤول/ة قسم البحث",
     "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/technical-coordinator-67935"
+    "url": "https://www.jobs.ps/jobs/مسؤول-ة-قسم-البحث-68054"
+  },
+  {
+    "title": "مروج / ة منتجات متنقل (Product Promoter)",
+    "location": "الضفة الغربية/ القدس",
+    "url": "https://www.jobs.ps/jobs/product-promoter-68053"
+  },
+  {
+    "title": "مندوبة / مندوب مبيعات ميداني",
+    "location": "رام الله والبيرة, بيت لحم, ناب...",
+    "url": "https://www.jobs.ps/jobs/sales-68042"
+  },
+  {
+    "title": "Business Development Executive",
+    "location": "رام الله والبيرة",
+    "url": "https://www.jobs.ps/jobs/business-development-executive-68029"
+  },
+  {
+    "title": "معلم/ة دراسات اجتماعية (المرحلة الأساسية)",
+    "location": "بيت لحم",
+    "url": "https://www.jobs.ps/jobs/معلم-68026"
+  },
+  {
+    "title": "منسق مبيعات المعارض",
+    "location": "طولكرم",
+    "url": "https://www.jobs.ps/jobs/منسق-مبيعات-المعارض-68019"
+  },
+  {
+    "title": "Program Coordinator",
+    "location": "الخليل, بيت لحم",
+    "url": "https://www.jobs.ps/jobs/program-coordinator-68059"
+  },
+  {
+    "title": "Midwife",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/midwife-68058"
+  },
+  {
+    "title": "فني تشريح مرضي",
+    "location": "القدس",
+    "url": "https://www.jobs.ps/jobs/فني-تشريح-مرضي-68051"
+  },
+  {
+    "title": "Grants & Partnership Officer",
+    "location": "القدس",
+    "url": "https://www.jobs.ps/jobs/grants-partnership-officer-68049"
+  },
+  {
+    "title": "MEAL Specialist",
+    "location": "القدس",
+    "url": "https://www.jobs.ps/jobs/meal-specialist-68048"
+  },
+  {
+    "title": "Grants  & Finance Assistant",
+    "location": "القدس",
+    "url": "https://www.jobs.ps/jobs/grants-finance-assistant-68047"
+  },
+  {
+    "title": "مستشار /ة مبيعات",
+    "location": "رام الله والبيرة",
+    "url": "https://www.jobs.ps/jobs/مستشار-ة-مبيعات-68028"
+  },
+  {
+    "title": "مدير فرع ملت وماماتشاري",
+    "location": "رام الله والبيرة",
+    "url": "https://www.jobs.ps/jobs/branch-manager-68050"
+  },
+  {
+    "title": "Field Service Technician – Telecommunications",
+    "location": "خارج فلسطين(Africa)",
+    "url": "https://www.jobs.ps/jobs/field-service-technician-telecommunications-68043"
+  },
+  {
+    "title": "موظف/ة مشتريات",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/موظف-ة-مشتريات-68044"
+  },
+  {
+    "title": "Project Development Officer",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/project-development-officer-68041"
+  },
+  {
+    "title": "مهندس مدرس ومدرب صيانة سيارات",
+    "location": "رام الله والبيرة",
+    "url": "https://www.jobs.ps/jobs/car-maintenance-instructor-68040"
+  },
+  {
+    "title": "مختص/ة تطوير أعمال",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/مختص-ة-تطوير-أعمال-68039"
+  },
+  {
+    "title": "Project Development Assistant",
+    "location": "قطاع غزة",
+    "url": "https://www.jobs.ps/jobs/project-development-assistant-68035"
+  },
+  {
+    "title": "Communications Assistant",
+    "location": "القدس",
+    "url": "https://www.jobs.ps/jobs/communications-assistant-68088"
+  },
+  {
+    "title": "Marketing Specialist – West Bank",
+    "location": "رام الله والبيرة",
+    "url": "https://www.jobs.ps/jobs/marketing-specialist-west-bank-68096"
   },
   {
     "title": "Project Manager",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/project-manager-67934"
-  },
-  {
-    "title": "منتج الإعلام الرقمي",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/منتج-الإعلام-الرقمي-67932"
-  },
-  {
-    "title": "ممثل مبيعات المتاجر",
-    "location": "الخليل",
-    "url": "https://www.jobs.ps/jobs/ممثل-مبيعات-المتاجر-67931"
-  },
-  {
-    "title": "مدير مكتب",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/manager-67930"
-  },
-  {
-    "title": "IT Technical Support",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/it-technical-support-67929"
-  },
-  {
-    "title": "موظف/ة اصدار تأمين مركبات",
-    "location": "القدس",
-    "url": "https://www.jobs.ps/jobs/موظف-ة-اصدار-تأمين-67928"
-  },
-  {
-    "title": "محاسب/ ة مبيعات",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/محاسب-ة-مبيعات-67927"
-  },
-  {
-    "title": "موظف الأمن السيبراني",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/موظف-الأمن-السيبراني-67926"
-  },
-  {
-    "title": "مندوب مبيعات - الصيدليات",
-    "location": "الخليل",
-    "url": "https://www.jobs.ps/jobs/مندوب-مبيعات-الصيدليات-67925"
-  },
-  {
-    "title": "Executive Partner - (Right Hand to Founder)",
-    "location": "العمل عن بعد",
-    "url": "https://www.jobs.ps/jobs/executive-partner-67924"
-  },
-  {
-    "title": "منسق /ة الحماية و الدمج",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/منسق-67922"
-  },
-  {
-    "title": "Projects Coordinator",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/projects-coordinator-67923"
-  },
-  {
-    "title": "مشرف -ة ادارة حالات العنف المبني علي النوع الاجتماعي",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/مشرف-ة-ادارة-حالات-67920"
-  },
-  {
-    "title": "Security Guard",
-    "location": "القدس",
-    "url": "https://www.jobs.ps/jobs/security-guard-67919"
-  },
-  {
-    "title": "Fundraising and Project Development Officer",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/fundraising-and-project-development-officer-67918"
-  },
-  {
-    "title": "المدير التنفيذي (Executive Director)",
-    "location": "القدس",
-    "url": "https://www.jobs.ps/jobs/المدير-التنفيذي-executive-director-67917"
-  },
-  {
-    "title": "Talent Acquisition Officer",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/talent-acquisition-officer-67915"
-  },
-  {
-    "title": "منسق/ة المساءلة المجتمعية",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/منسق-ة-المساءلة-المجتمعية-67908"
-  },
-  {
-    "title": "موظف في دائرة التسويق",
     "location": "نابلس",
-    "url": "https://www.jobs.ps/jobs/موظف-تسويق-67895"
+    "url": "https://www.jobs.ps/jobs/project-manager-68086"
   },
   {
-    "title": "ضابط اقراض",
-    "location": "نابلس",
-    "url": "https://www.jobs.ps/jobs/ضابط-اقراض-67882"
-  },
-  {
-    "title": "محاسب",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/محاسب-67880"
-  },
-  {
-    "title": "مسؤول تحصيل ومتابعة القروض المتعثرة",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/مسؤول-تحصيل-ومتابعة-القروض-المتعثرة-67879"
-  },
-  {
-    "title": "مندوب دعاية طبية",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/مندوب-مبيعات-طبي-67579"
-  },
-  {
-    "title": "Gaza North Deputy Project Coordinator",
-    "location": "شمال غزة",
-    "url": "https://www.jobs.ps/jobs/gaza-north-deputy-project-coordinator-67907"
-  },
-  {
-    "title": "MD Chief of Finance",
-    "location": "بيت لحم",
-    "url": "https://www.jobs.ps/jobs/md-chief-of-finance-67904"
-  },
-  {
-    "title": "مسوّقة | Marketing Officer",
-    "location": "الخليل",
-    "url": "https://www.jobs.ps/jobs/marketing-officer-67806"
-  },
-  {
-    "title": "Psychologist",
+    "title": "GS Communication Officer",
     "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/psychologist-national-position-67887"
-  },
-  {
-    "title": "Psychologist (Remote)",
-    "location": "العمل عن بعد",
-    "url": "https://www.jobs.ps/jobs/psychologist-67886"
-  },
-  {
-    "title": "أمين صندوق",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/أمين-صندوق-67829"
-  },
-  {
-    "title": "Marketing Manager",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/marketing-manager-67885"
-  },
-  {
-    "title": "⁦ERP Back Office Manager",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/erp-back-office-manager-67884"
-  },
-  {
-    "title": "Deputy Project Coordinator",
-    "location": "جنوب غزة",
-    "url": "https://www.jobs.ps/jobs/deputy-project-coordinator-67905"
-  },
-  {
-    "title": "HEALTH PROMOTER IEC OFFICER",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/health-promoter-iec-officer-67901"
-  },
-  {
-    "title": "SUPPLY CHAIN OFFICER",
-    "location": "قطاع غزة",
-    "url": "https://www.jobs.ps/jobs/supply-chain-officer-67900"
-  },
-  {
-    "title": "مندوبين مبيعات",
-    "location": "شمال الضفة",
-    "url": "https://www.jobs.ps/jobs/مندوبين-مبيعات-67872"
-  },
-  {
-    "title": "مشرف ضبط الجودة (Quality Control Supervisor)",
-    "location": "أريحا",
-    "url": "https://www.jobs.ps/jobs/quality-control-supervisor-67896"
-  },
-  {
-    "title": "مروج مبيعات",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/مروج-67856"
-  },
-  {
-    "title": "مراقب مستودعات ومخزون",
-    "location": "رام الله والبيرة",
-    "url": "https://www.jobs.ps/jobs/مراقب-مستودعات-ومخزون-67903"
-  },
-  {
-    "title": "Health Care Products Sales Representatives",
-    "location": "الضفة الغربية",
-    "url": "https://www.jobs.ps/jobs/health-care-products-sales-representatives-67888"
+    "url": "https://www.jobs.ps/jobs/gs-communication-officer-68075"
   }
 ]

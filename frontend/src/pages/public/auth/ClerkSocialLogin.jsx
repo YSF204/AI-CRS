@@ -1,15 +1,18 @@
-import { useEffect, useRef } from 'react';
-import { SignInButton, useAuth as useClerkAuth, useClerk } from '@clerk/react';
+import { useEffect, useRef, useState } from 'react';
+import { useAuth as useClerkAuth, useClerk } from '@clerk/react';
+import { useSignIn } from '@clerk/react/legacy';
 import { useNavigate } from 'react-router-dom';
 import api from '../../../services/api';
 import { useAuth } from '../../../context/AuthContext';
 
 export default function ClerkSocialLogin({ setMode, setSocialData, setErrorMsg }) {
   const { isLoaded, isSignedIn, getToken } = useClerkAuth();
+  const { isLoaded: isSignInLoaded, signIn } = useSignIn();
   const { signOut } = useClerk();
   const { login } = useAuth();
   const navigate = useNavigate();
   const handled = useRef(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
     if (!isLoaded || !isSignedIn || handled.current) return;
@@ -52,11 +55,43 @@ export default function ClerkSocialLogin({ setMode, setSocialData, setErrorMsg }
     };
   }, [getToken, isLoaded, isSignedIn, login, navigate, setErrorMsg, setMode, setSocialData, signOut]);
 
+  const handleGoogleLogin = async () => {
+    if (!isSignInLoaded || !signIn || isRedirecting) return;
+
+    setErrorMsg('');
+    setIsRedirecting(true);
+
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy: 'oauth_google',
+        redirectUrl: '/sso-callback',
+        redirectUrlComplete: '/auth?mode=login',
+      });
+    } catch (error) {
+      const clerkError =
+        error?.errors?.[0]?.longMessage ||
+        error?.errors?.[0]?.message ||
+        error?.message;
+      setErrorMsg(clerkError || 'Google login failed. Please try again.');
+      setIsRedirecting(false);
+    }
+  };
+
   return (
-    <SignInButton mode="modal" forceRedirectUrl="/auth?mode=login">
-      <button type="button" className="nm-btn" style={{ width: '100%', padding: 14, background: '#fff', color: '#111' }}>
-        Continue with Google or another provider
-      </button>
-    </SignInButton>
+    <button
+      type="button"
+      className="nm-btn"
+      onClick={handleGoogleLogin}
+      disabled={!isSignInLoaded || isRedirecting}
+      style={{
+        width: '100%',
+        padding: 14,
+        background: '#fff',
+        color: '#111',
+        opacity: !isSignInLoaded || isRedirecting ? 0.65 : 1,
+      }}
+    >
+      {isRedirecting ? 'Opening Google...' : 'Continue with Google'}
+    </button>
   );
 }

@@ -6,6 +6,7 @@ import RouteError from "./components/layout/RouteError";
 
 const DynamicRoot = React.lazy(() => import("./pages/DynamicRoot"));
 const AuthPage = React.lazy(() => import("./pages/public/auth/AuthPage"));
+const ClerkOAuthCallback = React.lazy(() => import("./pages/public/auth/ClerkOAuthCallback"));
 const VerifyEmailPage = React.lazy(() => import("./pages/public/auth/VerifyEmailPage"));
 const ForgotPasswordPage = React.lazy(() => import("./pages/public/auth/ForgotPasswordPage"));
 const ResetPasswordPage = React.lazy(() => import("./pages/public/auth/ResetPasswordPage"));
@@ -147,6 +148,14 @@ const publicRoutes = [
     element: (
       <Lazy>
         <AuthPage />
+      </Lazy>
+    ),
+  },
+  {
+    path: "/sso-callback",
+    element: (
+      <Lazy>
+        <ClerkOAuthCallback />
       </Lazy>
     ),
   },

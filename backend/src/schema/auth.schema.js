@@ -2,15 +2,15 @@ import { z } from 'zod';
 
 // login vald
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string().trim().toLowerCase().email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
 });
 
 ///  sign up validation
 export const signupSchema = z.object({
-  firstName: z.string().min(1, 'First name is required').regex(/^[^0-9]*$/, 'First name should not contain numbers'),
-  lastName: z.string().min(1, 'Last name is required').regex(/^[^0-9]*$/, 'Last name should not contain numbers'),
-  email: z.string().email('Invalid email address'),
+  firstName: z.string().trim().min(1, 'First name is required').regex(/^[^0-9]*$/, 'First name should not contain numbers'),
+  lastName: z.string().trim().min(1, 'Last name is required').regex(/^[^0-9]*$/, 'Last name should not contain numbers'),
+  email: z.string().trim().toLowerCase().email('Invalid email address'),
   password: z.string()
     .min(8, 'Password must be at least 8 characters')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase character')

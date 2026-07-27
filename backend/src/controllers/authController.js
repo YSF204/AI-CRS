@@ -26,7 +26,7 @@ export const register = catchAsync(async (req, res, next) => {
   const result = signupSchema.safeParse(req.body);
 
   if (!result.success) {
-    const message = result.error.errors.map((err) => err.message).join(", ");
+    const message = result.error.issues.map((err) => err.message).join(", ");
     return next(new AppError(message, 400));
   }
 
@@ -228,8 +228,15 @@ export const register = catchAsync(async (req, res, next) => {
       text: `Verify your email using this link (valid for 24 hours): ${verificationURL}`,
     });
   } catch (err) {
-    // Even if email fails, don't fail signup - user can request new verification email later
     console.error("Error sending verification email:", err.message);
+    await User.findByIdAndDelete(user._id);
+    if (employerDoc) await Employer.findByIdAndDelete(employerDoc._id);
+    return next(
+      new AppError(
+        "We could not send the verification email, so no account was created. Please try again.",
+        503,
+      ),
+    );
   }
 
   // Do NOT generate a login token for unverified email.
@@ -266,7 +273,7 @@ export const login = catchAsync(async (req, res, next) => {
   const result = loginSchema.safeParse(req.body);
 
   if (!result.success) {
-    const message = result.error.errors.map((err) => err.message).join(", ");
+    const message = result.error.issues.map((err) => err.message).join(", ");
     return next(new AppError(message, 400));
   }
 
@@ -281,16 +288,6 @@ export const login = catchAsync(async (req, res, next) => {
     return next(new AppError("Invalid email or password", 401));
   }
 
-  // check if the Account is ACTIVE or not
-  if (user.accountStatus !== "ACTIVE") {
-    return res.status(403).json({
-      success: false,
-      message: `Account is not active. Current status: ${user.accountStatus}`,
-      role: user.role,
-      accountStatus: user.accountStatus,
-    });
-  }
-
   const isPasswordValid = await user.comparePassword(String(password));
 
   if (!isPasswordValid) {
@@ -303,6 +300,15 @@ export const login = catchAsync(async (req, res, next) => {
       success: false,
       message: "Please verify your email first. Check your inbox or request a new verification link.",
       isEmailVerified: false,
+    });
+  }
+
+  if (user.accountStatus !== "ACTIVE") {
+    return res.status(403).json({
+      success: false,
+      message: `Account is not active. Current status: ${user.accountStatus}`,
+      role: user.role,
+      accountStatus: user.accountStatus,
     });
   }
 

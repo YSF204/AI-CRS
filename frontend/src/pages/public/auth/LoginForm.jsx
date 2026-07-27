@@ -28,7 +28,10 @@ export default function LoginForm({ setMode, setGoogleData }) {
     }
 
     try {
-      const res = await api.post("/auth/login", { email, password });
+      const res = await api.post("/auth/login", {
+        email: email.trim().toLowerCase(),
+        password,
+      });
       login(res.data.token, res.data.data.user);
       navigate("/");
     } catch (err) {

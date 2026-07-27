@@ -124,7 +124,7 @@ export default function ClassicSignupForm() {
       }
       case 3:
         return !!(
-          form.password.length >= 6 &&
+          form.password.length >= 8 &&
           form.password === form.passwordConfirm &&
           !errors.password &&
           !errors.passwordConfirm
